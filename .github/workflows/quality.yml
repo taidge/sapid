@@ -68,6 +68,15 @@ jobs:
           New-Item -ItemType Directory -Force $env:CARGO_TARGET_DIR,$env:TEMP | Out-Null
           rustup toolchain install 1.95.0 --profile minimal
           if ($LASTEXITCODE) { throw 'MSRV toolchain installation failed' }
+      - name: Test upstream MSRV preparation
+        run: |
+          python -m unittest discover -s scripts -p test_prepare_upstream_msrv.py
+          if ($LASTEXITCODE) { throw 'Upstream MSRV preparation regressions failed' }
+      - name: Prepare disposable upstream compatibility manifest
+        if: matrix.source == 'upstream-main'
+        run: |
+          python scripts/prepare_upstream_msrv.py
+          if ($LASTEXITCODE) { throw 'Upstream MSRV preparation failed' }
       - uses: ./sapid/.github/actions/build-cache
         with:
           scope: msrv-${{ matrix.features }}
