@@ -491,8 +491,8 @@ pub struct Burger {
     common: Common,
     open: Value<bool>,
     on_change: Option<Box<dyn FnMut(bool)>>,
-    open_name: String,
-    close_name: String,
+    open_name: Vary<String>,
+    close_name: Vary<String>,
     animated: Vary<bool>,
     duration_millis: u16,
     controls: Option<SemanticId>,
@@ -533,7 +533,9 @@ impl Burger {
         self.on_change = Some(Box::new(callback));
         self
     }
-    pub fn labels(mut self, open: impl Into<String>, close: impl Into<String>) -> Self {
+    /// Accessible names for the closed and open states. Reactive sources can
+    /// update localization without replacing the button or its expanded state.
+    pub fn labels(mut self, open: impl Into<Vary<String>>, close: impl Into<Vary<String>>) -> Self {
         self.open_name = open.into();
         self.close_name = close.into();
         self
@@ -545,8 +547,10 @@ impl Burger {
 }
 impl Widget for Burger {
     fn build(&mut self, scope: &Scope) -> Result {
-        validate_name(&self.open_name)?;
-        validate_name(&self.close_name)?;
+        let open_name =
+            crate::composite::validated(scope, &self.open_name, |name| validate_name(name))?;
+        let close_name =
+            crate::composite::validated(scope, &self.close_name, |name| validate_name(name))?;
         glory::render::GraphicTransition {
             duration_millis: self.duration_millis,
         }
@@ -563,13 +567,11 @@ impl Widget for Burger {
             }))
         });
         let open = control.source.clone();
-        let open_name = self.open_name.clone();
-        let close_name = self.close_name.clone();
         let name = scope.bond(move || {
             if open.get() {
-                close_name.clone()
+                close_name.get()
             } else {
-                open_name.clone()
+                open_name.get()
             }
         });
         let open = control.source.clone();
