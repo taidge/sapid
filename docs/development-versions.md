@@ -24,4 +24,11 @@ Normal development CI checks sibling main branches. Frozen publication checks
 use exact release tags and published engine sources. Registry-only consumers
 independently verify the packaged dependency graph; sibling-source checks alone
 do not establish registry compatibility.
+
+The MSRV matrix checks both the product's pinned Glory revision and upstream main.
+Only the disposable `upstream-main` CI checkout retargets Sapid's two Glory version
+requirements to the checked-out facade version, before cache/lock preparation.
+`scripts/prepare_upstream_msrv.py` refuses existing lockfiles and foreign dependency
+paths. Product-pin and publication checks retain the committed exact requirements;
+an upstream compatibility result does not validate a new release dependency.
 See [licensing](licensing.md) for Apache-2.0 and retained third-party notices.

@@ -163,7 +163,7 @@ S= shadcn 主目录；D=日期；C=图表；T=日程；H=代码；X=其他 Manti
 | P2-06 | Chip / ChipGroup | 已完成并记录证据 | Chip 使用真实 Checkbox，ChipGroup 按单选 Radio/多选 Checkbox 分别实现；Web/SSR 与原生均有消费端证据，新增四主题单选受控选择、只读与物理身份。 | [M:Chip](https://mantine.dev/core/chip/) |
 | P2-07 | ButtonGroup | 已完成并记录证据 | 自然Tab的ButtonGroup与可选真实Toolbar roving均已实现；禁用/loading跳过、首尾/循环/RTL/垂直焦点导航不激活，Web与原生实际焦点/身份已验收。 2026-11-05共同页面复核：按钮批次新增完整独立源码文档、同packet动作保护、可见加载/矢量关闭图标、真实复制与文件结果反馈；56组公开站浏览器矩阵通过。 | [S:Button Group](https://ui.shadcn.com/docs/components/base/button-group) |
 | P2-08 | ActionIcon / CloseButton | 已完成并记录证据 | ActionIcon与CloseButton复用真实Button激活，强制非空名称、主题尺寸/unstyled与disabled；浏览器AX名称和原生布局已验证。新增五种 ActionIconVariant、CloseButton 自定义 icon、居中零 padding 和动态 disabled 配色；视觉复核见 showcase-style-review。 2026-11-05共同页面复核：按钮批次新增完整独立源码文档、同packet动作保护、可见加载/矢量关闭图标、真实复制与文件结果反馈；56组公开站浏览器矩阵通过。 | [M:ActionIcon](https://mantine.dev/core/action-icon/)、[M:CloseButton](https://mantine.dev/core/close-button/) |
-| P2-09 | Burger | 已完成并记录证据 | Burger真实六命令三bar矢量路径，expanded/pressed与受控或本地布尔同源；有限GraphicTransition支持打断、动态Reduce/Clear、隐藏/退休取消，不写每帧Cage。四主题native像素/受控拒绝及Web15九项真实键鼠/AX/动画/classic通过，不宣称OS偏好或屏幕阅读器公告。 | [M:Burger](https://mantine.dev/core/burger/) |
+| P2-09 | Burger | 已完成并记录证据 | Burger真实六命令三bar矢量路径，expanded/pressed与受控或本地布尔同源；有限GraphicTransition支持打断、动态Reduce/Clear、隐藏/退休取消，不写每帧Cage。四主题native像素/受控拒绝及Web15九项真实键鼠/AX/动画/classic通过，不宣称OS偏好或屏幕阅读器公告。 labels接受响应式Vary<String>，语言切换保留按钮/图形身份及展开状态；非法名称修订保留最后有效名称并报告错误。 | [M:Burger](https://mantine.dev/core/burger/) |
 
 ### P3 · 展示、排版与基础布局
 

@@ -378,6 +378,93 @@ fn burger_controlled_rejection_disabled_and_external_silent_updates() {
     );
 }
 #[test]
+fn burger_reactive_labels_preserve_identity_state_and_callback_silence() {
+    let app = App::memory();
+    let open = app.scope().cage(false);
+    let open_label = app.scope().cage("Open navigation".to_owned());
+    let chinese = app.scope().cage(false);
+    let close_label = app.scope().bond(move || {
+        if chinese.get() {
+            "关闭导航".to_owned()
+        } else {
+            "Close navigation".to_owned()
+        }
+    });
+    let calls = Rc::new(Cell::new(0));
+    let seen = calls.clone();
+    app.mount(
+        burger()
+            .open(open)
+            .labels(open_label, close_label)
+            .on_open_change(move |_| seen.set(seen.get() + 1)),
+    )
+    .unwrap();
+    let id = root(&app);
+    let glyph = app.tree().node(id).unwrap().children[0];
+    let name = || app.tree().node(id).unwrap().descriptor.view().name.clone();
+    assert_eq!(name().as_deref(), Some("Open navigation"));
+    open_label.revise(|label| *label = "打开导航".into());
+    chinese.revise(|value| *value = true);
+    app.flush().unwrap();
+    assert_eq!(name().as_deref(), Some("打开导航"));
+    assert!(!open.get());
+    open.revise(|value| *value = true);
+    app.flush().unwrap();
+    assert_eq!(name().as_deref(), Some("关闭导航"));
+    chinese.revise(|value| *value = false);
+    app.flush().unwrap();
+    assert_eq!(name().as_deref(), Some("Close navigation"));
+    assert!(open.get());
+    assert_eq!(calls.get(), 0);
+    assert_eq!(root(&app), id);
+    assert_eq!(app.tree().node(id).unwrap().children[0], glyph);
+    app.clear().unwrap();
+    open_label.revise(|label| *label = "Retired".into());
+    chinese.revise(|value| *value = true);
+    app.flush().unwrap();
+    assert_eq!(app.stats().nodes, 0);
+    assert_eq!(app.runtime_stats().tasks, 0);
+}
+#[test]
+fn burger_reactive_labels_reject_empty_initial_and_retain_last_valid_revisions() {
+    for closed in [false, true] {
+        let app = App::memory();
+        let invalid = app.scope().cage(" ".to_owned());
+        let widget = if closed {
+            burger().labels(invalid, "Close")
+        } else {
+            burger().labels("Open", invalid)
+        };
+        assert!(app.mount(widget).is_err());
+        assert!(app.tree().is_empty());
+    }
+
+    let app = App::memory();
+    let open = app.scope().cage(false);
+    let open_label = app.scope().cage("Open".to_owned());
+    let close_label = app.scope().cage("Close".to_owned());
+    app.mount(burger().open(open).labels(open_label, close_label))
+        .unwrap();
+    let id = root(&app);
+    let name = || app.tree().node(id).unwrap().descriptor.view().name.clone();
+    open_label.revise(|label| label.clear());
+    assert!(app.flush().is_err());
+    assert!(open_label.get().is_empty());
+    assert_eq!(name().as_deref(), Some("Open"));
+    open_label.revise(|label| *label = "Show menu".into());
+    app.flush().unwrap();
+    assert_eq!(name().as_deref(), Some("Show menu"));
+    close_label.revise(|label| *label = " ".into());
+    assert!(app.flush().is_err());
+    open.revise(|value| *value = true);
+    app.flush().unwrap();
+    assert_eq!(name().as_deref(), Some("Close"));
+    close_label.revise(|label| *label = "Hide menu".into());
+    app.flush().unwrap();
+    assert_eq!(name().as_deref(), Some("Hide menu"));
+    assert_eq!(root(&app), id);
+}
+#[test]
 fn burger_internal_behavior_precedes_typed_callback_and_generic_observers() {
     let app = App::memory();
     let order = Rc::new(RefCell::new(Vec::new()));

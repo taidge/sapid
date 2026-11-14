@@ -1060,7 +1060,7 @@ Tests:
 
 ### Evidence P2-09
 
-Burger真实六命令三bar矢量路径，expanded/pressed与受控或本地布尔同源；有限GraphicTransition支持打断、动态Reduce/Clear、隐藏/退休取消，不写每帧Cage。四主题native像素/受控拒绝及Web15九项真实键鼠/AX/动画/classic通过，不宣称OS偏好或屏幕阅读器公告。
+Burger真实六命令三bar矢量路径，expanded/pressed与受控或本地布尔同源；有限GraphicTransition支持打断、动态Reduce/Clear、隐藏/退休取消，不写每帧Cage。四主题native像素/受控拒绝及Web15九项真实键鼠/AX/动画/classic通过，不宣称OS偏好或屏幕阅读器公告。 labels接受响应式Vary<String>，语言切换保留按钮/图形身份及展开状态；非法名称修订保留最后有效名称并报告错误。
 
 Implementation:
 
@@ -1071,7 +1071,7 @@ Implementation:
 
 Tests:
 
-- `tests/actions.rs (14 passed)`
+- `tests/actions.rs (19 passed, including reactive Cage/Bond label updates, invalid revisions and Owner retirement)`
 - `examples/native/tests/burger.rs (2 passed, four themes)`
 - `examples/web/burger-acceptance.js`
 - `D:/BuildCache/sapid/burger-browser.json (9 passed, Chromium 148.0.7778.96, Web15)`

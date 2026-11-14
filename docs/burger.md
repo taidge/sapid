@@ -14,6 +14,27 @@ native. `labels(open, close)` supplies nonempty localized names and `controls(id
 associates an application-owned panel; Burger does not create that panel or infer
 actual focus.
 
+Both `labels` arguments accept `Vary<String>`, including static strings, `Cage`
+and `Bond` sources. Changing a locale updates the current accessible name in
+place, preserving the Button, decorative Graphic, focus and accepted expanded
+state. Label updates do not invoke action callbacks. Both names must initially
+be nonempty; invalid later revisions report an error and retain the last valid
+name without changing the caller's source.
+
+```rust
+# use glory::ui::App;
+let app = App::memory();
+let chinese = app.scope().cage(false);
+let open_label = app.scope().bond(move || {
+    if chinese.get() { "打开导航" } else { "Open navigation" }.to_owned()
+});
+let close_label = app.scope().bond(move || {
+    if chinese.get() { "关闭导航" } else { "Close navigation" }.to_owned()
+});
+app.mount(sapid::burger().labels(open_label, close_label))?;
+# Ok::<(), glory::ui::Error>(())
+```
+
 `animated(source)` defaults true; `duration_millis(value)` defaults 180 and accepts
 0–500. Explicit no motion and a live reduced-motion preference immediately cancel
 an in-flight transition at the accepted endpoint. Browser paths interpolate in
