@@ -105,11 +105,15 @@ class ReleasePlanTests(unittest.TestCase):
             with self.subTest(mutation=mutation),self.assertRaises(SystemExit):
                 self.validate(mutation)
 
-    def test_reviewed_exact_external_path_is_allowed(self):
-        def mutation(plan,packages):
-            plan['external_path_dependencies']={'foreign':'=0.6.0'}
-            packages[1]['dependencies']=[{'name':'foreign','req':'=0.6.0','kind':None,'source':None,'path':'D:/published'}]
-        self.assertIn('v0.6.0',self.validate(mutation))
+    def test_reviewed_external_path_is_allowed(self):
+        for requirement in ('=0.6.0', '^0.6.0'):
+            def mutation(plan, packages):
+                plan['external_path_dependencies'] = {'foreign': requirement}
+                packages[1]['dependencies'] = [
+                    {'name': 'foreign', 'req': requirement, 'kind': None, 'source': None, 'path': 'D:/published'}
+                ]
+            with self.subTest(requirement=requirement):
+                self.assertIn('v0.6.0', self.validate(mutation))
 
 
 class ArchiveTests(unittest.TestCase):
