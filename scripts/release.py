@@ -393,7 +393,7 @@ def main():
                 raise SystemExit(f"Release order must place {dependency['name']} before {package['name']}")
             if dependency.get("path") and dependency["name"] not in owned:
                 external = plan.get("external_path_dependencies", {}).get(dependency["name"])
-                if external != dependency["req"] or not external.startswith("="):
+                if external != dependency["req"] or not re.fullmatch(r"[=^]\d+\.\d+\.\d+", external):
                     raise SystemExit(f"Unreleased path dependency: {package['name']} -> {dependency['name']}")
         completed.add(package["name"])
     print(json.dumps({"tag": tag, "repository": plan["repository"],

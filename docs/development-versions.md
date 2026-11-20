@@ -1,10 +1,9 @@
 # Coordinated release versions
 
-Sapid 0.7.1 uses Glory 0.7.0, Apace 0.3.0, Takia 0.15.1 and Wingy 0.31.1.
-Glory 0.7.0 and the exact engine prerequisites are already published; the Sapid
-patch does not require a new Glory release.
-Use the five sibling source repositories. Exact dependency requirements prevent
-silently mixing these changes with older published packages.
+Sapid 0.7.2 supports Glory 0.7.1 and later compatible 0.7 patches.
+The tested engine versions are Apace 0.3.0, Takia 0.15.1 and Wingy 0.31.1.
+Use the five sibling source repositories. Frozen publication checks use the
+Glory revision in deploy/dependencies.json.
 
 All packages require Rust 1.95 and workspaces use resolver 3. Cargo.lock files
 in library, example and benchmark workspaces are ignored; the separate website
@@ -29,6 +28,6 @@ The MSRV matrix checks both the product's pinned Glory revision and upstream mai
 Only the disposable `upstream-main` CI checkout retargets Sapid's two Glory version
 requirements to the checked-out facade version, before cache/lock preparation.
 `scripts/prepare_upstream_msrv.py` refuses existing lockfiles and foreign dependency
-paths. Product-pin and publication checks retain the committed exact requirements;
+paths. Product-pin and publication checks retain the committed dependency requirements;
 an upstream compatibility result does not validate a new release dependency.
 See [licensing](licensing.md) for Apache-2.0 and retained third-party notices.

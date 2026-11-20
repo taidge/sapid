@@ -411,7 +411,6 @@ fn representative_ssr_documents_render_in_all_themes_without_frames() {
             assert!(!html.contains("<iframe"));
             assert!(html.contains("Search widgets"));
             assert!(html.contains(&format!("v{}", sapid::VERSION)));
-            assert!(html.contains("v0.7.1"));
             assert!(!html.contains("v0.6.1"));
             if !id.is_empty() {
                 assert!(html.contains("site-code"));
