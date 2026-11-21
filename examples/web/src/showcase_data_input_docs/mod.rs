@@ -20,6 +20,7 @@ mod number_formats;
 mod number_sizes;
 mod number_states;
 mod number_steps;
+mod phone_field;
 pub fn sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
     macro_rules! section {
         ($module:ident,$id:literal,$title:literal,$note:literal) => {
@@ -33,6 +34,12 @@ pub fn sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         };
     }
     match id {
+        "phone-input" => vec![section!(
+            phone_field,
+            "phone-field",
+            "Field state and form submission",
+            "Enable the phone Cargo feature to use PhoneInput. A named Field submits a valid number as an RFC 3966 telephone URI and preserves the extension. Read-only numbers still submit. Disabled fields and incomplete drafts omit the form entry."
+        )],
         "file-input" => vec![
             section!(
                 file_single,
@@ -174,6 +181,7 @@ pub fn sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
 }
 pub fn navigation(id: &str) -> Vec<(&'static str, &'static str)> {
     match id {
+        "phone-input" => vec![("Field and form", "#phone-field")],
         "file-input" => vec![
             ("Single and clear", "#file-single"),
             ("Multiple and long names", "#file-multiple"),

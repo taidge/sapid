@@ -26,6 +26,13 @@ pub struct FieldControl {
     pub(crate) unstyled: bool,
 }
 impl FieldControl {
+    /// Composite editors submit through a separate canonical-value control.
+    #[cfg(feature = "phone")]
+    pub(crate) fn take_form_name(&mut self) -> Option<Vary<String>> {
+        self.form_control
+            .take()
+            .map(|control| control.map(|value| value.name.clone()).into())
+    }
     pub(crate) fn has_label(&self) -> bool {
         self.label.is_some()
     }

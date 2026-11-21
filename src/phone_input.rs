@@ -5,7 +5,7 @@ use glory::render::{FormControl, Purpose, Semantics};
 use glory::ui::{Result, Widget};
 use glory::{Scope, Vary};
 use phonenumber::{Mode, PhoneNumber, country, metadata::DATABASE};
-use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 use std::rc::Rc;
 
 /// The selected ISO region and the user's current text, including incomplete edits.
@@ -60,6 +60,9 @@ pub struct PhoneInput {
     readonly: Vary<bool>,
     required: Vary<bool>,
     placeholder: Vary<String>,
+    field: Option<crate::FieldControl>,
+    loading: Vary<bool>,
+    editor_ref: Option<glory::Cage<Option<glory::render::NodeId>>>,
     form_name: Option<Vary<String>>,
     changed: Option<Box<dyn FnMut(PhoneDraft)>>,
     committed: Option<Box<dyn FnMut(PhoneDraft)>>,
@@ -78,6 +81,9 @@ pub fn phone_input(key: impl Into<String>) -> PhoneInput {
         readonly: false.into(),
         required: false.into(),
         placeholder: String::new().into(),
+        field: None,
+        loading: false.into(),
+        editor_ref: None,
         form_name: None,
         changed: None,
         committed: None,
@@ -99,6 +105,22 @@ impl PhoneInput {
     }
     pub fn country_label(mut self, label: impl Into<Vary<String>>) -> Self {
         self.country_label = label.into();
+        self
+    }
+    /// Use the enclosing Field's label, errors, availability, and submission name.
+    pub fn field(mut self, field: crate::FieldControl) -> Self {
+        self.theme = field.theme.clone();
+        self.size = field.size;
+        self.field = Some(field);
+        self
+    }
+    pub fn loading(mut self, loading: impl Into<Vary<bool>>) -> Self {
+        self.loading = loading.into();
+        self
+    }
+    /// Refers to the editable telephone input.
+    pub fn node_ref(mut self, reference: glory::Cage<Option<glory::render::NodeId>>) -> Self {
+        self.editor_ref = Some(reference);
         self
     }
     pub fn placeholder(mut self, text: impl Into<Vary<String>>) -> Self {
@@ -130,7 +152,7 @@ impl PhoneInput {
         self.value.default = value;
         self
     }
-    /// Limit the selector to the supplied ISO codes and localized labels.
+    /// Display the supplied ISO codes and localized labels in their declared order.
     /// Without a list, all geographic regions in the numbering database are available.
     pub fn regions(
         mut self,
@@ -159,7 +181,7 @@ struct PhoneEditor {
     control: crate::state::Control<PhoneDraft>,
     changed: Callback<PhoneDraft>,
     committed: Callback<PhoneDraft>,
-    regions: BTreeMap<String, String>,
+    regions: BTreeSet<String>,
     owner: glory::core::InstanceId,
 }
 impl PhoneEditor {
@@ -172,7 +194,7 @@ impl PhoneEditor {
         {
             if draft.text.trim_start().starts_with('+')
                 && let Some(id) = number.country().id()
-                && self.regions.contains_key(id.as_ref())
+                && self.regions.contains(id.as_ref())
             {
                 draft.region = id.as_ref().to_owned();
             }
@@ -207,28 +229,33 @@ impl Widget for PhoneInput {
         let invalid =
             || glory::render::Error::InvalidProps("invalid phone input region, label or draft");
         let labels = self.regions.take().unwrap_or_else(|| {
-            DATABASE
+            let mut labels = DATABASE
                 .iter()
                 .filter(|meta| meta.id().parse::<country::Id>().is_ok())
                 .map(|meta| (meta.id().to_owned(), meta.id().to_owned()))
-                .collect()
+                .collect::<Vec<_>>();
+            labels.sort_unstable();
+            labels
         });
         if labels.is_empty() || labels.len() > 256 {
             return Err(invalid().into());
         }
-        let mut regions = BTreeMap::new();
+        let mut regions = BTreeSet::new();
+        let mut options = Vec::with_capacity(labels.len());
         for (id, label) in labels {
             let meta = DATABASE.by_id(id.as_str()).ok_or_else(invalid)?;
             if id.parse::<country::Id>().is_err()
                 || label.trim().is_empty()
                 || label.len() > 220
                 || label.contains(['\0', '\r', '\n'])
-                || regions
-                    .insert(id, format!("{label} (+{})", meta.country_code()))
-                    .is_some()
+                || !regions.insert(id.clone())
             {
                 return Err(invalid().into());
             }
+            options.push(crate::select_option(
+                id,
+                format!("{label} (+{})", meta.country_code()),
+            ));
         }
         let editor = Rc::new(PhoneEditor {
             control: std::mem::take(&mut self.value).mount(scope),
@@ -239,7 +266,7 @@ impl Widget for PhoneInput {
         });
         let model = editor.clone();
         let draft = composite::validated(scope, &editor.control.source, move |draft| {
-            if !model.regions.contains_key(&draft.region)
+            if !model.regions.contains(&draft.region)
                 || draft.text.len() > 256
                 || draft.text.contains(['\0', '\r', '\n'])
             {
@@ -248,21 +275,27 @@ impl Widget for PhoneInput {
                 Ok(())
             }
         })?;
-        let enabled = self.enabled.clone();
-        let readonly = self.readonly.clone();
+        let mut field = self.field.take();
+        let field_name = field.as_mut().and_then(crate::FieldControl::take_form_name);
+        let form_name = composite::form_name(scope, &self.form_name.take().or(field_name))?;
+        let enabled = field
+            .as_ref()
+            .map(|f| f.enabled(scope, self.enabled.clone()))
+            .unwrap_or_else(|| self.enabled.clone());
+        let select_enabled = enabled.clone();
+        let readonly = field
+            .as_ref()
+            .map(|f| f.readonly_state(scope, self.readonly.clone()))
+            .unwrap_or_else(|| self.readonly.clone());
+        let plain = field.as_ref().is_some_and(|f| f.unstyled);
         let choose = editor.clone();
         let weak = scope.downgrade();
-        let select = crate::native_select(&self.key)
+        let mut select = crate::native_select(&self.key)
             .theme(self.theme.clone())
             .size(self.size)
             .label(self.country_label.clone())
-            .enabled(scope.bond(move || enabled.get() && !readonly.get()))
-            .options(
-                editor
-                    .regions
-                    .iter()
-                    .map(|(id, label)| crate::select_option(id, label)),
-            )
+            .enabled(scope.bond(move || select_enabled.get() && !readonly.get()))
+            .options(options)
             .value(scope.bond(move || Some(draft.with(|d| d.region.clone()))))
             .on_value_change(move |id| {
                 if let Some(id) = id
@@ -283,6 +316,9 @@ impl Widget for PhoneInput {
                     }
                 }
             });
+        if plain {
+            select = select.unstyled();
+        }
         let edit = |commit: bool| {
             let handler = editor.clone();
             let weak = scope.downgrade();
@@ -295,30 +331,40 @@ impl Widget for PhoneInput {
                 }
             }
         };
-        let input = crate::text_field()
+        let mut input = crate::text_field()
             .theme(self.theme.clone())
             .size(self.size)
             .purpose(Purpose::Tel)
             .placeholder(self.placeholder.clone())
             .enabled(self.enabled.clone())
+            .loading(self.loading.clone())
             .readonly(self.readonly.clone())
             .required(self.required.clone())
             .value(scope.bond(move || draft.with(|d| d.text.clone())))
             .on_value_change(edit(false))
             .on_commit(edit(true));
-        let mut input = Some(input);
-        let field = crate::field(&self.key)
-            .theme(self.theme.clone())
-            .size(self.size)
-            .label(self.label.clone())
-            .control(move |field| input.take().expect("mount once").field(field));
+        if let Some(reference) = self.editor_ref {
+            input = input.node_ref(reference);
+        }
+        let editor: Box<dyn Widget> = if let Some(field) = field {
+            Box::new(input.field(field))
+        } else {
+            let mut input = Some(input);
+            Box::new(
+                crate::field(&self.key)
+                    .theme(self.theme.clone())
+                    .size(self.size)
+                    .label(self.label.clone())
+                    .required(self.required.clone())
+                    .control(move |field| input.take().expect("mount once").field(field)),
+            )
+        };
         crate::group()
             .theme(self.theme.clone())
-            .fill((select, field))
+            .fill((select, editor))
             .show_in(scope)?;
-        if let Some(name) = composite::form_name(scope, &self.form_name)? {
+        if let Some(name) = form_name {
             let value = scope.bond(move || draft.with(PhoneDraft::rfc3966));
-            let enabled = self.enabled.clone();
             glory::ui::view()
                 .semantics(Some(Box::new(Semantics {
                     hidden: true,
