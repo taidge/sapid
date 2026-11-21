@@ -40,8 +40,9 @@ async (hostPage) => {
       await page.evaluate(()=>window.demo.choice_state('reject',false));await page.keyboard.press('Home');await tick();
       const monthly=page.getByRole('radio',{name:'Monthly',exact:true}),yearly=page.getByRole('radio',{name:'Yearly',exact:true});
       const animatesSelection=await yearly.evaluate(radio=>{
-        const style=getComputedStyle(radio.closest('label'));
-        return style.transitionProperty.split(', ').includes('background-color')&&style.transitionDuration.split(', ').some(duration=>parseFloat(duration)>0);
+        const anchored = CSS.supports('(anchor-scope: --sp-selected) and (width: anchor-size(--sp-selected width))');
+        const style = anchored ? getComputedStyle(radio.closest('.sapid-radio-group-items'), '::after') : getComputedStyle(radio.closest('label'));
+        return style.transitionProperty.split(', ').includes(anchored ? 'left' : 'background-color')&&style.transitionDuration.split(', ').some(duration=>parseFloat(duration)>0);
       });
       assert(animatesSelection===(reducedMotion==='no-preference'),`${mode}: segmented highlight follows motion preference`);
       assert(await page.getByRole('radiogroup',{name:'Billing interval',exact:true}).count()===1&&await monthly.isChecked()&&!await yearly.isChecked(),`${mode}: segmented single-value semantics`);

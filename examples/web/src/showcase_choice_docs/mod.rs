@@ -13,7 +13,9 @@ mod rating_controlled;
 mod rating_states;
 mod rating_symbols;
 mod segments_controlled;
+mod segments_form;
 mod segments_layout;
+mod segments_motion;
 mod segments_width;
 mod switch_group;
 mod switch_labels;
@@ -87,10 +89,22 @@ pub fn sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
                 "full_width is reactive. In a horizontal group it distributes the available row equally; the default keeps content widths. The same native controls, selection and focus survive switching modes. Explicit segment styles can override the provided geometry. A full-width control belongs in a parent with a real bounded width."
             ),
             section!(
+                segments_form,
+                "segments-form",
+                "Uncontrolled form value",
+                "default_value selects the initial format. form_name includes the selected key in the form submission. Choose Spreadsheet and submit to see its value, csv."
+            ),
+            section!(
                 segments_layout,
                 "segments-layout",
                 "Vertical layout, disabled items and long labels",
-                "Vertical orientation changes both layout and directional navigation. Disabled members are skipped. Full-width long labels share the same row and may wrap within each segment, retaining their complete accessible names. Small changes the compact theme size. This remains a single value choice, with no tab panels or separate application view controller."
+                "Use the arrow keys to move the selection indicator along the group. The indicator follows each label’s width and height and moves immediately when reduced motion is enabled. Disabled members are skipped. Full-width long labels share the same row and may wrap within each segment, retaining their complete accessible names. Small changes the compact theme size. This remains a single value choice, with no tab panels or separate application view controller."
+            ),
+            section!(
+                segments_motion,
+                "segments-motion",
+                "Indicator color and transitions",
+                "The first group pairs the theme accent with its foreground color and slides for 500 ms. The second switches immediately. The source shows the four CSS properties for your stylesheet."
             ),
             section!(
                 segments_controlled,
@@ -185,7 +199,9 @@ pub fn navigation(id: &str) -> Vec<(&'static str, &'static str)> {
         ],
         "segmented-control" => vec![
             ("Width modes", "#segments-width"),
+            ("Uncontrolled form", "#segments-form"),
             ("Layout and long labels", "#segments-layout"),
+            ("Color and transitions", "#segments-motion"),
             ("Controlled and readonly", "#segments-controlled"),
         ],
         "checkbox" => vec![

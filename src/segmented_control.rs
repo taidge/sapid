@@ -50,6 +50,8 @@ pub struct SegmentedControl {
     class: Vary<String>,
     segments: Vec<Segment>,
     full_width: Vary<bool>,
+    radius: Option<Vary<f64>>,
+    item_borders: Vary<bool>,
 }
 pub fn segmented_control(key: impl Into<String>) -> SegmentedControl {
     SegmentedControl {
@@ -57,12 +59,24 @@ pub fn segmented_control(key: impl Into<String>) -> SegmentedControl {
         class: "".into(),
         segments: Vec::new(),
         full_width: false.into(),
+        radius: None,
+        item_borders: true.into(),
     }
 }
 impl SegmentedControl {
     /// Fill the available row with equal-width segments, retaining the same controls.
     pub fn full_width(mut self, value: impl Into<Vary<bool>>) -> Self {
         self.full_width = value.into();
+        self
+    }
+    /// Corner radius in logical pixels for the track and selection indicator.
+    pub fn radius(mut self, value: impl Into<Vary<f64>>) -> Self {
+        self.radius = Some(value.into());
+        self
+    }
+    /// Show dividers between adjacent unselected segments.
+    pub fn with_item_borders(mut self, value: impl Into<Vary<bool>>) -> Self {
+        self.item_borders = value.into();
         self
     }
     fn map(mut self, update: impl FnOnce(RadioGroup) -> RadioGroup) -> Self {
@@ -156,12 +170,20 @@ impl SegmentedControl {
 impl Widget for SegmentedControl {
     fn build(&mut self, scope: &Scope) -> Result {
         let class = self.class.clone();
+        let borders = self.item_borders.clone();
         let mut group = self
             .inner
             .take()
             .ok_or(glory::ui::Error::Gone)?
-            .stretch_segments(self.full_width.clone())
-            .class(scope.bond(move || format!("sapid-segmented-control {}", class.get())));
+            .stretch_segments(self.full_width.clone(), self.radius.take())
+            .class(scope.bond(move || {
+                let dividers = if borders.get() {
+                    "sapid-segment-dividers"
+                } else {
+                    ""
+                };
+                format!("sapid-segmented-control {dividers} {}", class.get())
+            }));
         for segment in self.segments.drain(..) {
             let class = segment.class;
             group = group.radio(
