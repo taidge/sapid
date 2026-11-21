@@ -68,7 +68,23 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
     await primary.getByRole('checkbox',{name:'Animate project count',exact:true}).uncheck();await tick();assert(await primary.locator('.sapid-rolling-number-reel').evaluateAll(es=>es.every((e,i)=>Math.abs(new DOMMatrixReadOnly(getComputedStyle(e).transform).m42+[58.9,117.8,471.2][i])<0.1)));
     await page.emulateMedia({reducedMotion:'reduce'});await primary.getByRole('button',{name:'Add one project',exact:true}).click();await tick();assert.equal(await value.textContent(),'129');assert(await primary.locator('.sapid-rolling-number-reel').evaluateAll(es=>es.every(e=>getComputedStyle(e).transitionDuration==='0s')));
    } else if(slug==='spoiler') {
-    const trigger=primary.getByRole('button',{name:'Read the full walking guide',exact:true}),text=primary.locator('.sapid-spoiler-text');await text.evaluate(e=>window.guideText=e);assert.equal(await trigger.getAttribute('aria-expanded'),'false');const before=(await box(primary.locator('.sapid-spoiler-viewport'))).height;await trigger.click();await tick();assert.equal(await primary.getByRole('button',{name:'Show a shorter guide',exact:true}).getAttribute('aria-expanded'),'true');assert((await box(primary.locator('.sapid-spoiler-viewport'))).height>before);assert(await text.evaluate(e=>e===window.guideText));await page.keyboard.press('Space');await tick();assert.equal(await trigger.getAttribute('aria-expanded'),'false');await focus(trigger);
+    const trigger=primary.getByRole('button',{name:'Read the full walking guide',exact:true});
+    const viewport=primary.locator('.sapid-spoiler-viewport');
+    const text=viewport.locator('.sapid-spoiler-text');
+    await loaded(viewport.getByRole('img',{name:'The lakeside village below the alpine peaks'}));
+    await text.evaluate(e=>window.guideText=e);
+    assert.equal(await trigger.getAttribute('aria-expanded'),'false');
+    const before=(await box(viewport)).height;
+    await trigger.click();
+    await tick();
+    assert.equal(await primary.getByRole('button',{name:'Show a shorter guide',exact:true}).getAttribute('aria-expanded'),'true');
+    assert((await box(viewport)).height>=before+100,'the full guide reveals several more lines');
+    assert(await text.evaluate(e=>e===window.guideText));
+    await page.keyboard.press('Space');
+    await tick();
+    assert.equal(await trigger.getAttribute('aria-expanded'),'false');
+    assert.equal((await box(viewport)).height,before);
+    await focus(trigger);
     assert.equal(await detail('spoiler-threshold').getByRole('button').count(),1);const control=detail('spoiler-controlled'),expand=control.getByRole('button',{name:'Read more about the route',exact:true});await expand.click();await tick();assert.equal(await expand.getAttribute('aria-expanded'),'false');await control.getByRole('checkbox',{name:'Allow guide expansion',exact:true}).check();await expand.click();await tick();assert(await control.getByRole('button',{name:'Collapse route details',exact:true}).isVisible());const changing=detail('spoiler-changes');assert.equal(await changing.getByRole('button').count(),0);await changing.getByRole('checkbox',{name:'Show extended route notes',exact:true}).check();await tick();assert(await changing.getByRole('button',{name:'Show more',exact:true}).isVisible());
    } else if(slug==='theme-icon') {
     assert.equal(await primary.getByRole('button').count(),0);assert.equal(await primary.locator('.sapid-theme-icon svg').count(),1);const sizes=detail('theme-icon-sizes').locator('.sapid-theme-icon');assert.equal(await sizes.count(),8);for(let i=0;i<5;i++){const r=await box(sizes.nth(i));assert.equal(r.width,[24,30,36,42,50][i]);}for(let i=0;i<3;i++)assert.equal((await box(sizes.nth(i+5).locator('svg'))).width,[12,20,28][i]);const actions=detail('theme-icon-actions');await actions.getByRole('button',{name:'Open project information',exact:true}).focus();await page.keyboard.press('Enter');await tick();assert(await actions.getByText('Project information: this workspace is shared with your design team.',{exact:true}).isVisible());

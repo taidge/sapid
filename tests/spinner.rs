@@ -77,6 +77,10 @@ fn named_status_has_a_real_decorative_finite_graphic_and_no_input_handlers() {
         Some(GraphicAnimation::Rotate { period_millis: 800 })
     );
     assert_eq!(props.width, 40.);
+    let glory::render::PathCommand::Move(start) = props.commands[0] else {
+        panic!("spinner arc must start with a move");
+    };
+    assert_eq!(start.y - props.stroke.unwrap().width / 2., 1.);
     assert_eq!(app.stats().handlers, 0);
     let html = glory::ssr::render(loader().name("Loading files")).unwrap();
     assert!(html.contains("role=\"status\"") && html.contains("aria-busy=\"true\""));

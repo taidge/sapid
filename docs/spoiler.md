@@ -1,11 +1,10 @@
 # Measured Spoiler
 
-`spoiler(key).content(text).max_height(120.0)` clips plain selectable text and
+`spoiler(key).content(text).max_height(120.0)` clips selectable text and an optional image, and
 provides a real named disclosure button outside the clipped viewport. It accepts
 reactive text up to 64KiB and positive finite mount-time height. Text remains in
 one original paragraph/text node during expansion; it is not rewritten into a
-truncated business value. Interactive descendants are excluded by the plain-text
-API, so hidden clipped controls cannot remain in the Tab sequence.
+truncated business value. `.illustration(image)` places a Sapid Image before the text inside the measured body. Image load and resize use the same height observer. The content API accepts passive text and images so clipped controls cannot remain in the Tab sequence.
 
 Presentation settles immediately with no expansion animation, including reduced
 motion. Short content hides the action; changed content remeasures the current
@@ -22,11 +21,10 @@ Unstyled preserves structural clipping and explicit overrides.
 A boxed inner view observes real content height. Overflow determines whether the
 action shell is visible; content changes, font/layout changes and width changes
 use the same Resize protocol. Before the first measurement SSR keeps an action
-for nonempty text; it cannot predict pixels. If content shrinks while the action
+for nonempty text or an illustration; it cannot predict pixels. If content shrinks while the action
 is focused, the component requests focus on the stable programmatic text box
 before hiding its action. There are no timers, polling loops or layout reads in
-reactive patches. The only retained content is current text and its accepted
-binding value, never a history of text or list rows.
+reactive patches. The mounted image and text retain their identities across disclosure changes.
 
 Invalid source updates preserve the last accepted paragraph and can recover.
 Owner cleanup retires handlers, bindings and references; late events cannot

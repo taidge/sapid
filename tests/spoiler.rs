@@ -304,3 +304,26 @@ fn shrinking_content_requests_focus_before_its_disclosure_disappears() {
     assert!(hidden_actions(&app));
     assert_eq!(&*actions.borrow(), &[Action::Focus(body)]);
 }
+
+#[test]
+fn illustration_is_measured_even_without_text_and_survives_disclosure() {
+    let app = App::memory();
+    app.mount(
+        spoiler("photo")
+            .max_height(100.)
+            .illustration(sapid::image("/lake.png").alt("Mountain lake")),
+    )
+    .unwrap();
+    let photo = find(&app, "sapid-image");
+    assert!(!hidden_actions(&app));
+    measure(&app, 80.);
+    assert!(hidden_actions(&app));
+    measure(&app, 150.);
+    assert!(!hidden_actions(&app));
+    let trigger = find(&app, "sapid-spoiler-trigger");
+    for expected in [true, false] {
+        app.dispatch(trigger, Event::Activate).unwrap();
+        assert_eq!(expanded(&app), expected);
+        assert_eq!(find(&app, "sapid-image"), photo);
+    }
+}

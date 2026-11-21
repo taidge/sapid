@@ -207,9 +207,7 @@ impl Widget for Spinner {
             let period = self.period;
             let drawing = move || {
                 let mut value = match kind {
-                    LoaderType::Oval => {
-                        crate::progress::arc(diameter, thickness, false, 0.75, color)
-                    }
+                    LoaderType::Oval => crate::progress::spinner_arc(diameter, thickness, color),
                     LoaderType::Dots => {
                         crate::progress::arc(diameter / 5., diameter / 10., false, 1., color)
                     }
