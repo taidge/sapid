@@ -1,10 +1,10 @@
-param()
+param([string]$ProjectRoot = (Split-Path -Parent $PSScriptRoot))
 . "$PSScriptRoot/local-build-paths.ps1"
 
 $ErrorActionPreference='Stop'
-$projectRoot=Split-Path -Parent $PSScriptRoot
-$exportRoot=if($env:SAPID_EXPORT_ROOT){$env:SAPID_EXPORT_ROOT}else{"$PSScriptRoot/../target/verification/sapid/export-check"}
-$sourcePath=if($env:SAPID_STUDIO_EXPORT){$env:SAPID_STUDIO_EXPORT}else{"$PSScriptRoot/../target/verification/sapid/studio-export.rs"}
+$ProjectRoot=(Resolve-Path -LiteralPath $ProjectRoot).Path
+$exportRoot=if($env:SAPID_EXPORT_ROOT){$env:SAPID_EXPORT_ROOT}else{"$ProjectRoot/target/verification/sapid/export-check"}
+$sourcePath=if($env:SAPID_STUDIO_EXPORT){$env:SAPID_STUDIO_EXPORT}else{"$ProjectRoot/target/verification/sapid/studio-export.rs"}
 if (-not (Test-Path -LiteralPath $sourcePath)) { throw 'Run theme-studio-browser.cjs to copy a real export first.' }
 $saved=@{}
 $names=@('CARGO_HOME','CARGO_TARGET_DIR','CARGO_PROFILE_DEV_DEBUG','CARGO_INCREMENTAL','TEMP','TMP','CARGO_BUILD_JOBS')
@@ -23,6 +23,8 @@ edition="2024"
 [dependencies]
 sapid={path="$sapidPath"}
 glory={path="$gloryPath",default-features=false}
+[patch.crates-io]
+glory={path="$gloryPath"}
 "@ | Set-Content -LiteralPath "$exportRoot/Cargo.toml"
     $source=Get-Content -LiteralPath $sourcePath -Raw
     $checks=@'

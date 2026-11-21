@@ -95,6 +95,7 @@ function fileHashes(directory) {
 function showcaseSuites(root, output, mode = 'full') {
   if (!['quick', 'full'].includes(mode)) throw Error(`Unknown showcase mode: ${mode}`);
   const script = name => path.join(root, 'scripts', name);
+  const exportCheck = path.join(__dirname, 'check-theme-export.ps1');
   const browser = (id, name, report = `${name.replace(/\.cjs$/, '')}.json`) => ({
     id, program: process.execPath, args: [script(name)], source: script(name),
     report: path.join(artifactRoot, report),
@@ -105,8 +106,8 @@ function showcaseSuites(root, output, mode = 'full') {
     { ...browser('theme-studio', 'theme-studio-browser.cjs'),
       copiedExport: path.join(artifactRoot, 'studio-export.rs') },
     { ...browser('palette-order', 'palette-order-browser.cjs'), report: path.join(output, 'palette-order-browser.json') },
-    { id: 'theme-export', program: process.env.SAPID_PWSH || 'pwsh', source: script('check-theme-export.ps1'),
-      args: ['-NoProfile', '-File', script('check-theme-export.ps1')], after: 'theme-studio', exclusive: true },
+    { id: 'theme-export', program: process.env.SAPID_PWSH || 'pwsh', source: exportCheck,
+      args: ['-NoProfile', '-File', exportCheck, '-ProjectRoot', root], after: 'theme-studio', exclusive: true },
     browser('navigation', 'showcase-navigation-browser.cjs'),
     browser('routing', 'showcase-routing-browser.cjs'),
     browser('navigation-docs', 'showcase-remediation-navigation.cjs', 'navigation-remediation.json'),
