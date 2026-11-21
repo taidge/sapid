@@ -524,7 +524,7 @@ fn saved_actions(
     })
 }
 
-fn source(entry: &'static Entry, theme: Theme, full: bool) -> impl Widget {
+fn source(code: &'static str, theme: Theme, full: bool) -> impl Widget {
     widget(move |scope| {
         let expanded = scope.cage(full);
         let class = scope.bond(move || {
@@ -550,12 +550,12 @@ fn source(entry: &'static Entry, theme: Theme, full: bool) -> impl Widget {
                         .theme(theme.clone())
                         .size(sapid::Size::ExtraSmall)
                         .label("Copy code")
-                        .source(entry.code),
+                        .source(code),
                 )),
                 view().class("site-code-body").fill(
                     sapid::code_highlight()
                         .theme(theme.clone())
-                        .source(entry.code)
+                        .source(code)
                         .language(sapid::CodeLanguage::Rust),
                 ),
                 when(!full, move || {
@@ -692,7 +692,7 @@ fn documentation(
                             text().class("site-doc-note").content(section.note),
                             view().class("site-preview").fill(view().class("site-demo").fill(section.example)),
                             view().class("site-doc-code").fill(
-                                sapid::code_highlight().theme(demo_theme.clone()).language(sapid::CodeLanguage::Rust).source(section.source),
+                                source(section.source, demo_theme.clone(), false),
                             ),
                         ))
                     })
@@ -700,7 +700,7 @@ fn documentation(
                 view().class("site-doc-content").fill((
                     section_title("usage", "Usage"),
                     view().class("site-preview").fill(view().class("site-demo").fill(crate::showcase_examples::demo(entry.slug, demo_theme.clone()))),
-                    view().semantics(Some(Box::new(Semantics { id: Some(SemanticId::new("example-source").expect("static id")), ..Default::default() }))).fill(source(entry, demo_theme.clone(), false)),
+                    view().semantics(Some(Box::new(Semantics { id: Some(SemanticId::new("example-source").expect("static id")), ..Default::default() }))).fill(source(entry.code, demo_theme.clone(), false)),
                     view().class("site-component-details").fill(details),
                     section_title("composition", "Compose your interface"),
                     text().class("site-doc-note").content("Use Cage, Bond and Vary for reactive values. Compose these builders with other Sapid widgets and keep application data in your own model."),
@@ -712,7 +712,7 @@ fn documentation(
             }),
             when(props, move || api_props(entry, props_theme.clone())),
             when(styles, move || api_styles(entry, styles_theme.clone())),
-            when(code, move || view().class("site-doc-content").fill((section_title("source", "Rust source"), source(entry, code_theme.clone(), true)))),
+            when(code, move || view().class("site-doc-content").fill((section_title("source", "Rust source"), source(entry.code, code_theme.clone(), true)))),
             when(capabilities, move || view().class("site-doc-content").fill(support(entry, &caps_theme, "capabilities-support"))),
             view().role(Role::ContentInfo).class("site-footer").fill((
                 text().content("Sapid · Built with Glory"),

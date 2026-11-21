@@ -10,6 +10,14 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
         glory::ui::view().fill(
             sapid::highlight()
                 .theme(theme.clone())
+                .content("Design and DESIGN match, redesign stays plain.")
+                .query("design")
+                .ignore_ascii_case(true)
+                .whole_words(true),
+        ),
+        glory::ui::view().fill(
+            sapid::highlight()
+                .theme(theme.clone())
                 .content("团队设计指南 · café notes · 设计评审")
                 .query("设计"),
         ),

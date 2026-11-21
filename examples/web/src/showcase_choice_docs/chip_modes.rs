@@ -30,9 +30,11 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                 sapid::chip_group("multiple-languages")
                     .theme(theme.clone())
                     .label("Several languages")
+                    .max_values(2)
                     .mode(sapid::ChipMode::Multiple)
                     .values(multiple)
                     .items([
+                        sapid::chip_item("python", "Python"),
                         sapid::chip_item("rust", "Rust"),
                         sapid::chip_item("wasm", "Wasm"),
                     ])

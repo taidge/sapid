@@ -17,6 +17,15 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                         sapid::checkbox_item("push", "Push notifications").enabled(false),
                     ])
                     .on_selected_change(move |v| selected.revise(|old| *old = v)),
+                sapid::checkbox_group("digest-days")
+                    .theme(theme.clone())
+                    .label("Choose up to two digest days")
+                    .max_values(2)
+                    .items([
+                        sapid::checkbox_item("mon", "Monday"),
+                        sapid::checkbox_item("wed", "Wednesday"),
+                        sapid::checkbox_item("fri", "Friday"),
+                    ]),
                 sapid::text()
                     .theme(theme.clone())
                     .content(selected.map(|v| format!("Selected: {}", v.join(", ")))),

@@ -158,7 +158,7 @@ pub fn sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
                 chip_modes,
                 "chip-modes",
                 "Single, multiple and clearing selection",
-                "Single mode is a real radio group: choosing another chip replaces the key and clicking the selected chip does not clear it. The explicit Clear action writes the application's empty key. Multiple mode is a real checkbox group: activating an already checked chip removes that key, including the final selection. value/on_value_change and values/on_values_change are separate typed contracts; callbacks may decline proposals."
+                "Single mode is a real radio group: choosing another chip replaces the key and clicking the selected chip does not clear it. The explicit Clear action writes the application's empty key. Multiple mode uses max_values(2) here. A third chip becomes available again when a selected chip is cleared. Multiple mode is a real checkbox group: activating an already checked chip removes that key, including the final selection. value/on_value_change and values/on_values_change are separate typed contracts; callbacks may decline proposals."
             ),
             section!(
                 chip_states,

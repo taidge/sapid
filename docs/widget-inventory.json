@@ -1011,6 +1011,7 @@
       "baseline_at_snapshot": false,
       "evidence": {
         "implementation": [
+          "examples/web/src/showcase_choice_docs/checkbox_group.rs (selection cap with disabled items and select-all)",
           "src/mixed_checkbox.rs",
           "src/checkbox_group.rs",
           "src/switch/mod.rs",
@@ -1211,6 +1212,7 @@
       "baseline_at_snapshot": false,
       "evidence": {
         "implementation": [
+          "examples/web/src/showcase_choice_docs/chip_modes.rs (multiple-selection cap shared with CheckboxGroup)",
           "src/chip.rs",
           "docs/choices-implementation.md",
           "docs/choice-inputs.md",
@@ -1601,6 +1603,7 @@
       "baseline_at_snapshot": false,
       "evidence": {
         "implementation": [
+          "examples/web/src/showcase_typography_docs/highlight_case.rs (ASCII case and Unicode word boundaries)",
           "src/document.rs",
           "docs/document-widgets.md",
           "../glory/crates/render/src/document.rs",
