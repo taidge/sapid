@@ -88,6 +88,7 @@
 .sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-segment:has(input:checked){background:var(--sp-input);border-color:var(--sp-border)}
 .sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-segment:has(input:focus-visible){outline:2px solid var(--sp-ring);outline-offset:1px}
 .sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-segment:has(input:disabled){cursor:not-allowed;color:var(--sp-disabled-text);opacity:.55}
+@media (prefers-reduced-motion:no-preference){.sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-segment{transition:background-color .12s ease-out,border-color .12s ease-out}}
 
 .sapid-radio:where(:not(.sapid-unstyled)):has(input:disabled){opacity:.6}
 
