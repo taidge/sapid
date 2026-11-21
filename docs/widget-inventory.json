@@ -3102,6 +3102,7 @@
       "baseline_at_snapshot": false,
       "evidence": {
         "implementation": [
+          "examples/web/src/showcase_shell/resizable.rs",
           "src/app_shell.rs",
           "docs/sidebar-app-shell.md",
           "examples/web/src/showcase_shell/mod.rs"

@@ -226,6 +226,7 @@ pub fn detail_navigation(id: &str) -> Vec<(&'static str, &'static str)> {
             ("Collapsed navigation", "#shell-collapsed"),
             ("Scrolling and sections", "#shell-scrolling"),
             ("Region configuration", "#shell-configuration"),
+            ("Resizable folder pane", "#shell-resizable"),
             ("Full-window frame", "#shell-viewport"),
         ],
         "date-picker-input" => vec![
@@ -425,7 +426,7 @@ mod tests {
     #[test]
     fn shell_and_menubar_documentation_sections_mount_real_widgets_and_retire() {
         for (slug, count) in [
-            ("app-shell", 6),
+            ("app-shell", 7),
             ("aspect-ratio", 2),
             ("center", 1),
             ("container", 1),
