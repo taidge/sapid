@@ -171,6 +171,11 @@ impl MultiSelect {
         self
     }
     /// Caps the number of matching options mounted as visible results.
+    /// Window the shared combobox's flat option list.
+    pub fn virtualized(mut self, value: bool) -> Self {
+        self.inner = self.inner.virtualized(value);
+        self
+    }
     pub fn limit(mut self, value: usize) -> Self {
         self.inner = self.inner.visible_limit(value);
         self
