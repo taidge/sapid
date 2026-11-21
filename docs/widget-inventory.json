@@ -3795,6 +3795,7 @@
           "src/mask_input.rs",
           "src/mask_model.rs",
           "src/phone_input.rs",
+          "examples/web/src/showcase_data_input_docs/phone_field.rs",
           "docs/mask-input.md",
           "../glory/crates/render/src/input_edit.rs",
           "../glory/crates/render/src/text_selection.rs",

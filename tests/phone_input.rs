@@ -97,3 +97,68 @@ fn default_database_and_invalid_region_configuration() {
         assert!(bad.tree().is_empty());
     }
 }
+
+#[test]
+fn field_controls_one_editor_one_successful_value_and_the_declared_region_order() {
+    let app = App::memory();
+    let enabled = app.scope().cage(true);
+    let readonly = app.scope().cage(false);
+    let reference = app.scope().cage(None);
+    app.mount(
+        sapid::field("support")
+            .label("Support phone")
+            .form_name("phone")
+            .required(true)
+            .enabled(enabled)
+            .readonly(readonly)
+            .control(move |field| {
+                phone_input("region")
+                    .field(field)
+                    .node_ref(reference)
+                    .regions([("GB", "UK"), ("US", "USA"), ("CA", "Canada")])
+                    .default_value(PhoneDraft::new("GB", "020 7946 0018"))
+            }),
+    )
+    .unwrap();
+    let id = editor(&app).0;
+    for (active, locked) in [(true, false), (true, true), (false, false)] {
+        enabled.revise(|v| *v = active);
+        readonly.revise(|v| *v = locked);
+        app.flush().unwrap();
+        assert_eq!(reference.get(), Some(id));
+        let tree = app.tree();
+        let mut pending = tree.roots().to_vec();
+        let mut named = Vec::new();
+        let mut regions = Vec::new();
+        while let Some(next) = pending.pop() {
+            let node = tree.node(next).unwrap();
+            let view = node.descriptor.view();
+            if next == id {
+                let semantics = view.semantics.as_deref().unwrap();
+                assert!(semantics.required);
+                assert_eq!(semantics.readonly, locked);
+                assert!(semantics.form_control.is_none());
+            }
+            if let Props::Input(input) = view.props {
+                assert_eq!(input.enabled, active);
+                if let Some(control) = view
+                    .semantics
+                    .as_deref()
+                    .and_then(|s| s.form_control.as_ref())
+                {
+                    named.push((control.name.clone(), input.value.clone()));
+                }
+            }
+            if let Props::Select(select) = view.props {
+                assert_eq!(select.enabled, active && !locked);
+                regions.extend(select.options().map(|(opt, _)| opt.key.as_str().to_owned()));
+            }
+            pending.extend(&node.children);
+        }
+        assert_eq!(regions, ["GB", "US", "CA"]);
+        assert_eq!(
+            named,
+            [("phone".to_owned(), "tel:+44-20-7946-0018".to_owned())]
+        );
+    }
+}

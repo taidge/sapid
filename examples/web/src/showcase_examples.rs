@@ -64,9 +64,8 @@ pub fn detail_sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             super::showcase_combobox_docs::sections(id, theme)
         }
         "input" | "text-input" | "textarea" => super::showcase_text_docs::sections(id, theme),
-        "json-input" | "number-input" | "mask-input" | "native-select" | "file-input" => {
-            super::showcase_data_input_docs::sections(id, theme)
-        }
+        "json-input" | "number-input" | "mask-input" | "phone-input" | "native-select"
+        | "file-input" => super::showcase_data_input_docs::sections(id, theme),
         "pin-input" => super::showcase_pin_docs::sections(theme),
         "scroller" => super::showcase_scroller_docs::sections(theme),
         "rich-text-editor" => super::showcase_editor_docs::sections(theme),
@@ -195,9 +194,8 @@ pub fn detail_navigation(id: &str) -> Vec<(&'static str, &'static str)> {
             super::showcase_combobox_docs::navigation(id)
         }
         "input" | "text-input" | "textarea" => super::showcase_text_docs::navigation(id),
-        "json-input" | "number-input" | "mask-input" | "native-select" | "file-input" => {
-            super::showcase_data_input_docs::navigation(id)
-        }
+        "json-input" | "number-input" | "mask-input" | "phone-input" | "native-select"
+        | "file-input" => super::showcase_data_input_docs::navigation(id),
         "floating-window" => super::showcase_window_docs::navigation(),
         "carousel" => super::showcase_carousel_docs::navigation(),
         "dropzone" => super::showcase_dropzone_docs::navigation(),
@@ -459,6 +457,7 @@ mod tests {
             ("json-input", 4),
             ("number-input", 5),
             ("mask-input", 4),
+            ("phone-input", 1),
             ("native-select", 4),
             ("file-input", 4),
             ("slider", 5),
