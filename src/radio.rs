@@ -105,6 +105,7 @@ pub struct RadioGroup {
     on_change: Option<Box<dyn FnMut(String)>>,
     member_gap: f64,
     stretch_segments: Option<Vary<bool>>,
+    segment_radius: Option<Vary<f64>>,
 }
 pub fn radio_group(key: impl Into<String>) -> RadioGroup {
     RadioGroup {
@@ -125,11 +126,13 @@ pub fn radio_group(key: impl Into<String>) -> RadioGroup {
         on_change: None,
         member_gap: 8.,
         stretch_segments: None,
+        segment_radius: None,
     }
 }
 impl RadioGroup {
     common_methods!();
-    pub(crate) fn stretch_segments(mut self, value: Vary<bool>) -> Self {
+    pub(crate) fn stretch_segments(mut self, value: Vary<bool>, radius: Option<Vary<f64>>) -> Self {
+        self.segment_radius = radius;
         self.stretch_segments = Some(value);
         self
     }
@@ -518,9 +521,11 @@ impl Widget for RadioGroup {
             .gap(self.member_gap);
         let items_style: Vary<glory::style::Style> =
             if let Some(stretch) = self.stretch_segments.clone() {
+                let radius = self.segment_radius.take();
                 scope
                     .bond(move || {
                         let mut style = items_base.clone();
+                        style.radius = radius.as_ref().map(Vary::get);
                         style.width = Some(if stretch.get() {
                             glory::style::Length::Percent(100.)
                         } else {

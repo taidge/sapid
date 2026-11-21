@@ -1,5 +1,57 @@
 const assert=require('node:assert/strict'),fs=require('node:fs');
 const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
+async function checkSegmentPlayground(page, primary, width) {
+ const preview = primary.locator('.site-playground-preview');
+ const panel = primary.locator('.site-playground-controls');
+ const billing = preview.getByRole('radiogroup', {name: 'Billing interval'});
+ const track = billing.locator('.sapid-radio-group-items');
+ const canvas = await preview.boundingBox(), controls = await panel.boundingBox();
+ if (width > 600) assert(controls.x >= canvas.x + canvas.width - 1);
+ else assert(controls.y >= canvas.y + canvas.height - 1);
+
+ // Sample rendered positions during the transition, including the final label width.
+ async function follows(label, axis, reduced = false) {
+   const frames = await track.evaluate(async (track, {label, axis}) => {
+     const target = [...track.querySelectorAll('label')].find(el => el.textContent === label);
+     const coordinate = () => parseFloat(getComputedStyle(track, '::after')[axis]);
+     const start = coordinate(), samples = [];
+     target.click();
+     const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
+     const begin = performance.now();
+     do { await frame(); samples.push(coordinate()); } while (performance.now() - begin < 350);
+     const rect = target.getBoundingClientRect(), parent = track.getBoundingClientRect();
+     return {start, samples, end: rect[axis] - parent[axis], width: rect.width,
+       indicatorWidth: parseFloat(getComputedStyle(track, '::after').width)};
+   }, {label, axis});
+   assert(Math.abs(frames.samples.at(-1) - frames.end) < 1);
+   assert(Math.abs(frames.indicatorWidth - frames.width) < 1);
+   const intermediate = frames.samples.some(value => Math.abs(value - frames.start) > 1 && Math.abs(value - frames.end) > 1);
+   assert.equal(intermediate, !reduced);
+ }
+ await follows('Yearly', 'left');
+ await panel.getByText('Vertical', {exact: true}).click();
+ await preview.locator('[data-gly-navigation=vertical]').waitFor();
+ const yearly = billing.getByRole('radio', {name: 'Yearly'});
+ assert(await yearly.isChecked());
+ await follows('Lifetime', 'top');
+ await page.emulateMedia({reducedMotion: 'reduce'});
+ try { await follows('Monthly', 'top', true); }
+ finally { await page.emulateMedia({reducedMotion: 'no-preference'}); }
+ const compact = (await track.boundingBox()).width;
+ await panel.getByRole('switch', {name: 'Full width'}).check();
+ await page.waitForFunction(({track, compact}) => track.getBoundingClientRect().width > compact + 10, {track: await track.elementHandle(), compact});
+ assert((await track.boundingBox()).width > compact + 10);
+ await panel.getByRole('switch', {name: 'Item borders'}).uncheck();
+ await page.waitForFunction(el => !el.classList.contains('sapid-segment-dividers'), await billing.elementHandle());
+ const radius = panel.getByRole('slider', {name: 'Radius'});
+ await radius.press('End');
+ await page.waitForFunction(el => getComputedStyle(el).borderRadius === '24px', await track.elementHandle());
+ const initialHeight = (await track.boundingBox()).height;
+ await panel.getByRole('slider', {name: 'Size'}).press('End');
+ assert(await billing.getByRole('radio', {name: 'Monthly'}).isChecked());
+ await page.waitForFunction(({preview, initialHeight}) => preview.querySelector('.sapid-radio-group-items').getBoundingClientRect().height > initialHeight, {preview: await preview.elementHandle(), initialHeight});
+}
+
 (async()=>{
  const browser=await chromium.launch(),page=await browser.newPage();const report={browser:browser.version(),pages:[],errors:[]};
  const watch=p=>{p.on('pageerror',e=>report.errors.push(e.message));p.on('console',m=>{if(m.type()==='error')report.errors.push(m.text());});};watch(page);
@@ -13,7 +65,7 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
   try{
    await page.setViewportSize({width,height:1000});await page.goto(`${base}/showcase.html?widget=${slug}&theme=${theme}&scheme=${scheme}`);await page.waitForFunction(()=>window.ready===true,undefined,{timeout:20000});await tick(page);
    const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;
-   const primary=page.locator('.site-preview .site-demo').first();assert.equal(await page.locator('.site-component-detail').count(),{slider:5,'range-slider':8,rating:3,'segmented-control':3}[slug]);
+   const primary=page.locator('.site-preview .site-demo').first();assert.equal(await page.locator('.site-component-detail').count(),{slider:5,'range-slider':8,rating:3,'segmented-control':5}[slug]);
    if(slug==='slider'){
     const s=primary.getByRole('slider',{name:'Volume',exact:true});await s.evaluate(e=>{window.scalar=e;});await s.focus();await s.press('ArrowRight');await tick(page);assert.equal(await number(s),41);assert.equal(await s.getAttribute('aria-valuetext'),'41 percent');assert(await primary.getByText('Volume: 41%',{exact:true}).isVisible());assert(await s.evaluate(e=>e===window.scalar));assert.equal(await primary.locator('.sapid-slider-thumb').evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(255, 255, 255)');
     const states=detail('Read-only, disabled and live keyboard steps'),live=states.getByRole('slider',{name:'Configurable volume',exact:true});await live.focus();await live.press('ArrowRight');await tick(page);assert.equal(await number(live),45);await states.getByRole('checkbox',{name:'Use five-unit steps',exact:true}).uncheck();await live.focus();await live.press('ArrowRight');await tick(page);assert.equal(await number(live),46);await states.getByRole('checkbox',{name:'Lock volume',exact:true}).check();await live.focus();await live.press('Home');await tick(page);assert.equal(await number(live),46);assert.equal(await states.getByRole('slider',{name:'Unavailable volume',exact:true}).getAttribute('aria-disabled'),'true');
@@ -37,7 +89,17 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
     const states=detail('Display-only, read-only, disabled and sizes');assert.equal(await states.getByRole('group',{name:'Average score: 3.5 of 5',exact:true}).getByRole('radio').count(),0);const readonly=states.getByRole('radiogroup',{name:'Read-only score',exact:true});await readonly.getByRole('radio',{name:'4 of 5',exact:true}).click();await tick(page);assert(await readonly.getByRole('radio',{name:'3 of 5',exact:true}).isChecked());assert(await states.getByRole('radiogroup',{name:'Disabled score',exact:true}).getByRole('radio').first().isDisabled());
     const symbols=detail('Custom empty and filled symbols'),paths=symbols.locator('.sapid-rating-star path');assert.equal(await paths.count(),6);assert((await paths.first().getAttribute('d')).includes('C'));const old=await paths.last().getAttribute('fill');await paths.last().evaluate(e=>{window.symbolPath=e;});await symbols.getByRole('radio',{name:'3 of 3',exact:true}).click();await page.mouse.move(1,1);await tick(page);assert.notEqual(await paths.last().getAttribute('fill'),old);assert.equal(await paths.last().getAttribute('fill'),await paths.first().getAttribute('fill'));assert(await paths.last().evaluate(e=>e===window.symbolPath));
    }else{
-    await primary.getByRole('radio',{name:'Yearly',exact:true}).click();assert(await primary.getByRole('radio',{name:'Yearly',exact:true}).isChecked());
+    await checkSegmentPlayground(page, primary, width);
+    const motion = detail('Indicator color and transitions');
+    for (const [label, duration] of [['500 ms linear', '0.5s'], ['Instant', '0s']]) {
+      const track = motion.getByRole('radiogroup', {name: label}).locator('.sapid-radio-group-items');
+      assert.equal(await track.evaluate(el => getComputedStyle(el, '::after').transitionDuration), duration);
+    }
+    const form = detail('Uncontrolled form value').locator('form');
+    await form.getByText('Spreadsheet', {exact: true}).click();
+    assert.equal(await form.evaluate(el => new FormData(el).get('format')), 'csv');
+    await form.getByRole('button', {name: 'Submit format'}).click();
+    await form.getByText('Submitted format: csv', {exact: true}).waitFor();
     const widths=detail('Equal full width and content width'),group=widths.getByRole('radiogroup',{name:'Period width',exact:true}),labels=group.locator('.sapid-segment');await group.getByRole('radio',{name:'Day',exact:true}).evaluate(e=>{window.segment=e;});const before=await labels.evaluateAll(es=>es.map(e=>e.getBoundingClientRect().width));assert(before[2]>before[0]+10);await widths.getByRole('checkbox',{name:'Use equal full-width segments',exact:true}).check();await tick(page);const after=await labels.evaluateAll(es=>es.map(e=>e.getBoundingClientRect().width));assert(after.every(w=>Math.abs(w-after[0])<1));assert(await group.getByRole('radio',{name:'Day',exact:true}).evaluate(e=>e===window.segment));await widths.getByRole('checkbox',{name:'Use equal full-width segments',exact:true}).uncheck();await tick(page);
     const layout=detail('Vertical layout, disabled items and long labels'),vertical=layout.getByRole('radiogroup',{name:'Vertical period',exact:true});const daily=vertical.getByRole('radio',{name:'Daily',exact:true});await daily.focus();await daily.press('ArrowDown');await tick(page);assert(await vertical.getByRole('radio',{name:'Weekly',exact:true}).isChecked());assert(await vertical.getByRole('radio',{name:'Monthly',exact:true}).isDisabled());const rects=await layout.getByRole('radiogroup',{name:'Workspace section',exact:true}).locator('.sapid-segment').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().toJSON()));assert(rects.every(r=>Math.abs(r.width-rects[0].width)<1&&r.right<=width+1&&r.height<100));
     const controlled=detail('Controlled refusal and read-only selection'),view=controlled.getByRole('radiogroup',{name:'Controlled view',exact:true});await view.getByRole('radio',{name:'Grid',exact:true}).click();await tick(page);assert(await view.getByRole('radio',{name:'List',exact:true}).isChecked());await controlled.getByRole('checkbox',{name:'Accept view changes',exact:true}).check();await view.getByRole('radio',{name:'Grid',exact:true}).click();await tick(page);assert(await controlled.getByText('View: grid',{exact:true}).isVisible());const readonly=controlled.getByRole('radiogroup',{name:'Read-only view',exact:true});await readonly.getByRole('radio',{name:'Grid',exact:true}).click();await tick(page);assert(await readonly.getByRole('radio',{name:'List',exact:true}).isChecked());

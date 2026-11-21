@@ -1163,7 +1163,7 @@
       "sources": [
         "M:SegmentedControl"
       ],
-      "work": "SegmentedControl 复用真实 RadioGroup 与单值控制器；四主题原生受控选择、只读及物理身份已验证，不引入 Tabs 面板语义。",
+      "work": "SegmentedControl 复用真实 RadioGroup 与单值控制器；四主题原生受控选择、只读及物理身份已验证，网页选中指示器随标签滑动，示例面板可调方向、宽度、分隔线、尺寸和圆角。",
       "baseline_at_snapshot": false,
       "evidence": {
         "implementation": [
@@ -1178,9 +1178,10 @@
           "../glory/crates/web/src/stream.js",
           "examples/web/src/showcase_slider_docs (5 complete compiled examples)",
           "examples/web/src/showcase_range_slider_docs (8 complete compiled examples)",
-          "examples/web/src/showcase_choice_docs (rating and segments, 6 complete compiled examples)"
+          "examples/web/src/showcase_choice_docs (five SegmentedControl examples, including form submission and motion settings)"
         ],
         "tests": [
+          "scripts/showcase-remediation-selection.cjs (indicator geometry, playground controls and form value)",
           "tests/choices.rs (8 passed)",
           "tests/radio.rs (7 passed)",
           "tests/segmented_control.rs (2 passed)",
