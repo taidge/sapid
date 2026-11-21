@@ -583,7 +583,9 @@ fn chart_guides_do_not_mount_the_shared_acceptance_workbench() {
 #[test]
 fn playground_helpers_are_embedded_only_when_the_preview_uses_them() {
     for (id, expected) in [
-        ("P0-01", false),
+        ("P0-01", true),
+        ("P2-05", true),
+        ("P3-09-highlight", true),
         ("P0-02", false),
         ("P0-03", false),
         ("P0-07", false),

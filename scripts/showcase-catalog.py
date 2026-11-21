@@ -495,6 +495,30 @@ def display_items(task):
     return result
 
 
+def referenced_helpers(prefix, pending):
+    declarations = list(re.finditer(
+        r"(?m)^(?:pub\s+)?(?:fn|const|static)\s+([A-Za-z_][A-Za-z0-9_]*)", prefix
+    ))
+    if declarations:
+        header = prefix[:declarations[0].start()]
+        items = []
+        for index, declaration in enumerate(declarations):
+            item_end = declarations[index + 1].start() if index + 1 < len(declarations) else len(prefix)
+            items.append((declaration[1], prefix[declaration.start():item_end]))
+        required = set()
+        while True:
+            added = False
+            for identifier, item in items:
+                if identifier not in required and re.search(rf"\b{re.escape(identifier)}\b", pending):
+                    required.add(identifier)
+                    pending += "\n" + item
+                    added = True
+            if not added:
+                break
+        prefix = header + "".join(item for identifier, item in items if identifier in required)
+    return prefix
+
+
 def named_source(body, name, family):
     chart = family == "charts"
     indent = 12 if chart else 8
@@ -517,29 +541,10 @@ def named_source(body, name, family):
     if not selected:
         raise SystemExit(f"no named demo branch for {name}")
     selected_source = "".join(selected)
-    declarations = list(re.finditer(
-        r"(?m)^(?:pub\s+)?(?:fn|const|static)\s+([A-Za-z_][A-Za-z0-9_]*)", prefix
-    ))
-    if declarations:
-        header = prefix[:declarations[0].start()]
-        items = []
-        for index, declaration in enumerate(declarations):
-            item_end = declarations[index + 1].start() if index + 1 < len(declarations) else len(prefix)
-            items.append((declaration[1], prefix[declaration.start():item_end]))
-        required = set()
-        pending = selected_source
-        if chart and "proportions()" in selected_source:
-            pending += "values()"
-        while True:
-            added = False
-            for identifier, item in items:
-                if identifier not in required and re.search(rf"\b{re.escape(identifier)}\b", pending):
-                    required.add(identifier)
-                    pending += item
-                    added = True
-            if not added:
-                break
-        prefix = header + "".join(item for identifier, item in items if identifier in required)
+    dependencies = selected_source
+    if chart and "proportions()" in selected_source:
+        dependencies += "values()"
+    prefix = referenced_helpers(prefix, dependencies)
     variable = "id" if chart else "name"
     signature = "id: &str, theme: sapid::Theme" if chart else "name: &str, theme: Theme"
     proportions = "    let proportions = || values(&[(\"a\", \"Product A\", 42.), (\"b\", \"Product B\", 31.), (\"c\", \"Product C\", 18.), (\"other\", \"Other\", 9.)]);\n" if chart and "proportions()" in selected_source else ""
@@ -779,6 +784,16 @@ def expand_macros(body, text):
     return "\n".join(result)
 
 
+def dedicated_source(key):
+    body = (WEB / f"src/dedicated_demos/{key}.rs").read_text(encoding="utf-8")
+    helpers = sorted(set(re.findall(r"\bcontrols::(\w+)", body)))
+    if helpers:
+        source = (WEB / "src/focused_demos/controls.rs").read_text(encoding="utf-8")
+        shared = referenced_helpers(source, " ".join(helpers))
+        body += "\n#[allow(unused_imports)]\nmod controls {\n" + shared + "\n}\n"
+    return formatted(body)
+
+
 def api_surface(task, item):
     name = item["name"]
     paths = API_PATHS.get(name, api_sources(task))
@@ -895,7 +910,7 @@ for task in tasks:
             # A replaced core demo is no longer emitted. Read its maintained
             # source so the next generation does not depend on a deleted output.
             maintained = {"P0-01": "button", "P0-02": "text_input", "P0-03": "checkbox", "P0-04": "collapse", "P0-07": "modal", "P0-08": "drawer", "P0-09": "popover", "P2-08": "action_icon", "P3-10": "pill", "P4-08": "multi_select", "P4-09": "pills_input"}[identity]
-            shared_code = (maintained + "_usage", formatted((WEB / f"src/dedicated_demos/{maintained}.rs").read_text(encoding="utf-8")))
+            shared_code = (maintained + "_usage", dedicated_source(maintained))
         elif identity in CORE:
             key = 'core_' + CORE[identity]
             code = (WEB / f"src/showcase_demos/{key}.rs").read_text(encoding="utf-8")
@@ -943,7 +958,7 @@ for task in tasks:
         if display_name in input_examples:
             source_key = input_examples[display_name]
             key = source_key + "_usage"
-            code = formatted((WEB / f"src/dedicated_demos/{source_key}.rs").read_text(encoding="utf-8"))
+            code = dedicated_source(source_key)
         elif display_name in {"Anchor", "Burger", "NavLink", "PinInput", "Scroller", "Rich text editor", "Affix", "BackgroundImage", "TimeGrid"}:
             key = {"Anchor": "anchor", "Burger": "burger", "NavLink": "nav_link", "PinInput": "pin_input", "Scroller": "scroller", "Rich text editor": "rich_text_editor", "Affix":"affix", "BackgroundImage":"background_image", "TimeGrid":"time_grid"}[display_name]
             code = formatted((WEB / f"src/dedicated_demos/{key}.rs").read_text(encoding="utf-8"))
