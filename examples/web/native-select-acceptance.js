@@ -9,6 +9,25 @@ async (hostPage,baseURL='http://127.0.0.1:8794')=>{
       await page.goto(`${baseURL}/${hydrate?`native-select-hydrate-${hue}-${scheme}.html`:'native-select.html'}?theme=${hue}&scheme=${scheme}`);await page.waitForFunction(()=>window.ready===true);
       const select=page.getByRole('combobox',{name:'Subscription plan',exact:true}),multiple=page.getByRole('listbox',{name:'Favourite fruit',exact:true}),empty=page.getByRole('combobox',{name:'Optional empty choice',exact:true});
       assert(await select.evaluate(e=>e.tagName==='SELECT'&&e.required&&e.value==='start-value'&&e.labels[0].textContent==='Subscription plan')&&await select.getAttribute('aria-describedby'),`${suite}: intrinsic Select/Field required label description`);
+      const compact = await select.evaluate(control => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;width:160px;overflow:hidden';
+        document.body.append(row);
+        try {
+          // Check both a standalone select and a Field acting as a flex item.
+          return [control, control.closest('.sapid-field')].every(original => {
+            const copy = original.cloneNode(true);
+            const menu = copy.matches('select') ? copy : copy.querySelector('select');
+            menu.add(new Option('Inherit the refresh interval specified by the current application'));
+            row.replaceChildren(copy);
+            const edge = row.getBoundingClientRect().right + 1;
+            return copy.getBoundingClientRect().right <= edge
+              && menu.getBoundingClientRect().right <= edge
+              && getComputedStyle(menu).textOverflow === 'ellipsis';
+          });
+        } finally { row.remove(); }
+      });
+      assert(compact, `${suite}: long option keeps the native arrow inside a compact flex row`);
       await select.focus();await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');await tick();
       assert(await select.inputValue()==='pro-value'&&await select.evaluate(e=>e===document.activeElement),`${suite}: actual native keyboard selection and focus`);
       await page.evaluate(()=>demo.native_select_state('reject','true'));await select.selectOption('start-value');await tick();assert(await select.inputValue()==='pro-value',`${suite}: controlled rejection restores actual selectedness`);

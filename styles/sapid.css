@@ -31,6 +31,11 @@
 .sapid-field-label:where(:not(.sapid-unstyled)){width:fit-content;cursor:default}.sapid-field-label:where(:not(.sapid-unstyled)).is-required::after{content:" *" / "";color:var(--sp-danger)}
 .sapid-fieldset:where(:not(.sapid-unstyled)){margin:0;min-inline-size:0}.sapid-fieldset-legend:where(:not(.sapid-unstyled)){padding:0 6px;margin-left:-6px}
 .sapid-fieldset:where(:not(.sapid-unstyled)):disabled{opacity:.65}.sapid-fieldset:where(:not(.sapid-unstyled)):disabled .sapid-field-label:where(:not(.sapid-unstyled)){cursor:not-allowed}
+/* A long option sets the intrinsic width of a select and its enclosing flex item. */
+.sapid-field:where(:not(.sapid-unstyled):has(> .sapid-native-select:not(.sapid-unstyled))),
+.sapid-native-select:where(:not(.sapid-unstyled)){box-sizing:border-box;min-inline-size:0;max-inline-size:100%}
+.sapid-native-select:where(:not(.sapid-unstyled,[multiple])):where(:not([size]),[size="1"]){text-overflow:ellipsis}
+.sapid-native-select:where(:not(.sapid-unstyled)):focus-visible{outline:2px solid var(--sp-ring);outline-offset:-2px}
 .sapid-text-field:where(:not(.sapid-unstyled)){width:100%;box-sizing:border-box;transition:border-color .12s;outline:0;box-shadow:none}
 .sapid-color-input-editor{width:100%}.sapid-color-input-preview{z-index:1}
 .sapid-text-field:where(:not(.sapid-unstyled))::placeholder{color:var(--sp-muted)}
