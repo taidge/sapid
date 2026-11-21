@@ -32,3 +32,7 @@ web-sys = { version = "=0.3.107", features = ["Window", "Document", "Element", "
 opt-level = "z"
 lto = true
 codegen-units = 1
+
+# Exercise the sibling Glory source with a single set of public widget types.
+[patch.crates-io]
+glory = { path = "../../../glory/crates/glory" }

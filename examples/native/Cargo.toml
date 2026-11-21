@@ -25,3 +25,7 @@ wingy = { path = "../../../wingy/wingy", version = "=0.31.1", optional = true }
 
 [lints.rust]
 unsafe_code = "forbid"
+
+# Exercise the sibling Glory source with a single set of public widget types.
+[patch.crates-io]
+glory = { path = "../../../glory/crates/glory" }

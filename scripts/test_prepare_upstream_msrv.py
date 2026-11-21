@@ -55,6 +55,18 @@ class UpstreamMsrvTests(unittest.TestCase):
         self.assertEqual(facade["version"], "0.8.0")
         self.assertEqual(Path(facade["manifest_path"]).resolve(), (self.glory / "crates/glory/Cargo.toml").resolve())
 
+    def test_registry_product_uses_the_sibling_only_for_the_upstream_check(self):
+        original = self.manifest.read_bytes().replace(b', path = "../glory/crates/glory"', b'')
+        self.manifest.write_bytes(original)
+        report = prepare(self.product)
+        self.assertEqual(set(report["product_requirements"].values()), {"=0.7.0"})
+        manifest = tomllib.loads(self.manifest.read_text(encoding="utf-8"))
+        for section in ("dependencies", "dev-dependencies"):
+            self.assertEqual(manifest[section]["glory"]["path"], "../glory/crates/glory")
+            self.assertEqual(manifest[section]["glory"]["version"], "=0.8.0")
+        result = self.cargo("check", "--offline", "--all-targets")
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_existing_product_and_example_locks_are_preserved_without_manifest_changes(self):
         original = self.manifest.read_bytes()
         for relative in ("Cargo.lock", "examples/web/Cargo.lock", "examples/native/Cargo.lock"):
