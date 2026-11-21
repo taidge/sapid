@@ -34,6 +34,14 @@ test('quick coverage retains every behavior suite and skips only the redundant a
   assert.throws(() => showcaseSuites(root, temporary, 'invalid'), /Unknown showcase mode/);
 });
 
+test('the workflow export checker compiles the theme against the frozen product checkout', () => {
+  const product = path.join(temporary, 'frozen-product');
+  const suite = showcaseSuites(product, temporary).find(suite => suite.id === 'theme-export');
+  const checker = path.join(__dirname, 'check-theme-export.ps1');
+  assert.equal(suite.source, checker);
+  assert.deepEqual(suite.args, ['-NoProfile', '-File', checker, '-ProjectRoot', product]);
+});
+
 test('quick and full subprocesses select the intended palette axes without changing responsive coverage', () => {
   const { spawnSync } = require('node:child_process');
   for (const mode of ['quick', 'full']) {
