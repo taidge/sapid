@@ -847,9 +847,8 @@ impl Widget for Progress {
                             .class("sapid-progress-section-label")
                             .content(label.clone())
                             .style(Style {
-                                color: Some(crate::alert::filled_foreground(
+                                color: Some(self.common.theme.contrasting_foreground(
                                     section.color,
-                                    self.common.theme.surface,
                                     self.common.theme.on_accent,
                                 )),
                                 ..self

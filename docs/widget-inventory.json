@@ -184,6 +184,7 @@
       "evidence": {
         "implementation": [
           "src/button.rs",
+          "src/theme/contrast.rs",
           "src/theme/mod.rs",
           "docs/button.md",
           "docs/mantine-api-comparison.md",

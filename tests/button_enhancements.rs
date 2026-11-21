@@ -457,3 +457,74 @@ fn section_ssr_uses_inline_flex_even_unstyled_and_keeps_escaped_text() {
     assert!(html.contains("aria-busy=\"false\""));
     assert!(html.contains("sapid-button-label"));
 }
+
+#[test]
+fn button_and_icon_contrast_follow_reactive_fills_and_explicit_foregrounds() {
+    use glory::style::Color;
+    let black = Color(0, 0, 0, 255);
+    let white = Color(255, 255, 255, 255);
+    for theme in [sapid::Theme::blue_light(), sapid::Theme::green_dark()] {
+        for icon in [false, true] {
+            let app = App::memory();
+            let custom = app.scope().cage(Style {
+                background: Some(white),
+                ..Style::new()
+            });
+            if icon {
+                app.mount(
+                    sapid::action_icon("Edit")
+                        .icon(text().content("+"))
+                        .variant(sapid::ActionIconVariant::Filled)
+                        .theme(theme.clone())
+                        .auto_contrast(true)
+                        .style(custom),
+                )
+                .unwrap();
+            } else {
+                app.mount(
+                    button()
+                        .theme(theme.clone())
+                        .label("Edit")
+                        .auto_contrast(true)
+                        .style(custom),
+                )
+                .unwrap();
+            }
+            let foreground = || {
+                app.tree()
+                    .node(root(&app))
+                    .unwrap()
+                    .descriptor
+                    .view()
+                    .style
+                    .color
+                    .unwrap()
+            };
+            assert_eq!(
+                foreground(),
+                theme.contrasting_foreground(white, theme.on_accent)
+            );
+            custom.revise(|style| {
+                *style = Style {
+                    background: Some(black),
+                    ..Style::new()
+                }
+            });
+            app.flush().unwrap();
+            assert_eq!(
+                foreground(),
+                theme.contrasting_foreground(black, theme.on_accent)
+            );
+            let explicit = Color(117, 0, 0, 255);
+            custom.revise(|style| style.color = Some(explicit));
+            app.flush().unwrap();
+            assert_eq!(foreground(), explicit);
+        }
+        assert_eq!(theme.contrasting_foreground(black, black), white);
+        assert_eq!(theme.contrasting_foreground(white, white), black);
+        assert_eq!(
+            theme.contrasting_foreground(Color(1, 2, 3, 0), white),
+            theme.contrasting_foreground(theme.surface, white)
+        );
+    }
+}

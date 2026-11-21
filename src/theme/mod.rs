@@ -37,6 +37,7 @@ impl ColorScheme {
         }
     }
 }
+mod contrast;
 mod definition;
 mod palette;
 mod presets;

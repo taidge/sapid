@@ -77,6 +77,24 @@ impl Common {
     }
 }
 
+pub(crate) fn action_style(
+    theme: &crate::Theme,
+    base: Style,
+    overrides: Style,
+    auto_contrast: bool,
+) -> Style {
+    let explicit_color = overrides.color.is_some();
+    let mut style = merge(base, overrides);
+    if auto_contrast
+        && !explicit_color
+        && let Some(background) = style.background
+    {
+        style.color =
+            Some(theme.contrasting_foreground(background, style.color.unwrap_or(theme.foreground)));
+    }
+    style
+}
+
 // Keep every optional declaration independent; absent overrides preserve tokens.
 // The exhaustive destructure makes new Glory Style fields a compile-time review.
 pub(crate) fn merge(mut base: Style, overrides: Style) -> Style {

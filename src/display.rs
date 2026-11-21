@@ -240,23 +240,20 @@ impl Widget for Badge {
                     glory::style::Color(c.0, c.1, c.2, (f64::from(c.3) * 0.12).round() as u8)
                 });
                 base.background = Some(fill);
-                base.color = Some(self.color.map_or(theme.accent_text, |c| {
-                    crate::alert::filled_foreground(fill, theme.surface, c)
-                }));
+                base.color = Some(
+                    self.color
+                        .map_or(theme.accent_text, |c| theme.contrasting_foreground(fill, c)),
+                );
                 "sapid-badge sapid-badge-soft"
             }
             BadgeVariant::Solid => {
                 base.background = Some(accent);
-                base.color = Some(crate::alert::filled_foreground(
-                    accent,
-                    theme.surface,
-                    theme.on_accent,
-                ));
+                base.color = Some(theme.contrasting_foreground(accent, theme.on_accent));
                 "sapid-badge sapid-badge-solid"
             }
             BadgeVariant::Outline => {
                 base.color = Some(self.color.map_or(theme.accent_text, |c| {
-                    crate::alert::filled_foreground(theme.surface, theme.surface, c)
+                    theme.contrasting_foreground(theme.surface, c)
                 }));
                 base.border_width = Some(Edges::all(1.));
                 base.border_style = Some(BorderStyle::Solid);

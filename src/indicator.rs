@@ -218,11 +218,11 @@ impl Widget for Indicator {
             marker_style.radius = Some(self.diameter / 2.0);
             let color = self.color.unwrap_or(self.common.theme.accent);
             marker_style.background = Some(color);
-            marker_style.color = Some(crate::alert::filled_foreground(
-                color,
-                self.common.theme.surface,
-                self.common.theme.on_accent,
-            ));
+            marker_style.color = Some(
+                self.common
+                    .theme
+                    .contrasting_foreground(color, self.common.theme.on_accent),
+            );
             marker_style.font_family = Some(vec![glory::style::Family::System]);
             marker_style.font_size = Some((self.diameter * 0.65).min(18.0));
             marker_style.font_weight = Some(600.0);

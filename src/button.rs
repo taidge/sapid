@@ -20,6 +20,7 @@ pub struct Button {
     inner: Option<glory::ui::Button>,
     common: Common,
     variant: ButtonVariant,
+    auto_contrast: bool,
     compact: Vary<bool>,
     loading: Vary<bool>,
     pressed: Option<Vary<bool>>,
@@ -55,6 +56,7 @@ pub fn button() -> Button {
         inner: Some(glory::ui::button()),
         common: Common::default(),
         variant: ButtonVariant::default(),
+        auto_contrast: false,
         compact: false.into(),
         loading: false.into(),
         pressed: None,
@@ -147,6 +149,12 @@ impl Button {
         self
     }
 
+    /// Resolve a readable foreground over the final background of an enabled,
+    /// styled action. An explicitly styled foreground takes precedence.
+    pub fn auto_contrast(mut self, value: bool) -> Self {
+        self.auto_contrast = value;
+        self
+    }
     pub fn variant(mut self, variant: ButtonVariant) -> Self {
         self.variant = variant;
         self
@@ -296,6 +304,7 @@ impl Widget for Button {
         let pressed = self.pressed.clone();
         let pressed_reactive = pressed.as_ref().is_some_and(Vary::is_reactive);
         let variant = self.variant;
+        let auto_contrast = self.auto_contrast;
         let state_style = move || {
             let mut base = if unstyled {
                 glory::style::Style::new()
@@ -331,7 +340,12 @@ impl Widget for Button {
                 base.color = Some(theme.disabled_text);
                 base.border_color = Some(theme.border);
             }
-            crate::appearance::merge(base, own_style.get())
+            crate::appearance::action_style(
+                &theme,
+                base,
+                own_style.get(),
+                auto_contrast && !unstyled && style_enabled.get(),
+            )
         };
         self.common.style = if enabled.is_reactive()
             || compact_reactive
