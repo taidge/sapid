@@ -9,6 +9,8 @@ async (hostPage) => {
     const tick=()=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
     for(const hue of ['blue','green'])for(const scheme of ['light','dark'])for(const hydration of [false,true]) {
       const mode=`choices-${hue}-${scheme}-${hydration?'hydrate':'csr'}`;
+      const reducedMotion=hydration?'reduce':'no-preference';
+      await page.emulateMedia({reducedMotion});
       await page.goto(`http://127.0.0.1:8794/${hydration?`choices-hydrate-${hue}-${scheme}.html`:'choices.html'}?theme=${hue}&scheme=${scheme}`);
       await page.waitForFunction(()=>window.ready===true);
       const mixed=page.getByRole('checkbox',{name:'Partial selection',exact:true}),toggle=page.getByRole('switch',{name:'Notifications',exact:true});
@@ -37,6 +39,11 @@ async (hostPage) => {
       assert(await alpha.isChecked()&&!await beta.isChecked()&&await beta.evaluate(e=>e===document.activeElement),`${mode}: typeahead controlled rejection restores native peers while preserving focus`);
       await page.evaluate(()=>window.demo.choice_state('reject',false));await page.keyboard.press('Home');await tick();
       const monthly=page.getByRole('radio',{name:'Monthly',exact:true}),yearly=page.getByRole('radio',{name:'Yearly',exact:true});
+      const animatesSelection=await yearly.evaluate(radio=>{
+        const style=getComputedStyle(radio.closest('label'));
+        return style.transitionProperty.split(', ').includes('background-color')&&style.transitionDuration.split(', ').some(duration=>parseFloat(duration)>0);
+      });
+      assert(animatesSelection===(reducedMotion==='no-preference'),`${mode}: segmented highlight follows motion preference`);
       assert(await page.getByRole('radiogroup',{name:'Billing interval',exact:true}).count()===1&&await monthly.isChecked()&&!await yearly.isChecked(),`${mode}: segmented single-value semantics`);
       const standard=page.getByRole('radio',{name:'Standard',exact:true}),express=page.getByRole('radio',{name:'Express',exact:true});
       assert(await page.getByRole('radiogroup',{name:'Delivery',exact:true}).count()===1&&await standard.isChecked()&&!await express.isChecked(),`${mode}: real radio group`);
