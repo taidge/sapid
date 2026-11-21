@@ -102,8 +102,20 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
           assert(await editor.evaluate(element => element === window.keyedTabEditor));
         }
         if (slug === 'timeline') {
-          assert.equal(await primary.locator('.sapid-timeline-marker').count(), 3);
-          assert.equal(await primary.locator('.sapid-timeline-line').count(), 2);
+          const items=primary.locator('.sapid-timeline-item');
+          const list=primary.locator('.sapid-timeline');
+          await primary.getByRole('combobox',{name:'Align'}).selectOption('alternate');
+          await primary.getByRole('switch',{name:'Opposite timestamps'}).click();await tick();
+          assert.equal(await list.locator('.sapid-timeline-opposite').count(),4);
+          assert.equal(await list.locator('.sapid-timeline-opposite').first().innerText(),'2 hours ago');
+          const marker=await items.nth(1).locator('.sapid-timeline-marker').boundingBox();
+          const content=await items.nth(1).locator('.sapid-timeline-content').boundingBox();
+          assert(content.x<marker.x);
+          await primary.getByRole('switch',{name:'Reverse active'}).click();await tick();
+          assert.equal(await list.locator('.sapid-timeline-completed').count(),2);
+          assert.equal(await list.locator('.sapid-timeline-line').nth(2).evaluate(e=>getComputedStyle(e).borderLeftStyle),'dashed');
+          assert.equal(await primary.locator('.sapid-timeline-marker').count(), 4);
+          assert.equal(await primary.locator('.sapid-timeline-line').count(), 3);
           assert.equal(await primary.locator('.sapid-timeline').evaluate(element => element.tagName), 'OL');
           assert(await primary.locator('.sapid-timeline-item').evaluateAll(elements => elements.every(element => getComputedStyle(element).display === 'flex')));
           assert(await primary.locator('.sapid-timeline-line').evaluateAll(elements => elements.every(element => element.getBoundingClientRect().height > 10)));

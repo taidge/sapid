@@ -44,12 +44,16 @@ pub enum ThemeIconVariant {
     Soft,
     Solid,
     Outline,
+    Transparent,
+    White,
+    Gradient,
 }
 pub struct ThemeIcon {
     common: Common,
     icon: Vary<Icon>,
     variant: ThemeIconVariant,
     color: Option<Color>,
+    auto_contrast: bool,
     icon_size: Option<Vary<f64>>,
 }
 pub fn theme_icon(icon: impl Into<Vary<Icon>>) -> ThemeIcon {
@@ -58,6 +62,7 @@ pub fn theme_icon(icon: impl Into<Vary<Icon>>) -> ThemeIcon {
         icon: icon.into(),
         variant: ThemeIconVariant::default(),
         color: None,
+        auto_contrast: false,
         icon_size: None,
     }
 }
@@ -74,6 +79,11 @@ impl ThemeIcon {
     /// preserve the last accepted extent and the actual Graphic identity.
     pub fn icon_size(mut self, size: impl Into<Vary<f64>>) -> Self {
         self.icon_size = Some(size.into());
+        self
+    }
+    /// Pick a readable glyph color for the solid theme background.
+    pub fn auto_contrast(mut self, enabled: bool) -> Self {
+        self.auto_contrast = enabled;
         self
     }
     pub fn variant(mut self, variant: ThemeIconVariant) -> Self {
@@ -313,6 +323,25 @@ impl Widget for ThemeIcon {
                 }
                 ThemeIconVariant::Solid => {
                     base.background = Some(self.common.theme.accent);
+                    if self.auto_contrast {
+                        self.common.theme.contrasting_foreground(
+                            self.common.theme.accent,
+                            self.common.theme.on_accent,
+                        )
+                    } else {
+                        self.common.theme.on_accent
+                    }
+                }
+                ThemeIconVariant::Transparent => self.common.theme.accent_text,
+                ThemeIconVariant::White => {
+                    base.background = Some(Color(255, 255, 255, 255));
+                    self.common.theme.accent_text
+                }
+                ThemeIconVariant::Gradient => {
+                    base.background_image = Some(glory::style::LinearGradient {
+                        angle: 45.,
+                        stops: vec![self.common.theme.accent, self.common.theme.foreground],
+                    });
                     self.common.theme.on_accent
                 }
                 ThemeIconVariant::Outline => {

@@ -1718,6 +1718,7 @@
         "implementation": [
           "src/separator.rs",
           "src/timeline.rs",
+          "examples/web/src/dedicated_demos/timeline.rs",
           "docs/timeline-separator.md",
           "examples/web/src/showcase_misc_docs",
           "docs/misc-pages.md"
@@ -1830,6 +1831,7 @@
         "implementation": [
           "src/indicator.rs",
           "src/theme_icon.rs",
+          "examples/web/src/dedicated_demos/theme_icon_gradient.rs",
           "docs/indicators-icons.md",
           "../glory/docs/finite-graphics.md"
         ],

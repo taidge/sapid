@@ -155,24 +155,38 @@ pub fn size_slider(value: Cage<Option<String>>, theme: &Theme) -> Box<dyn Widget
     )
 }
 
-pub fn radius_slider(value: Cage<f64>, theme: &Theme) -> Box<dyn Widget> {
+pub fn range(
+    key: &str,
+    label: &str,
+    value: Cage<f64>,
+    min: f64,
+    max: f64,
+    step: f64,
+    theme: &Theme,
+) -> Box<dyn Widget> {
+    let label = label.to_owned();
     Box::new(
-        sapid::stack().theme(theme.clone()).gap(8.0).fill((
+        sapid::stack().theme(theme.clone()).gap(8.).fill((
             sapid::text()
                 .theme(theme.clone())
                 .class("site-control-label")
-                .content("Radius"),
-            sapid::slider("control-radius")
+                .content(value.map({
+                    let label = label.clone();
+                    move |v| format!("{label} · {v:.0}")
+                })),
+            sapid::slider(key.to_owned())
                 .theme(theme.clone())
-                .name("Radius")
-                .min(0.0)
-                .max(12.0)
-                .step(1.0)
+                .name(label)
+                .min(min)
+                .max(max)
+                .step(step)
                 .value(value)
-                .value_text(value.map(|value| Some(format!("{value} px"))))
-                .on_value_change(move |next| value.revise(|current| *current = next)),
+                .on_value_change(move |next| value.revise(|v| *v = next)),
         )),
     )
+}
+pub fn radius_slider(value: Cage<f64>, theme: &Theme) -> Box<dyn Widget> {
+    range("control-radius", "Radius", value, 0., 12., 1., theme)
 }
 
 pub fn variant(value: Cage<Option<String>>, theme: &Theme) -> Box<dyn Widget> {
@@ -239,17 +253,32 @@ const COLORS: &[(&str, Color)] = &[
     ("Gray", Color(134, 142, 150, 255)),
 ];
 
+fn choice_color(name: &str) -> Option<Color> {
+    COLORS
+        .iter()
+        .find(|(label, _)| *label == name)
+        .map(|(_, color)| *color)
+        .or_else(|| sapid::parse_hex_color(name).ok())
+}
+
 pub fn accent(mut theme: Theme, name: &str) -> Theme {
-    if let Some((_, color)) = COLORS.iter().find(|(label, _)| *label == name) {
-        theme.accent = *color;
-        theme.accent_text = *color;
-        theme.focus_ring = *color;
-        theme.input_focus = *color;
+    if let Some(color) = choice_color(name) {
+        theme.accent = color;
+        theme.accent_text = color;
+        theme.focus_ring = color;
+        theme.input_focus = color;
     }
     theme
 }
 
 pub fn color_choices(selected: Cage<String>, theme: &Theme) -> Box<dyn Widget> {
+    let draft = selected.map(|value| {
+        COLORS
+            .iter()
+            .find(|(name, _)| *name == value)
+            .map(|(_, color)| sapid::format_hex_color(*color, false))
+            .unwrap_or_else(|| value.clone())
+    });
     Box::new(
         sapid::stack().theme(theme.clone()).gap(8.0).fill((
             sapid::text()
@@ -285,6 +314,15 @@ pub fn color_choices(selected: Cage<String>, theme: &Theme) -> Box<dyn Widget> {
                         })
                         .collect::<Vec<_>>(),
                 ),
+            sapid::field("control-custom-color")
+                .theme(theme.clone())
+                .label("Custom color")
+                .control(move |field| {
+                    sapid::color_input("custom-accent")
+                        .field(field)
+                        .value(draft)
+                        .on_value_change(move |next| selected.revise(|value| *value = next))
+                }),
         )),
     )
 }

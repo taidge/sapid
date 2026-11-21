@@ -15,10 +15,17 @@ pub enum TimelineProgress {
     Active(String),
     Complete,
 }
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum TimelineAlign {
+    #[default]
+    Start,
+    End,
+    Alternate,
+}
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Phase {
     Pending,
-    Active(usize),
+    Active(usize, bool),
     Complete,
 }
 impl Phase {
@@ -26,8 +33,8 @@ impl Phase {
         match self {
             Self::Pending => 2,
             Self::Complete => 0,
-            Self::Active(active) if index < active => 0,
-            Self::Active(active) if index == active => 1,
+            Self::Active(active, _) if index == active => 1,
+            Self::Active(active, reversed) if (index < active) != reversed => 0,
             _ => 2,
         }
     }
@@ -61,6 +68,9 @@ pub struct Timeline {
     level: u8,
     bullet_size: f64,
     line_width: f64,
+    align: TimelineAlign,
+    bullet_radius: Option<f64>,
+    reverse_active: bool,
 }
 pub fn timeline(key: impl Into<String>) -> Timeline {
     Timeline {
@@ -72,10 +82,25 @@ pub fn timeline(key: impl Into<String>) -> Timeline {
         level: 3,
         bullet_size: 22.,
         line_width: 2.,
+        align: TimelineAlign::Start,
+        bullet_radius: None,
+        reverse_active: false,
     }
 }
 impl Timeline {
     appearance_methods!();
+    pub fn align(mut self, align: TimelineAlign) -> Self {
+        self.align = align;
+        self
+    }
+    pub fn reverse_active(mut self, reverse: bool) -> Self {
+        self.reverse_active = reverse;
+        self
+    }
+    pub fn bullet_radius(mut self, radius: f64) -> Self {
+        self.bullet_radius = Some(radius);
+        self
+    }
     pub fn bullet_size(mut self, value: f64) -> Self {
         self.bullet_size = value;
         self
@@ -128,24 +153,25 @@ impl Timeline {
 fn select(
     progress: &TimelineProgress,
     keys: &HashMap<String, usize>,
+    reverse: bool,
 ) -> std::result::Result<Phase, glory::render::Error> {
     match progress {
         TimelineProgress::Pending => Ok(Phase::Pending),
         TimelineProgress::Complete => Ok(Phase::Complete),
-        TimelineProgress::Active(key) => {
-            keys.get(key)
-                .copied()
-                .map(Phase::Active)
-                .ok_or(glory::render::Error::InvalidProps(
-                    "timeline active key is not mounted",
-                ))
-        }
+        TimelineProgress::Active(key) => keys
+            .get(key)
+            .copied()
+            .map(|index| Phase::Active(index, reverse))
+            .ok_or(glory::render::Error::InvalidProps(
+                "timeline active key is not mounted",
+            )),
     }
 }
 impl Widget for Timeline {
     fn build(&mut self, scope: &Scope) -> Result {
         if self.items.len() > MAX_TIMELINE_ITEMS
             || !(1..=6).contains(&self.level)
+            || self.bullet_radius.is_some_and(|r| !r.is_finite() || r < 0.)
             || !self.bullet_size.is_finite()
             || !(8.0..=64.0).contains(&self.bullet_size)
             || !self.line_width.is_finite()
@@ -174,9 +200,12 @@ impl Widget for Timeline {
                 );
             }
         }
+        let reverse = self.reverse_active;
+        let centered = self.align == TimelineAlign::Alternate
+            || self.items.iter().any(|item| item.opposite.is_some());
         let initial = self
             .progress
-            .try_with(|progress| select(progress, &keys))??;
+            .try_with(|progress| select(progress, &keys, reverse))??;
         let phase = scope.cage(initial);
         if self.progress.is_reactive() {
             let source = self.progress.clone();
@@ -185,7 +214,7 @@ impl Widget for Timeline {
             scope.effect(move || {
                 let Some(scope) = weak.upgrade() else { return };
                 let result = (|| -> Result {
-                    let next = source.try_with(|progress| select(progress, &keys))??;
+                    let next = source.try_with(|progress| select(progress, &keys, reverse))??;
                     if phase.try_with_untracked(|previous| *previous != next)? {
                         phase.try_revise(|previous| *previous = next)?;
                     }
@@ -215,6 +244,11 @@ impl Widget for Timeline {
                 last: index + 1 == count,
                 bullet_size: self.bullet_size,
                 line_width: self.line_width,
+                centered,
+                reversed: self.align == TimelineAlign::End
+                    || (self.align == TimelineAlign::Alternate && index % 2 == 1),
+                radius: self.bullet_radius.unwrap_or(self.bullet_size / 2.),
+                reverse_active: reverse,
             });
         }
         let mut base = Style::new();
@@ -247,6 +281,8 @@ pub struct TimelineItem {
     description: Option<Vary<String>>,
     timestamp: Option<Vary<String>>,
     marker: Children,
+    opposite: Option<Children>,
+    line_style: BorderStyle,
     children: Children,
 }
 pub fn timeline_item(key: impl Into<String>) -> TimelineItem {
@@ -259,6 +295,8 @@ pub fn timeline_item(key: impl Into<String>) -> TimelineItem {
         description: None,
         timestamp: None,
         marker: ().into_children(),
+        opposite: None,
+        line_style: BorderStyle::Solid,
         children: ().into_children(),
     }
 }
@@ -284,6 +322,14 @@ impl TimelineItem {
         self.timestamp = Some(timestamp.into());
         self
     }
+    pub fn opposite(mut self, children: impl IntoChildren) -> Self {
+        self.opposite = Some(children.into_children());
+        self
+    }
+    pub fn line_style(mut self, style: BorderStyle) -> Self {
+        self.line_style = style;
+        self
+    }
     pub fn marker(mut self, marker: impl IntoChildren) -> Self {
         self.marker = marker.into_children();
         self
@@ -303,6 +349,10 @@ struct RenderedItem {
     last: bool,
     bullet_size: f64,
     line_width: f64,
+    centered: bool,
+    reversed: bool,
+    radius: f64,
+    reverse_active: bool,
 }
 impl Widget for RenderedItem {
     fn build(&mut self, scope: &Scope) -> Result {
@@ -381,6 +431,17 @@ impl Widget for RenderedItem {
                     .gap(4.0),
             );
         }
+        let column_style = Style {
+            grow: Some(1.),
+            ..Style::new().width(Length::Px(0.)).min_width(Length::Px(0.))
+        };
+        if self.centered || self.reversed {
+            let mut style = column_style.clone();
+            style.display = Some(Display::Flex);
+            style.flex_direction = Some(FlexDirection::Column);
+            style.gap = Some(4.);
+            body = body.style(style);
+        }
         let mut base = Style::new();
         base.position = Some(Position::Relative);
         base.display = Some(Display::Flex);
@@ -397,6 +458,7 @@ impl Widget for RenderedItem {
             .fill(std::mem::replace(&mut self.item.marker, ().into_children()));
         let theme = self.item.common.theme.clone();
         let bullet = self.bullet_size;
+        let radius = self.radius.min(bullet / 2.);
         if !self.item.common.unstyled {
             marker = marker.style(scope.bond(move || {
                 let state = phase.get().state(index);
@@ -426,7 +488,7 @@ impl Widget for RenderedItem {
                         } else {
                             theme.border
                         })
-                        .radius(bullet / 2.)
+                        .radius(radius)
                 }
             }));
         }
@@ -443,27 +505,73 @@ impl Widget for RenderedItem {
             id: Some(self.id.clone()),
             ..Default::default()
         })));
-        root = root.fill((marker, body));
+        let opposite = self.centered.then(|| {
+            glory::ui::view()
+                .class("sapid-timeline-opposite")
+                .style(column_style)
+                .fill(
+                    self.item
+                        .opposite
+                        .take()
+                        .unwrap_or_else(|| ().into_children()),
+                )
+        });
+        if self.reversed {
+            root = root.fill((body, marker));
+            if let Some(opposite) = opposite {
+                root = root.fill(opposite);
+            }
+        } else {
+            if let Some(opposite) = opposite {
+                root = root.fill(opposite);
+            }
+            root = root.fill((marker, body));
+        }
         if !self.last && !self.item.common.unstyled && self.line_width > 0. {
             let theme = self.item.common.theme.clone();
             let width = self.line_width;
+            let centered = self.centered;
+            let reversed = self.reversed;
+            let line_style = self.item.line_style;
+            let reverse_active = self.reverse_active;
             root = root.fill(
                 glory::ui::view()
                     .class("sapid-timeline-line")
                     .style(scope.bond(move || {
-                        Style {
-                            background: Some(if phase.get().state(index) == 0 {
-                                theme.accent
-                            } else {
-                                theme.border
-                            }),
-                            ..Style::new()
-                                .position(Position::Absolute)
-                                .left(Length::Px((bullet - width) / 2.))
-                                .top(Length::Px(bullet))
-                                .bottom(Length::Px(0.))
-                                .width(Length::Px(width))
+                        let active = if reverse_active {
+                            phase.get().state(index + 1) == 0
+                        } else {
+                            phase.get().state(index) == 0
+                        };
+                        let color = if active { theme.accent } else { theme.border };
+                        let mut line = Style::new()
+                            .position(Position::Absolute)
+                            .top(Length::Px(bullet))
+                            .bottom(Length::Px(0.))
+                            .width(Length::Px(width));
+                        if centered {
+                            line.left = Some(Length::Percent(50.));
+                            line.margin = Some(Edges {
+                                left: -width / 2.,
+                                ..Edges::all(0.)
+                            });
+                        } else if reversed {
+                            line.right = Some(Length::Px((bullet - width) / 2.));
+                        } else {
+                            line.left = Some(Length::Px((bullet - width) / 2.));
                         }
+                        if line_style == BorderStyle::Solid {
+                            line.background = Some(color);
+                        } else {
+                            line = line
+                                .border_style(line_style)
+                                .border_color(color)
+                                .border_width(Edges {
+                                    left: width,
+                                    ..Edges::all(0.)
+                                });
+                        }
+                        line
                     })),
             );
         }

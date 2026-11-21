@@ -6,7 +6,7 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
  const report={browser:browser.version(),pages:[],errors:[]};
  page.on('pageerror',e=>report.errors.push(e.message));
  page.on('console',m=>{if(m.type()==='error')report.errors.push(m.text());});
- const counts={avatar:4,badge:4,card:3,'color-swatch':3,'data-list':3,image:4,indicator:3,kbd:3,'number-formatter':3,'overflow-list':3,'rolling-number':3,spoiler:3,'theme-icon':3};
+ const counts={avatar:4,badge:4,card:3,'color-swatch':3,'data-list':3,image:4,indicator:3,kbd:3,'number-formatter':3,'overflow-list':3,'rolling-number':3,spoiler:3,'theme-icon':4};
  const tick=()=>page.evaluate(()=>new Promise(resolve=>{let n=0;const f=()=>++n===8?resolve():requestAnimationFrame(f);requestAnimationFrame(f);}));
  const detail=id=>page.locator('.site-component-detail').filter({has:page.locator(`#${id}`)});
  const box=async l=>{const r=await l.boundingBox();assert(r);return r;};
@@ -87,7 +87,22 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
     await focus(trigger);
     assert.equal(await detail('spoiler-threshold').locator('.site-preview').getByRole('button').count(),1);const control=detail('spoiler-controlled'),expand=control.getByRole('button',{name:'Read more about the route',exact:true});await expand.click();await tick();assert.equal(await expand.getAttribute('aria-expanded'),'false');await control.getByRole('checkbox',{name:'Allow guide expansion',exact:true}).check();await expand.click();await tick();assert(await control.getByRole('button',{name:'Collapse route details',exact:true}).isVisible());const changing=detail('spoiler-changes');assert.equal(await changing.locator('.site-preview').getByRole('button').count(),0);await changing.getByRole('checkbox',{name:'Show extended route notes',exact:true}).check();await tick();assert(await changing.getByRole('button',{name:'Show more',exact:true}).isVisible());
    } else if(slug==='theme-icon') {
-    assert.equal(await primary.getByRole('button').count(),0);assert.equal(await primary.locator('.sapid-theme-icon svg').count(),1);const sizes=detail('theme-icon-sizes').locator('.sapid-theme-icon');assert.equal(await sizes.count(),8);for(let i=0;i<5;i++){const r=await box(sizes.nth(i));assert.equal(r.width,[24,30,36,42,50][i]);}for(let i=0;i<3;i++)assert.equal((await box(sizes.nth(i+5).locator('svg'))).width,[12,20,28][i]);const actions=detail('theme-icon-actions');await actions.getByRole('button',{name:'Open project information',exact:true}).focus();await page.keyboard.press('Enter');await tick();assert(await actions.getByText('Project information: this workspace is shared with your design team.',{exact:true}).isVisible());
+    const icon=primary.locator('.sapid-theme-icon');
+    await primary.getByRole('button',{name:'Use Yellow',exact:true}).click();
+    await tick();
+    assert.equal(await icon.evaluate(e=>getComputedStyle(e).backgroundColor),'rgb(250, 176, 5)');
+    await primary.getByRole('combobox',{name:'Variant'}).selectOption('outline');
+    await tick();
+    assert.equal(await icon.evaluate(e=>getComputedStyle(e).borderTopStyle),'solid');
+    const gradient=detail('theme-icon-gradient'), tile=gradient.locator('.sapid-theme-icon');
+    const initialGradient=await tile.evaluate(e=>getComputedStyle(e).backgroundImage);
+    await gradient.getByRole('combobox',{name:'Gradient to'}).selectOption('Orange');
+    await gradient.getByRole('slider',{name:'Gradient angle'}).press('End');
+    await tick();
+    const changed=await tile.evaluate(e=>getComputedStyle(e).backgroundImage);
+    assert.notEqual(changed,initialGradient);
+    assert(changed.includes('360deg')&&changed.includes('253, 126, 20'));
+    assert.equal(await primary.locator('.site-playground-preview').getByRole('button').count(),0);assert.equal(await primary.locator('.sapid-theme-icon svg').count(),1);const sizes=detail('theme-icon-sizes').locator('.sapid-theme-icon');assert.equal(await sizes.count(),8);for(let i=0;i<5;i++){const r=await box(sizes.nth(i));assert.equal(r.width,[24,30,36,42,50][i]);}for(let i=0;i<3;i++)assert.equal((await box(sizes.nth(i+5).locator('svg'))).width,[12,20,28][i]);const actions=detail('theme-icon-actions');await actions.getByRole('button',{name:'Open project information',exact:true}).focus();await page.keyboard.press('Enter');await tick();assert(await actions.getByText('Project information: this workspace is shared with your design team.',{exact:true}).isVisible());
    }
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
    await primary.scrollIntoViewIfNeeded();await shot(primary,key);

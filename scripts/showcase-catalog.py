@@ -495,7 +495,7 @@ def display_items(task):
     return result
 
 
-def referenced_helpers(prefix, pending):
+def referenced_helpers(prefix, pending, *, calls_only=False):
     declarations = list(re.finditer(
         r"(?m)^(?:pub\s+)?(?:fn|const|static)\s+([A-Za-z_][A-Za-z0-9_]*)", prefix
     ))
@@ -509,7 +509,10 @@ def referenced_helpers(prefix, pending):
         while True:
             added = False
             for identifier, item in items:
-                if identifier not in required and re.search(rf"\b{re.escape(identifier)}\b", pending):
+                pattern = rf"\b{re.escape(identifier)}\b"
+                if calls_only and re.match(r"(?:pub\s+)?fn\s", item):
+                    pattern = rf"(?<![.\w:]){re.escape(identifier)}\s*\("
+                if identifier not in required and re.search(pattern, pending):
                     required.add(identifier)
                     pending += "\n" + item
                     added = True
@@ -789,7 +792,7 @@ def dedicated_source(key):
     helpers = sorted(set(re.findall(r"\bcontrols::(\w+)", body)))
     if helpers:
         source = (WEB / "src/focused_demos/controls.rs").read_text(encoding="utf-8")
-        shared = referenced_helpers(source, " ".join(helpers))
+        shared = referenced_helpers(source, " ".join(f"{name}(" for name in helpers), calls_only=True)
         body += "\n#[allow(unused_imports)]\nmod controls {\n" + shared + "\n}\n"
     return formatted(body)
 
@@ -937,7 +940,7 @@ for task in tasks:
             ("JsonInput", "json_input"), ("NumberInput", "number_input"),
             ("PhoneInput", "phone_input"), ("MaskInput", "mask_input"), ("NativeSelect", "native_select"), ("FileInput", "file_input"),
             ("Autocomplete", "autocomplete"), ("Combobox", "combobox"), ("ComboboxPopover", "combobox_popover"), ("MultiSelect", "multi_select"), ("Pill", "pill"), ("PillsInput", "pills_input"), ("TagsInput", "tags_input"), ("TreeSelect", "tree_select"), ("Cascader", "cascader"),
-            ("Avatar", "avatar"), ("Badge", "badge"), ("Card", "card"), ("ColorSwatch", "color_swatch"), ("DataList", "data_list"), ("Image", "image"), ("Indicator", "indicator"), ("Kbd", "kbd"), ("NumberFormatter", "number_formatter"), ("OverflowList", "overflow_list"), ("RollingNumber", "rolling_number"), ("Spoiler", "spoiler"), ("ThemeIcon", "theme_icon"),
+            ("Avatar", "avatar"), ("Badge", "badge"), ("Card", "card"), ("ColorSwatch", "color_swatch"), ("DataList", "data_list"), ("Image", "image"), ("Indicator", "indicator"), ("Kbd", "kbd"), ("NumberFormatter", "number_formatter"), ("OverflowList", "overflow_list"), ("RollingNumber", "rolling_number"), ("Spoiler", "spoiler"), ("Timeline", "timeline"), ("ThemeIcon", "theme_icon"),
             ("AreaChart", "area_chart"), ("BarChart", "bar_chart"), ("LineChart", "line_chart"), ("CompositeChart", "composite_chart"), ("CandlestickChart", "candlestick_chart"), ("DonutChart", "donut_chart"), ("PieChart", "pie_chart"), ("FunnelChart", "funnel_chart"), ("RadarChart", "radar_chart"), ("ScatterChart", "scatter_chart"), ("BubbleChart", "bubble_chart"), ("RadialBarChart", "radial_bar_chart"), ("Sparkline", "sparkline"), ("BarsList", "bars_list"), ("BulletChart", "bullet_chart"), ("GaugeChart", "gauge_chart"), ("WaffleChart", "waffle_chart"), ("Treemap", "treemap"), ("SunburstChart", "sunburst_chart"), ("SankeyChart", "sankey_chart"), ("MatrixChart", "matrix_chart"),
             ("Schedule", "schedule"), ("DayView", "day_view"), ("WeekView", "week_view"), ("MonthView", "month_view"), ("YearView", "year_view"), ("MobileMonthView", "mobile_month_view"), ("AgendaView", "agenda_view"), ("ResourcesDayView", "resources_day_view"), ("ResourcesWeekView", "resources_week_view"), ("ResourcesMonthView", "resources_month_view"), ("ResourcesSchedule", "resources_schedule"), ("Recurring events", "recurring_events"), ("Events data", "events_data"),
             ("CodeHighlight","code_highlight"), ("JsonViewer","json_viewer"), ("Notifications system","notifications_system"), ("Spotlight","spotlight"), ("Lightbox","lightbox"), ("NavigationProgress","navigation_progress"), ("Modals manager","modals_manager"),
@@ -1056,6 +1059,8 @@ for key in sorted(modules):
 outputs[WEB / "src/showcase_demos/mod.rs"] = formatted(registry)
 outputs[CATALOG] = formatted(catalog.replace("CATALOGUE_SIZE", str(len(entries))))
 outputs[WEB / "src/showcase_api.rs"] = formatted(api_catalog(tasks))
+for family, target_name in [("typography", "quote_color"), ("data_display", "theme_icon_gradient")]:
+    outputs[WEB / f"src/showcase_{family}_docs/{target_name}.rs"] = dedicated_source(target_name)
 stale = []
 previous = {path.stem for path in (WEB / "src/showcase_demos").glob("*.rs")} - {"mod"}
 for retired in previous - set(modules):

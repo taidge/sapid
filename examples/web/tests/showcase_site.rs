@@ -491,7 +491,7 @@ fn focused_guides_render_their_own_widget_content() {
         ("P3-12", "or continue with email"),
         ("P3-16", "Open search"),
         ("P3-18", "Project facts"),
-        ("P3-19", "Release progress"),
+        ("P3-19", "Map release history"),
         ("P3-20", "$12,500.50"),
         ("P5-03", "Save draft"),
         ("P5-04", "About Ada"),
@@ -587,9 +587,9 @@ fn playground_helpers_are_embedded_only_when_the_preview_uses_them() {
         ("P2-05", true),
         ("P3-09-highlight", true),
         ("P0-02", false),
-        ("P0-03", false),
+        ("P0-03", true),
         ("P0-07", false),
-        ("P2-08", false),
+        ("P2-08", true),
         ("P3-07", false),
         ("P7-05", false),
     ] {
@@ -1073,7 +1073,7 @@ fn data_display_guides_mount_complete_public_examples_in_four_themes_and_release
             ("overflow-list", 3),
             ("rolling-number", 3),
             ("spoiler", 3),
-            ("theme-icon", 3),
+            ("theme-icon", 4),
         ] {
             let sections =
                 sapid_web_example::showcase_examples::detail_sections(slug, theme.clone());

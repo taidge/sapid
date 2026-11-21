@@ -264,10 +264,6 @@ mod focused_pagination;
 pub fn focused_pagination_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(focused_pagination::demo(theme))
 }
-mod focused_timeline;
-pub fn focused_timeline_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(focused_timeline::demo(theme))
-}
 mod funnel_chart_usage;
 pub fn funnel_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(funnel_chart_usage::demo(theme))
@@ -659,6 +655,10 @@ pub fn time_picker_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
 mod time_value_usage;
 pub fn time_value_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(time_value_usage::demo(theme))
+}
+mod timeline_usage;
+pub fn timeline_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
+    Box::new(timeline_usage::demo(theme))
 }
 mod title_usage;
 pub fn title_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
