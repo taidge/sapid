@@ -3781,6 +3781,9 @@
       "phase": "P7",
       "name": "MaskInput",
       "status": "done",
+      "additional_core_widgets": [
+        {"name": "PhoneInput", "description": "Enter a regional or international telephone number, including an extension.", "native": "model-only", "native_note": "The number model and compound editor are tested with the memory host. OS telephone keyboards depend on the host."}
+      ],
       "sources": [
         "M:MaskInput"
       ],
@@ -3790,6 +3793,7 @@
         "implementation": [
           "src/mask_input.rs",
           "src/mask_model.rs",
+          "src/phone_input.rs",
           "docs/mask-input.md",
           "../glory/crates/render/src/input_edit.rs",
           "../glory/crates/render/src/text_selection.rs",
@@ -3799,6 +3803,7 @@
         ],
         "tests": [
           "tests/mask_inputs.rs (9 passed)",
+          "tests/phone_input.rs",
           "src/mask_model.rs (9 passed)",
           "examples/native/tests/mask_input.rs (2 passed)",
           "examples/web/mask-input-acceptance.js",

@@ -448,6 +448,10 @@ mod password_input_usage;
 pub fn password_input_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(password_input_usage::demo(theme))
 }
+mod phone_input_usage;
+pub fn phone_input_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
+    Box::new(phone_input_usage::demo(theme))
+}
 mod pie_chart_usage;
 pub fn pie_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(pie_chart_usage::demo(theme))
