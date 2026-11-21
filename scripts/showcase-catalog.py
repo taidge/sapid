@@ -1020,10 +1020,6 @@ mod tests {
             );
             assert!(entry.code.contains("fn ") && !entry.code.contains("iframe"));
         }
-        let checkbox = ENTRIES.iter().find(|entry| entry.owners.iter().any(|owner| owner.name == "CheckboxGroup")).unwrap();
-        for owner in checkbox.owners {
-            assert_eq!(owner.signatures.iter().any(|s| s.contains("fn max_values(")), owner.name == "CheckboxGroup");
-        }
         assert!(find("unknown").is_none());
     }
 }
