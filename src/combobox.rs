@@ -77,6 +77,7 @@ pub struct Combobox {
     disclosure_label: String,
     placeholder: Option<Vary<String>>,
     visible_limit: usize,
+    virtualized: bool,
     select_first_on_change: bool,
     auto_select_on_blur: bool,
     loading: Vary<bool>,
@@ -116,6 +117,7 @@ pub fn combobox(key: impl Into<String>) -> Combobox {
         disclosure_label: "Show options".into(),
         placeholder: None,
         visible_limit: 1024,
+        virtualized: false,
         select_first_on_change: false,
         auto_select_on_blur: false,
         loading: false.into(),
@@ -272,6 +274,12 @@ impl Combobox {
         self.filter = value;
         self
     }
+    /// Mount a scrolling window of fixed-height, ungrouped options. All matches
+    /// remain available to the keyboard, including options outside the viewport.
+    pub fn virtualized(mut self, value: bool) -> Self {
+        self.virtualized = value;
+        self
+    }
     /// Caps the number of matching options mounted as visible results.
     /// The complete declaration remains bounded to 1024 options.
     pub fn limit(mut self, value: usize) -> Self {
@@ -387,6 +395,20 @@ fn query_for(
     }
 }
 
+/// Ordered declaration indices and positions in the filtered, limited result.
+#[derive(Clone, Default, PartialEq)]
+struct Matches {
+    rows: Vec<usize>,
+    positions: BTreeMap<String, usize>,
+}
+
+#[derive(Clone, Copy)]
+struct OptionWindow {
+    active: Cage<Option<String>>,
+    viewport: Cage<(f64, f64)>,
+    row_height: f64,
+}
+
 struct State {
     scope: glory::ui::WeakScope,
     disclosure_focus: std::cell::Cell<bool>,
@@ -412,7 +434,8 @@ struct State {
     committed: Callback<String>,
     opened: Callback<bool>,
     activated: Observers,
-    visible_limit: usize,
+    matches: glory::Bond<Matches>,
+    window: Option<OptionWindow>,
     select_first_on_change: bool,
     auto_select_on_blur: bool,
 }
@@ -457,32 +480,56 @@ impl State {
         Ok(())
     }
 
-    fn option_matches(&self, key: &str, label: &str) -> bool {
-        self.query.with(|query| self.filter.matches(label, query))
-            && !self.multiple.as_ref().is_some_and(|multiple| {
-                multiple.hide_picked
-                    && multiple
-                        .selected
-                        .with(|values| values.iter().any(|value| value == key))
-            })
+    fn option_visible(&self, key: &str) -> bool {
+        self.matches
+            .with(|matches| matches.positions.contains_key(key))
     }
-    fn option_visible(&self, key: &str, label: &str) -> bool {
-        if !self.option_matches(key, label) || self.visible_limit == 0 {
-            return false;
+    // Windowed rows use declaration order, independent of node mount order.
+    fn flat_option(&self, row: usize) -> &glory::render::SelectOption {
+        match &self.config.entries[row] {
+            SelectEntry::Option(option) => option,
+            SelectEntry::Group(_) => unreachable!("validated flat option list"),
         }
-        let mut admitted = 0usize;
-        for (option, _) in self.config.options() {
-            if option.key.as_str() == key {
-                return admitted < self.visible_limit;
+    }
+    fn window_cursor(
+        &self,
+        window: OptionWindow,
+        preferred: Option<&str>,
+        command: Option<Navigation>,
+    ) {
+        self.matches.with(|matches| {
+            let current = window.active.get();
+            let enabled = matches
+                .rows
+                .iter()
+                .map(|&row| {
+                    let option = self.flat_option(row);
+                    !option.disabled && self.option_admitted(option.key.as_str())
+                })
+                .collect::<Vec<_>>();
+            let index = |key: &str| matches.positions.get(key).copied().filter(|&i| enabled[i]);
+            let old = current.as_deref().and_then(index);
+            let next = match command {
+                Some(command) => composite::destination(
+                    old.unwrap_or(0),
+                    if old.is_none() && command == Navigation::Next {
+                        Navigation::First
+                    } else {
+                        command
+                    },
+                    &enabled,
+                    true,
+                ),
+                None => preferred
+                    .and_then(index)
+                    .or(old)
+                    .or_else(|| enabled.iter().position(|&v| v)),
+            };
+            let key = next.map(|i| self.flat_option(matches.rows[i]).key.as_str().to_owned());
+            if key != current {
+                window.active.revise(|active| *active = key);
             }
-            if self.option_matches(option.key.as_str(), &option.label) {
-                admitted += 1;
-                if admitted == self.visible_limit {
-                    return false;
-                }
-            }
-        }
-        false
+        });
     }
     fn option_admitted(&self, key: &str) -> bool {
         self.multiple.as_ref().is_none_or(|multiple| {
@@ -610,6 +657,14 @@ impl State {
         Ok(())
     }
     fn current(&self) -> Result<Option<MountedItem>> {
+        if let Some(window) = self.window {
+            let active = window.active.try_get()?;
+            return Ok(self
+                .collection
+                .mounted()?
+                .into_iter()
+                .find(|i| i.enabled && Some(&i.key) == active.as_ref()));
+        }
         let current = self.cursor.current()?;
         Ok(self
             .collection
@@ -617,10 +672,29 @@ impl State {
             .into_iter()
             .find(|item| item.enabled && Some(&item.member) == current.as_ref()))
     }
+    fn active_key(&self) -> Result<Option<String>> {
+        if let Some(window) = self.window {
+            let key = window.active.try_get()?;
+            return Ok(key.filter(|key| self.option_visible(key) && self.option_admitted(key)));
+        }
+        Ok(self.current()?.map(|item| item.key))
+    }
     fn initial_cursor(&self) -> Result {
-        self.cursor.repair(self.selected.try_get()?.as_deref())
+        self.repair_cursor(self.selected.try_get()?.as_deref())
+    }
+    fn repair_cursor(&self, preferred: Option<&str>) -> Result {
+        if let Some(window) = self.window {
+            self.window_cursor(window, preferred, None);
+            Ok(())
+        } else {
+            self.cursor.repair(preferred)
+        }
     }
     fn navigate(&self, command: Navigation) -> Result {
+        if let Some(window) = self.window {
+            self.window_cursor(window, None, Some(command));
+            return Ok(());
+        }
         let items = self.collection.mounted()?;
         let next = match command {
             Navigation::First => items.iter().find(|item| item.enabled).cloned(),
@@ -702,9 +776,9 @@ impl State {
     fn blur(&self) -> Result {
         if self.kind == ComboboxKind::Autocomplete
             && self.auto_select_on_blur
-            && let Some(item) = self.current()?
+            && let Some(key) = self.active_key()?
         {
-            return self.choose_with_visibility(&item.key, false);
+            return self.choose_with_visibility(&key, false);
         }
         self.opened(false)
     }
@@ -718,12 +792,23 @@ impl State {
         {
             return Ok(());
         }
-        if !self
-            .collection
-            .mounted()?
-            .iter()
-            .any(|item| item.key == key && item.enabled)
-        {
+        // A queued keyboard commit can follow a seek before the new row mounts.
+        let allowed = if let Some(window) = self.window {
+            self.option_visible(key)
+                && self.option_admitted(key)
+                && (window.active.with(|active| active.as_deref() == Some(key))
+                    || self
+                        .collection
+                        .mounted()?
+                        .iter()
+                        .any(|item| item.key == key && item.enabled))
+        } else {
+            self.collection
+                .mounted()?
+                .iter()
+                .any(|item| item.key == key && item.enabled)
+        };
+        if !allowed {
             return Ok(());
         }
         self.value
@@ -813,9 +898,9 @@ impl State {
             }
             ChoiceCommand::Commit => {
                 if self.visible.try_get()?
-                    && let Some(item) = self.current()?
+                    && let Some(key) = self.active_key()?
                 {
-                    self.choose(&item.key)?;
+                    self.choose(&key)?;
                 } else if self.kind == ComboboxKind::Autocomplete {
                     let text = self.search.source.try_with(|value| {
                         validate_search(value)?;
@@ -898,6 +983,14 @@ impl Widget for Combobox {
             ..Default::default()
         });
         config.validate()?;
+        if self.virtualized
+            && config
+                .entries
+                .iter()
+                .any(|e| matches!(e, SelectEntry::Group(_)))
+        {
+            return Err(invalid("virtualized combobox requires ungrouped options"));
+        }
         for (key, content) in &self.option_content {
             let known = config
                 .options()
@@ -1006,6 +1099,47 @@ impl Widget for Combobox {
             selected.get().as_deref(),
             self.kind,
         ));
+        let options = config.clone();
+        let filter = self.filter;
+        let limit = self.visible_limit;
+        let picked = multiple
+            .as_ref()
+            .filter(|m| m.hide_picked)
+            .map(|m| m.selected);
+        let matches = scope.bond(move || {
+            let query = query.get();
+            let picked = picked.map(|values| values.get()).unwrap_or_default();
+            let picked = picked
+                .iter()
+                .map(String::as_str)
+                .collect::<std::collections::HashSet<_>>();
+            let mut matches = Matches::default();
+            for (index, (option, _)) in options.options().enumerate() {
+                if matches.rows.len() == limit {
+                    break;
+                }
+                if !picked.contains(option.key.as_str())
+                    && (query.is_empty() || filter.matches(&option.label, &query))
+                {
+                    matches
+                        .positions
+                        .insert(option.key.as_str().to_owned(), matches.rows.len());
+                    matches.rows.push(index);
+                }
+            }
+            matches
+        });
+        let window = self.virtualized.then(|| OptionWindow {
+            active: scope.cage(None),
+            viewport: scope.cage((0., 288.)),
+            row_height: self
+                .common
+                .theme
+                .tokens
+                .control(self.common.size)
+                .min_height
+                .max(24.),
+        });
         let state = Rc::new(State {
             scope: scope.downgrade(),
             disclosure_focus: std::cell::Cell::new(false),
@@ -1036,7 +1170,8 @@ impl Widget for Combobox {
                     .remove(&EventKind::Activate)
                     .unwrap_or_default(),
             ),
-            visible_limit: self.visible_limit,
+            matches,
+            window,
             select_first_on_change: self.select_first_on_change,
             auto_select_on_blur: self.auto_select_on_blur,
         });
@@ -1642,77 +1777,157 @@ impl Widget for Combobox {
                     scope.report_error(error);
                 }
             });
+        if let Some(window) = window {
+            panel = panel.on(EventKind::Scroll, move |event| {
+                if let Event::Scroll { y, viewport, .. } = event {
+                    let bounds = (y.max(0.), viewport.height.clamp(0., 288.));
+                    if window.viewport.get_untracked() != bounds {
+                        window.viewport.revise(|value| *value = bounds);
+                    }
+                }
+            });
+        }
         if let Some(name) = panel_accessible_name {
             panel = panel.name(name);
         }
         panel.show_in(&content)?;
         let items_scope = scope.child_in(panel_ref.get().ok_or(glory::ui::Error::Gone)?)?;
-        for (entry_index, entry) in config.entries.iter().enumerate() {
-            match entry {
-                SelectEntry::Option(option) => mount_option(
-                    &items_scope,
-                    &state,
-                    option,
-                    false,
-                    OptionPresentation {
-                        key: &self.key,
-                        owner: &panel_id,
-                        common: &self.common,
-                        content: self.option_content.get(option.key.as_str()),
-                    },
-                )?,
-                SelectEntry::Group(group) => {
-                    let reference = scope.cage(None);
-                    let group_state = state.clone();
-                    let group_config = config.clone();
-                    glory::ui::view()
-                        .role(Role::Group)
-                        .name(group.label.clone())
-                        .style(
-                            Style::new()
-                                .display(Display::Flex)
-                                .flex_direction(FlexDirection::Column),
-                        )
-                        .semantics(scope.bond(move || {
-                            Some(Box::new(Semantics {
-                                hidden: !{
-                                    match &group_config.entries[entry_index] {
-                                        SelectEntry::Group(group) => {
-                                            group.options.iter().any(|option| {
-                                                group_state.option_visible(
-                                                    option.key.as_str(),
-                                                    &option.label,
-                                                )
-                                            })
-                                        }
-                                        SelectEntry::Option(_) => {
-                                            unreachable!("static group declaration")
-                                        }
-                                    }
-                                },
-                                ..Default::default()
-                            }))
-                        }))
-                        .node_ref(reference)
-                        .fill(glory::ui::text().content(group.label.clone()))
-                        .show_in(&items_scope)?;
-                    let group_scope =
-                        scope.child_in(reference.get().ok_or(glory::ui::Error::Gone)?)?;
-                    for option in &group.options {
-                        mount_option(
-                            &group_scope,
-                            &state,
-                            option,
-                            group.disabled,
-                            OptionPresentation {
-                                key: &self.key,
-                                owner: &panel_id,
-                                common: &self.common,
-                                content: self.option_content.get(option.key.as_str()),
-                            },
-                        )?;
+        if let Some(window) = window {
+            let controller = state.clone();
+            let rows = scope.bond(move || {
+                controller.matches.with(|m| {
+                    let (top, height) = window.viewport.get();
+                    let end = m.rows.len();
+                    let top = top.min((end as f64 * window.row_height - height).max(0.));
+                    let start = ((top / window.row_height) as usize)
+                        .saturating_sub(2)
+                        .min(end);
+                    let stop = (((top + height) / window.row_height).ceil() as usize)
+                        .saturating_add(2)
+                        .min(end);
+                    let mut rows = m.rows[start..stop].to_vec();
+                    if let Some(i) = window.active.with(|active| {
+                        active
+                            .as_ref()
+                            .and_then(|key| m.positions.get(key).copied())
+                    }) && !(start..stop).contains(&i)
+                    {
+                        rows.push(m.rows[i]);
+                        rows.sort_unstable();
                     }
-                    items_scope.retain(group_scope)?;
+                    rows
+                })
+            });
+            let controller = state.clone();
+            let key = self.key.clone();
+            let owner = panel_id.clone();
+            let common = Rc::new(Common {
+                theme: self.common.theme.clone(),
+                size: self.common.size,
+                unstyled: self.common.unstyled,
+                ..Common::default()
+            });
+            let content = Rc::new(std::mem::take(&mut self.option_content));
+            let dimensions = state.matches;
+            glory::ui::view()
+                .style(scope.bond(move || {
+                    Style {
+                        shrink: Some(0.),
+                        ..Style::new()
+                    }
+                    .position(glory::style::Position::Relative)
+                    .height(Length::Px(
+                        dimensions.with(|m| m.rows.len()) as f64 * window.row_height,
+                    ))
+                }))
+                .fill(glory::ui::each(rows).key(|&row| row).seed(move |row| {
+                    let controller = controller.clone();
+                    let key = key.clone();
+                    let owner = owner.clone();
+                    let common = common.clone();
+                    let content = content.clone();
+                    glory::ui::widget(move |scope| {
+                        let option = controller.flat_option(row);
+                        mount_option(
+                            scope,
+                            &controller,
+                            option,
+                            false,
+                            OptionPresentation {
+                                key: &key,
+                                owner: &owner,
+                                common: &common,
+                                content: content.get(option.key.as_str()),
+                            },
+                        )
+                    })
+                }))
+                .show_in(&items_scope)?;
+        } else {
+            for (entry_index, entry) in config.entries.iter().enumerate() {
+                match entry {
+                    SelectEntry::Option(option) => mount_option(
+                        &items_scope,
+                        &state,
+                        option,
+                        false,
+                        OptionPresentation {
+                            key: &self.key,
+                            owner: &panel_id,
+                            common: &self.common,
+                            content: self.option_content.get(option.key.as_str()),
+                        },
+                    )?,
+                    SelectEntry::Group(group) => {
+                        let reference = scope.cage(None);
+                        let group_state = state.clone();
+                        let group_config = config.clone();
+                        glory::ui::view()
+                            .role(Role::Group)
+                            .name(group.label.clone())
+                            .style(
+                                Style::new()
+                                    .display(Display::Flex)
+                                    .flex_direction(FlexDirection::Column),
+                            )
+                            .semantics(scope.bond(move || {
+                                Some(Box::new(Semantics {
+                                    hidden: !{
+                                        match &group_config.entries[entry_index] {
+                                            SelectEntry::Group(group) => {
+                                                group.options.iter().any(|option| {
+                                                    group_state.option_visible(option.key.as_str())
+                                                })
+                                            }
+                                            SelectEntry::Option(_) => {
+                                                unreachable!("static group declaration")
+                                            }
+                                        }
+                                    },
+                                    ..Default::default()
+                                }))
+                            }))
+                            .node_ref(reference)
+                            .fill(glory::ui::text().content(group.label.clone()))
+                            .show_in(&items_scope)?;
+                        let group_scope =
+                            scope.child_in(reference.get().ok_or(glory::ui::Error::Gone)?)?;
+                        for option in &group.options {
+                            mount_option(
+                                &group_scope,
+                                &state,
+                                option,
+                                group.disabled,
+                                OptionPresentation {
+                                    key: &self.key,
+                                    owner: &panel_id,
+                                    common: &self.common,
+                                    content: self.option_content.get(option.key.as_str()),
+                                },
+                            )?;
+                        }
+                        items_scope.retain(group_scope)?;
+                    }
                 }
             }
         }
@@ -1721,17 +1936,15 @@ impl Widget for Combobox {
             .fill(glory::ui::text().content(self.empty.clone()))
             .semantics(scope.bond(move || {
                 Some(Box::new(Semantics {
-                    hidden: {
-                        controller.config.options().any(|(option, _)| {
-                            controller.option_visible(option.key.as_str(), &option.label)
-                        })
-                    },
+                    hidden: { controller.matches.with(|m| !m.rows.is_empty()) },
                     ..Default::default()
                 }))
             }))
             .show_in(&items_scope)?;
         content.retain(items_scope)?;
-        if self.kind != ComboboxKind::Autocomplete {
+        if self.kind != ComboboxKind::Autocomplete
+            && (window.is_none() || form_name.is_some() || self.field.is_some())
+        {
             let hidden = scope.cage(None);
             glory::ui::view()
                 .semantics(Some(Box::new(Semantics {
@@ -1829,7 +2042,7 @@ impl Widget for Combobox {
                     }
                 }
                 if controller.visible.try_get()? {
-                    controller.cursor.repair(None)?;
+                    controller.repair_cursor(None)?;
                 } else {
                     controller.initial_cursor()?;
                 }
@@ -1899,10 +2112,9 @@ fn mount_option(
     let scope = &item_scope;
     let id = composite::id("combobox", key, "option", option.key.as_str())?;
     let reference = scope.cage(None);
-    let label = option.label.clone();
     let visible_state = state.clone();
     let match_key = option.key.as_str().to_owned();
-    let matching = scope.bond(move || visible_state.option_visible(&match_key, &label));
+    let matching = scope.bond(move || visible_state.option_visible(&match_key));
     let allowed = !option.disabled && !group_disabled;
     let admitted_state = state.clone();
     let admit_key = option.key.as_str().to_owned();
@@ -1953,9 +2165,25 @@ fn mount_option(
     let accent = common.theme.accent_soft;
     let foreground = common.theme.accent_text;
     let plain = common.unstyled;
+    let styled_key = option.key.as_str().to_owned();
     let style = scope.bond(move || {
         let mut value = base.clone();
-        if !plain && styled.cursor.current().ok().flatten().as_ref() == Some(&styled_member) {
+        let active = if let Some(window) = styled.window {
+            let index = styled
+                .matches
+                .with(|m| m.positions.get(&styled_key).copied().unwrap_or_default());
+            value = value
+                .position(glory::style::Position::Absolute)
+                .left(Length::Px(0.))
+                .right(Length::Px(0.))
+                .top(Length::Px(index as f64 * window.row_height))
+                .height(Length::Px(window.row_height))
+                .overflow_y(Overflow::Hidden);
+            window.active.with(|key| key.as_ref() == Some(&styled_key))
+        } else {
+            styled.cursor.current().ok().flatten().as_ref() == Some(&styled_member)
+        };
+        if !plain && active {
             value.background = Some(accent);
             value.color = Some(foreground);
         }
@@ -1967,6 +2195,7 @@ fn mount_option(
     let pointer = state.clone();
     let pointer_weak = scope.downgrade();
     let pointer_member = member.clone();
+    let pointer_key = choose_key.clone();
     let mut button = glory::ui::button()
         .label(option.label.clone())
         .focus(FocusMode::Programmatic)
@@ -2004,7 +2233,15 @@ fn mount_option(
             ) {
                 let result = (|| -> Result {
                     if !pointer.composing.try_get()? {
-                        pointer.cursor.observe(&pointer_member)?;
+                        if let Some(window) = pointer.window {
+                            if enabled.get() && window.active.get().as_ref() != Some(&pointer_key) {
+                                window
+                                    .active
+                                    .revise(|active| *active = Some(pointer_key.clone()));
+                            }
+                        } else {
+                            pointer.cursor.observe(&pointer_member)?;
+                        }
                     }
                     Ok(())
                 })();
@@ -2164,6 +2401,102 @@ mod tests {
             crate::select_option("d", "Blocked").disabled(true),
         ])
     }
+    #[test]
+    fn virtual_window_preserves_the_active_reference_and_navigates_the_full_result() {
+        for kind in 0..3 {
+            let app = App::memory();
+            let widget = combobox("catalog")
+                .virtualized(true)
+                .default_open(true)
+                .options((0..300).map(|i| {
+                    crate::select_option(format!("key-{i}"), format!("Entry {i}"))
+                        .disabled(i == 299)
+                }));
+            let widget = match kind {
+                1 => widget.autocomplete(),
+                2 => widget.multiple(),
+                _ => widget,
+            };
+            app.mount(widget).unwrap();
+            let input_id = editor(&app);
+            let count = || {
+                nodes(&app)
+                    .into_iter()
+                    .filter(|id| {
+                        app.tree()
+                            .node(*id)
+                            .unwrap()
+                            .descriptor
+                            .view()
+                            .semantics
+                            .as_ref()
+                            .is_some_and(|s| s.option.is_some())
+                    })
+                    .count()
+            };
+            let panel = nodes(&app)
+                .into_iter()
+                .find(|id| {
+                    app.tree().node(*id).unwrap().descriptor.view().role == Some(Role::Listbox)
+                })
+                .unwrap();
+            assert!(count() < 20);
+            let first = option(&app, "Entry 0");
+            app.dispatch(
+                panel,
+                Event::Scroll {
+                    x: 0.,
+                    y: 4000.,
+                    viewport: glory::render::Rect {
+                        x: 0.,
+                        y: 0.,
+                        width: 300.,
+                        height: 280.,
+                    },
+                    ack: None,
+                },
+            )
+            .unwrap();
+            assert!(count() < 20);
+            assert_eq!(
+                app.tree().resolve_active_descendant(input_id).unwrap(),
+                Some(first)
+            );
+            for (command, label) in [
+                (ChoiceCommand::Last, "Entry 298"),
+                (ChoiceCommand::Next, "Entry 0"),
+            ] {
+                app.dispatch(
+                    input_id,
+                    Event::Choice {
+                        from: input_id,
+                        command,
+                    },
+                )
+                .unwrap();
+                assert_eq!(
+                    app.tree().resolve_active_descendant(input_id).unwrap(),
+                    Some(option(&app, label))
+                );
+            }
+            edit(&app, "Entry 25", false);
+            app.dispatch(
+                input_id,
+                Event::Choice {
+                    from: input_id,
+                    command: ChoiceCommand::Last,
+                },
+            )
+            .unwrap();
+            assert_eq!(
+                app.tree().resolve_active_descendant(input_id).unwrap(),
+                Some(option(&app, "Entry 259"))
+            );
+            app.clear().unwrap();
+            assert_eq!(app.stats().nodes, 0);
+        }
+    }
+
     #[test]
     fn passive_option_content_preserves_names_filtering_and_editor_identity_in_all_three_kinds() {
         for kind in 0..3 {

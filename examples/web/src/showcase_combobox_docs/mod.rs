@@ -148,7 +148,7 @@ pub fn sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             DetailSection {
                 id: "combo-filter",
                 title: "Filtering, limits and loading sources",
-                note: "Contains, Prefix and None choose finite matching policies. limit bounds visible matches, while loading only exposes application-owned progress. The target editor retains UTF-16 selection and IME state. For a passive custom button target, use the separate ComboboxPopover composition.",
+                note: "Contains, Prefix and None choose finite matching policies. limit caps matching results. The 500-entry example mounts the visible window and keeps the keyboard choice available as you scroll. The target editor retains UTF-16 selection and IME state. For a passive custom button target, use the separate ComboboxPopover composition.",
                 example: Box::new(combo_filter::demo(theme.clone())),
                 source: include_str!("combo_filter.rs"),
             },

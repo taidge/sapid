@@ -2259,6 +2259,7 @@
       "evidence": {
         "implementation": [
           "src/combobox.rs",
+          "examples/web/src/showcase_combobox_docs/combo_filter.rs",
           "docs/combobox-implementation.md",
           "../glory/docs/input-placeholder.md",
           "examples/web/src/showcase_combobox_docs",

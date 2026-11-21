@@ -154,6 +154,11 @@ impl Autocomplete {
     }
     /// Caps the number of matching suggestions mounted as visible options.
     /// Sapid declarations remain bounded to 1024 options in total.
+    /// Window the shared combobox's flat option list.
+    pub fn virtualized(mut self, value: bool) -> Self {
+        self.inner = self.inner.virtualized(value);
+        self
+    }
     pub fn limit(mut self, value: usize) -> Self {
         self.inner = self.inner.visible_limit(value);
         self

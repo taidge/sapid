@@ -18,6 +18,15 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                         sapid::select_option("leptos", "Leptos"),
                     ])
                     .empty_message("No prefix matches"),
+                sapid::combobox("combo-window")
+                    .theme(theme.clone())
+                    .label("Browse 500 entries")
+                    .virtualized(true)
+                    .options(
+                        (1..=500).map(|i| {
+                            sapid::select_option(format!("item-{i}"), format!("Entry {i}"))
+                        }),
+                    ),
                 sapid::checkbox()
                     .theme(theme.clone())
                     .label("Show framework loading")
