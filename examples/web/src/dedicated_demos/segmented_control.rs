@@ -35,14 +35,6 @@ fn scale(key: &str, label: &str, step: Cage<f64>, theme: &Theme) -> impl Widget 
     ))
 }
 
-fn toggle(label: &str, state: Cage<bool>, theme: &Theme) -> impl Widget {
-    sapid::switch()
-        .theme(theme.clone())
-        .label(label.to_owned())
-        .checked(state)
-        .on_checked_change(move |next| state.revise(|value| *value = next))
-}
-
 pub fn demo(theme: Theme) -> impl Widget {
     widget(move |scope| {
         let interval = scope.cage("monthly".to_owned());
@@ -79,16 +71,12 @@ pub fn demo(theme: Theme) -> impl Widget {
                     .on_value_change(move |next| interval.revise(|value| *value = next))
             });
 
-        sapid::group()
-            .theme(theme.clone())
-            .class("site-button-playground site-segments-playground")
-            .fill((
-                col().class("site-playground-preview").fill(preview),
-                sapid::stack()
-                    .theme(theme.clone())
-                    .class("site-playground-controls")
-                    .gap(16.)
-                    .fill((
+        view()
+            .class("site-configurator")
+            .fill(controls::playground(
+                Box::new(preview),
+                vec![
+                    Box::new(
                         sapid::segmented_control("billing-orientation")
                             .theme(theme.clone())
                             .size(Size::Small)
@@ -100,11 +88,12 @@ pub fn demo(theme: Theme) -> impl Widget {
                                 sapid::segment("vertical").label("Vertical"),
                             ])
                             .on_value_change(move |next| orientation.revise(|value| *value = next)),
-                        toggle("Full width", full, &theme),
-                        toggle("Item borders", borders, &theme),
-                        scale("billing-size", "Size", size, &theme),
-                        scale("billing-radius", "Radius", radius, &theme),
-                    )),
+                    ),
+                    controls::switch("Full width", full, &theme),
+                    controls::switch("Item borders", borders, &theme),
+                    Box::new(scale("billing-size", "Size", size, &theme)),
+                    Box::new(scale("billing-radius", "Radius", radius, &theme)),
+                ],
             ))
             .show_in(scope)
     })

@@ -409,15 +409,15 @@ html,body{margin:0;padding:0}
 .sapid-site .report-smooth{--sp-segment-indicator:var(--sp-accent);--sp-segment-selected-text:var(--sp-on-accent);--sp-segment-duration:500ms;--sp-segment-easing:linear}
 .sapid-site .report-instant{--sp-segment-duration:0ms}
 /* Let full width use the entire demo canvas, including at phone widths. */
-.sapid-site .site-demo:has(.site-segments-playground){padding:0}
-.sapid-site .site-segments-playground{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(200px,30%);gap:0!important;align-items:stretch}
-.sapid-site .site-segments-playground>.site-playground-preview{align-self:stretch;min-width:0;min-height:230px;padding:20px;align-items:stretch;justify-content:flex-start;text-align:start}
-.sapid-site .site-segments-playground>.site-playground-controls{min-width:0;padding:16px;gap:12px!important;border-inline-start:1px solid var(--site-border)}
-.sapid-site .site-segments-playground .site-control-label{line-height:1.35!important}
+.sapid-site .site-demo:has(.site-configurator){padding:0}
+.sapid-site .site-configurator .site-button-playground{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(200px,30%);gap:0!important;align-items:stretch}
+.sapid-site .site-configurator .site-button-playground>.site-playground-preview{align-self:stretch;min-width:0!important;min-height:230px;padding:20px;align-items:stretch!important;justify-content:flex-start!important;text-align:start}
+.sapid-site .site-configurator .site-button-playground>.site-playground-controls{min-width:0;width:100%!important;padding:16px;gap:12px!important;border-inline-start:1px solid var(--site-border)}
+.sapid-site .site-configurator .site-control-label{line-height:1.35!important}
 @media(max-width:600px){
-  .sapid-site .site-segments-playground{grid-template-columns:minmax(0,1fr)}
-  .sapid-site .site-segments-playground>.site-playground-preview{min-height:125px}
-  .sapid-site .site-segments-playground>.site-playground-controls{border-inline-start:0}
+  .sapid-site .site-configurator .site-button-playground{grid-template-columns:minmax(0,1fr)}
+  .sapid-site .site-configurator .site-button-playground>.site-playground-preview{min-height:125px}
+  .sapid-site .site-configurator .site-button-playground>.site-playground-controls{border-inline-start:0}
 }
 .sapid-site .site-demo-heading{font-size:18px!important;font-weight:650!important}
 .sapid-site .site-splitter-pane{padding:14px;text-align:center;font-size:14px;font-weight:500}
