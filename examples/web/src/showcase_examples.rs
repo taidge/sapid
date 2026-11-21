@@ -450,7 +450,7 @@ mod tests {
             ("chip", 2),
             ("fieldset", 2),
             ("rating", 3),
-            ("segmented-control", 3),
+            ("segmented-control", 5),
             ("switch", 4),
             ("input", 4),
             ("text-input", 4),
@@ -484,8 +484,8 @@ mod tests {
             ("dropzone", 4),
         ] {
             let sections = detail_sections(slug, sapid::Theme::blue_light());
-            assert_eq!(sections.len(), count);
-            assert_eq!(detail_navigation(slug).len(), count);
+            assert_eq!(sections.len(), count, "{slug}");
+            assert_eq!(detail_navigation(slug).len(), count, "{slug}");
             for section in sections {
                 assert!(section.source.contains("pub fn demo("));
                 let app = App::memory();
