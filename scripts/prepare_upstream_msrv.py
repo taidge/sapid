@@ -31,7 +31,9 @@ def prepare(project_root):
     requirements = {}
     for section in ("dependencies", "dev-dependencies"):
         dependency = product[section]["glory"]
-        if (root / dependency["path"]).resolve() != crate.resolve():
+        if dependency.get("git") or dependency.get("registry"):
+            raise ValueError("Expected a crates.io or sibling Glory dependency")
+        if "path" in dependency and (root / dependency["path"]).resolve() != crate.resolve():
             raise ValueError("Glory must refer to the checked-out sibling facade")
         requirements[section] = dependency["version"]
 
@@ -39,7 +41,10 @@ def prepare(project_root):
 
     def retarget(match):
         nonlocal count
-        line, changed = re.subn(r'\bversion\s*=\s*"[^"]+"', f'version = "={version}"', match[0])
+        source = f'version = "={version}"'
+        if "path" not in tomllib.loads(match[0])["glory"]:
+            source += ', path = "../glory/crates/glory"'
+        line, changed = re.subn(r'\bversion\s*=\s*"[^"]+"', source, match[0])
         if changed != 1:
             raise ValueError("Expected an explicit Glory version in each inline dependency")
         count += 1

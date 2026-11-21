@@ -8,9 +8,6 @@
   "packages": [
     "sapid"
   ],
-  "external_path_dependencies": {
-    "glory": "^0.7.1"
-  },
   "registry_verifier": "scripts/verify-registry.py",
   "uniform_version": true
 }

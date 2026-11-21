@@ -1,6 +1,6 @@
 # Sapid
 
-- Sapid 0.7.2 and Glory 0.7.1 require Rust 1.95 and use
+- Sapid 0.8.0 and Glory 0.8.1 require Rust 1.95 and use
   resolver 3. Keep sapid/glory/apace/takia/wingy as sibling repositories. All
   library and example Cargo.lock files are ignored and prepared locally before
   --locked checks. See docs/development-versions.md and docs/licensing.md.
@@ -12,7 +12,8 @@
 
 - Use Rust builders or the optional Glory DSL implementing the same `Widget`; keep `Cage`,
   `Bond`, and `Vary`. Host selection belongs to the application.
-- The current development dependency is the sibling `../glory` checkout.
+- The library uses Glory from crates.io. The development examples and the
+  upstream MSRV check exercise the sibling `../glory` checkout.
   Preserve unrelated changes there. Keep browser/SSR/native types outside
   widget state and use existing semantic controls rather than HTML wrappers.
 - Controlled sources are read-only inputs. Callbacks propose changes; local
