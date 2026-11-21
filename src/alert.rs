@@ -85,7 +85,7 @@ impl Alert {
         if self.common.unstyled {
             theme.foreground
         } else if self.variant == AlertVariant::Filled {
-            filled_foreground(color, theme.surface, theme.on_accent)
+            theme.contrasting_foreground(color, theme.on_accent)
         } else {
             color
         }
@@ -183,48 +183,6 @@ fn message(value: &str) -> Result {
         .into());
     }
     Ok(())
-}
-fn luminance(color: Color) -> f64 {
-    let channel = |value: u8| {
-        let value = f64::from(value) / 255.;
-        if value <= 0.04045 {
-            value / 12.92
-        } else {
-            ((value + 0.055) / 1.055).powf(2.4)
-        }
-    };
-    0.2126 * channel(color.0) + 0.7152 * channel(color.1) + 0.0722 * channel(color.2)
-}
-pub(crate) fn filled_foreground(background: Color, surface: Color, preferred: Color) -> Color {
-    let blend = |front: Color, back: Color| {
-        let alpha = u32::from(front.3);
-        let channel = |value: u8, back: u8| {
-            ((u32::from(value) * alpha + u32::from(back) * (255 - alpha) + 127) / 255) as u8
-        };
-        Color(
-            channel(front.0, back.0),
-            channel(front.1, back.1),
-            channel(front.2, back.2),
-            255,
-        )
-    };
-    let background = blend(background, surface);
-    let base = luminance(background);
-    let contrast = |color: Color| {
-        let text = luminance(blend(color, background));
-        (text.max(base) + 0.05) / (text.min(base) + 0.05)
-    };
-    if contrast(preferred) >= 4.5 {
-        preferred
-    } else {
-        let black = Color(0, 0, 0, 255);
-        let white = Color(255, 255, 255, 255);
-        if contrast(black) >= contrast(white) {
-            black
-        } else {
-            white
-        }
-    }
 }
 impl Widget for Alert {
     fn build(&mut self, scope: &Scope) -> Result {

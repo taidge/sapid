@@ -60,7 +60,7 @@ pub fn sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             DetailSection {
                 id: "button-variants",
                 title: "Button variants",
-                note: "The six finite variants share native button activation and disabled semantics. Danger uses the danger palette; label remains the accessible name.",
+                note: "The six finite variants share native button activation and disabled semantics. The custom fill chooses a contrasting label from the final background.",
                 example: Box::new(button_variants::demo(theme.clone())),
                 source: include_str!("button_variants.rs"),
             },

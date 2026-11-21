@@ -117,6 +117,7 @@ pub struct ActionIcon {
     icon: Option<Children>,
     class: &'static str,
     variant: ActionIconVariant,
+    auto_contrast: bool,
     presses: Vec<Box<dyn FnMut()>>,
     loading: Vary<bool>,
 }
@@ -127,6 +128,7 @@ pub fn action_icon(name: impl Into<String>) -> ActionIcon {
         icon: None,
         class: "sapid-action-icon",
         variant: ActionIconVariant::Default,
+        auto_contrast: false,
         presses: Vec::new(),
         loading: false.into(),
     }
@@ -176,6 +178,12 @@ impl ActionIcon {
     action_methods!();
     pub fn loading(mut self, value: impl Into<Vary<bool>>) -> Self {
         self.loading = value.into();
+        self
+    }
+    /// Resolve a readable foreground over the final background of an enabled,
+    /// styled action. An explicitly styled foreground takes precedence.
+    pub fn auto_contrast(mut self, value: bool) -> Self {
+        self.auto_contrast = value;
         self
     }
     pub fn variant(mut self, variant: ActionIconVariant) -> Self {
@@ -234,6 +242,7 @@ impl Widget for ActionIcon {
         let own_style = self.common.style.clone();
         let enabled = self.common.enabled.clone();
         let plain = self.common.unstyled;
+        let auto_contrast = self.auto_contrast;
         let state_style = move || {
             let mut base = if plain { Style::new() } else { base.clone() };
             if !plain && !enabled.get() {
@@ -241,7 +250,12 @@ impl Widget for ActionIcon {
                 base.color = Some(theme.disabled_text);
                 base.border_color = Some(theme.border);
             }
-            crate::appearance::merge(base, own_style.get())
+            crate::appearance::action_style(
+                &theme,
+                base,
+                own_style.get(),
+                auto_contrast && !plain && enabled.get(),
+            )
         };
         self.common.style = if self.common.enabled.is_reactive() || self.common.style.is_reactive()
         {
