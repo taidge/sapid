@@ -342,16 +342,36 @@ pub struct Blockquote {
     common: Common,
     children: Children,
     citation: Children,
+    icon: Option<crate::Icon>,
+    icon_size: Vary<f64>,
+    balance: Vary<bool>,
 }
 pub fn blockquote() -> Blockquote {
     Blockquote {
         common: Common::default(),
         children: ().into_children(),
         citation: ().into_children(),
+        icon: None,
+        icon_size: 36.0.into(),
+        balance: false.into(),
     }
 }
 impl Blockquote {
     document_methods!();
+    pub fn icon(mut self, icon: crate::Icon) -> Self {
+        self.icon = Some(icon);
+        self
+    }
+    /// Diameter of the decorative icon badge in pixels.
+    pub fn icon_size(mut self, size: impl Into<Vary<f64>>) -> Self {
+        self.icon_size = size.into();
+        self
+    }
+    /// Use balanced line wrapping on web hosts with the Sapid stylesheet.
+    pub fn balanced(mut self, balanced: impl Into<Vary<bool>>) -> Self {
+        self.balance = balanced.into();
+        self
+    }
     pub fn fill(mut self, children: impl IntoChildren) -> Self {
         self.children = children.into_children();
         self
@@ -378,6 +398,7 @@ impl Widget for Blockquote {
             })
             .border_style(BorderStyle::Solid)
             .border_color(self.common.theme.accent);
+        base.position = Some(glory::style::Position::Relative);
         base.color = Some(self.common.theme.foreground);
         base.background = Some(self.common.theme.accent_soft);
         base.margin = Some(Edges::all(0.0));
@@ -387,15 +408,65 @@ impl Widget for Blockquote {
         if !self.common.unstyled {
             citation = citation.style(self.common.theme.description(self.common.size));
         }
-        configure!(
+        let balance = self.balance.clone();
+        let mut root = configure!(
             self.common,
             glory::ui::view(),
             scope,
             "sapid-blockquote",
             base
         )
-        .document_part(DocumentPart::Blockquote)
-        .fill(take(&mut self.children))
+        .document_part(DocumentPart::Blockquote);
+        if let Some(icon) = self.icon {
+            let size = crate::composite::validated(scope, &self.icon_size, |v| {
+                if v.is_finite() && (8.0..=128.0).contains(v) {
+                    Ok(())
+                } else {
+                    Err(glory::render::Error::InvalidProps(
+                        "blockquote icon size requires 8..=128 pixels",
+                    )
+                    .into())
+                }
+            })?;
+            let theme = self.common.theme.clone();
+            let surface = theme.surface;
+            let color = theme.accent;
+            root = root.fill(
+                crate::theme_icon(icon)
+                    .theme(theme)
+                    .unstyled()
+                    .color(color)
+                    .class("sapid-blockquote-icon")
+                    .icon_size(size.map(|v| v * 0.5))
+                    .style(size.map(move |v| {
+                        Style {
+                            background: Some(surface),
+                            align: Some(glory::style::Align::Center),
+                            justify: Some(glory::style::Justify::Center),
+                            ..Style::new()
+                        }
+                        .display(Display::InlineFlex)
+                        .position(glory::style::Position::Absolute)
+                        .left(glory::style::Length::Px(-v / 2.))
+                        .top(glory::style::Length::Px(-v / 2.))
+                        .width(glory::style::Length::Px(*v))
+                        .height(glory::style::Length::Px(*v))
+                        .radius(v / 2.)
+                    })),
+            );
+        }
+        root.fill(
+            glory::ui::view()
+                .class(scope.bond(move || {
+                    if balance.get() {
+                        "sapid-blockquote-body is-balanced"
+                    } else {
+                        "sapid-blockquote-body"
+                    }
+                    .to_owned()
+                }))
+                .fill(take(&mut self.children)),
+        )
         .fill(citation)
         .show_in(scope)
     }

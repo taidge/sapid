@@ -38,6 +38,7 @@ mod swatch_alpha;
 mod swatch_controlled;
 mod swatch_sizes;
 mod theme_icon_actions;
+mod theme_icon_gradient;
 mod theme_icon_sizes;
 mod theme_icon_variants;
 use super::showcase_examples::DetailSection;
@@ -342,6 +343,13 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         ],
         "theme-icon" => vec![
             DetailSection {
+                id: "theme-icon-gradient",
+                title: "Gradient variant",
+                note: "Choose the start color, end color and angle of the two-stop linear gradient.",
+                example: Box::new(theme_icon_gradient::demo(theme.clone())),
+                source: include_str!("theme_icon_gradient.rs"),
+            },
+            DetailSection {
                 id: "theme-icon-sizes",
                 title: "Container size and independent glyph size",
                 note: "Theme size selects a 24, 30, 36, 42 or 50 pixel container. icon_size independently controls the finite drawing, preserving its physical node when a valid reactive size changes.",
@@ -456,6 +464,7 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ),
         ],
         "theme-icon" => vec![
+            ("Gradient variant", "#theme-icon-gradient"),
             (
                 "Container size and independent glyph size",
                 "#theme-icon-sizes",

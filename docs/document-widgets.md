@@ -130,3 +130,5 @@ reactive code update, mobile overflow and teardown. Screenshots are under
 `D:/BuildCache/sapid/document-*-hydrate.png`. The standalone native document test
 also passed all four themes with positive real-engine bounds for the nine
 display/document node categories and complete retirement.
+
+Blockquote accepts a decorative `icon(Icon)` and reactive `icon_size` for the corner badge. `balanced(true)` applies balanced line wrapping to the quote body on web hosts using the Sapid stylesheet. The citation remains a separate slot; native text uses ordinary wrapping.

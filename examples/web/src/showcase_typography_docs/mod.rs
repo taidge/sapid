@@ -51,8 +51,8 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             },
             DetailSection {
                 id: "quote-color",
-                title: "Long quotations and explicit colors",
-                note: "A quotation wraps normally and grows with its content. Border, background and text color remain independent Style declarations; attribution uses the same selected theme.",
+                title: "Text wrap",
+                note: "Compare normal line wrapping and balanced lines for the same quotation. Change the viewport width to compare the line endings.",
                 example: Box::new(quote_color::demo(theme.clone())),
                 source: include_str!("quote_color.rs"),
             },
@@ -291,7 +291,7 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
         "blockquote" => vec![
             ("Attribution and a real source link", "#quote-attribution"),
             ("An optional passive icon", "#quote-icon"),
-            ("Long quotations and explicit colors", "#quote-color"),
+            ("Text wrap", "#quote-color"),
         ],
         "code" => vec![
             ("Inline code and ordinary text", "#code-inline"),

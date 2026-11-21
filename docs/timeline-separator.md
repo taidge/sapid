@@ -8,6 +8,8 @@ connector. `marker(children)` centers caller content inside a node and preserves
 the ordinary Widget ownership model. Pending/current/completed updates patch
 node and connector paint without rebuilding list items or embedded controls.
 
+`align(TimelineAlign::End)` places the markers on the far side. `Alternate` alternates event content around the center line. `TimelineItem::opposite` adds a second column, for example for a timestamp. The ordered list always follows insertion order. `reverse_active(true)` marks items after the active key as completed. `bullet_radius` adjusts marker corners and `TimelineItem::line_style` selects the outgoing connector's border style.
+
 `timeline("release")` renders an actual ordered list. Explicit stable ASCII item
 keys identify each list item; `title`, `description`, `timestamp`, `marker` and
 `fill` provide separate content slots. Timestamps are ordinary text supplied by

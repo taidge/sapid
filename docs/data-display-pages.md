@@ -134,3 +134,5 @@ layout, wrapping, indicator hit testing, vector geometry and raster pixels in
 four themes. These checks do not establish OS pointer/keyboard input, IME or
 spoken screen-reader acceptance. Release and browser evidence is recorded per
 page in `shared-page-remediation.json` after the actual public run.
+
+The ThemeIcon playground exposes variant, radius, size, accent color, and automatic contrast for solid backgrounds. The gradient example changes both color stops and the angle of a Glory linear gradient. Timeline keeps its ordered list and keys when progress changes. Its release-history example supports end or alternating marker alignment, opposite timestamps, rounded bullets and per-item line style.

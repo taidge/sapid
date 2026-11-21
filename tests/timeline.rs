@@ -310,3 +310,43 @@ fn explicit_item_theme_and_size_override_parent_inheritance() {
         );
     }
 }
+
+#[test]
+fn alternate_and_opposite_keep_the_ordered_items_in_place_with_reverse_progress() {
+    let app = App::memory();
+    let progress = app.scope().cage(TimelineProgress::Active("b".into()));
+    app.mount(
+        timeline("release")
+            .align(sapid::TimelineAlign::Alternate)
+            .bullet_radius(4.)
+            .reverse_active(true)
+            .progress(progress)
+            .items(["a", "b", "c"].map(|key| {
+                timeline_item(key)
+                    .title(key)
+                    .opposite(glory::ui::text().content(key))
+                    .line_style(glory::style::BorderStyle::Dashed)
+            })),
+    )
+    .unwrap();
+    let list = find(&app, "sapid-timeline");
+    let rows = app.tree().node(list).unwrap().children.clone();
+    let phase = |i: usize, name: &str| {
+        app.tree()
+            .node(rows[i])
+            .unwrap()
+            .descriptor
+            .view()
+            .classes
+            .iter()
+            .any(|class| class == name)
+    };
+    assert!(phase(0, "sapid-timeline-upcoming"));
+    assert!(phase(1, "sapid-timeline-current"));
+    assert!(phase(2, "sapid-timeline-completed"));
+    progress.revise(|v| *v = TimelineProgress::Active("a".into()));
+    app.flush().unwrap();
+    assert!(phase(0, "sapid-timeline-current"));
+    assert!(phase(1, "sapid-timeline-completed"));
+    assert_eq!(app.tree().node(list).unwrap().children, rows);
+}

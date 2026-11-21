@@ -19,34 +19,6 @@ fn playground(preview: Box<dyn Widget>, controls: Vec<Box<dyn Widget>>) -> impl 
         .fill(super::controls::playground(preview, controls))
 }
 
-fn range(
-    key: &str,
-    label: &str,
-    value: Cage<f64>,
-    min: f64,
-    max: f64,
-    step: f64,
-    theme: &Theme,
-) -> Box<dyn Widget> {
-    Box::new(
-        sapid::stack().theme(theme.clone()).gap(8.0).fill((
-            sapid::text()
-                .theme(theme.clone())
-                .class("site-control-label")
-                .content(label.to_owned()),
-            sapid::slider(key.to_owned())
-                .theme(theme.clone())
-                .name(label.to_owned())
-                .min(min)
-                .max(max)
-                .step(step)
-                .value(value)
-                .value_text(value.map(|value| Some(format!("{value:.0}"))))
-                .on_value_change(move |next| value.revise(|value| *value = next)),
-        )),
-    )
-}
-
 fn heading(value: &str, theme: &Theme) -> impl Widget {
     sapid::title(3)
         .theme(theme.clone())
@@ -88,7 +60,7 @@ fn aspect_demo(theme: Theme) -> impl Widget {
             playground(Box::new(preview), vec![
                 super::controls::select("aspect-ratio", "Ratio", ratio,
                     &[("16-9", "16 / 9"), ("3-2", "3 / 2"), ("4-3", "4 / 3"), ("1-1", "1 / 1"), ("9-16", "9 / 16")], &theme),
-                range("aspect-width", "Width", width, 100.0, 600.0, 10.0, &theme),
+                super::controls::range("aspect-width", "Width", width, 100.0, 600.0, 10.0, &theme),
             ]),
             sapid::text().theme(theme.clone()).content("The image fills its frame while preserving the selected ratio. Resize the browser to see the frame shrink with its container."),
             heading("Inside a flex container", &theme),
@@ -321,7 +293,7 @@ fn splitter_demo(theme: Theme) -> impl Widget {
                     &[("horizontal", "Horizontal"), ("vertical", "Vertical")],
                     &theme,
                 ),
-                range("splitter-line-size", "Line thickness", line_size, 0.0, 6.0, 1.0, &theme),
+                super::controls::range("splitter-line-size", "Line thickness", line_size, 0.0, 6.0, 1.0, &theme),
                 super::controls::switch("Show grip", with_grip, &theme),
                 super::controls::switch("Disabled", disabled, &theme),
                 Box::new(
@@ -474,7 +446,7 @@ fn scroll_demo(theme: Theme) -> impl Widget {
                 &[("auto", "Auto"), ("contain", "Contain"), ("none", "None")],
                 &theme,
             ),
-            range(
+            super::controls::range(
                 "scroll-size",
                 "Scrollbar size",
                 size,
@@ -483,7 +455,7 @@ fn scroll_demo(theme: Theme) -> impl Widget {
                 1.0,
                 &theme,
             ),
-            range(
+            super::controls::range(
                 "scroll-delay",
                 "Scroll hide delay",
                 delay,

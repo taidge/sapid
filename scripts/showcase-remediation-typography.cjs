@@ -19,6 +19,20 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
    assert.equal(await page.locator('.site-component-detail').count(),counts[slug]);assert(await page.locator('.site-title,.site-section-title').evaluateAll(es=>es.every(e=>getComputedStyle(e).fontWeight==='400')));
    const primary=page.locator('.site-preview .site-demo').first();
    if(slug==='blockquote'){
+    const quote=primary.locator('blockquote'),badge=quote.locator('.sapid-blockquote-icon');
+    await primary.getByRole('button',{name:'Use Green',exact:true}).click();
+    await primary.getByRole('slider',{name:'Icon size'}).press('End');await tick();
+    assert.equal((await box(badge)).width,64);
+    assert.equal(await quote.evaluate(e=>getComputedStyle(e).borderLeftColor),'rgb(64, 192, 87)');
+    const custom=primary.getByRole('textbox',{name:'Custom color',exact:true});
+    assert.equal(await custom.inputValue(),'#40c057');
+    await custom.fill('#663399');await custom.press('Enter');await tick();
+    assert.equal(await quote.evaluate(e=>getComputedStyle(e).borderLeftColor),'rgb(102, 51, 153)');
+    const wrap=detail('quote-color');
+    await wrap.getByRole('radio',{name:'Balance',exact:true}).check();await tick();
+    assert.equal(await wrap.locator('.sapid-blockquote-body').evaluate(e=>getComputedStyle(e).textWrapStyle),'balance');
+    await wrap.getByRole('radio',{name:'Wrap',exact:true}).check();await tick();
+    assert.notEqual(await wrap.locator('.sapid-blockquote-body').evaluate(e=>getComputedStyle(e).textWrapStyle),'balance');
     assert.equal(await primary.locator('blockquote').count(),1);assert(await primary.getByText('— Ava Patel, Mountain studio design notes',{exact:true}).isVisible());const citation=detail('quote-attribution').getByRole('link',{name:'Read the article example',exact:true});assert.equal(await citation.getAttribute('href'),'?widget=typography');
     const icon=await box(detail('quote-icon').locator('.sapid-theme-icon')),text=await box(detail('quote-icon').locator('.sapid-text').first());assert(Math.abs(icon.y-text.y)<2);assert(text.x>=icon.x+icon.width+10);assert.equal(await detail('quote-icon').getByRole('button').count(),0);
    }else if(slug==='code'){

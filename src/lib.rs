@@ -460,7 +460,8 @@ pub use theme::{
 };
 pub use theme_icon::{Icon, ThemeIcon, ThemeIconVariant, theme_icon};
 pub use timeline::{
-    MAX_TIMELINE_ITEMS, Timeline, TimelineItem, TimelineProgress, timeline, timeline_item,
+    MAX_TIMELINE_ITEMS, Timeline, TimelineAlign, TimelineItem, TimelineProgress, timeline,
+    timeline_item,
 };
 pub use toggle::{
     MAX_TOGGLE_GROUP_ITEMS, Toggle, ToggleGroup, ToggleItem, ToggleMode, toggle, toggle_group,
@@ -615,8 +616,8 @@ pub mod prelude {
         SimpleGrid, Size, Space, Spoiler, Stack, SubmissionLimits, SubmitStatus, SubmitToken,
         Switch, SwitchLabelPosition, Tab, TabActivation, Tabs, TabsVariant, Text, TextField,
         TextList, TextListItem, TextVariant, Textarea, Theme, ThemeDefinition, Timeline,
-        TimelineItem, TimelineProgress, Title, Toggle, ToggleGroup, ToggleItem, ToggleMode,
-        Typeahead, TypeaheadConfig, Typography, TypographyContext, ValidationErrors,
+        TimelineAlign, TimelineItem, TimelineProgress, Title, Toggle, ToggleGroup, ToggleItem,
+        ToggleMode, Typeahead, TypeaheadConfig, Typography, TypographyContext, ValidationErrors,
         ValidationFuture, accordion, accordion_item, action_icon, anchor, aspect_ratio, badge,
         blockquote, box_, breadcrumb_item, breadcrumbs, burger, button, button_group, card, center,
         checkbox, checkbox_group, checkbox_item, chip, chip_group, chip_item, close_button, code,
