@@ -435,12 +435,13 @@ impl Widget for ColorInput {
                 remember.revise(|old| *old = value);
             }
         });
+        let can_load = self.loading.is_reactive() || self.loading.get();
         let has_left = self.preview
             || self.left.is_some()
-            || self.loading_position == ColorInputSectionPosition::Left;
+            || (can_load && self.loading_position == ColorInputSectionPosition::Left);
         let has_right = self.right.is_some()
             || self.eye_dropper.is_some()
-            || self.loading_position == ColorInputSectionPosition::Right;
+            || (can_load && self.loading_position == ColorInputSectionPosition::Right);
         let success = self.success.clone();
         let success_color = self.common.theme.success;
         let input_style =
@@ -1057,20 +1058,22 @@ impl Widget for ColorInput {
             }
             editor = editor.fill(button);
         }
-        editor = editor.fill(
-            crate::spinner()
-                .theme(self.common.theme.clone())
-                .diameter(18.)
-                .thickness(2.)
-                .visible(self.loading.clone())
-                .class(match self.loading_position {
-                    ColorInputSectionPosition::Left => "sapid-color-input-loading is-left",
-                    ColorInputSectionPosition::Right => "sapid-color-input-loading is-right",
-                })
-                .style(section_style(
-                    self.loading_position == ColorInputSectionPosition::Left,
-                )),
-        );
+        if can_load {
+            let theme = self.common.theme.clone();
+            let left = self.loading_position == ColorInputSectionPosition::Left;
+            editor = editor.fill(glory::ui::when(self.loading.clone(), move || {
+                crate::spinner()
+                    .theme(theme.clone())
+                    .diameter(18.)
+                    .thickness(2.)
+                    .class(if left {
+                        "sapid-color-input-loading is-left"
+                    } else {
+                        "sapid-color-input-loading is-right"
+                    })
+                    .style(section_style(left))
+            }));
+        }
         let mut root = glory::ui::view()
             .class(scope.bond(move || format!("{prefix} {}", extra.get())))
             .style(composite::column(6.))

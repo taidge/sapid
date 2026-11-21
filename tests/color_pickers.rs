@@ -1006,6 +1006,22 @@ fn palette_pressed_state_follows_the_accepted_color_and_controlled_close_propose
 }
 
 #[test]
+fn color_input_mounts_its_loading_graphic_only_when_requested() {
+    let app = App::memory();
+    app.mount(color_input("idle").show_picker(false)).unwrap();
+    let loading = app.scope().cage(false);
+    app.mount(color_input("pending").show_picker(false).loading(loading))
+        .unwrap();
+    assert!(nodes(&app, "sapid-color-input-loading").is_empty());
+    loading.revise(|value| *value = true);
+    app.flush().unwrap();
+    assert_eq!(nodes(&app, "sapid-color-input-loading").len(), 1);
+    loading.revise(|value| *value = false);
+    app.flush().unwrap();
+    assert!(nodes(&app, "sapid-color-input-loading").is_empty());
+}
+
+#[test]
 fn inset_preview_reopens_a_focused_editor_once_and_rechecks_a_replaced_loading_slot() {
     let app = App::memory();
     let opened = app.scope().cage(false);
