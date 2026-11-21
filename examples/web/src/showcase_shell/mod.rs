@@ -2,6 +2,7 @@ use super::showcase_examples::DetailSection;
 mod collapsed;
 mod configuration;
 mod regions;
+mod resizable;
 mod responsive;
 mod scrolling;
 pub(crate) mod viewport;
@@ -41,6 +42,13 @@ pub fn sections(theme: sapid::Theme) -> Vec<DetailSection> {
             note: "header_style, footer_style, main_style, body_style and aside_style accept reactive typed styles. Explicit header height replaces its default minimum. with_border configures all region borders, with an optional Sidebar override. header_visible, footer_visible and aside_visible hide their regions without rebuilding content; flex layout automatically releases the occupied space. aside_width configures the optional right-hand panel. Toggle the controls and keep a note while regions change.",
             example: Box::new(configuration::demo(theme.clone())),
             source: include_str!("configuration.rs"),
+        },
+        DetailSection {
+            id: "shell-resizable",
+            title: "Resizable folder pane",
+            note: "Drag the separator or focus it and use the arrow keys. Collapse and restore the folders to recover the last width while keeping the note editor mounted.",
+            example: Box::new(resizable::demo(theme.clone())),
+            source: include_str!("resizable.rs"),
         },
         DetailSection {
             id: "shell-viewport",
