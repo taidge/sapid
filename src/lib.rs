@@ -7,6 +7,10 @@
 /// The version of the Sapid package linked into this application.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+/// The bundled widget stylesheet for browser and WebView hosts.
+/// Install it alongside [`Theme::stylesheet`] when using a custom palette.
+pub const STRUCTURAL_CSS: &str = include_str!("../styles/sapid.css");
+
 mod accordion;
 mod actions;
 mod affix;

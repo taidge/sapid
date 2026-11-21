@@ -87,6 +87,7 @@ fn main() -> Result {
 `App::memory()` uses Glory's reference interpreter. To display the widget, mount
 it in your application's browser or native host. Browser hosts install
 [structural CSS](styles/sapid.css) and the selected theme stylesheet explicitly.
+Hosts that accept CSS as a string can use `sapid::STRUCTURAL_CSS` directly.
 
 A supplied `.value(...)` or `.checked(...)` is controlled: the callback proposes
 an update and the source decides the displayed value. Omit it to use local state,
