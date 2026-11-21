@@ -598,11 +598,16 @@ fn api_props(entry: &'static Entry, theme: Theme) -> impl Widget {
         .class("site-doc-content")
         .fill((
             section_title("builder-api", &format!("{} properties", label(entry))),
-            text().class("site-doc-note").content("Sapid builders and their parameters are the component's properties. These public Rust signatures come from the implementation used by this guide."),
-            when(!api.signatures.is_empty(), move || {
-                view().class("site-api-tokens").fill(api.signatures.iter().map(|signature| sapid::code().theme(theme.clone()).content(*signature)).collect::<Vec<_>>())
-            }),
-            when(api.signatures.is_empty(), || {
+            text().class("site-doc-note").content("Sapid builders and their parameters are the component's properties. Each Rust type lists the methods you can call on its builder."),
+            view().fill(api.owners.iter().map(|owner| {
+                view().fill((
+                    text().kind(TextKind::Heading(3)).content(owner.name),
+                    view().class("site-api-tokens").fill(owner.signatures.iter().map(|signature|
+                        sapid::code().theme(theme.clone()).content(*signature)
+                    ).collect::<Vec<_>>()),
+                ))
+            }).collect::<Vec<_>>()),
+            when(api.owners.is_empty(), || {
                 text().class("site-doc-note").content("This guide uses composition and shared builder properties rather than widget-specific parameters.")
             }),
         ))

@@ -570,6 +570,10 @@ API_INFRASTRUCTURE = {
     "build", "build_and_mount", "as_str", "is_finite", "resolve", "validate_input_placeholder",
 }
 API_TYPES = {
+    "Checkbox": ["Checkbox", "CheckboxGroup", "CheckboxItem"],
+    "Chip": ["Chip", "ChipGroup", "ChipItem"],
+    "Radio": ["Radio", "RadioGroup"],
+    "Button": ["Button", "ButtonGroup"],
     "InlineDateTimePicker": ["InlineDateTimePicker", "InlineDateTimeRangePicker", "DateTimeBounds", "DateTimeRangeValue", "DateTimePolicy"],
     "DateInput": ["DateInput", "DateInputFormat", "DateParse", "DateDraftStatus"],
     "DatePicker": ["DatePicker", "DatePickerMode", "DatePickerLevel", "DateSelection", "DatePickerPreset"],
@@ -650,7 +654,8 @@ API_PATHS = {
     "ColorPicker": ["src/color_picker/mod.rs"],
     "Pill": ["src/display.rs"], "Badge": ["src/display.rs"],
     "PillsInput": ["src/pills_input.rs"], "TagsInput": ["src/tags_input.rs"],
-    "Button": ["src/button.rs"], "UnstyledButton": ["src/button.rs"],
+    "Checkbox": ["src/checkbox.rs", "src/checkbox_group.rs"],
+    "Button": ["src/button.rs", "src/actions.rs"], "UnstyledButton": ["src/button.rs"],
     "Card": ["src/display.rs"], "Paper": ["src/display.rs"],
     "Code": ["src/document.rs"], "Highlight": ["src/document.rs"], "Mark": ["src/document.rs"],
     "Text": ["src/typography.rs"], "Title": ["src/typography.rs"], "Typography": ["src/typography.rs"],
@@ -769,40 +774,44 @@ def api_surface(task, item):
     name = item["name"]
     paths = API_PATHS.get(name, api_sources(task))
     types = API_TYPES.get(name, [name])
-    builders, classes, signatures = set(), set(), set()
+    builders, classes = set(), set()
+    signatures = {owner: set() for owner in types}
     factory = re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower().replace(" ", "_")
     for path in paths:
         text = (ROOT / path).read_text(encoding="utf-8")
         if re.search(r"pub fn " + re.escape(factory) + r"\s*\(", text): builders.add(factory)
-        if name in LAYOUT_NAMES:
-            body = macro_definition(text, "methods")
-            if name in {"Flex", "Group", "Stack"}: body += macro_definition(text, "flex_methods")
-            body += implementation_surface(text, name)
-        else:
-            body = "\n".join(implementation_surface(text, widget_type) for widget_type in types)
-            body = expand_macros(body, text)
-        signatures.update(rust_signatures(body))
-        classes.update(re.findall(r"\b(sapid-[a-z0-9-]+)", body))
         for widget_type in types:
+            body = implementation_surface(text, widget_type)
+            if widget_type == name and name in LAYOUT_NAMES:
+                body += macro_definition(text, "methods")
+                if name in {"Flex", "Group", "Stack"}:
+                    body += macro_definition(text, "flex_methods")
+            body = expand_macros(body, text)
+            signatures[widget_type].update(rust_signatures(body))
+            classes.update(re.findall(r"\b(sapid-[a-z0-9-]+)", body))
             type_factory = re.sub(r"(?<!^)(?=[A-Z])", "_", widget_type).lower()
             if re.search(r"pub fn " + re.escape(type_factory) + r"\s*\(", text):
                 builders.add(type_factory)
             base = re.sub(r"(?<!^)(?=[A-Z])", "-", widget_type).lower()
             classes.update(value for value in re.findall(r"\b(sapid-[a-z0-9-]+)", text)
                            if value == f"sapid-{base}" or value.startswith(f"sapid-{base}-"))
-    builders.update(match[1] for signature in signatures
+    builders.update(match[1] for methods in signatures.values() for signature in methods
                     if (match := re.match(r"pub fn ([a-z_0-9]+)", signature)))
-    return sorted(builders), sorted(classes), sorted(signatures)
+    return sorted(builders), sorted(classes), signatures
 
 
 def api_entry(task, item, display_id):
     builders, classes, signatures = api_surface(task, item)
     builder_values = ", ".join(literal(value) for value in builders)
-    signature_values = ", ".join(literal(value) for value in signatures)
+    owners = []
+    for owner, methods in signatures.items():
+        if methods:
+            values = ", ".join(literal(method) for method in sorted(methods))
+            owners.append(f"BuilderApi {{ name: {literal(owner)}, signatures: &[{values}] }}")
     class_values = ", ".join(literal(value) for value in classes)
     return (
         f"    ApiEntry {{ id: {literal(display_id)}, builders: &[{builder_values}], "
-        f"signatures: &[{signature_values}], classes: &[{class_values}] }},"
+        f"owners: &[{', '.join(owners)}], classes: &[{class_values}] }},"
     )
 
 
@@ -814,10 +823,15 @@ def api_catalog(tasks):
                          MANTINE_BY_TASK[task["id"]], key=lambda value: MANTINE_ORDER.get(value["name"], (99, 99)))))
     return """//! Generated Rust builder API metadata; edit sources and run showcase-catalog.py.
 #[derive(Clone, Copy, Debug)]
+pub struct BuilderApi {
+    pub name: &'static str,
+    pub signatures: &'static [&'static str],
+}
+#[derive(Clone, Copy, Debug)]
 pub struct ApiEntry {
     pub id: &'static str,
     pub builders: &'static [&'static str],
-    pub signatures: &'static [&'static str],
+    pub owners: &'static [BuilderApi],
     pub classes: &'static [&'static str],
 }
 #[rustfmt::skip]
@@ -837,9 +851,13 @@ mod tests {
         let entry = find("P0-01").unwrap();
         assert!(entry.builders.contains(&"button"));
         assert!(entry.builders.contains(&"left_section"));
-        assert!(entry.signatures.iter().any(|signature| signature.contains("compact")));
+        assert!(entry.owners[0].signatures.iter().any(|signature| signature.contains("compact")));
         assert!(!entry.builders.contains(&"blue_dark"));
         assert!(entry.classes.contains(&"sapid-button"));
+        let checkbox = ENTRIES.iter().find(|entry| entry.owners.iter().any(|owner| owner.name == "CheckboxGroup")).unwrap();
+        for owner in checkbox.owners {
+            assert_eq!(owner.signatures.iter().any(|s| s.contains("fn max_values(")), owner.name == "CheckboxGroup");
+        }
         assert!(find("unknown").is_none());
         assert!(!find("P7-08").unwrap().builders.contains(&"plane_size"));
         assert!(find("P7-08-colorpicker").unwrap().builders.contains(&"plane_size"));
@@ -1001,6 +1019,10 @@ mod tests {
                     && !entry.description.is_empty()
             );
             assert!(entry.code.contains("fn ") && !entry.code.contains("iframe"));
+        }
+        let checkbox = ENTRIES.iter().find(|entry| entry.owners.iter().any(|owner| owner.name == "CheckboxGroup")).unwrap();
+        for owner in checkbox.owners {
+            assert_eq!(owner.signatures.iter().any(|s| s.contains("fn max_values(")), owner.name == "CheckboxGroup");
         }
         assert!(find("unknown").is_none());
     }
