@@ -325,6 +325,22 @@ fn all_document_content_escapes_without_changing_business_text() {
 }
 
 #[test]
+fn whole_word_highlights_preserve_spelling_and_utf8_boundaries() {
+    let html = glory::ssr::render(
+        highlight()
+            .content("éDesign · DESIGN · redesign · design_2 · 设计 · design")
+            .queries(vec!["design".into(), "设计".into()])
+            .ignore_ascii_case(true)
+            .whole_words(true),
+    )
+    .unwrap();
+    assert_eq!(html.matches("<mark").count(), 3);
+    for word in ["DESIGN", "设计", "design"] {
+        assert!(html.contains(&format!(">{word}</mark>")));
+    }
+}
+
+#[test]
 fn highlight_exact_matches_keep_canonical_text_order_and_longest_overlap() {
     let app = App::memory();
     app.mount(highlight().content("a😀<&>ababa\r\nb\0").queries(vec![

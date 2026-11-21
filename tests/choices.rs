@@ -145,6 +145,35 @@ fn grouped_selection_aggregates_enabled_items_and_preserves_disabled_selection()
     assert_eq!(props(&app, all).mode, CheckMode::Mixed);
 }
 #[test]
+fn selection_limit_reserves_disabled_values_and_reopens_capacity_after_removal() {
+    let app = App::memory();
+    let chosen = app.scope().cage(vec!["fixed".to_owned()]);
+    app.mount(
+        checkbox_group("capped")
+            .max_values(2)
+            .selected(chosen)
+            .select_all_label("All")
+            .items([
+                checkbox_item("a", "A"),
+                checkbox_item("b", "B"),
+                checkbox_item("fixed", "Fixed").enabled(false),
+            ])
+            .on_selected_change(move |value| chosen.revise(|old| *old = value)),
+    )
+    .unwrap();
+    let all = find(&app, "sapid-checkbox-group-all")[0];
+    let items = find(&app, "sapid-checkbox-group-item");
+    assert!(!app.dispatch(all, Event::CheckedChanged(true)).unwrap());
+    app.dispatch(items[0], Event::CheckedChanged(true)).unwrap();
+    assert!(!app.dispatch(items[1], Event::CheckedChanged(true)).unwrap());
+    assert_eq!(chosen.get(), ["a", "fixed"]);
+    app.dispatch(items[0], Event::CheckedChanged(false))
+        .unwrap();
+    assert!(app.dispatch(items[1], Event::CheckedChanged(true)).unwrap());
+    assert_eq!(chosen.get(), ["b", "fixed"]);
+}
+
+#[test]
 fn group_rejected_proposals_leave_child_and_select_all_models_unchanged() {
     let app = App::memory();
     let selected = app.scope().cage(vec!["a".to_owned()]);

@@ -610,18 +610,21 @@ fn publish_reference(
     Ok(())
 }
 
-/// Mount-time exact substring highlighting, with original canonical text and
-/// order preserved. Marked ranges are bounded; no language parser or case-fold.
+/// Bounded substring highlighting that preserves original text and byte offsets.
 pub struct Highlight {
     common: Common,
     content: String,
     queries: Vec<String>,
+    ignore_ascii_case: bool,
+    whole_words: bool,
 }
 pub fn highlight() -> Highlight {
     Highlight {
         common: Common::default(),
         content: String::new(),
         queries: Vec::new(),
+        ignore_ascii_case: false,
+        whole_words: false,
     }
 }
 impl Highlight {
@@ -634,6 +637,16 @@ impl Highlight {
         if self.queries.len() <= 32 {
             self.queries.push(query.into());
         }
+        self
+    }
+    /// Match ASCII letters in either case while preserving the original spelling.
+    pub fn ignore_ascii_case(mut self, value: bool) -> Self {
+        self.ignore_ascii_case = value;
+        self
+    }
+    /// Require boundaries on both sides. Letters, numbers and underscores are word characters.
+    pub fn whole_words(mut self, value: bool) -> Self {
+        self.whole_words = value;
         self
     }
     pub fn queries(mut self, queries: impl IntoIterator<Item = String>) -> Self {
@@ -658,7 +671,18 @@ impl Widget for Highlight {
             .iter()
             .map(|q| glory::render::normalize_text(q, true))
             .collect::<Vec<_>>();
-        let ranges = highlight_ranges(&content, &queries)?;
+        let (search, queries) = if self.ignore_ascii_case {
+            (
+                std::borrow::Cow::Owned(content.to_ascii_lowercase()),
+                queries
+                    .into_iter()
+                    .map(|query| std::borrow::Cow::Owned(query.to_ascii_lowercase()))
+                    .collect(),
+            )
+        } else {
+            (std::borrow::Cow::Borrowed(content.as_ref()), queries)
+        };
+        let ranges = highlight_ranges(&search, &queries, self.whole_words)?;
         let root = scope.create(Descriptor::new(Props::Group))?;
         let children = scope.child_in(root)?;
         for (start, end, marked) in ranges {
@@ -692,6 +716,7 @@ impl Widget for Highlight {
 fn highlight_ranges(
     content: &str,
     queries: &[std::borrow::Cow<'_, str>],
+    whole_words: bool,
 ) -> Result<Vec<(usize, usize, bool)>> {
     let mut ranges = Vec::new();
     let mut cursor = 0;
@@ -718,9 +743,22 @@ fn highlight_ranges(
         let next = queries
             .iter()
             .filter_map(|query| {
-                content[cursor..]
-                    .find(query.as_ref())
-                    .map(|index| (cursor + index, query.len()))
+                let mut from = cursor;
+                let word = |ch: char| ch.is_alphanumeric() || ch == '_';
+                while let Some(offset) = content[from..].find(query.as_ref()) {
+                    let start = from + offset;
+                    if !whole_words
+                        || (!content[..start].chars().next_back().is_some_and(word)
+                            && !content[start + query.len()..]
+                                .chars()
+                                .next()
+                                .is_some_and(word))
+                    {
+                        return Some((start, query.len()));
+                    }
+                    from = start + content[start..].chars().next()?.len_utf8();
+                }
+                None
             })
             .min_by(|left, right| left.0.cmp(&right.0).then_with(|| right.1.cmp(&left.1)));
         let Some((start, len)) = next else {

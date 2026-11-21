@@ -91,7 +91,7 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             DetailSection {
                 id: "highlight-case",
                 title: "Exact case and UTF-8 matching",
-                note: "Matching is exact and case-sensitive. Design, design and DESIGN differ. Non-ASCII queries match literal UTF-8 text; this API does not advertise Unicode case folding or a regular expression engine.",
+                note: "Compare exact matching with ignore_ascii_case and whole_words. Both preserve the source spelling. Whole words use Unicode letters, numbers and underscores as word characters. Accented characters and Chinese text still match literally.",
                 example: Box::new(highlight_case::demo(theme.clone())),
                 source: include_str!("highlight_case.rs"),
             },

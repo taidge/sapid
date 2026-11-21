@@ -41,6 +41,7 @@ pub struct CheckboxGroup {
     all_label: Option<Vary<String>>,
     value: Value<Vec<String>>,
     items: Vec<CheckboxItem>,
+    max_values: usize,
     on_change: Option<Box<dyn FnMut(Vec<String>)>>,
     field: Option<crate::FieldControl>,
     required: Vary<bool>,
@@ -55,6 +56,7 @@ pub fn checkbox_group(key: impl Into<String>) -> CheckboxGroup {
         all_label: None,
         value: Value::default(),
         items: Vec::new(),
+        max_values: MAX_CHECKBOX_GROUP_ITEMS,
         on_change: None,
         field: None,
         required: false.into(),
@@ -85,6 +87,12 @@ impl CheckboxGroup {
     }
     pub fn label(mut self, value: impl Into<Vary<String>>) -> Self {
         self.label = value.into();
+        self
+    }
+    /// Limit accepted selections, including selected disabled members.
+    /// A bulk selection is available only when the entire result fits.
+    pub fn max_values(mut self, maximum: usize) -> Self {
+        self.max_values = maximum;
         self
     }
     pub fn select_all_label(mut self, value: impl Into<Vary<String>>) -> Self {
@@ -119,7 +127,13 @@ impl CheckboxGroup {
     }
 }
 
-fn validate(keys: &HashSet<String>, selected: &[String]) -> Result {
+fn validate(keys: &HashSet<String>, selected: &[String], maximum: usize) -> Result {
+    if selected.len() > maximum {
+        return Err(glory::render::Error::InvalidProps(
+            "checkbox group selection exceeds max_values",
+        )
+        .into());
+    }
     let mut unique = HashSet::new();
     if selected.len() > keys.len()
         || selected
@@ -136,12 +150,15 @@ fn validate(keys: &HashSet<String>, selected: &[String]) -> Result {
 fn propose(
     scope: &glory::ui::WeakScope,
     control: &Control<Vec<String>>,
-    keys: &HashSet<String>,
+    maximum: usize,
     callback: &Callback<Vec<String>>,
     value: Vec<String>,
 ) {
     let Some(scope) = scope.upgrade() else { return };
-    if let Err(error) = validate(keys, &value).and_then(|()| control.accept(&value)) {
+    if value.len() > maximum {
+        return;
+    }
+    if let Err(error) = control.accept(&value) {
         scope.report_error(error);
         return;
     }
@@ -150,7 +167,8 @@ fn propose(
 
 impl Widget for CheckboxGroup {
     fn build(&mut self, scope: &Scope) -> Result {
-        if self.items.len() > MAX_CHECKBOX_GROUP_ITEMS {
+        let maximum = self.max_values;
+        if self.items.len() > MAX_CHECKBOX_GROUP_ITEMS || maximum > MAX_CHECKBOX_GROUP_ITEMS {
             return Err(glory::render::Error::InvalidProps(
                 "checkbox group exceeds mounted item budget",
             )
@@ -173,7 +191,7 @@ impl Widget for CheckboxGroup {
         let callback = Callback::new(self.on_change.take());
         let valid_keys = keys.clone();
         let selected = composite::validated(scope, &control.source, move |value| {
-            validate(&valid_keys, value)
+            validate(&valid_keys, value, maximum)
         })?;
         let enabled = self
             .field
@@ -265,8 +283,19 @@ impl Widget for CheckboxGroup {
             });
             let all_items = items.clone();
             let enabled = enabled.clone();
-            let active = scope
-                .bond(move || enabled.get() && all_items.iter().any(|item| item.enabled.get()));
+            let active = scope.bond(move || {
+                if !enabled.get() || !all_items.iter().any(|item| item.enabled.get()) {
+                    return false;
+                }
+                maximum >= all_items.len()
+                    || selected.with(|current| {
+                        all_items
+                            .iter()
+                            .filter(|item| item.enabled.get() || current.contains(&item.key))
+                            .count()
+                            <= maximum
+                    })
+            });
             let all_items = items.clone();
             let control = control.clone();
             let callback = callback.clone();
@@ -286,7 +315,7 @@ impl Widget for CheckboxGroup {
                 .on_state_change(move |state| {
                     let Some(scope) = weak.upgrade() else { return };
                     let current = match control.source.try_with(|value| {
-                        validate(&keys, value)?;
+                        validate(&keys, value, maximum)?;
                         Ok::<_, glory::ui::Error>(value.clone())
                     }) {
                         Ok(Ok(value)) => value,
@@ -310,7 +339,7 @@ impl Widget for CheckboxGroup {
                         })
                         .map(|item| item.key.clone())
                         .collect();
-                    propose(&scope.downgrade(), &control, &keys, &callback, selected);
+                    propose(&scope.downgrade(), &control, maximum, &callback, selected);
                 });
             if self.common.unstyled {
                 all = all.unstyled();
@@ -323,7 +352,11 @@ impl Widget for CheckboxGroup {
             let checked = scope.bond(move || source.with(|selected| selected.contains(&key)));
             let enabled = enabled.clone();
             let item_enabled = item.enabled.clone();
-            let active = scope.bond(move || enabled.get() && item_enabled.get());
+            let active = scope.bond(move || {
+                enabled.get()
+                    && item_enabled.get()
+                    && (checked.get() || selected.with(|values| values.len() < maximum))
+            });
             let key = item.key.clone();
             let all_items = items.clone();
             let control = control.clone();
@@ -345,7 +378,7 @@ impl Widget for CheckboxGroup {
                 .on_checked_change(move |checked| {
                     let Some(scope) = weak.upgrade() else { return };
                     let current = match control.source.try_with(|value| {
-                        validate(&keys, value)?;
+                        validate(&keys, value, maximum)?;
                         Ok::<_, glory::ui::Error>(value.clone())
                     }) {
                         Ok(Ok(value)) => value,
@@ -369,7 +402,7 @@ impl Widget for CheckboxGroup {
                         })
                         .map(|item| item.key.clone())
                         .collect();
-                    propose(&scope.downgrade(), &control, &keys, &callback, selected);
+                    propose(&scope.downgrade(), &control, maximum, &callback, selected);
                 });
             if self.common.unstyled {
                 checkbox = checkbox.unstyled();

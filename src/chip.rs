@@ -125,6 +125,7 @@ pub struct ChipGroup {
     invalid: Vary<bool>,
     single: Value<String>,
     multiple: Value<Vec<String>>,
+    max_values: usize,
     single_configured: bool,
     multiple_configured: bool,
     on_single: Option<Box<dyn FnMut(String)>>,
@@ -143,6 +144,7 @@ pub fn chip_group(key: impl Into<String>) -> ChipGroup {
         invalid: false.into(),
         single: Value::default(),
         multiple: Value::default(),
+        max_values: crate::checkbox_group::MAX_CHECKBOX_GROUP_ITEMS,
         single_configured: false,
         multiple_configured: false,
         on_single: None,
@@ -215,6 +217,12 @@ impl ChipGroup {
     pub fn on_value_change(mut self, handler: impl FnMut(String) + 'static) -> Self {
         self.on_single = Some(Box::new(handler));
         self.single_configured = true;
+        self
+    }
+    /// Limit the number of values in a multiple-selection group.
+    pub fn max_values(mut self, maximum: usize) -> Self {
+        self.multiple_configured = true;
+        self.max_values = maximum;
         self
     }
     pub fn on_values_change(mut self, handler: impl FnMut(Vec<String>) + 'static) -> Self {
@@ -297,6 +305,7 @@ impl Widget for ChipGroup {
                     )
                 });
                 let mut group = crate::checkbox_group(&self.key)
+                    .max_values(self.max_values)
                     .label(self.label.clone())
                     .theme(self.common.theme.clone())
                     .size(self.common.size)
