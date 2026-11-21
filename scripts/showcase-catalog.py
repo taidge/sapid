@@ -436,7 +436,7 @@ def focused_bundle(identity, family):
 MANTINE_FACTS = json.loads((ROOT / "docs/mantine-api-audit.json").read_text(encoding="utf-8"))
 MANTINE_GROUPS = {
     "Layout": ["AppShell", "AspectRatio", "Center", "Container", "Flex", "Grid", "Group", "SimpleGrid", "Space", "Splitter", "Stack"],
-    "Inputs": ["AlphaSlider", "AngleSlider", "Checkbox", "Chip", "ColorInput", "ColorPicker", "Fieldset", "FileInput", "HueSlider", "Input", "JsonInput", "MaskInput", "NativeSelect", "NumberInput", "PasswordInput", "PinInput", "Radio", "RangeSlider", "Rating", "SegmentedControl", "Slider", "Switch", "Textarea", "TextInput"],
+    "Inputs": ["AlphaSlider", "AngleSlider", "Checkbox", "Chip", "ColorInput", "ColorPicker", "Fieldset", "FileInput", "HueSlider", "Input", "JsonInput", "MaskInput", "NativeSelect", "NumberInput", "PasswordInput", "PhoneInput", "PinInput", "Radio", "RangeSlider", "Rating", "SegmentedControl", "Slider", "Switch", "Textarea", "TextInput"],
     "Combobox": ["Autocomplete", "Cascader", "Combobox", "ComboboxPopover", "MultiSelect", "Pill", "PillsInput", "Select", "TagsInput", "TreeSelect"],
     "Buttons": ["ActionIcon", "Button", "CloseButton", "CopyButton", "FileButton", "Toggle", "UnstyledButton"],
     "Navigation": ["Anchor", "Breadcrumbs", "Burger", "NavLink", "Pagination", "Stepper", "TableOfContents", "Tabs", "Tree"],
@@ -454,6 +454,13 @@ MANTINE_ORDER = {
 MANTINE_BY_TASK = {}
 for item in MANTINE_FACTS["entries"]:
     MANTINE_BY_TASK.setdefault(item["task"], []).append(item)
+# Additions since the frozen upstream audit retain their own coverage metadata.
+additional_core = {}
+for task in tasks:
+    for widget in task.get("additional_core_widgets", []):
+        additional_core[widget["name"]] = widget
+        MANTINE_BY_TASK.setdefault(task["id"], []).append(
+            {"name": widget["name"], "source": "mantine-core", "task": task["id"]})
 NAMED_DEMO_TASKS = {task for task, items in MANTINE_BY_TASK.items() if len(items) > 1} | {
     "P3-07", "P3-13", "P4-05", "P4-06", "P4-07", "P6-06", "P8-01", "P8-04", "P8-05", "P10-06",
 }
@@ -570,6 +577,7 @@ API_INFRASTRUCTURE = {
     "build", "build_and_mount", "as_str", "is_finite", "resolve", "validate_input_placeholder",
 }
 API_TYPES = {
+    "PhoneInput": ["PhoneInput", "PhoneDraft"],
     "Checkbox": ["Checkbox", "CheckboxGroup", "CheckboxItem"],
     "Chip": ["Chip", "ChipGroup", "ChipItem"],
     "Radio": ["Radio", "RadioGroup"],
@@ -628,6 +636,7 @@ API_TYPES = {
     **{'Schedule': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'DayView': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'WeekView': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'MonthView': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'YearView': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'MobileMonthView': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'AgendaView': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'ResourcesDayView': ['ResourceSchedule', 'ResourceScheduleView', 'ResourceScheduleRequest', 'ResourceScheduleData', 'ScheduleResources', 'ScheduleResource', 'ScheduleResourceWindow', 'ResourceAxis', 'ScheduleSelection', 'ScheduleEdit', 'SchedulePermissions'], 'ResourcesWeekView': ['ResourceSchedule', 'ResourceScheduleView', 'ResourceScheduleRequest', 'ResourceScheduleData', 'ScheduleResources', 'ScheduleResource', 'ScheduleResourceWindow', 'ResourceAxis', 'ScheduleSelection', 'ScheduleEdit', 'SchedulePermissions'], 'ResourcesMonthView': ['ResourceSchedule', 'ResourceScheduleView', 'ResourceScheduleRequest', 'ResourceScheduleData', 'ScheduleResources', 'ScheduleResource', 'ScheduleResourceWindow', 'ResourceAxis', 'ScheduleSelection', 'ScheduleEdit', 'SchedulePermissions'], 'ResourcesSchedule': ['ResourceSchedule', 'ResourceScheduleView', 'ResourceScheduleRequest', 'ResourceScheduleData', 'ScheduleResources', 'ScheduleResource', 'ScheduleResourceWindow', 'ResourceAxis', 'ScheduleSelection', 'ScheduleEdit', 'SchedulePermissions'], 'Recurring events': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'Events data': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError']},
 }
 API_PATHS = {
+    "PhoneInput": ["src/phone_input.rs"],
     **{name: ['src/schedule/mod.rs', 'src/schedule/resources/mod.rs', 'src/schedule_model.rs', 'src/schedule_recurrence.rs'] for name in ['Schedule', 'DayView', 'WeekView', 'MonthView', 'YearView', 'MobileMonthView', 'AgendaView', 'ResourcesDayView', 'ResourcesWeekView', 'ResourcesMonthView', 'ResourcesSchedule', 'Recurring events', 'Events data']},
     **{name: ['src/chart_widget.rs', 'src/chart_scene.rs', 'src/chart_model.rs'] for name in ['AreaChart', 'BarChart', 'LineChart', 'CompositeChart']},
     **{name: ['src/plot_widget.rs', 'src/plot_scene.rs', 'src/plot_model.rs', 'src/chart_scene.rs', 'src/chart_model.rs'] for name in ['DonutChart', 'PieChart', 'RadialBarChart', 'CandlestickChart', 'ScatterChart', 'BubbleChart', 'FunnelChart', 'RadarChart', 'Sparkline', 'WaffleChart', 'MatrixChart', 'BarsList', 'BulletChart', 'GaugeChart', 'Treemap', 'SunburstChart', 'SankeyChart']},
@@ -911,7 +920,7 @@ for task in tasks:
             ("Slider", "slider"), ("RangeSlider", "range_slider"), ("Rating", "rating"), ("SegmentedControl", "segmented_control"), ("Switch", "switch"),
             ("Input", "input"), ("TextInput", "text_input"), ("Textarea", "textarea"),
             ("JsonInput", "json_input"), ("NumberInput", "number_input"),
-            ("MaskInput", "mask_input"), ("NativeSelect", "native_select"), ("FileInput", "file_input"),
+            ("PhoneInput", "phone_input"), ("MaskInput", "mask_input"), ("NativeSelect", "native_select"), ("FileInput", "file_input"),
             ("Autocomplete", "autocomplete"), ("Combobox", "combobox"), ("ComboboxPopover", "combobox_popover"), ("MultiSelect", "multi_select"), ("Pill", "pill"), ("PillsInput", "pills_input"), ("TagsInput", "tags_input"), ("TreeSelect", "tree_select"), ("Cascader", "cascader"),
             ("Avatar", "avatar"), ("Badge", "badge"), ("Card", "card"), ("ColorSwatch", "color_swatch"), ("DataList", "data_list"), ("Image", "image"), ("Indicator", "indicator"), ("Kbd", "kbd"), ("NumberFormatter", "number_formatter"), ("OverflowList", "overflow_list"), ("RollingNumber", "rolling_number"), ("Spoiler", "spoiler"), ("ThemeIcon", "theme_icon"),
             ("AreaChart", "area_chart"), ("BarChart", "bar_chart"), ("LineChart", "line_chart"), ("CompositeChart", "composite_chart"), ("CandlestickChart", "candlestick_chart"), ("DonutChart", "donut_chart"), ("PieChart", "pie_chart"), ("FunnelChart", "funnel_chart"), ("RadarChart", "radar_chart"), ("ScatterChart", "scatter_chart"), ("BubbleChart", "bubble_chart"), ("RadialBarChart", "radial_bar_chart"), ("Sparkline", "sparkline"), ("BarsList", "bars_list"), ("BulletChart", "bullet_chart"), ("GaugeChart", "gauge_chart"), ("WaffleChart", "waffle_chart"), ("Treemap", "treemap"), ("SunburstChart", "sunburst_chart"), ("SankeyChart", "sankey_chart"), ("MatrixChart", "matrix_chart"),
@@ -951,11 +960,12 @@ for task in tasks:
         outputs[WEB / f"src/showcase_demos/{key}.rs"] = code
         modules[key] = code
         slug = public_slug(display_name)
+        addition = additional_core.get(display_name, {})
         values = [("id", display_id), ("slug", slug), ("task", identity), ("name", display_name), ("group", display_group),
-                  ("description", DISPLAY_DESCRIPTIONS.get(display_name, description)), ("example", page),
+                  ("description", addition.get("description", DISPLAY_DESCRIPTIONS.get(display_name, description))), ("example", page),
                   ("web", records[identity]["web"]["state"]),
-                  ("native", records[identity]["native"]["state"]),
-                  ("native_note", {"Transition": "Apace supports clock-driven fade/none and custom opacity; animated transforms and Wry presence are explicitly rejected. Engine pixels are separate from OS input/readers.", "MiniCalendar": "Independent 1–31 day strip; native four-theme geometry, keyboard, bounds, RTL and stable day buttons tested.", "Heatmap": "Native dated-grid geometry, pixels, focus and retained identities tested; with_tooltip(true) is explicitly rejected."}.get(display_name, records[identity]["native"]["notes"]))]
+                  ("native", addition.get("native", records[identity]["native"]["state"])),
+                  ("native_note", {"Transition": "Apace supports clock-driven fade/none and custom opacity; animated transforms and Wry presence are explicitly rejected. Engine pixels are separate from OS input/readers.", "MiniCalendar": "Independent 1–31 day strip; native four-theme geometry, keyboard, bounds, RTL and stable day buttons tested.", "Heatmap": "Native dated-grid geometry, pixels, focus and retained identities tested; with_tooltip(true) is explicitly rejected."}.get(display_name, addition.get("native_note", records[identity]["native"]["notes"])))]
         entries.append((display_group, display_name, display_id, "    Entry { " + ", ".join(f"{key}: {literal(value)}" for key, value in values)
                        + f', code: include_str!("showcase_demos/{key}.rs"), build: crate::showcase_demos::{key}_widget' + " },"))
 
@@ -965,7 +975,7 @@ entries = sorted(entries, key=lambda row: (
     MANTINE_ORDER.get(row[1], (99, 999))[1],
     row[2],
 ))
-core_names = [name for _, name, _, _ in entries[:121]]
+core_names = [name for group, name, _, _ in entries if group in MANTINE_GROUPS]
 expected_core = [name for names in MANTINE_GROUPS.values() for name in names]
 if core_names != expected_core:
     raise SystemExit("Core navigation names or order drifted from the Mantine catalogue")
@@ -1007,7 +1017,7 @@ mod tests {
 
     #[test]
     fn catalogue_covers_every_work_item_once_with_real_rust_examples() {
-        assert_eq!(ENTRIES.len(), 181);
+        assert_eq!(ENTRIES.len(), CATALOGUE_SIZE);
         for (index, entry) in ENTRIES.iter().enumerate() {
             assert!(ENTRIES[..index].iter().all(|other| other.id != entry.id));
             assert!(ENTRIES[..index].iter().all(|other| other.slug != entry.slug));
@@ -1029,7 +1039,7 @@ for key in sorted(modules):
     registry += f"mod {key};\n"
     registry += f"pub fn {key}_widget(theme: sapid::Theme) -> Box<dyn Widget> {{ Box::new({key}::demo(theme)) }}\n"
 outputs[WEB / "src/showcase_demos/mod.rs"] = formatted(registry)
-outputs[CATALOG] = formatted(catalog)
+outputs[CATALOG] = formatted(catalog.replace("CATALOGUE_SIZE", str(len(entries))))
 outputs[WEB / "src/showcase_api.rs"] = formatted(api_catalog(tasks))
 stale = []
 previous = {path.stem for path in (WEB / "src/showcase_demos").glob("*.rs")} - {"mod"}

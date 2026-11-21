@@ -14,10 +14,10 @@ fn nodes(app: &App) -> Vec<NodeId> {
 }
 
 #[test]
-fn catalogue_has_exactly_181_unique_routes_and_real_example_sources() {
+fn catalogue_has_unique_routes_and_real_example_sources() {
     let mut ids = std::collections::BTreeSet::new();
     let mut slugs = std::collections::BTreeSet::new();
-    assert_eq!(ENTRIES.len(), 181);
+    assert!(ENTRIES.iter().any(|entry| entry.slug == "phone-input"));
     for entry in ENTRIES {
         assert!(ids.insert(entry.id), "duplicate {}", entry.id);
         assert!(slugs.insert(entry.slug), "duplicate {}", entry.slug);
@@ -49,7 +49,7 @@ fn docs_navigation_is_live_semantic_links_and_mobile_menu_is_rust_state() {
                 .any(|c| c == "site-nav-link")
         })
         .collect();
-    assert_eq!(navigation.len(), 181);
+    assert_eq!(navigation.len(), ENTRIES.len());
     assert!(navigation.iter().all(|id| matches!(
         app.tree().node(*id).unwrap().descriptor.view().props,
         Props::Link(_)

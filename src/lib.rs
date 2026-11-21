@@ -476,6 +476,9 @@ pub use typography::{
 pub use visually_hidden::{MAX_VISUALLY_HIDDEN_BYTES, VisuallyHidden, visually_hidden};
 
 pub mod prelude {
+    #[cfg(feature = "phone")]
+    pub use crate::{PhoneDraft, PhoneInput, phone_input};
+
     #[cfg(feature = "dates")]
     pub use crate::date_time_model::*;
     #[cfg(feature = "dates")]
@@ -785,6 +788,10 @@ pub use number_model::{
 };
 mod number_input;
 pub use number_input::{NumberClampBehavior, NumberInput, number_input};
+#[cfg(feature = "phone")]
+mod phone_input;
+#[cfg(feature = "phone")]
+pub use phone_input::{PhoneDraft, PhoneInput, phone_input};
 mod mask_input;
 mod mask_model;
 mod pin_input;
