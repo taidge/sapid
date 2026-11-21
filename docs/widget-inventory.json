@@ -2021,6 +2021,7 @@
       "evidence": {
         "implementation": [
           "src/spoiler.rs",
+          "examples/web/src/dedicated_demos/spoiler.rs: illustrated measured guide",
           "docs/spoiler.md"
         ],
         "tests": [
@@ -2667,6 +2668,7 @@
         ],
         "tests": [
           "tests/spinner.rs",
+          "src/progress.rs: inset rotating loader geometry",
           "examples/native/tests/spinner.rs",
           "examples/web/spinner-acceptance.js",
           "D:/BuildCache/sapid/spinner-browser.json",

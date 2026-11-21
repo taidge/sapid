@@ -293,8 +293,7 @@ impl Widget for ActionIcon {
                     glory::ui::graphic()
                         .class("sapid-action-icon-loader")
                         .drawing(scope.bond(move || {
-                            let mut drawing =
-                                crate::progress::arc(16., 2., false, 0.75, loader_color);
+                            let mut drawing = crate::progress::spinner_arc(16., 2., loader_color);
                             drawing.animation =
                                 rotating
                                     .get()
@@ -478,7 +477,7 @@ pub(crate) fn loading_indicator(
     glory::ui::graphic()
         .class("sapid-button-loader")
         .drawing(scope.bond(move || {
-            let mut drawing = crate::progress::arc(16., 2., false, 0.75, color);
+            let mut drawing = crate::progress::spinner_arc(16., 2., color);
             drawing.animation = rotating
                 .get()
                 .then_some(glory::render::GraphicAnimation::Rotate {

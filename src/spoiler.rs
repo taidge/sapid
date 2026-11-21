@@ -1,4 +1,4 @@
-//! Measured plain-text truncation. Interactive descendants are not accepted.
+//! Measured text truncation with an optional illustration. Interactive descendants are not accepted.
 use crate::appearance::{Common, common_methods, configure, observe};
 use crate::composite::{self, Callback};
 use crate::state::Value;
@@ -12,6 +12,7 @@ pub struct Spoiler {
     common: Common,
     key: String,
     content: Vary<String>,
+    illustration: Option<crate::Image>,
     expanded: Value<bool>,
     max_height: f64,
     more: String,
@@ -25,6 +26,7 @@ pub fn spoiler(key: impl Into<String>) -> Spoiler {
         common: Common::default(),
         key: key.into(),
         content: "".into(),
+        illustration: None,
         expanded: Value::default(),
         max_height: 120.0,
         more: "Show more".into(),
@@ -38,6 +40,11 @@ impl Spoiler {
     common_methods!();
     pub fn content(mut self, content: impl Into<Vary<String>>) -> Self {
         self.content = content.into();
+        self
+    }
+    /// Place an image in the measured content, before the text.
+    pub fn illustration(mut self, image: crate::Image) -> Self {
+        self.illustration = Some(image);
         self
     }
     pub fn max_height(mut self, height: f64) -> Self {
@@ -89,7 +96,11 @@ impl Widget for Spoiler {
         if initial.len() > MAX_SPOILER_BYTES {
             return Err(glory::render::Error::InvalidProps("spoiler text exceeds 64KiB").into());
         }
-        let measured = scope.cage(if initial.is_empty() { Some(0.0) } else { None });
+        let measured = scope.cage(if initial.is_empty() && self.illustration.is_none() {
+            Some(0.0)
+        } else {
+            None
+        });
         let control = std::mem::take(&mut self.expanded).mount(scope);
         let open = control.source.clone();
         let style_open = open.clone();
@@ -113,7 +124,7 @@ impl Widget for Spoiler {
         let text_ref = scope.cage(None);
         let body_ref = scope.cage(None);
         let on_measure = scope.downgrade();
-        let body = glory::ui::view()
+        let mut body = glory::ui::view()
             .focus(glory::render::FocusMode::Programmatic)
             .class("sapid-spoiler-measure")
             .style(Style::new().min_width(Length::Px(0.0)))
@@ -138,15 +149,18 @@ impl Widget for Spoiler {
                         scope.report_error(error);
                     }
                 }
-            })
-            .fill(
-                glory::ui::text()
-                    .kind(glory::render::TextKind::Paragraph)
-                    .class("sapid-spoiler-text")
-                    .style(text_style)
-                    .content(initial.clone())
-                    .node_ref(text_ref),
-            );
+            });
+        if let Some(image) = self.illustration.take() {
+            body = body.fill(image);
+        }
+        let body = body.fill(
+            glory::ui::text()
+                .kind(glory::render::TextKind::Paragraph)
+                .class("sapid-spoiler-text")
+                .style(text_style)
+                .content(initial.clone())
+                .node_ref(text_ref),
+        );
         let viewport_ref = self.viewport.unwrap_or_else(|| scope.cage(None));
         let viewport = glory::ui::view()
             .class("sapid-spoiler-viewport")

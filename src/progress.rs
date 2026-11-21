@@ -324,8 +324,18 @@ pub(crate) fn arc(
 ) -> GraphicProps {
     arc_span(size, thickness, ArcGeometry::new(semi), 0., fraction, color)
 }
+/// Leave a pixel around rotating strokes for subpixel sampling at every angle.
+pub(crate) fn spinner_arc(size: f64, thickness: f64, color: Color) -> GraphicProps {
+    let geometry = ArcGeometry {
+        inset: 1.,
+        ..ArcGeometry::new(false)
+    };
+    arc_span(size, thickness, geometry, 0., 0.75, color)
+}
+
 #[derive(Clone, Copy)]
 struct ArcGeometry {
+    inset: f64,
     semi: bool,
     orientation: SemiCircleOrientation,
     direction: SemiCircleFillDirection,
@@ -335,6 +345,7 @@ struct ArcGeometry {
 impl ArcGeometry {
     const fn new(semi: bool) -> Self {
         Self {
+            inset: 0.,
             semi,
             orientation: SemiCircleOrientation::Up,
             direction: SemiCircleFillDirection::LeftToRight,
@@ -347,6 +358,7 @@ impl ArcGeometry {
         direction: SemiCircleFillDirection,
     ) -> Self {
         Self {
+            inset: 0.,
             semi: true,
             orientation,
             direction,
@@ -356,6 +368,7 @@ impl ArcGeometry {
     }
     fn ring(start_angle: f64, round_caps: bool) -> Self {
         Self {
+            inset: 0.,
             semi: false,
             orientation: SemiCircleOrientation::Up,
             direction: SemiCircleFillDirection::LeftToRight,
@@ -376,7 +389,7 @@ fn arc_span(
     fraction: f64,
     color: Color,
 ) -> GraphicProps {
-    let radius = (size - thickness) / 2.0;
+    let radius = (size - thickness) / 2.0 - geometry.inset;
     let center_x = size / 2.;
     let center_y = if geometry.semi && geometry.orientation == SemiCircleOrientation::Down {
         thickness / 2.

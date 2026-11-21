@@ -7,7 +7,7 @@ the name, status and busy announcement, preserving a decorative Graphic rather
 than duplicating its containing region's announcement. No button, range or
 keyboard behavior is implied.
 
-The default Oval has a bounded three-quarter circular path. Animation is a finite
+The default Oval leaves one pixel around its three-quarter arc so the rotating stroke and round caps have room for antialiasing. Animation is a finite
 host-owned rotation, not a component task, per-frame reactive write or timer.
 The browser honors prefers-reduced-motion dynamically. Native hosts explicitly
 configure a motion preference; unknown defaults to Reduce (a visible static

@@ -110,7 +110,7 @@ Digit line boxes, translation distance and separators follow reactive explicit
 font size or line height together. Large type is not cropped to a fixed 24px row;
 changing typography retains the current reel nodes.
 
-Spoiler measures and clips real plain text at an explicit `max_height`. Short
+Spoiler measures its text and optional illustration together at an explicit `max_height`. Short
 content omits the disclosure action. Controlled expansion may be refused; text
 changes remeasure the same viewport. Labels are explicit localized strings.
 Spoiler currently settles immediately without a transition, including reduced
