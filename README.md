@@ -188,6 +188,12 @@ From a Windows checkout with the sibling sources available:
 
 # Public showcase and browser acceptance at http://127.0.0.1:8795/
 ./scripts/check-showcase.ps1 -Serve -Browser
+
+# Native Rust showcase in the system WebView (uses the sibling Glory source)
+cargo run --manifest-path examples/web/Cargo.toml --features wry-showcase --bin showcase_wry -- badge
+
+# Windows WebView2 acceptance, with Playwright installed
+node scripts/check-showcase-wry.cjs
 ```
 
 See [development checks](docs/development-checks.md) for formatting, optional

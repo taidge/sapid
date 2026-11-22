@@ -17,6 +17,7 @@ crate-type = ["cdylib", "rlib"]
 # The public site does not expose the four legacy gallery mounting protocols.
 # Default builds retain them for the independent 8794 acceptance fixtures.
 public-showcase = []
+wry-showcase = ["glory/wry"]
 
 [dependencies]
 serde = { version = "=1.0.229", features = ["derive"] }
@@ -36,3 +37,8 @@ codegen-units = 1
 # Exercise the sibling Glory source with a single set of public widget types.
 [patch.crates-io]
 glory = { path = "../../../glory/crates/glory" }
+
+[[bin]]
+name = "showcase_wry"
+path = "src/bin/showcase_wry.rs"
+required-features = ["wry-showcase"]

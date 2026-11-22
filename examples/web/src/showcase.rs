@@ -732,6 +732,20 @@ pub fn site(theme: Theme, selection: String) -> impl Widget {
     site_at(theme, selection, initial)
 }
 pub fn site_at(theme: Theme, selection: String, initial: glory::routing::Location) -> impl Widget {
+    site_with_router(theme, selection, initial, |_, _, _| Ok(()))
+}
+
+pub(crate) fn site_with_router(
+    theme: Theme,
+    selection: String,
+    initial: glory::routing::Location,
+    bind: impl Fn(
+        &Scope,
+        crate::showcase_navigation::State,
+        glory::routing::RouterHandle,
+    ) -> glory::ui::Result
+    + 'static,
+) -> impl Widget {
     widget(move |scope| {
         let definitions = crate::showcase_navigation::routes();
         let router = glory::routing::Router::new(
@@ -742,6 +756,7 @@ pub fn site_at(theme: Theme, selection: String, initial: glory::routing::Locatio
         .map_err(|error| glory::render::Error::Backend(error.to_string()))?;
         let page = crate::showcase_navigation::Page::builtin(theme.clone(), selection.clone());
         let state = crate::showcase_navigation::State::new(scope, page, Vec::new(), false);
+        bind(scope, state, router.handle())?;
         crate::showcase_navigation::routed_app(state, definitions, router.handle()).show_in(scope)
     })
 }
