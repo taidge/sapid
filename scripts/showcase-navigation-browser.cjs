@@ -22,12 +22,14 @@ const {chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs
     };
    });
    const label=`${mode} at ${width}px: ${JSON.stringify(geometry)}`;
-   assert(Math.abs(geometry.docLeft-geometry.headerLeft)<1,label);
-   assert(Math.abs(geometry.docRight-geometry.headerRight)<1,label);
+   const left = width <= 1060 ? 16 : geometry.headerLeft;
+   const right = width <= 1240 ? geometry.clientWidth - 32 : geometry.headerRight;
+   assert(Math.abs(geometry.docLeft-left)<1,label);
+   assert(Math.abs(geometry.docRight-right)<1,label);
    assert(geometry.scrollWidth<=geometry.clientWidth+1,label);
   }
   await page.setViewportSize(viewport);
-  ok(`${mode} Showcase aligns the header and documentation edges from 320 to 2200px`);
+  ok(`${mode} Showcase preserves the responsive documentation insets from 320 to 2200px`);
  };
  const review=await context.newPage();review.on('pageerror',e=>report.errors.push(String(e)));
  const reviewReady=widget=>review.waitForFunction(widget=>window.ready===true&&document.documentElement.getAttribute('data-sapid-widget')===widget,widget);
@@ -99,9 +101,9 @@ const {chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs
  ok('Header, sidebar, search and browser back/forward use one document without WASM reload');
  const popupEvent=context.waitForEvent('page');await page.getByRole('navigation',{name:'Primary navigation'}).getByRole('link',{name:'Widgets',exact:true}).click({modifiers:['Control']});const popup=await popupEvent;await popup.waitForURL(/widget=button/);assert(popup.url().includes('widget=button'));await popup.close();assert.equal(documents,initialDocuments);ok('Control-click retains native new-tab behavior');
   await page.getByRole('navigation',{name:'Primary navigation'}).getByRole('link',{name:'Widgets',exact:true}).click();await ready('button','green','light');
- const filled=page.locator('.site-demo').getByRole('button',{name:'Filled button',exact:true});await filled.click();await page.getByText('Button presses: 1',{exact:true}).waitFor();const identity=await filled.getAttribute('data-gly-node');
+ const filled=page.locator('.site-doc-content > .site-preview .site-demo').getByRole('button',{name:'Filled button',exact:true});await filled.click();await page.locator('.site-doc-content > .site-preview').getByText('Button presses: 1',{exact:true}).waitFor();const identity=await filled.getAttribute('data-gly-node');
   await page.getByRole('navigation',{name:'On this page'}).getByRole('link',{name:'Composition',exact:true}).click();await page.waitForURL(/#composition$/);await page.goBack();await ready('button','green','light');
- assert.equal(await filled.getAttribute('data-gly-node'),identity);assert(await page.getByText('Button presses: 1',{exact:true}).count());ok('Fragment history retains live widget identity and state');
+ assert.equal(await filled.getAttribute('data-gly-node'),identity);assert(await page.locator('.site-doc-content > .site-preview').getByText('Button presses: 1',{exact:true}).count());ok('Fragment history retains live widget identity and state');
   await page.goto(base+'/ssr-button-blue-dark.html');await ready('button','blue','dark');const afterSSR=documents;await page.evaluate(()=>window.navigationIdentity={token:'ssr-adopted'});
  await checkDocEdges('Hydrated');
   await page.locator('.site-nav-link').filter({hasText:/^TextInput$/}).click();await ready('text-input','blue','dark');await page.goBack();await ready('button','blue','dark');assert.equal(documents,afterSSR);assert.equal(await page.evaluate(()=>window.navigationIdentity?.token),'ssr-adopted');ok('Hydrated SSR pages join client routing and restore their original history entry');

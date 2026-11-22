@@ -60,5 +60,17 @@ async function assertPlaygroundLayout(primary, width) {
   }
 }
 
-module.exports = { showcaseSlugs, assertPlaygroundLayout, base, buildRoot, outputPath, outputRoot, tempDir, writeReport, matrix,
+async function assertDocHeadingWeights(page) {
+  const headings = await page.locator('.site-title,.site-section-title').evaluateAll(elements =>
+    elements.map(element => ({
+      text: element.textContent,
+      expected: element.matches('.site-doc-main > .site-title,.site-section-title:has(+ .site-native-select-note)') ? '600' : '400',
+      actual: getComputedStyle(element).fontWeight,
+    })));
+  const assert = require('node:assert/strict');
+  assert(headings.length > 1, 'document title and section headings');
+  for (const heading of headings) assert.equal(heading.actual, heading.expected, heading.text);
+}
+
+module.exports = { assertDocHeadingWeights, showcaseSlugs, assertPlaygroundLayout, base, buildRoot, outputPath, outputRoot, tempDir, writeReport, matrix,
   get chromium() { return require(process.env.SAPID_PLAYWRIGHT || 'playwright').chromium; } };
