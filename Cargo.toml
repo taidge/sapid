@@ -1,6 +1,6 @@
 [package]
 name = "sapid"
-version = "0.9.0"
+version = "0.9.1"
 edition = "2024"
 authors = ["Chris Young <chris@veco.id>"]
 rust-version = "1.95"
@@ -24,11 +24,11 @@ dates = []
 unicode-normalization = { version = "=0.1.26", optional = true, default-features = false }
 phonenumber = { version = "=0.3.10", optional = true }
 libm = { version = "=0.2.16", default-features = false, optional = true }
-glory = { version = "0.9.0", default-features = false }
+glory = { version = "0.9.1", default-features = false }
 serde_json = { version = "=1.0.154", features = ["raw_value"], optional = true }
 
 [dev-dependencies]
-glory = { version = "0.9.0", default-features = false, features = ["ssr", "dsl"] }
+glory = { version = "0.9.1", default-features = false, features = ["ssr", "dsl"] }
 
 [lints.rust]
 unsafe_code = "forbid"

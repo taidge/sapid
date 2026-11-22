@@ -1,6 +1,6 @@
 # Coordinated release versions
 
-Sapid 0.9.0 exposes Glory 0.9 types and requires Glory 0.9.0 or a later compatible 0.9 patch.
+Sapid 0.9.1 exposes Glory 0.9 types and requires Glory 0.9.1 or a later compatible 0.9 patch.
 The library resolves the same Glory package from crates.io in Git and registry dependencies.
 The tested engine versions are Apace 0.4.0, Takia 0.16.0 and Wingy 0.31.2.
 Use the five sibling source repositories. Frozen publication checks use the
