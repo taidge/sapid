@@ -38,6 +38,17 @@ struct Batch {
     headings: Vec<(SemanticId, Option<Rect>)>,
     repeat: bool,
 }
+enum Reveal {
+    Requested(SemanticId),
+    AtScrollLimit(SemanticId),
+}
+impl Reveal {
+    fn id(&self) -> &SemanticId {
+        match self {
+            Self::Requested(id) | Self::AtScrollLimit(id) => id,
+        }
+    }
+}
 struct Index {
     key: String,
     owner: glory::core::InstanceId,
@@ -51,7 +62,7 @@ struct Index {
     next_entry: Cell<u64>,
     measured: Cell<bool>,
     offset: Cell<f64>,
-    reveal: RefCell<Option<SemanticId>>,
+    reveal: RefCell<Option<Reveal>>,
     queued: Cell<bool>,
     task: RefCell<Option<glory::core::TaskToken>>,
 }
@@ -141,7 +152,7 @@ impl TocContext {
             )
             .into());
         }
-        *self.0.reveal.borrow_mut() = Some(id.clone());
+        *self.0.reveal.borrow_mut() = Some(Reveal::Requested(id.clone()));
         self.0.refresh()
     }
     pub fn len(&self) -> usize {
@@ -201,6 +212,9 @@ impl Index {
     }
     fn unregister(&self, id: &SemanticId) {
         let removed = self.entries.borrow_mut().remove(id);
+        if self.reveal.borrow().as_ref().is_some_and(|r| r.id() == id) {
+            self.reveal.borrow_mut().take();
+        }
         if removed.is_some() && self.owner.is_alive() {
             if self.active.get().as_ref() == Some(id) {
                 let _ = self.active.try_revise(|value| *value = None);
@@ -383,35 +397,51 @@ impl Index {
             .into_iter()
             .filter_map(|(id, rect)| rect.map(|rect| (id, rect)))
             .collect::<Vec<_>>();
-        let active = model::current(&headings, viewport, self.offset.get());
+        let mut active = model::current(&headings, viewport, self.offset.get());
+        let reveal = self.reveal.borrow_mut().take();
+        if let Some(reveal) = reveal
+            && let Some((id, heading)) = headings.iter().find(|(id, heading)| {
+                id == reveal.id() && heading.width > 0. && heading.height > 0.
+            })
+        {
+            let requested_y = metrics.y + heading.y - viewport.y - self.offset.get();
+            let y = requested_y.clamp(
+                0.,
+                (metrics.content_height - metrics.viewport_height).max(0.),
+            );
+            let requested = matches!(reveal, Reveal::Requested(_));
+            if requested {
+                if metrics.x < 0. || metrics.y < 0. {
+                    return Err(glory::render::Error::Unsupported(
+                        "heading reveal on negative RTL/elastic offsets",
+                    )
+                    .into());
+                }
+                if let Some(document) = self.viewport.borrow().clone()
+                    && let Some(scope) = document.scope.upgrade()
+                {
+                    scope.action(Action::ScrollTo {
+                        node: document.node,
+                        x: metrics.x,
+                        y,
+                    })?;
+                }
+            }
+            // A visible heading near either end may never reach the reading line. Retain the
+            // explicitly requested section only while the viewport remains at that limit.
+            let top_at_limit = heading.y + metrics.y - y;
+            if requested_y != y
+                && top_at_limit < viewport.y + viewport.height
+                && top_at_limit + heading.height > viewport.y
+                && (requested || (metrics.y - y).abs() <= 1.)
+            {
+                *self.reveal.borrow_mut() = Some(Reveal::AtScrollLimit(id.clone()));
+                active = Some(id.clone());
+            }
+        }
         self.measured.set(true);
         if self.active.get() != active {
             self.active.try_revise(|value| *value = active)?;
-        }
-        let reveal = self.reveal.borrow_mut().take();
-        if let Some(reveal) = reveal
-            && let Some((_, heading)) = headings.iter().find(|(id, _)| id == &reveal)
-            && heading.height > 0.
-        {
-            if metrics.x < 0. || metrics.y < 0. {
-                return Err(glory::render::Error::Unsupported(
-                    "heading reveal on negative RTL/elastic offsets",
-                )
-                .into());
-            }
-            if let Some(viewport) = self.viewport.borrow().clone()
-                && let Some(scope) = viewport.scope.upgrade()
-            {
-                scope.action(Action::ScrollTo {
-                    node: viewport.node,
-                    x: metrics.x,
-                    y: (metrics.y + heading.y - work.viewport.unwrap().y - self.offset.get())
-                        .clamp(
-                            0.,
-                            (metrics.content_height - metrics.viewport_height).max(0.),
-                        ),
-                })?;
-            }
         }
         if work.repeat {
             self.refresh()?;
