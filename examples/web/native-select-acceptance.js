@@ -28,7 +28,8 @@ async (hostPage,baseURL='http://127.0.0.1:8794')=>{
         } finally { row.remove(); }
       });
       assert(compact, `${suite}: long option keeps the native arrow inside a compact flex row`);
-      await select.focus();await page.keyboard.press('ArrowDown');await page.keyboard.press('Enter');await tick();
+      // Native typeahead works with the closed menu on both macOS and Windows.
+      await select.focus();await page.keyboard.press('p');await tick();
       assert(await select.inputValue()==='pro-value'&&await select.evaluate(e=>e===document.activeElement),`${suite}: actual native keyboard selection and focus`);
       await page.evaluate(()=>demo.native_select_state('reject','true'));await select.selectOption('start-value');await tick();assert(await select.inputValue()==='pro-value',`${suite}: controlled rejection restores actual selectedness`);
       await page.evaluate(()=>demo.native_select_state('reject','false'));await select.selectOption('start-value');await tick();assert(await select.inputValue()==='start-value',`${suite}: accepted controlled echo`);
