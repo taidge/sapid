@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict'), fs = require('node:fs');
-const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-browser-env.cjs');
+const {assertPlaygroundLayout,matrix, chromium, base, outputPath, writeReport } = require('./showcase-browser-env.cjs');
 (async () => {
  const browser=await chromium.launch(), context=await browser.newContext(), page=await context.newPage();
  page.setDefaultTimeout(10000);
@@ -31,7 +31,27 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
     const group=detail('avatar-group');assert.equal(await group.locator('.sapid-avatar').count(),4);assert(await group.getByText('+2',{exact:true}).isVisible());
     const recovery=detail('avatar-recovery'),image=recovery.locator('img'),icon=recovery.locator('.sapid-avatar-fallback');await loaded(image);await image.evaluate(e=>window.avatarImage=e);await icon.evaluate(e=>window.avatarFallback=e);await recovery.getByRole('button',{name:'Use unavailable avatar',exact:true}).click();await tick();assert(await icon.isVisible());assert.equal(await icon.evaluate(e=>e.tagName.toLowerCase()),'svg');await recovery.getByRole('button',{name:'Restore avatar photo',exact:true}).click();await loaded(image);await tick();assert(!await icon.isVisible());assert(await image.evaluate(e=>e===window.avatarImage));assert(await icon.evaluate(e=>e===window.avatarFallback));
    } else if(slug==='badge') {
-    assert.equal(await primary.locator('.sapid-badge').count(),3);assert.equal(await primary.locator('.sapid-badge-dot-marker').count(),1);assert.equal(await primary.locator('.sapid-badge-left svg').count(),1);
+     await assertPlaygroundLayout(primary, width);
+    const badge=primary.locator('.site-playground-preview .sapid-badge');
+    const variant=primary.getByRole('combobox',{name:'Variant'});
+    const css=prop=>badge.evaluate((el,p)=>getComputedStyle(el)[p],prop);
+    await primary.getByRole('textbox',{name:'Custom color'}).fill('#663399');await tick();
+    assert.equal(await css('backgroundColor'),'rgb(102, 51, 153)');
+    const initialSize=await css('fontSize');
+    await primary.getByRole('slider',{name:'Size',exact:true}).press('End');await tick();
+    assert(parseFloat(await css('fontSize'))>parseFloat(initialSize));
+    await primary.getByRole('slider',{name:'Radius',exact:true}).press('Home');await tick();
+    assert.equal(await css('borderTopLeftRadius'),'0px');
+    for(const [option,suffix] of [['light','soft'],['outline','outline'],['dot','dot'],['transparent','transparent'],['default','default'],['white','white'],['gradient','gradient']]){
+     await variant.selectOption(option);await tick();assert(await badge.evaluate((el,s)=>el.classList.contains('sapid-badge-'+s),suffix));
+     if(option==='dot')assert.equal(await badge.locator('svg').count(),1);
+    }
+    await primary.getByRole('combobox',{name:'Gradient from'}).selectOption('Teal');
+    await primary.getByRole('combobox',{name:'Gradient to'}).selectOption('Orange');
+    await primary.getByRole('slider',{name:'Gradient angle'}).press('End');await tick();
+    assert.match(await css('backgroundImage'),/360deg.*18, 184, 134.*253, 126, 20/);
+    await variant.selectOption('filled');await tick();
+    assert.equal(await css('backgroundColor'),'rgb(102, 51, 153)');
     assert.equal(await detail('badge-variants').locator('.sapid-badge').count(),4);assert.equal(await detail('badge-sizes').locator('.sapid-badge').count(),6);
     const sections=detail('badge-sections'),label=sections.locator('.sapid-badge-content'),icon=sections.locator('svg');await label.evaluate(e=>window.badgeLabel=e);await icon.evaluate(e=>window.badgeIcon=e);await sections.getByRole('checkbox',{name:'Ready to publish',exact:true}).check();await tick();assert.equal(await label.textContent(),'Ready to publish');assert(await label.evaluate(e=>e===window.badgeLabel));assert(await icon.evaluate(e=>e===window.badgeIcon));
     const actions=detail('badge-actions');await actions.getByRole('button',{name:'Review comments',exact:true}).click();await tick();assert(await actions.getByText('Comments marked as reviewed.',{exact:true}).isVisible());

@@ -98,6 +98,10 @@ pub enum BadgeVariant {
     Solid,
     Outline,
     Dot,
+    Transparent,
+    Default,
+    White,
+    Gradient,
 }
 /// Finite passive side content, without nested interactive controls.
 #[derive(Clone, Debug)]
@@ -259,6 +263,32 @@ impl Widget for Badge {
                 base.border_style = Some(BorderStyle::Solid);
                 base.border_color = Some(accent);
                 "sapid-badge sapid-badge-outline"
+            }
+            BadgeVariant::Transparent => {
+                base.color = Some(theme.contrasting_foreground(theme.surface, accent));
+                "sapid-badge sapid-badge-transparent"
+            }
+            BadgeVariant::Default => {
+                base.color = Some(theme.foreground);
+                base.background = Some(theme.surface);
+                base.border_width = Some(Edges::all(1.));
+                base.border_style = Some(BorderStyle::Solid);
+                base.border_color = Some(theme.border);
+                "sapid-badge sapid-badge-default"
+            }
+            BadgeVariant::White => {
+                let background = glory::style::Color(255, 255, 255, 255);
+                base.background = Some(background);
+                base.color = Some(theme.contrasting_foreground(background, accent));
+                "sapid-badge sapid-badge-white"
+            }
+            BadgeVariant::Gradient => {
+                base.background_image = Some(glory::style::LinearGradient {
+                    angle: 45.,
+                    stops: vec![accent, theme.foreground],
+                });
+                base.color = Some(theme.on_accent);
+                "sapid-badge sapid-badge-gradient"
             }
             BadgeVariant::Dot => {
                 base.color = Some(theme.foreground);

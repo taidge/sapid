@@ -432,3 +432,27 @@ fn dynamic_accordion_fixture_has_deterministic_rich_relations_and_four_theme_ssr
         }
     }
 }
+
+#[test]
+fn keyed_accordion_keeps_the_accessible_name_with_a_leading_chevron() {
+    let snapshot = glory::ssr::snapshot(
+        sapid::accordion("leading")
+            .chevron_at_start(true)
+            .chevron_size(24.)
+            .item_radius(9.)
+            .items(vec!["one".to_owned()], |key| {
+                sapid::accordion_item(key)
+                    .label("Section one")
+                    .trigger_content(|| glory::ui::text().content("Keyed summary"))
+            }),
+    )
+    .unwrap();
+    let (_, trigger) = snapshot.html.split_once("<button").unwrap();
+    let (trigger, _) = trigger.split_once("</button>").unwrap();
+    assert!(trigger.contains("aria-label=\"Section one\""));
+    assert!(
+        trigger.find("sapid-disclosure-chevron").unwrap() < trigger.find("Keyed summary").unwrap()
+    );
+    assert!(trigger.contains("width:24px"));
+    assert!(snapshot.html.contains("border-radius:9px"));
+}

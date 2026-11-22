@@ -440,7 +440,7 @@ html,body{margin:0;padding:0}
 .showcase-walking-guide .sapid-image{float:right;margin:0 0 8px 16px;border-radius:6px}
 .sapid-site .sapid-spoiler-text{white-space:pre-line}
 
-.sapid-site .site-configurator .site-playground-preview:has(.sapid-blockquote,.sapid-theme-icon){align-items:center!important;justify-content:center!important;padding:34px 26px}
+.sapid-site .site-configurator .site-playground-preview:has(.sapid-blockquote,.sapid-theme-icon,>.sapid-badge){align-items:center!important;justify-content:center!important;padding:34px 26px}
 .sapid-site .site-configurator .site-playground-preview>.sapid-blockquote{width:100%;max-width:440px}
 .sapid-site .site-configurator .sapid-blockquote-citation{font-style:italic}
 .sapid-site .site-playground-preview .sapid-timeline-content{min-width:0}

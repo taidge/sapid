@@ -1,5 +1,9 @@
 //! Generated compiled widget examples; source panels include these exact files.
 use glory::ui::Widget;
+mod accordion_usage;
+pub fn accordion_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
+    Box::new(accordion_usage::demo(theme))
+}
 mod action_bar_usage;
 pub fn action_bar_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(action_bar_usage::demo(theme))
@@ -167,10 +171,6 @@ pub fn container_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
 mod copy_button_usage;
 pub fn copy_button_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(copy_button_usage::demo(theme))
-}
-mod core_accordion;
-pub fn core_accordion_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(core_accordion::demo(theme))
 }
 mod core_tabs;
 pub fn core_tabs_widget(theme: sapid::Theme) -> Box<dyn Widget> {

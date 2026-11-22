@@ -39,5 +39,17 @@ function writeReport(name, report) {
   fs.writeFileSync(outputPath(name), JSON.stringify(report, null, 2));
 }
 
-module.exports = { base, buildRoot, outputPath, outputRoot, tempDir, writeReport, matrix,
+async function assertPlaygroundLayout(primary, width) {
+  const preview = await primary.locator('.site-playground-preview').boundingBox();
+  const controls = await primary.locator('.site-playground-controls').boundingBox();
+  const assert = require('node:assert/strict');
+  assert(preview && controls, 'visible preview and controls');
+  if (width > 600) {
+    assert(controls.x >= preview.x + preview.width - 1 && Math.abs(controls.y - preview.y) < 1, 'desktop controls beside preview');
+  } else {
+    assert(controls.y >= preview.y + preview.height - 1 && Math.abs(controls.x - preview.x) < 1, 'phone controls below preview');
+  }
+}
+
+module.exports = { assertPlaygroundLayout, base, buildRoot, outputPath, outputRoot, tempDir, writeReport, matrix,
   get chromium() { return require(process.env.SAPID_PLAYWRIGHT || 'playwright').chromium; } };

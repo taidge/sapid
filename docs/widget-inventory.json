@@ -337,6 +337,7 @@
       "baseline_at_snapshot": true,
       "evidence": {
         "implementation": [
+          "examples/web/src/dedicated_demos/accordion.rs",
           "src/accordion/mod.rs",
           "src/collection.rs",
           "src/composite/mod.rs",
@@ -1334,6 +1335,7 @@
       "baseline_at_snapshot": false,
       "evidence": {
         "implementation": [
+          "examples/web/src/dedicated_demos/stack.rs",
           "src/layout.rs",
           "docs/layout-widgets.md",
           "../glory/crates/style/src/lib.rs (FlexWrap)",
@@ -1641,6 +1643,7 @@
       "baseline_at_snapshot": false,
       "evidence": {
         "implementation": [
+          "examples/web/src/dedicated_demos/badge.rs",
           "src/display.rs",
           "docs/display-widgets.md",
           "docs/showcase-style-review.md",

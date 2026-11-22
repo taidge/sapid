@@ -87,6 +87,7 @@ pub(super) fn build(widget: &mut Accordion, scope: &Scope, input: Items) -> Resu
     let unstyled = widget.common.unstyled;
     let variant = widget.variant;
     let chevron = widget.chevron;
+    let radius = widget.item_radius;
     let heading = widget.heading;
     let regions = widget.regions;
     let policy = widget.policy;
@@ -147,17 +148,20 @@ pub(super) fn build(widget: &mut Accordion, scope: &Scope, input: Items) -> Resu
                         })
                     }));
                 if !unstyled {
-                    trigger = trigger.style(skin::accordion_trigger(&theme, size));
+                    trigger = trigger.style(skin::accordion_trigger(
+                        &theme,
+                        size,
+                        chevron.visible && chevron.at_start,
+                    ));
                 }
-                if let Some(mut factory) = config.take_trigger_content() {
-                    trigger = trigger
-                        .label("")
-                        .name(config.label)
-                        .fill(glory::ui::widget(move |scope| factory().show_in(scope)));
-                }
-                if chevron {
-                    trigger = trigger.fill(skin::chevron(scope, open.into(), theme.foreground));
-                }
+                trigger = chevron.fill(
+                    scope,
+                    trigger,
+                    config.label.into(),
+                    config.take_trigger_content(),
+                    open.into(),
+                    theme.foreground,
+                );
                 let control = control.clone();
                 let callback = callback.clone();
                 let presses = presses.clone();
@@ -205,9 +209,10 @@ pub(super) fn build(widget: &mut Accordion, scope: &Scope, input: Items) -> Resu
                 let mut row = glory::ui::view().class("sapid-accordion-item");
                 if !unstyled {
                     let theme = theme.clone();
-                    row = row.style(
-                        scope.bond(move || skin::accordion_item(&theme, variant, open.get())),
-                    );
+                    row =
+                        row.style(scope.bond(move || {
+                            skin::accordion_item(&theme, variant, open.get(), radius)
+                        }));
                 }
                 row.on(EventKind::FocusWithin, move |event| {
                     if let Event::FocusWithin { focused, .. } = event

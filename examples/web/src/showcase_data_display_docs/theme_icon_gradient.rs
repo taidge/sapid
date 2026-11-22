@@ -4,7 +4,6 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
         let from = scope.cage(Some("Blue".to_owned()));
         let to = scope.cage(Some("Grape".to_owned()));
         let angle = scope.cage(45.);
-        let palette = theme.clone();
         let icon = sapid::theme_icon(sapid::Icon::Calendar)
             .theme(theme.clone())
             .name("Gradient calendar")
@@ -12,41 +11,19 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
             .variant(sapid::ThemeIconVariant::Gradient)
             .color(glory::style::Color(255, 255, 255, 255))
             .style(scope.bond(move || {
-                let stop = |value: Option<String>| {
-                    controls::accent(palette.clone(), value.as_deref().unwrap_or("Blue")).accent
-                };
                 Style::new()
                     .radius(10.)
-                    .background_image(glory::style::LinearGradient {
-                        angle: angle.get(),
-                        stops: vec![stop(from.get()), stop(to.get())],
-                    })
+                    .background_image(controls::gradient_style(
+                        from.get().as_deref(),
+                        to.get().as_deref(),
+                        angle.get(),
+                    ))
             }));
-        const STOPS: &[(&str, &str)] = &[
-            ("Blue", "Blue"),
-            ("Grape", "Grape"),
-            ("Orange", "Orange"),
-            ("Green", "Green"),
-            ("Pink", "Pink"),
-            ("Teal", "Teal"),
-        ];
         view()
             .class("site-configurator")
             .fill(controls::playground(
                 Box::new(icon),
-                vec![
-                    controls::select("gradient-start", "Gradient from", from, STOPS, &theme),
-                    controls::select("gradient-end", "Gradient to", to, STOPS, &theme),
-                    controls::range(
-                        "gradient-angle",
-                        "Gradient angle",
-                        angle,
-                        0.,
-                        360.,
-                        5.,
-                        &theme,
-                    ),
-                ],
+                vec![controls::gradient_controls(from, to, angle, &theme)],
             ))
             .show_in(scope)
     })
@@ -177,13 +154,46 @@ mod controls {
             .or_else(|| sapid::parse_hex_color(name).ok())
     }
 
-    pub fn accent(mut theme: Theme, name: &str) -> Theme {
-        if let Some(color) = choice_color(name) {
-            theme.accent = color;
-            theme.accent_text = color;
-            theme.focus_ring = color;
-            theme.input_focus = color;
+    pub fn gradient_style(
+        from: Option<&str>,
+        to: Option<&str>,
+        angle: f64,
+    ) -> glory::style::LinearGradient {
+        let stop = |name: Option<&str>| {
+            choice_color(name.unwrap_or("Blue")).unwrap_or(Color(34, 139, 230, 255))
+        };
+        glory::style::LinearGradient {
+            angle,
+            stops: vec![stop(from), stop(to)],
         }
-        theme
+    }
+
+    pub fn gradient_controls(
+        from: Cage<Option<String>>,
+        to: Cage<Option<String>>,
+        angle: Cage<f64>,
+        theme: &Theme,
+    ) -> Box<dyn Widget> {
+        const STOPS: &[(&str, &str)] = &[
+            ("Blue", "Blue"),
+            ("Grape", "Grape"),
+            ("Orange", "Orange"),
+            ("Green", "Green"),
+            ("Pink", "Pink"),
+            ("Teal", "Teal"),
+        ];
+        Box::new(sapid::stack().theme(theme.clone()).gap(12.).fill((
+            select("gradient-start", "Gradient from", from, STOPS, theme),
+            select("gradient-end", "Gradient to", to, STOPS, theme),
+            range(
+                "gradient-angle",
+                "Gradient angle",
+                angle,
+                0.,
+                360.,
+                5.,
+                theme,
+            ),
+        )))
     }
 }

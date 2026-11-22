@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
-const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
+const {assertPlaygroundLayout,matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
 (async()=>{
   const browser=await chromium.launch();const page=await browser.newPage();
   const report={browser:browser.version(),pages:[],errors:[]};
@@ -63,6 +63,20 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
         const vertical=axes.locator('.docs-space-vertical');const above=await box(vertical.getByText('Above',{exact:true})),below=await box(vertical.getByText('Below',{exact:true}));near(below.y-above.y-above.height,24);
         assert.equal(await axes.locator('.docs-space-gap').evaluate(e=>getComputedStyle(e).gap),'16px');
       }else if(slug==='stack'){
+        await assertPlaygroundLayout(primary, width);
+        const preview=primary.locator('.site-stack-example'),cards=preview.locator('.sapid-card');
+        const alignment=primary.getByRole('combobox',{name:'Align'});
+        const distribution=primary.getByRole('combobox',{name:'Justify'});
+        const stretch=await box(cards.first());
+        await alignment.selectOption('end');await tick();
+        const right=await box(cards.first());assert(right.x>stretch.x+10 && right.width<stretch.width);
+        await distribution.selectOption('start');await tick();
+        const top=await box(cards.first());
+        await distribution.selectOption('end');await tick();assert((await box(cards.first())).y>top.y+10);
+        await distribution.selectOption('start');await tick();
+        const spacing=async()=>(await box(cards.nth(1))).y-(await box(cards.first())).y-(await box(cards.first())).height;
+        const initialGap=await spacing();await primary.getByRole('slider',{name:'Gap'}).press('End');await tick();
+        assert(await spacing()>initialGap);
         const section=detail('Alignment, distribution and long content'),stack=section.locator('.docs-stack-distribution');await stack.evaluate(e=>{window.stackElement=e;});
         await section.getByRole('checkbox',{name:'Distribute through the available height',exact:true}).check();await tick();
         const rect=await box(stack),last=await box(stack.getByText('Deliver',{exact:true}));near(rect.height,240);near(last.y+last.height,rect.y+rect.height);

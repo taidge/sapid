@@ -108,6 +108,15 @@ mod controls {
     }
 
     pub fn size_slider(value: Cage<Option<String>>, theme: &Theme) -> Box<dyn Widget> {
+        scale_slider("control-size", "Size", value, theme)
+    }
+
+    pub fn scale_slider(
+        key: &'static str,
+        label: &'static str,
+        value: Cage<Option<String>>,
+        theme: &Theme,
+    ) -> Box<dyn Widget> {
         let current = value.map(|current| match current.as_deref() {
             Some("xs") => 0.0,
             Some("sm") => 1.0,
@@ -132,10 +141,10 @@ mod controls {
                 sapid::text()
                     .theme(theme.clone())
                     .class("site-control-label")
-                    .content("Size"),
-                sapid::slider("control-size")
+                    .content(label),
+                sapid::slider(key)
                     .theme(theme.clone())
-                    .name("Size")
+                    .name(label)
                     .min(0.0)
                     .max(4.0)
                     .step(1.0)

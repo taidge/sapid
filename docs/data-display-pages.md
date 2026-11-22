@@ -17,7 +17,9 @@ source changes preserve the same wrapper, image and fallback identities. Groups
 use explicit keys, bounded overlap and a named `+N` overflow marker; they do not
 create a people menu. See `avatar-images.md`.
 
-Badge supports Soft, Solid, Outline and Dot, five compact theme sizes, optional
+Badge supports Soft, Solid, Outline, Dot, Transparent, Default, White and Gradient.
+The usage panel exposes five compact theme sizes, radius and custom colors. In Gradient mode,
+it exposes both color stops and the angle. Badges support optional
 color and passive left/right sections. A `BadgeSection` is an Icon or a nonempty
 single-line string of at most 32 UTF-8 bytes. Central content is reactive. Plain
 badges remain semantic Text, including inside finite intrinsic button content.
