@@ -19,7 +19,7 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
       await page.goto(`${base}/showcase.html?widget=app-shell&theme=${theme}&scheme=${scheme}`);
       await page.waitForFunction(() => window.ready===true && document.documentElement.getAttribute('data-sapid-widget')==='app-shell'); await tick();
       report.asset = await page.evaluate(() => document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]); assert(report.asset);
-      assert.equal(await page.locator('.site-component-detail').count(),6);
+      assert.equal(await page.locator('.site-component-detail').count(),7);
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth+1));
       const primary = page.locator('.site-preview .site-demo').first();
       const note = primary.getByLabel('Workspace note',{exact:true}); await note.fill('Persistent project draft');
@@ -74,6 +74,17 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
         await controlled.getByRole('checkbox',{name:'Accept navigation changes',exact:true}).uncheck(); await expand.click(); await tick(); near((await box(controlled.locator('.sapid-sidebar'))).width,64);
         await controlled.getByRole('checkbox',{name:'Accept navigation changes',exact:true}).check(); await expand.click(); await tick(); near((await box(controlled.locator('.sapid-sidebar'))).width,180);
       }
+      const folders = detail('Resizable folder pane');
+      const separator = folders.getByRole('separator', { name: 'Folder pane width', exact: true });
+      const folderNote = folders.getByRole('textbox', { name: 'Workspace note', exact: true });
+      await folderNote.fill('Keep this draft');
+      await separator.press('ArrowRight'); await tick();
+      assert.equal(await separator.getAttribute('aria-valuenow'), '36');
+      await folders.getByRole('button', { name: 'Collapse folders', exact: true }).click(); await tick();
+      assert.equal(await separator.getAttribute('aria-valuenow'), '0');
+      await folders.getByRole('button', { name: 'Restore folders', exact: true }).click(); await tick();
+      assert.equal(await separator.getAttribute('aria-valuenow'), '36');
+      assert.equal(await folderNote.inputValue(), 'Keep this draft');
       assert.equal(await detail('Full-window application frame').getByRole('link',{name:'Open full-window workspace',exact:true}).getAttribute('href'),'shell-window.html');
       report.pages.push({key:`documentation-${key}`,passed:true}); console.log(`PASS documentation-${key}`);
 
