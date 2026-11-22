@@ -83,7 +83,8 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
           assert.equal(await opened.locator('svg').count(), 1);
           await opened.press('Space'); await tick();
           assert.equal(await button.getAttribute('aria-expanded'), 'false');
-          assert(await detail('Sizes, local state and disabled controls').locator('button').last().isDisabled());
+          const options = detail('Sizes, local state and disabled controls').locator('.site-demo');
+          assert.equal(await options.getByRole('button', { disabled: true }).count(), 1);
         }
         await primary.screenshot({ path: outputPath(`navigation-remediation/${key}.png`), animations: 'disabled' });
         report.pages.push({ slug, theme, scheme, width, status: 'passed', ...geometry });
