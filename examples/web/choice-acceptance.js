@@ -39,12 +39,9 @@ async (hostPage) => {
       assert(await alpha.isChecked()&&!await beta.isChecked()&&await beta.evaluate(e=>e===document.activeElement),`${mode}: typeahead controlled rejection restores native peers while preserving focus`);
       await page.evaluate(()=>window.demo.choice_state('reject',false));await page.keyboard.press('Home');await tick();
       const monthly=page.getByRole('radio',{name:'Monthly',exact:true}),yearly=page.getByRole('radio',{name:'Yearly',exact:true});
-      const animatesSelection=await yearly.evaluate(radio=>{
-        const anchored = CSS.supports('(anchor-scope: --sp-selected) and (width: anchor-size(--sp-selected width))');
-        const style = anchored ? getComputedStyle(radio.closest('.sapid-radio-group-items'), '::after') : getComputedStyle(radio.closest('label'));
-        return style.transitionProperty.split(', ').includes(anchored ? 'left' : 'background-color')&&style.transitionDuration.split(', ').some(duration=>parseFloat(duration)>0);
-      });
-      assert(animatesSelection===(reducedMotion==='no-preference'),`${mode}: segmented highlight follows motion preference`);
+      const indicator=page.getByRole('radiogroup',{name:'Billing interval',exact:true}).locator('.sapid-segment-indicator.is-positioned');
+      await indicator.waitFor();
+      assert(await indicator.evaluate(e=>parseFloat(getComputedStyle(e).transitionDuration)>0)===(reducedMotion==='no-preference'),`${mode}: segmented highlight follows motion preference`);
       assert(await page.getByRole('radiogroup',{name:'Billing interval',exact:true}).count()===1&&await monthly.isChecked()&&!await yearly.isChecked(),`${mode}: segmented single-value semantics`);
       const standard=page.getByRole('radio',{name:'Standard',exact:true}),express=page.getByRole('radio',{name:'Express',exact:true});
       assert(await page.getByRole('radiogroup',{name:'Delivery',exact:true}).count()===1&&await standard.isChecked()&&!await express.isChecked(),`${mode}: real radio group`);
@@ -77,7 +74,23 @@ async (hostPage) => {
       await email.focus();await page.keyboard.press('ArrowRight');await tick();assert(await sms.isChecked()&&!await email.isChecked(),`${mode}: chip single keyboard`);
       await wasm.locator('..').click();await tick();assert(await wasm.isChecked()&&await rust.evaluate(e=>!e.required&&e.checkValidity()),`${mode}: chip group any selection fulfills required`);
       await rust.locator('..').click();await tick();assert(await rust.isChecked()&&await wasm.isChecked(),`${mode}: chip multi independent selection`);
-      await monthly.focus();await page.keyboard.press('ArrowRight');await tick();
+      await monthly.focus();
+      const slide=await yearly.evaluate(async radio=>{
+        const label=radio.closest('label'), track=label.parentElement;
+        const marker=track.querySelector('.sapid-segment-indicator');
+        const start=marker.getBoundingClientRect().left, target=label.getBoundingClientRect();
+        let between=false;
+        track.querySelector('input:checked').dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true,cancelable:true}));
+        const deadline=performance.now()+1500;
+        while(performance.now()<deadline) {
+          await new Promise(requestAnimationFrame);
+          const box=marker.getBoundingClientRect();
+          between ||= box.left>Math.min(start,target.left)+1 && box.left<Math.max(start,target.left)-1;
+          if(Math.abs(box.left-target.left)<.5 && Math.abs(box.width-target.width)<.5) return {between,aligned:true};
+        }
+        return {between,aligned:false};
+      });
+      assert(slide.aligned&&slide.between===(reducedMotion==='no-preference'),`${mode}: selected indicator reaches the new label with the expected physical motion`);
       assert(await yearly.isChecked()&&!await monthly.isChecked()&&await yearly.evaluate(e=>document.activeElement===e),`${mode}: segmented arrows skip disabled`);
       assert(await page.locator('.sapid-segmented-control').getAttribute('role')==='radiogroup'&&await page.locator('[role=tablist]').count()===0,`${mode}: segmented uses values rather than tabs`);
       await standard.focus();await page.keyboard.press('ArrowDown');await tick();

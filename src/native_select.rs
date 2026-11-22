@@ -344,12 +344,30 @@ impl Widget for NativeSelect {
         let dirty = Dirty::new(scope);
         let mut props = (*config).clone();
         props.selection.keys = initial.clone();
+        let base = self.common.theme.control(self.common.size);
+        if !self.common.unstyled && !props.multiple && props.rows.unwrap_or(1) == 1 {
+            // WebKit's native menu button ignores min-height unless a height is
+            // supplied. Keep the platform picker and use the control's size.
+            let custom = self.common.style.clone();
+            let reactive = custom.is_reactive();
+            let min_height = base.min_height;
+            let menu_style = move || {
+                let mut style = custom.get();
+                style.height = style.height.or(style.min_height).or(min_height);
+                style
+            };
+            self.common.style = if reactive {
+                scope.bond(menu_style).into()
+            } else {
+                menu_style().into()
+            };
+        }
         let mut inner = configure!(
             self.common,
             glory::ui::select().configuration(props),
             scope,
             "sapid-native-select",
-            self.common.theme.control(self.common.size)
+            base
         )
         .enabled(enabled.clone())
         .semantics(metadata)

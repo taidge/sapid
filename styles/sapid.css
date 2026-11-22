@@ -81,7 +81,7 @@
 @media(prefers-reduced-motion:reduce){.sapid-switch:where(:not(.sapid-unstyled)) input{transition:none}}
 .sapid-checkbox-group:where(:not(.sapid-unstyled)){margin:0;min-inline-size:0;border:0;padding:0}
 
-/* The checked native radio is also the geometry source for the moving indicator. */
+/* Preserve a checked highlight while the host is measuring the indicator. */
 .sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-radio-group-items{position:relative;isolation:isolate;box-sizing:border-box;width:fit-content;max-width:100%;padding:3px;border-radius:6px;background:var(--sp-disabled);gap:0!important;flex-wrap:wrap}
 .sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-segment{position:relative;z-index:1;box-sizing:border-box;margin:0;padding:.45em .85em;border:1px solid transparent;border-radius:inherit;cursor:pointer;justify-content:center;text-align:center;gap:0}
 .sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-segment input{position:absolute;appearance:none;opacity:0;width:1px;height:1px;overflow:hidden;margin:0}
@@ -91,28 +91,15 @@
 .sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-segment:has(input:disabled){cursor:not-allowed;color:var(--sp-disabled-text);opacity:.55}
 .sapid-segment-dividers:where(:not(.sapid-unstyled)) :where(.sapid-segment:not(:has(:checked)) + .sapid-segment:not(:has(:checked)))::before{content:"";position:absolute;inset-block:20%;inset-inline-start:0;border-inline-start:1px solid var(--sp-border);pointer-events:none}
 .sapid-segment-dividers:where(:not(.sapid-unstyled))[data-gly-navigation=vertical] .sapid-segment::before{inset-block:0 auto;inset-inline:12%;border-inline:0;border-block-start:1px solid var(--sp-border)}
-@supports (anchor-scope: --sp-selected) and (width: anchor-size(--sp-selected width)) {
-  .sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-radio-group-items{anchor-scope:--sp-selected}
-  .sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-segment:has(input:checked){anchor-name:--sp-selected;background:transparent;box-shadow:none}
-  .sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-radio-group-items:has(input:checked)::after{
-    content:"";position:absolute;pointer-events:none;border-radius:inherit;
-    left:anchor(--sp-selected left);top:anchor(--sp-selected top);
-    width:anchor-size(--sp-selected width);height:anchor-size(--sp-selected height);
-    background:var(--sp-segment-indicator,var(--sp-input));box-shadow:0 1px 3px var(--sp-border)
-  }
-  @media (prefers-reduced-motion:no-preference){
-    .sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-radio-group-items::after{
-      transition-property:left,top,width,height;
-      transition-duration:var(--sp-segment-duration,200ms);
-      transition-timing-function:var(--sp-segment-easing,ease)
-    }
-  }
+.sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-segment-indicator.is-positioned{
+  border-radius:inherit;background:var(--sp-segment-indicator,var(--sp-input));box-shadow:0 1px 3px var(--sp-border)
 }
-@supports not ((anchor-scope: --sp-selected) and (width: anchor-size(--sp-selected width))) {
-  @media (prefers-reduced-motion:no-preference){
-    .sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-segment{
-      transition:background-color var(--sp-segment-duration,200ms) var(--sp-segment-easing,ease)
-    }
+.sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-radio-group-items:has(> .sapid-segment-indicator.is-positioned) .sapid-segment:has(input:checked){background:transparent;box-shadow:none}
+@media (prefers-reduced-motion:no-preference){
+  .sapid-segmented-control:where(:not(.sapid-unstyled)) .sapid-segment-indicator{
+    transition-property:left,top,width,height;
+    transition-duration:var(--sp-segment-duration,200ms);
+    transition-timing-function:var(--sp-segment-easing,ease)
   }
 }
 @media (forced-colors:active){
