@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict'),fs=require('node:fs');
-const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
+const {assertDocHeadingWeights,matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
 (async()=>{
  const browser=await chromium.launch(),context=await browser.newContext(),page=await context.newPage();page.setDefaultTimeout(8000);
  const report={browser:browser.version(),pages:[],errors:[]};page.on('pageerror',e=>report.errors.push(e.message));page.on('console',m=>{if(m.type()==='error')report.errors.push(m.text());});
@@ -14,8 +14,8 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
   try{
    await page.setViewportSize({width,height:1100});await page.goto(`${base}/showcase.html?widget=${slug}&theme=${theme}&scheme=${scheme}`);await page.waitForFunction(()=>window.ready===true,undefined,{timeout:25000});await tick();
    const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;
-   assert.equal(await page.locator('.site-component-detail').count(),{stepper:9,'table-of-contents':3,tree:8}[slug]);
-   assert(await page.locator('.site-title,.site-section-title').evaluateAll(elements=>elements.every(e=>getComputedStyle(e).fontWeight==='400')));
+   assert.equal(await page.locator('.site-component-detail').count(),{stepper:13,'table-of-contents':5,tree:14}[slug]);
+   await assertDocHeadingWeights(page);
    const primary=page.locator('.site-preview .site-demo').first();
    if(slug==='stepper'){
     const workflow=primary.getByRole('group',{name:'Create a workspace',exact:true});assert.equal(await workflow.locator('[aria-current=step]').getAttribute('aria-label'),'2. Verify');assert.equal(await workflow.locator('.sapid-stepper-connector').count(),2);

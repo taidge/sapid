@@ -19,8 +19,8 @@ const { chromium, base, outputPath, outputRoot, writeReport } = require('./showc
     await ready(page, 'button', 'blue', 'dark');
     const firstKey = await page.evaluate(() => history.state.__glory_routing_v1);
     assert.equal(typeof firstKey, 'string');
-    await page.locator('.site-demo').getByRole('button', { name: 'Filled button', exact: true }).click();
-    await page.getByText('Button presses: 1', { exact: true }).waitFor();
+    await page.locator('.site-doc-content > .site-preview .site-demo').getByRole('button', { name: 'Filled button', exact: true }).click();
+    await page.locator('.site-doc-content > .site-preview').getByText('Button presses: 1', { exact: true }).waitFor();
     await page.evaluate(() => { window.retainedDemo = document.querySelector('.site-demo'); });
     await page.getByRole('navigation', { name: 'On this page' }).getByRole('link', { name: 'Composition', exact: true }).click();
     await page.waitForURL(/#composition$/);
@@ -30,7 +30,7 @@ const { chromium, base, outputPath, outputRoot, writeReport } = require('./showc
     await page.goBack(); await ready(page, 'button', 'blue', 'dark');
     assert.equal(await page.evaluate(() => history.state.__glory_routing_v1), firstKey);
     assert(await page.evaluate(() => window.retainedDemo === document.querySelector('.site-demo')));
-    await page.getByText('Button presses: 1', { exact: true }).waitFor();
+    await page.locator('.site-doc-content > .site-preview').getByText('Button presses: 1', { exact: true }).waitFor();
     report.checks.push('Glory history keys retain foreign state and fragment traversal keeps the live demo');
 
     const namedRoute = await browser.newPage();

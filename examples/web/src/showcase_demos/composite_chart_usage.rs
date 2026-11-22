@@ -227,6 +227,7 @@ mod controls {
                 Color(18, 184, 134, 255),
             ]);
             let preview = chart(key)
+                .style(Style::new().width(Length::Percent(100.)))
                 .kind(kind)
                 .theme(theme.clone())
                 .name("Monthly series")

@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict'),fs=require('node:fs');
-const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
+const {assertDocHeadingWeights,matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
 const normal=['schedule','day-view','week-view','month-view','year-view','mobile-month-view','agenda-view'];
 const resources=['resources-day-view','resources-week-view','resources-month-view','resources-schedule'];
 (async()=>{
@@ -27,8 +27,8 @@ const resources=['resources-day-view','resources-week-view','resources-month-vie
   try{
    await page.setViewportSize({width,height:1100});await visit(base+'/showcase.html?widget='+slug+'&theme='+theme+'&scheme='+scheme);await page.waitForFunction(slug=>window.ready===true&&document.documentElement.getAttribute('data-sapid-widget')===slug,slug,{timeout:30000});await tick();
    const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;
-   assert(await page.locator('.site-title,.site-section-title').evaluateAll(es=>es.every(e=>getComputedStyle(e).fontWeight==='400')));
-   assert.equal(await page.locator('.site-component-detail').count(),({"day-view": 15, "week-view": 17, "month-view": 15, "mobile-month-view": 11, "year-view": 13, "agenda-view": 7, "recurring-events": 8, "events-data": 3, "resources-day-view": 12, "resources-week-view": 12, "resources-month-view": 9, "resources-schedule": 7})[slug]??5);
+   await assertDocHeadingWeights(page);
+   assert.equal(await page.locator('.site-component-detail').count(),({"day-view": 18, "week-view": 21, "month-view": 15, "mobile-month-view": 11, "year-view": 13, "agenda-view": 11, "recurring-events": 8, "events-data": 3, "resources-day-view": 12, "resources-week-view": 12, "resources-month-view": 9, "resources-schedule": 7})[slug]??5);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
    const primary=page.locator('.site-preview .site-demo').first();
    if(normal.includes(slug)){

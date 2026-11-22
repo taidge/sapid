@@ -15,7 +15,7 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
       await page.goto(`${base}/showcase.html?widget=password-input&theme=${theme}&scheme=${scheme}`);
       await page.waitForFunction(() => window.ready === true && document.documentElement.getAttribute('data-sapid-widget') === 'password-input'); await tick();
       report.asset = await page.evaluate(() => document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]); assert(report.asset);
-      assert.equal(await page.locator('.site-component-detail').count(), 9); assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+      assert.equal(await page.locator('.site-component-detail').count(), 12); assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
       const primary = page.locator('.site-preview .site-demo').first(); const editor = primary.getByLabel('Input label', { exact: true });
       let eye = primary.getByRole('button', { name: 'Show password', exact: true });
       assert.equal(await editor.getAttribute('type'), 'password'); assert.equal(await eye.innerText(), ''); assert.equal(await eye.locator('svg').count(), 1);
@@ -54,7 +54,7 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
 
       const states = detail('Field metadata and unavailable states'); const readonly = states.getByLabel('Read-only password', { exact: true });
       assert(!(await readonly.isEditable())); await field(states, 'Read-only password').getByRole('button', { name: 'Show password', exact: true }).click(); await tick(); assert.equal(await readonly.getAttribute('type'), 'text');
-      assert(await states.getByLabel('Disabled password', { exact: true }).isDisabled()); assert(await field(states, 'Disabled password').getByRole('button', { name: 'Show password', exact: true }).isDisabled());
+      assert(await states.getByLabel('Disabled password', { exact: true }).isDisabled()); assert(await field(states, 'Disabled password').locator('.sapid-password-toggle').isDisabled());
       assert(await states.getByLabel('Required password', { exact: true }).evaluate(e => e.required)); const invalid = states.getByLabel('Invalid password', { exact: true }); assert.equal(await invalid.getAttribute('aria-invalid'), 'true'); assert(await invalid.getAttribute('aria-errormessage'));
 
       const sizes = detail('Sizes and icon geometry'); for (const size of ['xs', 'sm', 'md', 'lg', 'xl']) {

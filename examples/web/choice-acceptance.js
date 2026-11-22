@@ -28,7 +28,9 @@ async (hostPage) => {
       await page.keyboard.press('a');await tick();
       assert(await apple.isChecked()&&await apple.evaluate(e=>e===document.activeElement),`${mode}: actual typeahead searches mounted labels`);
       await page.keyboard.press('a');await tick();assert(await alpha.isChecked(),`${mode}: repeated typeahead cycles and skips disabled`);
-      await page.keyboard.press('p');await tick();assert(await apple.isChecked(),`${mode}: incremental prefix`);
+      // Exercise the timed prefix without protocol assertions between keystrokes.
+      await page.keyboard.press('Home');await tick();
+      await page.keyboard.type('aap');await tick();assert(await apple.isChecked(),`${mode}: incremental prefix`);
       await page.keyboard.press('ArrowLeft');await tick();assert(await beta.isChecked(),`${mode}: RTL Left next skips disabled`);
       await page.keyboard.press('ArrowRight');await tick();assert(await apple.isChecked(),`${mode}: RTL Right previous`);
       await page.keyboard.press('Home');await tick();assert(await alpha.isChecked(),`${mode}: RTL Home retains first`);

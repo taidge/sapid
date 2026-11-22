@@ -12,7 +12,7 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
   try{
    await page.setViewportSize({width,height:1000});await page.goto(`${base}/showcase.html?widget=${slug}&theme=${theme}&scheme=${scheme}`);await page.waitForFunction(()=>window.ready===true,undefined,{timeout:20000});await tick();
    const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;
-   assert.equal(await page.locator('.site-component-detail').count(),{input:8,'text-input':9,textarea:10}[slug]);
+   assert.equal(await page.locator('.site-component-detail').count(),{input:14,'text-input':9,textarea:10}[slug]);
    const primary=page.locator('.site-preview .site-demo').first(),editor=primary.getByRole('textbox',{name:slug==='input'?'Email address':'Input label',exact:true});
    await editor.evaluate(e=>window.primaryEditor=e);await editor.fill(slug==='textarea'?'First line\nSecond line':'Ada');await tick();assert.equal(await editor.inputValue(),slug==='textarea'?'First line\nSecond line':'Ada');assert(await editor.evaluate(e=>e===window.primaryEditor));
    if(slug==='input'){

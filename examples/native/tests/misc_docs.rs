@@ -6,7 +6,9 @@ mod focus_initial;
 mod hidden_description;
 #[path = "../../web/src/showcase_misc_docs/portal_destinations.rs"]
 mod portal_destinations;
-#[path = "../../web/src/dedicated_demos/toolbar.rs"]
+// This fixture exercises the basic toolbar from the shared showcase module.
+#[allow(dead_code)]
+#[path = "../../web/src/showcase_demos/toolbar_usage.rs"]
 mod public_toolbar;
 #[path = "../../web/src/showcase_misc_docs/scroll_position.rs"]
 mod scroll_position;
@@ -146,14 +148,14 @@ fn actual_portal_example_moves_one_physical_editor_between_public_destinations()
     assert_eq!(app.stats().handlers, 0);
 }
 #[test]
-fn shipping_form_focuses_requested_address_and_returns_to_its_live_trigger() {
+fn focus_trap_focuses_second_input_and_returns_to_its_live_trigger() {
     let host = WindowApp::new();
     host.renderer().set_viewport(450, 800, 1.).unwrap();
     host.mount(focus_initial::demo(sapid::Theme::green_dark()))
         .unwrap();
     observe(&host);
     let app = host.app();
-    let entry = button(app, "Edit shipping details");
+    let entry = button(app, "Activate focus trap");
     app.scope().action(Action::Focus(entry)).unwrap();
     app.flush().unwrap();
     app.dispatch(entry, Event::Activate).unwrap();
@@ -167,12 +169,12 @@ fn shipping_form_focuses_requested_address_and_returns_to_its_live_trigger() {
             )
         })
         .collect();
-    assert_eq!(inputs.len(), 2);
+    assert_eq!(inputs.len(), 3);
     assert_eq!(
         host.renderer().inspect(|doc| doc.get_focussed_node_id()),
         Some(physical(&host, inputs[1]))
     );
-    app.dispatch(button(app, "Done editing shipping"), Event::Activate)
+    app.dispatch(button(app, "Deactivate focus trap"), Event::Activate)
         .unwrap();
     observe(&host);
     assert_eq!(
@@ -192,14 +194,14 @@ fn public_position_buttons_scroll_the_real_viewport_without_replacing_its_childr
     let viewport = classes(app, "sapid-scroll-area")[0];
     let text = classes(app, "sapid-text")[0];
     let before = physical(&host, text);
-    app.dispatch(button(app, "Jump to latest notes"), Event::Activate)
+    app.dispatch(button(app, "Scroll to bottom"), Event::Activate)
         .unwrap();
     observe(&host);
     let QueryValue::ScrollMetrics(bottom) = query(app, Query::ScrollMetrics(viewport)) else {
         panic!()
     };
     assert!(bottom.y > 200., "{bottom:?}");
-    app.dispatch(button(app, "Read notes from the start"), Event::Activate)
+    app.dispatch(button(app, "Scroll to top"), Event::Activate)
         .unwrap();
     observe(&host);
     let QueryValue::ScrollMetrics(top) = query(app, Query::ScrollMetrics(viewport)) else {
@@ -243,7 +245,7 @@ fn public_toolbar_icon_actions_have_names_and_square_native_hit_boxes() {
         .unwrap();
     observe(&host);
     let app = host.app();
-    for name in ["Undo", "Redo"] {
+    for name in ["Align left", "Align right"] {
         let id = nodes(app)
             .into_iter()
             .find(|id| {

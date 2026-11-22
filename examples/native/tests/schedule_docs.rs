@@ -10,19 +10,19 @@ mod mobile_month_view;
 mod month_view;
 #[path = "../../web/src/dedicated_demos/recurring_events.rs"]
 mod recurring_events;
-#[path = "../../web/src/dedicated_demos/resources_day_view.rs"]
+#[path = "../../web/src/showcase_demos/resources_day_view_usage.rs"]
 mod resources_day_view;
 #[path = "../../web/src/showcase_schedule_docs/resources_day_view_editing.rs"]
 mod resources_day_view_editing;
-#[path = "../../web/src/dedicated_demos/resources_month_view.rs"]
+#[path = "../../web/src/showcase_demos/resources_month_view_usage.rs"]
 mod resources_month_view;
 #[path = "../../web/src/showcase_schedule_docs/resources_month_view_editing.rs"]
 mod resources_month_view_editing;
-#[path = "../../web/src/dedicated_demos/resources_schedule.rs"]
+#[path = "../../web/src/showcase_demos/resources_schedule_usage.rs"]
 mod resources_schedule;
 #[path = "../../web/src/showcase_schedule_docs/resources_schedule_editing.rs"]
 mod resources_schedule_editing;
-#[path = "../../web/src/dedicated_demos/resources_week_view.rs"]
+#[path = "../../web/src/showcase_demos/resources_week_view_usage.rs"]
 mod resources_week_view;
 #[path = "../../web/src/showcase_schedule_docs/resources_week_view_editing.rs"]
 mod resources_week_view_editing;
@@ -224,10 +224,10 @@ fn actual_resource_primary_sources_select_bookings_without_mounting_the_edit_wor
         .unwrap_or_else(|e| panic!("{name}: {e}"));
         observe(&host);
         let app = host.app();
-        let planning=nodes(app).into_iter().find(|id|matches!(app.tree().node(*id).unwrap().descriptor.view().props,Props::Button(p) if p.label.starts_with("Project planning"))).unwrap_or_else(||panic!("{name}: planning missing"));
+        let planning=nodes(app).into_iter().find(|id|matches!(app.tree().node(*id).unwrap().descriptor.view().props,Props::Button(p) if p.label.starts_with("Team Standup"))).unwrap_or_else(||panic!("{name}: planning missing"));
         app.dispatch(planning, Event::Activate).unwrap();
         observe(&host);
-        assert!(nodes(app).into_iter().any(|id|matches!(app.tree().node(id).unwrap().descriptor.view().props,Props::Text(p) if p.content.contains("Selected: Project planning"))),"{name}");
+        assert!(nodes(app).into_iter().any(|id|matches!(app.tree().node(id).unwrap().descriptor.view().props,Props::Text(p) if p.content.contains("Selected: Team Standup"))),"{name}");
         assert!(!nodes(app).into_iter().any(|id|matches!(app.tree().node(id).unwrap().descriptor.view().props,Props::Button(p) if p.label=="Move later")),"{name}: edit controls belong to their separate source section");
         app.clear().unwrap();
         assert_eq!(app.stats().handlers, 0);

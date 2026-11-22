@@ -1079,7 +1079,7 @@ fn data_display_guides_mount_complete_public_examples_in_four_themes_and_release
             ("indicator", 8),
             ("kbd", 4),
             ("number-formatter", 3),
-            ("overflow-list", 6),
+            ("overflow-list", 7),
             ("rolling-number", 3),
             ("spoiler", 4),
             ("theme-icon", 5),

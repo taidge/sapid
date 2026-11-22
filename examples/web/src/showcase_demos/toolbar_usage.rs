@@ -85,6 +85,13 @@ pub(crate) fn format_toolbar(
                     .name(label)
                     .variant(sapid::ButtonVariant::Subtle)
                     .enabled(!disabled || i == 0)
+                    .style(
+                        Style::new()
+                            .width(Length::Px(30.))
+                            .height(Length::Px(30.))
+                            .min_height(Length::Px(30.))
+                            .padding(glory::style::Edges::all(0.)),
+                    )
                     .pressed(alignment.map(move |v| *v == Some(i)))
                     .fill(
                         glory::ui::graphic()

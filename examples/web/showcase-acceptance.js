@@ -49,7 +49,14 @@ async (hostPage) => {
       assert(new URL(p.url()).searchParams.get('widget') === id, `${id}: actual route navigation`);
       assert(await p.locator('.site-demo .site-example').count() === 1, `${id}: real embedded Glory widget`);
       assert((await p.locator('.site-code').first().textContent()).trim().length > 30, `${id}: readable source`);
-      assert(await p.locator('iframe').count() === 0, `${id}: no fixture iframe`);
+      if (id === 'aspect-ratio') {
+        const map = p.locator('.site-ratio-map > iframe[title="Google map"][src^="https://www.google.com/maps/embed?"]');
+        const video = p.locator('.site-ratio-video > iframe[title="YouTube video player"][src="https://www.youtube.com/embed/mzJ4vCjSt28"]');
+        await Promise.all([map.waitFor({ state: 'attached' }), video.waitFor({ state: 'attached' })]);
+        assert(await p.locator('iframe').count() === 2, 'only the map and video examples embed frames');
+      } else {
+        assert(await p.locator('iframe').count() === 0, `${id}: no fixture iframe`);
+      }
       reports.push({suite:`showcase-route-${id}`,status:'passed'});
       console.log(`showcase route ${reports.length - 1}/${visitedRoutes.length} ${id} passed`);
     }
@@ -80,15 +87,16 @@ async (hostPage) => {
     const snippet = p.locator('.site-code').first();
     const codeBody = snippet.locator('.site-code-body');
     const collapsedHeight = (await codeBody.boundingBox()).height;
-    const completeSource = await codeBody.locator('.sapid-code-source').textContent();
-    assert(completeSource.includes('pub fn demo(') && completeSource.includes('on_press'), 'collapsed example keeps complete Rust source');
-    const compiledSource = require('node:fs').readFileSync('examples/web/src/showcase_demos/button_usage.rs', 'utf8');
-    assert(completeSource.replace(/\r\n/g, '\n').trim() === compiledSource.replace(/\r\n/g, '\n').trim(), 'copyable Button source exactly matches its compiled module');
+    const compiledSource = require('node:fs').readFileSync('examples/web/src/showcase_demos/button_usage.rs', 'utf8').replace(/\r\n/g, '\n');
+    const previewSource = await codeBody.locator('.sapid-code-source').textContent();
+    assert(previewSource === compiledSource.split('\n').slice(0,16).join('\n'), 'collapsed panel shows the first 16 lines of the compiled example');
+    await snippet.getByRole('button',{name:'Copy code',exact:true}).click();
+    await p.waitForFunction(async expected => (await navigator.clipboard.readText()).replace(/\r\n/g, '\n').trimEnd() === expected, compiledSource.trimEnd());
     await snippet.getByRole('button',{name:'Expand code',exact:true}).click();
     await snippet.getByRole('button',{name:'Collapse code',exact:true}).waitFor();
     await p.waitForFunction(height => document.querySelector('.site-code-body').getBoundingClientRect().height > height, collapsedHeight);
-    await snippet.getByRole('button',{name:'Copy code',exact:true}).click();
-    await p.waitForFunction(async expected => (await navigator.clipboard.readText()) === expected, completeSource);
+    const completeSource = await codeBody.locator('.sapid-code-source').textContent();
+    assert(completeSource.trimEnd() === compiledSource.trimEnd(), 'expanded Button source exactly matches its compiled module');
     await snippet.getByRole('button',{name:'Collapse code',exact:true}).click();
     await snippet.getByRole('button',{name:'Expand code',exact:true}).waitFor();
     assert(Math.abs((await codeBody.boundingBox()).height - collapsedHeight) <= 1, 'code collapse restores bounded preview height');
@@ -121,8 +129,8 @@ async (hostPage) => {
     await p.locator('.sapid-site.site-dark').waitFor();
     assert(new URL(p.url()).searchParams.get('widget') === 'button', 'theme reload retains route');
     await go(p, 'showcase.html?widget=text-input&theme=green&scheme=dark');
-    await p.getByRole('textbox',{name:'Your name',exact:true}).fill('Sapid reader');
-    assert(await p.getByRole('textbox',{name:'Your name',exact:true}).inputValue() === 'Sapid reader', 'real text editor accepts editing');
+    await p.locator('.site-doc-content > .site-preview').getByRole('textbox',{name:'Input label',exact:true}).fill('Sapid reader');
+    assert(await p.locator('.site-doc-content > .site-preview').getByRole('textbox',{name:'Input label',exact:true}).inputValue() === 'Sapid reader', 'real text editor accepts editing');
     await shot(p, 'textfield-dark');
     reports.push({suite:'showcase-theme-and-controlled-text',status:'passed'});
 
@@ -137,12 +145,12 @@ async (hostPage) => {
       assert(swatch.text === '' && swatch.color === (name === 'blue' ? 'rgb(25, 113, 194)' : 'rgb(35, 112, 50)'), 'palette is represented by its actual color, without a text label');
 
       const frame = await p.locator('.sapid-site').evaluate(e=>({background:getComputedStyle(e).backgroundColor,text:getComputedStyle(e).color}));
-      assert(frame.background === (scheme === 'dark' ? 'rgb(20, 21, 23)' : 'rgb(248, 249, 250)'), 'page canvas comes from resolved palette data');
+      assert(frame.background === (scheme === 'dark' ? 'rgb(20, 21, 23)' : 'rgb(255, 255, 255)'), 'page canvas comes from resolved palette data');
       assert(frame.text === (scheme === 'dark' ? 'rgb(222, 226, 230)' : 'rgb(33, 37, 41)'), 'page text comes from resolved palette data');
       const actual = await p.locator('.site-nav-link.is-active').evaluate(e=>getComputedStyle(e).color);
       const accent = name === 'blue' ? (scheme === 'dark' ? 'rgb(116, 192, 252)' : 'rgb(24, 100, 171)') : (scheme === 'dark' ? 'rgb(140, 233, 154)' : 'rgb(35, 112, 50)');
       assert(actual === accent, `${name}-${scheme}: website follows palette tokens (${actual})`);
-      const filled = p.locator('.site-demo').getByRole('button',{name:'Filled button',exact:true});
+      const filled = p.locator('.site-component-detail').filter({has:p.locator('#button-variants')}).getByRole('button',{name:'Filled',exact:true});
       assert(await filled.evaluate(e=>getComputedStyle(e).backgroundColor) === (name === 'blue' ? 'rgb(25, 113, 194)' : 'rgb(35, 112, 50)'), 'preview follows the same palette');
       await p.getByRole('link',{name:`Switch to ${scheme === 'dark' ? 'light' : 'dark'} theme`,exact:true}).click();
       await p.locator(`.sapid-site.sapid-theme-${name}-${scheme === 'dark' ? 'light' : 'dark'}`).waitFor();
@@ -163,7 +171,7 @@ async (hostPage) => {
     }
     await p.goto(`${base}/ssr-textfield-blue-light.html?manual`);
     await p.waitForFunction(() => window.moduleReady === true);
-    const dirty = p.getByRole('textbox',{name:'Your name',exact:true});
+    const dirty = p.locator('.site-doc-content > .site-preview').getByRole('textbox',{name:'Input label',exact:true});
     await dirty.fill('Before hydration');
     await dirty.evaluate(e => {window.beforeShowcaseInput=e;e.focus();e.setSelectionRange(2,8,'backward');});
     await p.evaluate(() => window.showcase.mount(true,'text-input','blue','light'));

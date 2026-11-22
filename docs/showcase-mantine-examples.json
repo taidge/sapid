@@ -6354,7 +6354,7 @@
       {
         "title": "Max visible items",
         "status": "paired",
-        "section": "overflow-controlled"
+        "section": "overflow-max-visible"
       },
       {
         "title": "Collapse from",

@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict'),fs=require('node:fs');
-const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
+const {assertDocHeadingWeights,matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
 (async()=>{
  const browser=await chromium.launch(),context=await browser.newContext(),page=await context.newPage();page.setDefaultTimeout(9000);
  const report={browser:browser.version(),pages:[],errors:[]};page.on('pageerror',e=>report.errors.push(e.message));page.on('console',m=>{if(m.type()==='error')report.errors.push(m.text());});
@@ -11,7 +11,7 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
  const compact=async l=>{const r=await box(l);assert.equal(r.width,24);assert.equal(r.height,24);assert.equal(await l.locator('svg').count(),1);};
  const close=async panel=>{await panel.locator('.sapid-layer-close').first().click();await tick();assert(!await panel.isVisible());};
  const settleHints=async()=>{await page.mouse.move(0,0);await page.locator('.site-title').click();await page.keyboard.press('Escape');await page.waitForTimeout(230);await tick();};
- const counts={modal:12,drawer:10,popover:9,dialog:3,'loading-overlay':4,overlay:5,tooltip:10,'hover-card':4,'action-bar':4,'floating-indicator':3,tour:4};
+ const counts={modal:15,drawer:13,popover:14,dialog:3,'loading-overlay':4,overlay:5,tooltip:16,'hover-card':6,'action-bar':4,'floating-indicator':4,tour:10};
  fs.mkdirSync(outputPath('overlays-remediation'),{recursive:true});
  try{
  for(const theme of (process.env.SAPID_OVERLAY_THEMES||matrix.themes.join(',')).split(','))for(const scheme of (process.env.SAPID_OVERLAY_SCHEMES||matrix.schemes.join(',')).split(','))for(const width of (process.env.SAPID_OVERLAY_WIDTHS||'1280,390').split(',').map(Number))for(const slug of (process.env.SAPID_OVERLAY_PAGES||Object.keys(counts).join(',')).split(',')){
@@ -19,7 +19,7 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
   try{
    await page.setViewportSize({width,height:1100});await page.goto(`${base}/showcase.html?widget=${slug}&theme=${theme}&scheme=${scheme}`);await page.waitForFunction(()=>window.ready===true,undefined,{timeout:25000});await tick();
    const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;
-   assert.equal(await page.locator('.site-component-detail').count(),counts[slug]);assert(await page.locator('.site-title,.site-section-title').evaluateAll(es=>es.every(e=>getComputedStyle(e).fontWeight==='400')));
+   assert.equal(await page.locator('.site-component-detail').count(),counts[slug]);await assertDocHeadingWeights(page);
    const primary=page.locator('.site-preview .site-demo').first();
    if(slug==='modal'){
     const trigger=primary.getByRole('button',{name:'Edit profile',exact:true});await trigger.click();await tick();const panel=primary.getByRole('dialog',{name:'Edit your profile',exact:true});await within(panel);await panel.screenshot({path:outputPath(`overlays-remediation/open-${key}.png`)});await compact(panel.getByRole('button',{name:'Close profile editor',exact:true}));const input=panel.getByRole('textbox',{name:'Profile display name',exact:true});await input.fill('Grace Hopper');await input.evaluate(e=>window.savedProfile=e);await panel.getByRole('button',{name:'Save profile',exact:true}).click();await tick();assert(await primary.getByText('Current profile: Grace Hopper',{exact:true}).isVisible());await focus(trigger);await trigger.click();await tick();assert.equal(await input.inputValue(),'Grace Hopper');assert(await input.evaluate(e=>e===window.savedProfile));await page.keyboard.press('Escape');await tick();await focus(trigger);

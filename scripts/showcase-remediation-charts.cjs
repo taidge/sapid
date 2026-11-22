@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict'),fs=require('node:fs');
-const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
+const {assertDocHeadingWeights,matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
 const chartPages=['area-chart','bar-chart','line-chart','composite-chart'];
 const plots=['candlestick-chart','donut-chart','pie-chart','funnel-chart','radar-chart','scatter-chart','bubble-chart','radial-bar-chart','sparkline','bars-list','bullet-chart','gauge-chart','waffle-chart','treemap','sunburst-chart','sankey-chart','matrix-chart'];
 (async()=>{
@@ -17,9 +17,9 @@ const plots=['candlestick-chart','donut-chart','pie-chart','funnel-chart','radar
  try{
  await page.setViewportSize({width,height:1100});await page.goto(`${base}/showcase.html?widget=${slug}&theme=${theme}&scheme=${scheme}`);await page.waitForFunction(()=>window.ready===true,undefined,{timeout:30000});await tick();
  const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;
- assert(await page.locator('.site-title,.site-section-title').evaluateAll(es=>es.every(e=>getComputedStyle(e).fontWeight==='400')));assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+ await assertDocHeadingWeights(page);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  const cartesian=chartPages.includes(slug),primary=page.locator('.site-preview .site-demo').first(),frameSelector=cartesian?'.sapid-chart-plot':'.sapid-plot-drawing',pointSelector=cartesian?'.sapid-chart-point':'.sapid-plot-point',legendSelector=cartesian?'.sapid-chart-legend-item':'.sapid-plot-legend-item',detailSelector=cartesian?'.sapid-chart-point-detail':'.sapid-plot-detail';
- const expected=({'area-chart':32,'bar-chart':26,'line-chart':27,'composite-chart':27,'donut-chart':14,'pie-chart':12,'funnel-chart':11,'radar-chart':6,'radial-bar-chart':7,'bubble-chart':6,'sunburst-chart':10,'waffle-chart':8,'sankey-chart':9,'treemap':8,'scatter-chart':5,'matrix-chart':10,'bars-list':5,'bullet-chart':10,'gauge-chart':10})[slug] || 4;assert.equal(await page.locator('.site-component-detail').count(),expected);assert.equal(await primary.locator('.site-chart-card').count(),0);
+ const expected=({'area-chart':32,'bar-chart':26,'line-chart':27,'composite-chart':27,'donut-chart':15,'pie-chart':13,'funnel-chart':12,'radar-chart':6,'radial-bar-chart':7,'bubble-chart':6,'sunburst-chart':10,'waffle-chart':8,'sankey-chart':9,'treemap':8,'scatter-chart':5,'matrix-chart':10,'bars-list':5,'bullet-chart':10,'gauge-chart':10})[slug] || 4;assert.equal(await page.locator('.site-component-detail').count(),expected);assert.equal(await primary.locator('.site-chart-card').count(),0);
  const frame=primary.locator(frameSelector),b=await rect(frame),container=await rect(primary);assert(b.width<=container.width+1&&b.width>=(['sparkline','donut-chart','pie-chart','gauge-chart'].includes(slug)?145:220));if(slug==='bullet-chart'){assert(Math.abs(b.height-b.width*120/800)<2)}else{assert(b.height>=(slug==='sparkline'?35:65))};
  await remember(frame,'primaryChartFrame');
  if(slug==='sparkline'){

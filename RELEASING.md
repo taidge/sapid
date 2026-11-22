@@ -1,6 +1,6 @@
 # Releases
 
-Sapid 0.9.0 requires the published Glory 0.9.0 and its coordinated native engines.
+Sapid 0.9.1 requires the published Glory 0.9.1 and its coordinated native engines.
 Library, example and benchmark locks remain local and ignored; generate and
 validate them without adding them to Git.
 

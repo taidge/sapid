@@ -49,6 +49,7 @@ mod number_locales;
 mod number_precision;
 mod overflow_controlled;
 mod overflow_hover;
+mod overflow_max_visible;
 mod overflow_retained;
 mod overflow_rows;
 mod overflow_start;
@@ -470,6 +471,13 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
                 source: include_str!("overflow_rows.rs"),
             },
             DetailSection {
+                id: "overflow-max-visible",
+                title: "Max visible items",
+                note: "At most five fruit badges appear in the row. Drag the right edge inward to move more fruit into the overflow.",
+                example: Box::new(overflow_max_visible::demo(theme.clone())),
+                source: include_str!("overflow_max_visible.rs"),
+            },
+            DetailSection {
                 id: "overflow-start",
                 title: "Collapse from",
                 note: "The first fruit badges move into the overflow as the container narrows.",
@@ -685,6 +693,7 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
         ],
         "overflow-list" => vec![
             ("Max rows", "#overflow-rows"),
+            ("Max visible items", "#overflow-max-visible"),
             ("Collapse from", "#overflow-start"),
             ("Hover card", "#overflow-hover"),
             ("Container width and automatic overflow", "#overflow-width"),

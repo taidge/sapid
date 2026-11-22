@@ -1,13 +1,13 @@
 const { checkBadge } = require('./showcase-playground-checks.cjs');
 const assert = require('node:assert/strict'), fs = require('node:fs');
-const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-browser-env.cjs');
+const {assertDocHeadingWeights,matrix, chromium, base, outputPath, writeReport } = require('./showcase-browser-env.cjs');
 (async () => {
  const browser=await chromium.launch(), context=await browser.newContext(), page=await context.newPage();
  page.setDefaultTimeout(10000);
  const report={browser:browser.version(),pages:[],errors:[]};
  page.on('pageerror',e=>report.errors.push(e.message));
  page.on('console',m=>{if(m.type()==='error')report.errors.push(m.text());});
- const counts={avatar:11,badge:9,card:6,'color-swatch':4,'data-list':4,image:4,indicator:8,kbd:4,'number-formatter':3,'overflow-list':6,'rolling-number':3,spoiler:4,'theme-icon':5};
+ const counts={avatar:11,badge:9,card:6,'color-swatch':4,'data-list':4,image:4,indicator:8,kbd:4,'number-formatter':3,'overflow-list':7,'rolling-number':3,spoiler:4,'theme-icon':5};
  const tick=()=>page.evaluate(()=>new Promise(resolve=>{let n=0;const f=()=>++n===8?resolve():requestAnimationFrame(f);requestAnimationFrame(f);}));
  const detail=id=>page.locator('.site-component-detail').filter({has:page.locator(`#${id}`)});
  const box=async l=>{const r=await l.boundingBox();assert(r);return r;};
@@ -24,7 +24,7 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
    await page.waitForFunction(()=>window.ready===true,undefined,{timeout:30000});await tick();
    const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;
    assert.equal(await page.locator('.site-component-detail').count(),counts[slug]);
-   assert(await page.locator('.site-title,.site-section-title').evaluateAll(es=>es.every(e=>getComputedStyle(e).fontWeight==='400')));
+   await assertDocHeadingWeights(page);
    const primary=page.locator('.site-preview .site-demo').first();
    if(slug==='avatar') {
     await loaded(primary.locator('img'));assert.equal(await primary.locator('.sapid-avatar').getAttribute('aria-label'),'Ava Patel');assert(!await primary.locator('.sapid-avatar-fallback').isVisible());

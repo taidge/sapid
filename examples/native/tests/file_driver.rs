@@ -12,7 +12,7 @@ use std::{
     task::{Context, Waker},
     time::{Duration, Instant},
 };
-#[path = "../../web/src/dedicated_demos/file_input.rs"]
+#[path = "../../web/src/showcase_demos/file_input_usage.rs"]
 mod file_primary;
 struct Reader(Arc<Vec<u8>>);
 impl FileReader for Reader {
@@ -113,17 +113,36 @@ fn native_input_summary_long_names_cancel_and_inset_clear_keep_the_same_picker()
         assert!(
             matches!(host.app().tree().node(id).unwrap().descriptor.view().props,Props::File(p)if p.label==format!("{name}, +1 more"))
         );
-        assert_eq!(
-            host.app()
-                .tree()
-                .node(id)
+        let label = find(&host, "sapid-field-label").into_iter().find(|node| {
+            let tree = host.app().tree();
+            tree.node(*node).unwrap().children.iter().any(|child| matches!(tree.node(*child).unwrap().descriptor.view().props, Props::Text(p) if p.content == "Input label"))
+        }).expect("file field label");
+        {
+            let tree = host.app().tree();
+            let label_id = tree
+                .node(label)
                 .unwrap()
                 .descriptor
                 .view()
-                .name
-                .as_deref(),
-            Some("Attachments")
-        );
+                .semantics
+                .as_ref()
+                .unwrap()
+                .id
+                .as_ref()
+                .unwrap();
+            assert_eq!(
+                tree.node(id)
+                    .unwrap()
+                    .descriptor
+                    .view()
+                    .semantics
+                    .as_ref()
+                    .unwrap()
+                    .labelled_by
+                    .as_ref(),
+                Some(label_id)
+            );
+        }
         *picker.0.lock().unwrap() = Some(Ok(None));
         pick(&host);
         assert_eq!(files.stats().references, 2);
@@ -180,7 +199,7 @@ fn native_input_summary_long_names_cancel_and_inset_clear_keep_the_same_picker()
         );
         assert_eq!(files.stats().references, 0);
         assert!(
-            matches!(host.app().tree().node(id).unwrap().descriptor.view().props,Props::File(p)if p.label=="Choose files")
+            matches!(host.app().tree().node(id).unwrap().descriptor.view().props,Props::File(p)if p.label=="Input placeholder")
         );
         assert_eq!(
             host.renderer()

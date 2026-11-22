@@ -58,19 +58,25 @@ impl OverflowItem {
     }
 }
 
+enum OverflowLabel {
+    Prefix(Vary<String>),
+    Count(Rc<dyn Fn(usize) -> String>),
+}
+
 pub struct OverflowList {
     common: Common,
     key: String,
     items: Vec<OverflowItem>,
     dynamic: Option<(Vary<Vec<String>>, KeyFactory)>,
     initial: usize,
+    max_visible: usize,
     max_rows: usize,
     from_start: bool,
     hover: bool,
     visible: Option<Vary<usize>>,
     changed: Option<Box<dyn FnMut(usize)>>,
     gap: Vary<f64>,
-    label: Vary<String>,
+    label: OverflowLabel,
     open: Value<bool>,
     open_changed: Option<Box<dyn FnMut(bool)>>,
     revision: Vary<u64>,
@@ -84,13 +90,14 @@ pub fn overflow_list(key: impl Into<String>) -> OverflowList {
         items: Vec::new(),
         dynamic: None,
         initial: 3,
+        max_visible: MAX_OVERFLOW_ITEMS,
         max_rows: 1,
         from_start: false,
         hover: false,
         visible: None,
         changed: None,
         gap: 8.0.into(),
-        label: "More items".into(),
+        label: OverflowLabel::Prefix("More items".into()),
         open: Value::default(),
         open_changed: None,
         revision: 0u64.into(),
@@ -131,6 +138,11 @@ impl OverflowList {
         self.max_rows = rows.clamp(1, MAX_OVERFLOW_ITEMS);
         self
     }
+    /// Cap the number of inline items even when additional items would fit.
+    pub fn max_visible_items(mut self, count: usize) -> Self {
+        self.max_visible = count.min(MAX_OVERFLOW_ITEMS);
+        self
+    }
     /// Place the overflow trigger first and retain the trailing items.
     pub fn collapse_from_start(mut self, from_start: bool) -> Self {
         self.from_start = from_start;
@@ -154,7 +166,12 @@ impl OverflowList {
         self
     }
     pub fn overflow_label(mut self, value: impl Into<Vary<String>>) -> Self {
-        self.label = value.into();
+        self.label = OverflowLabel::Prefix(value.into());
+        self
+    }
+    /// Format the overflow entry using the current number of hidden items.
+    pub fn overflow_count_label(mut self, format: impl Fn(usize) -> String + 'static) -> Self {
+        self.label = OverflowLabel::Count(Rc::new(format));
         self
     }
     pub fn open(mut self, value: impl Into<Vary<bool>>) -> Self {
@@ -203,6 +220,7 @@ struct Controller {
     owner: glory::core::InstanceId,
     live: Cell<bool>,
     popup: bool,
+    max_visible: usize,
     max_rows: usize,
     from_start: bool,
     line: Cell<Option<NodeId>>,
@@ -423,7 +441,11 @@ impl Controller {
         let scope = self.scope()?;
         let rows = self.rows.borrow().clone();
         let count = if self.popup {
-            self.visible.source.try_get()?.min(rows.len())
+            self.visible
+                .source
+                .try_get()?
+                .min(rows.len())
+                .min(self.max_visible)
         } else {
             rows.len()
         };
@@ -626,20 +648,22 @@ impl Controller {
                 .trigger
                 .ok_or_else(|| invalid("overflow trigger geometry missing"))?;
             let gap = self.gap.try_get()?;
+            let keep_trigger = self.more_focus.get() || widths.len() > self.max_visible;
             let count = if self.max_rows == 1 && !self.from_start {
-                model::capacity(&widths, available, trigger, gap, self.more_focus.get())?
+                model::capacity(&widths, available, trigger, gap, keep_trigger)?
             } else {
                 model::pack(
                     &widths,
                     available,
                     trigger,
                     gap,
-                    self.more_focus.get(),
+                    keep_trigger,
                     self.max_rows,
                     self.from_start,
                 )
-            };
-            let current = self.visible.source.try_get()?.min(widths.len());
+            }
+            .min(self.max_visible);
+            let current = self.count.try_get()?;
             if count != current {
                 self.visible.accept(&count)?;
                 self.changed.emit(self.owner, count);
@@ -798,12 +822,18 @@ impl Widget for OverflowList {
         let raw_gap = self.gap.clone();
         model::extent(raw_gap.try_get()?)?;
         let gap = scope.cage(raw_gap.try_get()?);
-        let label = composite::validated(scope, &self.label, |label| {
-            if label.is_empty() || label.len() > 256 {
-                return Err(invalid("overflow label must contain 1..=256 bytes"));
+        let format_label: Rc<dyn Fn(usize) -> String> = match &self.label {
+            OverflowLabel::Prefix(source) => {
+                let prefix = composite::validated(scope, source, |label| {
+                    if label.is_empty() || label.len() > 256 {
+                        return Err(invalid("overflow label must contain 1..=256 bytes"));
+                    }
+                    Ok(())
+                })?;
+                Rc::new(move |hidden| format!("{} ({} hidden)", prefix.get(), hidden))
             }
-            Ok(())
-        })?;
+            OverflowLabel::Count(format) => format.clone(),
+        };
         let controlled = self
             .visible
             .take()
@@ -829,7 +859,11 @@ impl Widget for OverflowList {
             return Err(invalid("overflow controlled prefix exceeds 128 items"));
         }
         let count = scope.cage(if self.popup {
-            visible.source.try_get()?.min(initial_keys.len())
+            visible
+                .source
+                .try_get()?
+                .min(initial_keys.len())
+                .min(self.max_visible)
         } else {
             initial_keys.len()
         });
@@ -842,6 +876,7 @@ impl Widget for OverflowList {
             owner: scope.id(),
             live: Cell::new(true),
             popup: self.popup,
+            max_visible: self.max_visible,
             max_rows: self.max_rows,
             from_start: self.from_start,
             line: Cell::new(None),
@@ -1051,13 +1086,7 @@ impl Widget for OverflowList {
                         ..Style::new().display(Display::Flex)
                     })
             };
-            let label = scope.bond(move || {
-                format!(
-                    "{} ({} hidden)",
-                    label.get(),
-                    total.get().saturating_sub(count.get())
-                )
-            });
+            let label = scope.bond(move || format_label(total.get().saturating_sub(count.get())));
             let on_open = move |open| {
                 if let Some(state) = on_open.upgrade()
                     && let Err(error) = state.set_open(open)

@@ -15,7 +15,7 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
  try {
  await context.grantPermissions(['clipboard-read','clipboard-write']);await page.setViewportSize({width,height:1000});await page.goto(`${base}/showcase.html?widget=${slug}&theme=${theme}&scheme=${scheme}`);await page.waitForFunction(()=>window.ready===true,undefined,{timeout:20000});await tick();
  const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;
- assert.equal(await page.locator('.site-component-detail').count(),{'action-icon':13,button:18,'close-button':3,'copy-button':4,'file-button':3,toggle:5,'unstyled-button':3}[slug]);
+ assert.equal(await page.locator('.site-component-detail').count(),{'action-icon':16,button:21,'close-button':3,'copy-button':4,'file-button':3,toggle:5,'unstyled-button':3}[slug]);
  const primary=page.locator('.site-preview .site-demo').first();
  if(slug==='action-icon'){
  const action=primary.getByRole('button',{name:'Confirm selection',exact:true});assert.equal(await action.locator('svg:visible').count(),1);const rect=await action.boundingBox();assert.equal(rect.width,28);assert.equal(rect.height,28);

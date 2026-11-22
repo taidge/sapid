@@ -120,7 +120,7 @@ fn native_angle_cardinals_center_and_non_square_geometry_keep_live_identity_in_f
         let PathCommand::Line(end) = graphic.commands[1] else {
             panic!("hand endpoint")
         };
-        assert!((end.x - 10.).abs() < 1e-8 && (end.y - 50.).abs() < 1e-8);
+        assert!(end.x.abs() < 1e-8 && (end.y - 50.).abs() < 1e-8);
         drop(tree);
         assert_eq!(
             host.renderer()
@@ -134,7 +134,7 @@ fn native_angle_cardinals_center_and_non_square_geometry_keep_live_identity_in_f
     }
 }
 #[test]
-fn native_angle_graphics_paint_the_rotating_hand_and_thumb_in_four_themes() {
+fn native_angle_graphics_paint_the_rotating_marker_in_four_themes() {
     for theme in [
         sapid::Theme::blue_light(),
         sapid::Theme::blue_dark(),
@@ -157,17 +157,12 @@ fn native_angle_graphics_paint_the_rotating_hand_and_thumb_in_four_themes() {
         let mut raster = Raster::default();
         raster.draw(host.renderer()).unwrap();
         let image = raster.frame().unwrap();
-        let x = (rect.x + rect.width * 0.7).round() as usize;
+        let x = (rect.x + rect.width * 0.93).round() as usize;
         let y = (rect.y + rect.height / 2.).round() as usize;
         let offset = (y * image.width as usize + x) * 4;
         assert_eq!(
             &raster.pixels()[offset..offset + 4],
-            &[
-                theme.accent.0,
-                theme.accent.1,
-                theme.accent.2,
-                theme.accent.3
-            ]
+            &[theme.muted.0, theme.muted.1, theme.muted.2, theme.muted.3]
         );
         app.clear().unwrap();
     }

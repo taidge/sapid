@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict'),fs=require('node:fs');
-const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
+const {assertDocHeadingWeights,matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
 (async()=>{
  const browser=await chromium.launch(),context=await browser.newContext(),page=await context.newPage();page.setDefaultTimeout(8000);
  const report={browser:browser.version(),pages:[],errors:[]};page.on('pageerror',e=>report.errors.push(e.message));page.on('console',m=>{if(m.type()==='error')report.errors.push(m.text());});
@@ -17,7 +17,7 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
    await page.setViewportSize({width,height:1100});await page.emulateMedia({reducedMotion:'no-preference'});await page.goto(`${base}/showcase.html?widget=${slug}&theme=${theme}&scheme=${scheme}`);await page.waitForFunction(()=>window.ready===true,undefined,{timeout:25000});await tick();
    const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;
    assert.equal(await page.locator('.site-component-detail').count(),{alert:5,'empty-state':6,loader:6,notification:4,skeleton:3,progress:13,'ring-progress':13,'semi-circle-progress':11}[slug]);
-   assert(await page.locator('.site-title,.site-section-title').evaluateAll(es=>es.every(e=>getComputedStyle(e).fontWeight==='400')));
+   await assertDocHeadingWeights(page);
    const primary=page.locator('.site-preview .site-demo').first();
    if(slug==='alert'){
     await primary.getByRole('switch',{name:'With close button',exact:true}).check();const close=primary.getByRole('button',{name:'Dismiss storage notice',exact:true});await compact(close,20);await close.click();await tick();assert(!await close.isVisible());await primary.getByRole('button',{name:'Restore storage notice',exact:true}).click();await tick();assert(await close.isVisible());

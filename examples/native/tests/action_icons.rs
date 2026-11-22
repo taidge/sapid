@@ -37,12 +37,12 @@ fn observe(host: &WindowApp) {
 #[test]
 fn icon_and_close_targets_are_square_and_default_vector_is_centered_in_all_sizes() {
     for theme in themes() {
-        for (size, side, glyph) in [
-            (sapid::Size::ExtraSmall, 24., 12.),
-            (sapid::Size::Small, 30., 14.),
-            (sapid::Size::Medium, 36., 16.),
-            (sapid::Size::Large, 42., 18.),
-            (sapid::Size::ExtraLarge, 50., 20.),
+        for (size, side) in [
+            (sapid::Size::ExtraSmall, 18.),
+            (sapid::Size::Small, 22.),
+            (sapid::Size::Medium, 28.),
+            (sapid::Size::Large, 34.),
+            (sapid::Size::ExtraLarge, 44.),
         ] {
             let host = WindowApp::new();
             host.renderer().set_viewport(180, 100, 1.).unwrap();
@@ -60,7 +60,8 @@ fn icon_and_close_targets_are_square_and_default_vector_is_centered_in_all_sizes
             assert_eq!((rect.width, rect.height), (side, side));
             let icon = app.tree().node(id).unwrap().children[0];
             let ir = bounds(app, icon);
-            assert_eq!((ir.width, ir.height), (glyph, glyph));
+            let glyph = side * 0.7;
+            assert!((ir.width - glyph).abs() < 0.1 && (ir.height - glyph).abs() < 0.1);
             assert!((ir.x + glyph / 2. - rect.x - side / 2.).abs() < 0.1);
             assert!((ir.y + glyph / 2. - rect.y - side / 2.).abs() < 0.1);
             app.clear().unwrap();

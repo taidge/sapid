@@ -199,11 +199,11 @@ fn native_switch_sizes_marks_and_label_positions_retain_the_same_editor_when_cap
             sapid::SwitchLabelPosition::After,
         ] {
             for (size, width, height) in [
-                (sapid::Size::ExtraSmall, 26., 14.),
-                (sapid::Size::Small, 30., 16.),
-                (sapid::Size::Medium, 34., 20.),
-                (sapid::Size::Large, 42., 24.),
-                (sapid::Size::ExtraLarge, 50., 28.),
+                (sapid::Size::ExtraSmall, 32., 16.),
+                (sapid::Size::Small, 38., 20.),
+                (sapid::Size::Medium, 46., 24.),
+                (sapid::Size::Large, 56., 30.),
+                (sapid::Size::ExtraLarge, 72., 36.),
             ] {
                 let host = WindowApp::new();
                 let app = host.app();

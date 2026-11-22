@@ -96,7 +96,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
             list
         });
         view()
-            .class("site-configurator site-display-configurator")
+            .class("site-configurator site-display-configurator site-timeline-configurator")
             .fill(controls::playground(
                 Box::new(preview),
                 vec![
