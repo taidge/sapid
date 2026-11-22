@@ -160,6 +160,7 @@ explicit even when another variant of the same family is available.
 Implementation:
 
 - `src/button.rs`
+- `src/theme/contrast.rs`
 - `src/theme/mod.rs`
 - `docs/button.md`
 - `docs/mantine-api-comparison.md`
@@ -282,6 +283,7 @@ Documentation:
 
 Implementation:
 
+- `examples/web/src/dedicated_demos/accordion.rs`
 - `src/accordion/mod.rs`
 - `src/collection.rs`
 - `src/composite/mod.rs`
@@ -837,6 +839,7 @@ MixedCheckbox/CheckboxGroup 保留真实三态与有限全选/禁用策略；新
 
 Implementation:
 
+- `examples/web/src/showcase_choice_docs/checkbox_group.rs (selection cap with disabled items and select-all)`
 - `src/mixed_checkbox.rs`
 - `src/checkbox_group.rs`
 - `src/switch/mod.rs`
@@ -957,7 +960,7 @@ Tests:
 
 ### Evidence P2-05
 
-SegmentedControl 复用真实 RadioGroup 与单值控制器；四主题原生受控选择、只读及物理身份已验证，不引入 Tabs 面板语义。
+SegmentedControl 复用真实 RadioGroup 与单值控制器；四主题原生受控选择、只读及物理身份已验证，网页选中指示器随标签滑动，示例面板可调方向、宽度、分隔线、尺寸和圆角。
 
 Implementation:
 
@@ -972,10 +975,11 @@ Implementation:
 - `../glory/crates/web/src/stream.js`
 - `examples/web/src/showcase_slider_docs (5 complete compiled examples)`
 - `examples/web/src/showcase_range_slider_docs (8 complete compiled examples)`
-- `examples/web/src/showcase_choice_docs (rating and segments, 6 complete compiled examples)`
+- `examples/web/src/showcase_choice_docs (five SegmentedControl examples, including form submission and motion settings)`
 
 Tests:
 
+- `scripts/showcase-remediation-selection.cjs (indicator geometry, playground controls and form value)`
 - `tests/choices.rs (8 passed)`
 - `tests/radio.rs (7 passed)`
 - `tests/segmented_control.rs (2 passed)`
@@ -997,6 +1001,7 @@ Chip 使用真实 Checkbox，ChipGroup 按单选 Radio/多选 Checkbox 分别实
 
 Implementation:
 
+- `examples/web/src/showcase_choice_docs/chip_modes.rs (multiple-selection cap shared with CheckboxGroup)`
 - `src/chip.rs`
 - `docs/choices-implementation.md`
 - `docs/choice-inputs.md`
@@ -1085,6 +1090,7 @@ Box/Flex/Stack/布局Group使用真实View，支持gap/对齐/换行与结构uns
 
 Implementation:
 
+- `examples/web/src/dedicated_demos/stack.rs`
 - `src/layout.rs`
 - `docs/layout-widgets.md`
 - `../glory/crates/style/src/lib.rs (FlexWrap)`
@@ -1291,6 +1297,7 @@ Code/Mark真实行内语义；Highlight为有预算的挂载时精确子串切�
 
 Implementation:
 
+- `examples/web/src/showcase_typography_docs/highlight_case.rs (ASCII case and Unicode word boundaries)`
 - `src/document.rs`
 - `docs/document-widgets.md`
 - `../glory/crates/render/src/document.rs`
@@ -1318,6 +1325,7 @@ Badge被动展示与可移除Pill分别建模；关闭动作独立名称，受�
 
 Implementation:
 
+- `examples/web/src/dedicated_demos/badge.rs`
 - `src/display.rs`
 - `docs/display-widgets.md`
 - `docs/showcase-style-review.md`
@@ -1379,6 +1387,7 @@ Implementation:
 
 - `src/separator.rs`
 - `src/timeline.rs`
+- `examples/web/src/dedicated_demos/timeline.rs`
 - `docs/timeline-separator.md`
 - `examples/web/src/showcase_misc_docs`
 - `docs/misc-pages.md`
@@ -1468,6 +1477,7 @@ Implementation:
 
 - `src/indicator.rs`
 - `src/theme_icon.rs`
+- `examples/web/src/dedicated_demos/theme_icon_gradient.rs`
 - `docs/indicators-icons.md`
 - `../glory/docs/finite-graphics.md`
 
@@ -1614,6 +1624,7 @@ Tests:
 Implementation:
 
 - `src/spoiler.rs`
+- `examples/web/src/dedicated_demos/spoiler.rs: illustrated measured guide`
 - `docs/spoiler.md`
 
 Tests:
@@ -1809,6 +1820,7 @@ Documentation:
 Implementation:
 
 - `src/combobox.rs`
+- `examples/web/src/showcase_combobox_docs/combo_filter.rs`
 - `docs/combobox-implementation.md`
 - `../glory/docs/input-placeholder.md`
 - `examples/web/src/showcase_combobox_docs`
@@ -2138,6 +2150,7 @@ Implementation:
 Tests:
 
 - `tests/spinner.rs`
+- `src/progress.rs: inset rotating loader geometry`
 - `examples/native/tests/spinner.rs`
 - `examples/web/spinner-acceptance.js`
 - `D:/BuildCache/sapid/spinner-browser.json`
@@ -2475,6 +2488,7 @@ Tests:
 
 Implementation:
 
+- `examples/web/src/showcase_shell/resizable.rs`
 - `src/app_shell.rs`
 - `docs/sidebar-app-shell.md`
 - `examples/web/src/showcase_shell/mod.rs`
@@ -3024,6 +3038,8 @@ Implementation:
 
 - `src/mask_input.rs`
 - `src/mask_model.rs`
+- `src/phone_input.rs`
+- `examples/web/src/showcase_data_input_docs/phone_field.rs`
 - `docs/mask-input.md`
 - `../glory/crates/render/src/input_edit.rs`
 - `../glory/crates/render/src/text_selection.rs`
@@ -3034,6 +3050,7 @@ Implementation:
 Tests:
 
 - `tests/mask_inputs.rs (9 passed)`
+- `tests/phone_input.rs`
 - `src/mask_model.rs (9 passed)`
 - `examples/native/tests/mask_input.rs (2 passed)`
 - `examples/web/mask-input-acceptance.js`
