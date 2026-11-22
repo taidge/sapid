@@ -244,3 +244,106 @@ fn scroller_overlay_controls_fit_narrow_viewports_and_fixed_steps_keep_the_edito
         app.clear().unwrap();
     }
 }
+
+#[test]
+fn trackpad_momentum_keeps_the_scroll_area_axis_until_a_mouse_wheel_takes_over() {
+    use apace_dom::Document;
+    use apace_traits::events::{
+        ApacePointerEvent, ApacePointerId, ApaceWheelDelta, ApaceWheelEvent, ApaceWheelPhase,
+        ApaceWheelSource, MouseEventButton, PointerCoords, UiEvent,
+    };
+    use glory::render::ScrollAxes;
+    let mut host = WindowApp::new();
+    host.renderer().set_viewport(400, 300, 1.).unwrap();
+    let viewport = host.app().scope().cage(None);
+    host.mount(
+        scroll_area("gestures")
+            .node_ref(viewport)
+            .axes(ScrollAxes::Both)
+            .style(
+                Style::new()
+                    .width(Length::Px(200.))
+                    .height(Length::Px(120.)),
+            )
+            .content(|_| {
+                glory::ui::view().style(
+                    Style::new()
+                        .width(Length::Px(800.))
+                        .height(Length::Px(700.)),
+                )
+            }),
+    )
+    .unwrap();
+    host.app().settle(16).unwrap();
+    let node = viewport.get().unwrap();
+    let initial = metrics(host.app(), node);
+    assert!(
+        initial.content_width > initial.viewport_width
+            && initial.content_height > initial.viewport_height
+    );
+    let coords = PointerCoords {
+        page_x: 24.,
+        page_y: 24.,
+        client_x: 24.,
+        client_y: 24.,
+        screen_x: 24.,
+        screen_y: 24.,
+    };
+    host.handle_ui_event(UiEvent::PointerMove(ApacePointerEvent {
+        id: ApacePointerId::Mouse,
+        is_primary: true,
+        coords,
+        button: MouseEventButton::Main,
+        buttons: Default::default(),
+        mods: Default::default(),
+        details: Default::default(),
+        element: Default::default(),
+        active_pointers: Default::default(),
+    }));
+    let wheel = |dx, dy, phase, source| {
+        UiEvent::Wheel(ApaceWheelEvent {
+            delta: ApaceWheelDelta::Pixels(dx, dy),
+            phase,
+            source,
+            coords,
+            mods: Default::default(),
+            buttons: Default::default(),
+            element: Default::default(),
+        })
+    };
+    host.handle_ui_event(wheel(
+        -3.,
+        -30.,
+        ApaceWheelPhase::Started,
+        ApaceWheelSource::Finger,
+    ));
+    host.handle_ui_event(wheel(
+        0.,
+        0.,
+        ApaceWheelPhase::Ended,
+        ApaceWheelSource::Finger,
+    ));
+    // A diagonal first momentum event inherits the previous vertical gesture.
+    host.handle_ui_event(wheel(
+        -4.,
+        -4.,
+        ApaceWheelPhase::Started,
+        ApaceWheelSource::Momentum,
+    ));
+    host.handle_ui_event(wheel(
+        0.,
+        0.,
+        ApaceWheelPhase::Ended,
+        ApaceWheelSource::Momentum,
+    ));
+    let after = metrics(host.app(), node);
+    assert_eq!((after.x, after.y), (0., 34.));
+    host.handle_ui_event(wheel(
+        -5.,
+        -6.,
+        ApaceWheelPhase::Moved,
+        ApaceWheelSource::Wheel,
+    ));
+    let after = metrics(host.app(), node);
+    assert_eq!((after.x, after.y), (5., 40.));
+}
