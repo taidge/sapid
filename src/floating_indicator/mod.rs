@@ -60,7 +60,7 @@ struct Controller {
     targets: RefCell<BTreeMap<String, Target>>,
     next_target: Cell<u64>,
     pulse: Cage<()>,
-    active: Cage<Option<String>>,
+    active: Vary<Option<String>>,
     visible: Vary<bool>,
     snapshot: Cage<Snapshot>,
     pending: Cage<usize>,
@@ -87,6 +87,49 @@ impl FloatingIndicatorContext {
     }
 }
 impl Controller {
+    fn new(
+        scope: &Scope,
+        container: Cage<Option<NodeId>>,
+        active: Vary<Option<String>>,
+        visible: Vary<bool>,
+        changed: Option<Box<dyn FnMut(Option<Rect>)>>,
+    ) -> Rc<Self> {
+        Rc::new(Self {
+            weak: scope.downgrade(),
+            owner: scope.id(),
+            container,
+            targets: RefCell::new(BTreeMap::new()),
+            next_target: Cell::new(0),
+            pulse: scope.cage(()),
+            active,
+            visible,
+            snapshot: scope.cage(Snapshot {
+                geometry: None,
+                transition: false,
+            }),
+            pending: scope.cage(0),
+            task: Cell::new(None),
+            scheduled: Cell::new(false),
+            batch: RefCell::new(None),
+            next: Cell::new(0),
+            callback: Callback::new(changed),
+        })
+    }
+
+    fn watch(self: &Rc<Self>, scope: &Scope, revision: Vary<u64>) {
+        let refresh = Rc::downgrade(self);
+        let (active, pulse, visible) = (self.active.clone(), self.pulse, self.visible.clone());
+        scope.effect(move || {
+            let _ = (active.get(), pulse.get(), visible.get(), revision.get());
+            if let Some(state) = refresh.upgrade() {
+                state.cancel();
+                if let Err(error) = state.schedule() {
+                    state.report(error);
+                }
+            }
+        });
+    }
+
     fn scope(&self) -> Result<Scope> {
         if !self.owner.is_alive() {
             return Err(glory::ui::Error::Gone);
@@ -297,6 +340,45 @@ impl Controller {
         }
         Ok(())
     }
+}
+
+/// Follow an existing track and its fixed, scope-owned members without wrapping
+/// the semantic nodes or changing their layout.
+pub(crate) fn track_fixed_targets(
+    scope: &Scope,
+    container: Cage<Option<NodeId>>,
+    selected: Cage<String>,
+    targets: impl Iterator<Item = (String, NodeId)>,
+    bounds: Cage<Option<Rect>>,
+) -> FloatingIndicatorContext {
+    let active = scope.bond(move || {
+        let key = selected.get();
+        (!key.is_empty()).then_some(key)
+    });
+    let state = Controller::new(
+        scope,
+        container,
+        active.into(),
+        true.into(),
+        Some(Box::new(move |rect| {
+            bounds.revise(|current| *current = rect)
+        })),
+    );
+    state
+        .targets
+        .borrow_mut()
+        .extend(targets.map(|(key, node)| {
+            (
+                key,
+                Target {
+                    node,
+                    owner: scope.id(),
+                    serial: 0,
+                },
+            )
+        }));
+    state.watch(scope, 0u64.into());
+    FloatingIndicatorContext { inner: state }
 }
 
 pub struct FloatingIndicatorTarget {
@@ -533,29 +615,14 @@ impl Widget for FloatingIndicator {
             .validate()?)
         })?;
         let container = scope.cage(None);
-        let pulse = scope.cage(());
-        let snapshot = scope.cage(Snapshot {
-            geometry: None,
-            transition: false,
-        });
-        let pending = scope.cage(0);
-        let state = Rc::new(Controller {
-            weak: scope.downgrade(),
-            owner: scope.id(),
+        let state = Controller::new(
+            scope,
             container,
-            targets: RefCell::new(BTreeMap::new()),
-            next_target: Cell::new(0),
-            pulse,
-            active,
-            visible: self.visible.clone(),
-            snapshot,
-            pending,
-            task: Cell::new(None),
-            scheduled: Cell::new(false),
-            batch: RefCell::new(None),
-            next: Cell::new(0),
-            callback: Callback::new(self.changed.take()),
-        });
+            active.into(),
+            self.visible.clone(),
+            self.changed.take(),
+        );
+        let snapshot = state.snapshot;
         let weak = Rc::downgrade(&state);
         scope.on_cleanup(move || {
             if let Some(state) = weak.upgrade() {
@@ -695,18 +762,7 @@ impl Widget for FloatingIndicator {
         if let Some(reference) = self.reference {
             reference.try_revise(|value| *value = Some(context))?;
         }
-        let refresh = Rc::downgrade(&state);
-        let visible = self.visible.clone();
-        let revision = self.revision.clone();
-        scope.effect(move || {
-            let _ = (active.get(), pulse.get(), visible.get(), revision.get());
-            if let Some(state) = refresh.upgrade() {
-                state.cancel();
-                if let Err(error) = state.schedule() {
-                    state.report(error)
-                }
-            }
-        });
+        state.watch(scope, self.revision.clone());
         scope.retain((parent, area_scope, state))?;
         Ok(())
     }

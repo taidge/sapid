@@ -545,6 +545,17 @@ impl Widget for RadioGroup {
             } else {
                 items_base.into()
             };
+        let indicator = (self.stretch_segments.is_some() && !self.common.unstyled)
+            .then(|| (scope.cage(None), scope.cage(None)));
+        let mut items_view = glory::ui::view()
+            .class("sapid-radio-group-items")
+            .style(items_style)
+            .fill(children);
+        if let Some((track, bounds)) = indicator {
+            items_view = items_view
+                .node_ref(track)
+                .fill(crate::segmented_control::selection_marker(scope, bounds));
+        }
         let base = composite::column(8.0);
         let mut root = configure!(
             self.common,
@@ -568,12 +579,7 @@ impl Widget for RadioGroup {
             Some(metadata)
         }))
         .fill(label)
-        .fill(
-            glory::ui::view()
-                .class("sapid-radio-group-items")
-                .style(items_style)
-                .fill(children),
-        );
+        .fill(items_view);
         // Root listeners are installed after the finite native children exist.
         // A scope-owned relay avoids keeping an owning Scope in its handlers.
         let navigation = Rc::new(std::cell::RefCell::new(None::<Rc<Selection>>));
@@ -641,11 +647,53 @@ impl Widget for RadioGroup {
             owner,
         });
         *navigation.borrow_mut() = Some(selection.clone());
+        let indicator = if let Some((track, bounds)) = indicator {
+            let track_node = track.try_get()?.ok_or(glory::ui::Error::Gone)?;
+            let targets = keys
+                .iter()
+                .zip(references.iter())
+                .map(|(key, reference)| {
+                    let node = reference.try_get()?.ok_or(glory::ui::Error::Gone)?;
+                    Ok((key.clone(), node))
+                })
+                .collect::<Result<Vec<_>>>()?;
+            let indicator = crate::floating_indicator::track_fixed_targets(
+                scope,
+                track,
+                selected,
+                targets.into_iter(),
+                bounds,
+            );
+            let resize = indicator.clone();
+            let weak = scope.downgrade();
+            scope.on(track_node, EventKind::Resize, move |_| {
+                if let Some(scope) = weak.upgrade()
+                    && let Err(error) = resize.refresh()
+                {
+                    scope.report_error(error);
+                }
+            })?;
+            Some(indicator)
+        } else {
+            None
+        };
         for (position, handlers) in members.into_iter().enumerate() {
             let node = references[position]
                 .try_get()?
                 .ok_or(glory::ui::Error::Gone)?;
             let mut handlers = handlers;
+            if let Some(resize) = indicator.clone() {
+                let mut observers = handlers.remove(&EventKind::Resize).unwrap_or_default();
+                let weak = scope.downgrade();
+                scope.on(node, EventKind::Resize, move |event| {
+                    if let Some(scope) = weak.upgrade()
+                        && let Err(error) = resize.refresh()
+                    {
+                        scope.report_error(error);
+                    }
+                    observe(&mut observers, owner, event);
+                })?;
+            }
             let mut checked_observers = handlers
                 .remove(&EventKind::CheckedChanged)
                 .unwrap_or_default();

@@ -47,3 +47,9 @@ glory = { path = "../../../glory/crates/glory" }
 name = "showcase_wry"
 path = "src/bin/showcase_wry.rs"
 required-features = ["wry-showcase"]
+
+[[test]]
+name = "settings_controls_wry"
+path = "tests/settings_controls_wry.rs"
+harness = false
+required-features = ["wry-showcase"]

@@ -11,17 +11,25 @@ async function checkSegmentPlayground(page, primary, width) {
 
  // Sample rendered positions during the transition, including the final label width.
  async function follows(label, axis, reduced = false) {
-   const frames = await track.evaluate(async (track, {label, axis}) => {
-     const target = [...track.querySelectorAll('label')].find(el => el.textContent === label);
-     const coordinate = () => parseFloat(getComputedStyle(track, '::after')[axis]);
+   const marker = track.locator('.sapid-segment-indicator.is-positioned');
+   await marker.waitFor();
+   await page.waitForFunction(marker => {
+     const selected = marker.parentElement.querySelector('label:has(input:checked)');
+     const bounds = marker.getBoundingClientRect(), target = selected.getBoundingClientRect();
+     return Math.abs(bounds.left-target.left)<1 && Math.abs(bounds.top-target.top)<1 &&
+       Math.abs(bounds.width-target.width)<1 && Math.abs(bounds.height-target.height)<1;
+   }, await marker.elementHandle());
+   const frames = await marker.evaluate(async (marker, {label, axis}) => {
+     const target = [...marker.parentElement.querySelectorAll('label')].find(el => el.textContent === label);
+     const coordinate = () => marker.getBoundingClientRect()[axis];
      const start = coordinate(), samples = [];
      target.click();
      const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
      const begin = performance.now();
      do { await frame(); samples.push(coordinate()); } while (performance.now() - begin < 350);
-     const rect = target.getBoundingClientRect(), parent = track.getBoundingClientRect();
-     return {start, samples, end: rect[axis] - parent[axis], width: rect.width,
-       indicatorWidth: parseFloat(getComputedStyle(track, '::after').width)};
+     const rect = target.getBoundingClientRect();
+     return {start, samples, end: rect[axis], width: rect.width,
+       indicatorWidth: marker.getBoundingClientRect().width};
    }, {label, axis});
    assert(Math.abs(frames.samples.at(-1) - frames.end) < 1);
    assert(Math.abs(frames.indicatorWidth - frames.width) < 1);
@@ -92,8 +100,8 @@ async function checkSegmentPlayground(page, primary, width) {
     await checkSegmentPlayground(page, primary, width);
     const motion = detail('Indicator color and transitions');
     for (const [label, duration] of [['500 ms linear', '0.5s'], ['Instant', '0s']]) {
-      const track = motion.getByRole('radiogroup', {name: label}).locator('.sapid-radio-group-items');
-      assert.equal(await track.evaluate(el => getComputedStyle(el, '::after').transitionDuration), duration);
+      const marker = motion.getByRole('radiogroup', {name: label}).locator('.sapid-segment-indicator.is-positioned');
+      assert.equal(await marker.evaluate(el => getComputedStyle(el).transitionDuration), duration);
     }
     const form = detail('Uncontrolled form value').locator('form');
     await form.getByText('Spreadsheet', {exact: true}).click();

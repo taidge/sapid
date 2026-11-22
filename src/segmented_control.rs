@@ -1,8 +1,32 @@
 //! Compact single-value selection over the same genuine RadioGroup protocol.
 use crate::radio::{Radio, RadioGroup, radio, radio_group};
-use glory::render::{Event, EventKind, FocusMode, NodeId, Orientation};
+use glory::render::{Event, EventKind, FocusMode, NodeId, Orientation, Rect};
+use glory::style::{Length, PointerEvents, Position, Style};
 use glory::ui::{Result, Widget};
 use glory::{Cage, Scope, Vary};
+
+pub(crate) fn selection_marker(scope: &Scope, bounds: Cage<Option<Rect>>) -> glory::ui::View {
+    glory::ui::view()
+        .class(scope.bond(move || {
+            if bounds.get().is_some() {
+                "sapid-segment-indicator is-positioned"
+            } else {
+                "sapid-segment-indicator"
+            }
+            .to_owned()
+        }))
+        .style(scope.bond(move || {
+            let mut style = Style::new().pointer_events(PointerEvents::None);
+            style.position = Some(Position::Absolute);
+            if let Some(rect) = bounds.get() {
+                style.left = Some(Length::Px(rect.x));
+                style.top = Some(Length::Px(rect.y));
+                style.width = Some(Length::Px(rect.width));
+                style.height = Some(Length::Px(rect.height));
+            }
+            style
+        }))
+}
 
 pub struct Segment {
     inner: Radio,
