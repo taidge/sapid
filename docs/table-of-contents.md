@@ -49,7 +49,9 @@ labels/orders update existing link nodes. Removal retires the corresponding
 short Owner; reinsertion creates a new identity.
 
 `context.current(scope)` observes the section nearest the viewport's top plus
-`.offset(px)`. `context.entries(scope)` exposes the bounded live metadata.
+`.offset(px)`. When a scroll limit prevents a requested heading from reaching
+that line, it stays current until the viewport moves away from the limit.
+`context.entries(scope)` exposes the bounded live metadata.
 `context.reveal(&id)` measures the registered heading and scrolls its document,
 retaining the caller's actual focus. It revalidates current staged ancestry.
 Unknown/retired/outside headings and unsupported layout/scroll hosts return typed
