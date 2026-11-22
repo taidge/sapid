@@ -65,6 +65,7 @@ jobs:
     with:
       source_ref: ${{ inputs.release_ref || github.sha }}
       mode: ${{ inputs.release_ref != '' && 'full' || 'quick' }}
+      published_engines: ${{ inputs.release_ref != '' }}
       check_rust: ${{ needs.scope.outputs.showcase_rust == 'true' }}
   widgets:
     needs: scope
@@ -96,32 +97,6 @@ jobs:
         with:
           path: sapid
           ref: ${{ inputs.release_ref || github.sha }}
-      - name: Check out coordinated engines
-        shell: bash
-        env:
-          RELEASE_REF: ${{ inputs.release_ref }}
-        run: |
-          if [ ! -d ../apace/.git ]; then
-            if [ -n "$RELEASE_REF" ]; then
-              git clone --depth 1 --branch apace-v0.3.0 https://github.com/glory-rs/apace ../apace
-            else
-              git clone --depth 1 https://github.com/glory-rs/apace ../apace
-            fi
-          fi
-          if [ ! -d ../takia/.git ]; then
-            if [ -n "$RELEASE_REF" ]; then
-              git clone --depth 1 --branch takia-v0.15.1 https://github.com/glory-rs/takia ../takia
-            else
-              git clone --depth 1 https://github.com/glory-rs/takia ../takia
-            fi
-          fi
-          if [ ! -d ../wingy/.git ]; then
-            if [ -n "$RELEASE_REF" ]; then
-              git clone --depth 1 --branch wingy-v0.31.1 https://github.com/glory-rs/wingy ../wingy
-            else
-              git clone --depth 1 https://github.com/glory-rs/wingy ../wingy
-            fi
-          fi
       - name: Read the pinned Glory release source
         id: dependency
         env:
@@ -160,6 +135,8 @@ jobs:
           path: ci-support
           ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Check out coordinated engines
+        run: python ../ci-support/scripts/checkout_engines.py --source ${{ inputs.release_ref != '' && 'published' || 'development' }}
       - uses: ./ci-support/.github/actions/build-cache
         with:
           scope: widgets

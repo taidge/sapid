@@ -18,6 +18,10 @@ on:
       mode:
         type: string
         default: full
+      published_engines:
+        description: Validate against the published engine tags for a release
+        type: boolean
+        default: false
       check_rust:
         description: Run showcase Rust tests and Clippy (always true for schedules and releases)
         type: boolean
@@ -69,12 +73,6 @@ jobs:
           path: sapid
           ref: ${{ inputs.source_ref || github.sha }}
           persist-credentials: false
-      - name: Check out coordinated development engines
-        shell: bash
-        run: |
-          if [ ! -d ../apace/.git ]; then git clone --depth 1 https://github.com/glory-rs/apace ../apace; fi
-          if [ ! -d ../takia/.git ]; then git clone --depth 1 https://github.com/glory-rs/takia ../takia; fi
-          if [ ! -d ../wingy/.git ]; then git clone --depth 1 https://github.com/glory-rs/wingy ../wingy; fi
       - name: Read Glory revision
         id: dependency
         run: |
@@ -107,6 +105,8 @@ jobs:
           path: ci-support
           ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Check out coordinated engines
+        run: python ../ci-support/scripts/checkout_engines.py --source ${{ inputs.published_engines && 'published' || 'development' }}
       - uses: ./ci-support/.github/actions/build-cache
         with:
           scope: showcase

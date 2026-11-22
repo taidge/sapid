@@ -2,5 +2,10 @@
   "glory": {
     "repository": "glory-rs/glory",
     "revision": "3d459530336ed725db22058aee6544e3cfbce7dc"
+  },
+  "engines": {
+    "apace": "7db3ab0e4a46e6a6be95faa3b1ac270632d6bad9",
+    "takia": "bad353c780cef9caf002eeee2ead432ee91e80f4",
+    "wingy": "ba2e202cbdddbc6e1bab11421b500c4a9f08d621"
   }
 }
