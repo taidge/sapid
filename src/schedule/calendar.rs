@@ -80,6 +80,7 @@ fn prepare(data: &snapshot::Snapshot, view: ScheduleView, week_start: Weekday) -
             candidate: occurrence.candidate_index(),
             interval: occurrence.interval(),
             title: event.title().into(),
+            color: event.event_color(),
             resource: event
                 .resource_key()
                 .map(|v| v.as_str().to_owned())
@@ -420,6 +421,9 @@ pub(super) fn build(scope: &Scope, root: Rc<Controller>, config: Config) -> Resu
                 theme: theme.clone(),
                 unstyled,
                 show_outside_days,
+                with_weekdays,
+                week_start,
+                direction,
                 today,
                 max_events_per_day,
             }
@@ -446,6 +450,7 @@ pub(super) fn build(scope: &Scope, root: Rc<Controller>, config: Config) -> Resu
             .children(move |entry| {
                 let day = entry.value;
                 AgendaDayWidget {
+                    event_content: None,
                     day,
                     state: root.clone(),
                     theme: theme.clone(),
@@ -505,6 +510,9 @@ struct CalendarCell {
     theme: crate::Theme,
     unstyled: bool,
     show_outside_days: bool,
+    with_weekdays: bool,
+    week_start: Weekday,
+    direction: Direction,
     today: Option<CivilDate>,
     max_events_per_day: usize,
 }
@@ -606,6 +614,9 @@ impl Widget for CalendarCell {
             .style(scope.bond(move||{let mut style=Style::new().width(Length::Percent(100.)).height(Length::Px(if view==ScheduleView::MobileMonth{48.}else{36.})).padding(Edges::all(2.));if !unstyled{let active=chosen.with(|v|matches!(v,Some(ScheduleSelection::Slot{interval,resource:None})if p.with(|p|p.cells[index].span==Some(*interval))));let is_today=today.is_some_and(|today|p.with(|p|p.cells[index].date==Some(today)));style.background=Some(if active{t.accent_soft}else if is_today{t.input}else{t.surface});style.color=Some(if !p.with(|p|p.cells[index].span.is_some()) || !flags.with(|f|f.enabled) {t.disabled_text}else if active{t.accent_text}else{t.foreground});style=style.border_width(Edges::all(if is_today{2.}else{1.})).border_style(BorderStyle::Solid).border_color(if reference.get().is_some_and(|id|physical.get()==Some(id))||is_today{t.accent}else{t.border});}style}))
             .on(EventKind::Activate,move|e|{s.report(s.activate(index));s.root.activated.emit(s.root.owner,e);})
             .on(EventKind::FocusChanged,move|e|{if let Event::FocusChanged(active)=e{f.report(f.focus(index,active));}}).show_in(&content)?;
+        if view == ScheduleView::Year {
+            self.year_month_days(&content)?;
+        }
         if view != ScheduleView::Month {
             glory::ui::text()
                 .content(scope.bond(move || {
@@ -758,5 +769,107 @@ impl Widget for PeriodEventWidget {
             .style(scope.bond(move||{let mut style=Style::new().width(Length::Percent(100.)).height(Length::Px(28.)).padding(Edges::all(1.)).overflow_x(Overflow::Hidden).overflow_y(Overflow::Hidden);if !unstyled{let chosen=selected.with(|v|matches!(v,Some(ScheduleSelection::Event{key,candidate,interval})if row.with(|r|*key==r.key&&*candidate==r.candidate&&*interval==r.interval)));style.background=Some(if chosen{theme.accent}else{theme.accent_soft});style.color=Some(if chosen{theme.on_accent}else{theme.accent_text});style.font_size=Some(11.);style=style.border_width(Edges::all(1.)).border_style(BorderStyle::Solid).border_color(theme.accent);}style}))
             .on(EventKind::Activate,move|e|{let r=row.with(|r|r.clone());state.report(state.event(&r));state.activated.emit(state.owner,e);}).show_in(&content)?;
         scope.retain(content)
+    }
+}
+
+impl CalendarCell {
+    fn year_month_days(&self, scope: &Scope) -> Result {
+        let index = self.index;
+        let prepared = self.state.prepared;
+        let start = self.week_start;
+        let rtl = self.direction == Direction::Rtl;
+        let locale = self.locale;
+        let unstyled = self.unstyled;
+        let month = scope.bond(move || {
+            prepared.with(|p| {
+                MonthGrid::new(
+                    p.cells[index]
+                        .date
+                        .expect("year period has a month")
+                        .year_month(),
+                    start,
+                )
+            })
+        });
+        let days = scope.cage(None);
+        glory::ui::view()
+            .class("sapid-schedule-year-days")
+            .node_ref(days)
+            .style(
+                Style::new()
+                    .width(Length::Percent(100.))
+                    .display(Display::Flex)
+                    .flex_direction(FlexDirection::Row)
+                    .flex_wrap(FlexWrap::Wrap),
+            )
+            .show_in(scope)?;
+        let day_scope = child(scope, days)?;
+        if self.with_weekdays {
+            for i in 0..7 {
+                let day = Weekday::ALL[(start.index() as usize + if rtl { 6 - i } else { i }) % 7];
+                glory::ui::text()
+                    .class("sapid-schedule-year-weekday")
+                    .content(locale.weekday_short(day))
+                    .style(Style::new().width(Length::Percent(100. / 7.)))
+                    .show_in(&day_scope)?;
+            }
+        }
+        for position in 0..42 {
+            let at = if rtl {
+                position / 7 * 7 + 6 - position % 7
+            } else {
+                position
+            };
+            let date = day_scope.bond(move || {
+                month.with(|m| m.cells()[at].filter(|d| d.year_month() == m.month()))
+            });
+            let marked = day_scope.bond(move || {
+                date.get().is_some_and(|d| {
+                    d.checked_add_days(1)
+                        .ok()
+                        .and_then(|end| ScheduleInterval::all_day(d, end).ok())
+                        .is_some_and(|interval| {
+                            prepared.with(|p| {
+                                p.cells[index]
+                                    .indices
+                                    .iter()
+                                    .any(|&i| p.events[i].interval.overlaps(interval))
+                            })
+                        })
+                })
+            });
+            let state = self.state.clone();
+            let flags = state.root.flags;
+            let palette = self.theme.clone();
+            let selected = state.root.selection.source.clone();
+            glory::ui::button().class("sapid-schedule-year-day")
+                .label(day_scope.bond(move||date.get().map_or_else(String::new,|d|d.day().to_string())))
+                .name(day_scope.bond(move||date.get().map_or_else(String::new,|d|locale.date_label(d))))
+                .enabled(day_scope.bond(move||date.get().is_some() && flags.with(|f|f.enabled && !f.readonly)))
+                .style(day_scope.bond(move||{
+                    let mut style=Style::new().width(Length::Percent(100./7.)).height(Length::Px(25.));
+                    if !unstyled {
+                        let active=date.get().is_some_and(|d|selected.with(|s|matches!(s,Some(ScheduleSelection::Slot{interval, resource:None}) if interval.start().date()==d && interval.end().date()==d.checked_add_days(1).unwrap_or(d))));
+                        style.background=Some(if active || marked.get(){palette.accent_soft}else{palette.surface});
+                        style.color=Some(if active || marked.get(){palette.accent_text}else{palette.foreground});
+                        style.font_size=Some(12.);
+                        style=style.border_width(Edges::all(0.)).padding(Edges::all(0.));
+                    }
+                    style
+                }))
+                .on(EventKind::Activate,move|_|{
+                    state.report((||->Result{
+                        state.ensure()?;
+                        if let Some(date)=date.try_get()? && flags.try_with(|f|f.enabled && !f.readonly)?
+                            && let Ok(end)=date.checked_add_days(1) && let Ok(interval)=ScheduleInterval::all_day(date,end){
+                            let selection=ScheduleSelection::Slot{interval,resource:None};
+                            state.root.selection.accept(&Some(selection.clone()))?;
+                            state.root.selected.emit(state.root.owner,selection);
+                        }
+                        Ok(())
+                    })());
+                }).show_in(&day_scope)?;
+        }
+        scope.retain(day_scope)
     }
 }

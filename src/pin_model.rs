@@ -6,6 +6,11 @@ pub enum PinAlphabet {
     #[default]
     Digits,
     AsciiAlphanumeric,
+    /// Accept decimal digits between these inclusive bounds.
+    DigitRange {
+        first: u8,
+        last: u8,
+    },
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PinRejection {
@@ -40,6 +45,11 @@ impl Default for PinDomain {
 }
 impl PinDomain {
     pub fn validate(self) -> Result<(), PinRejection> {
+        if let PinAlphabet::DigitRange { first, last } = self.alphabet
+            && (first > last || last > 9)
+        {
+            return Err(PinRejection::InvalidCharacter);
+        }
         if (1..=MAX_PIN_LENGTH).contains(&self.length) {
             Ok(())
         } else {
@@ -53,6 +63,7 @@ impl PinDomain {
         }
         if !value.bytes().all(|c| match self.alphabet {
             PinAlphabet::Digits => c.is_ascii_digit(),
+            PinAlphabet::DigitRange { first, last } => (b'0' + first..=b'0' + last).contains(&c),
             PinAlphabet::AsciiAlphanumeric => c.is_ascii_alphanumeric(),
         }) {
             return Err(PinRejection::InvalidCharacter);
@@ -69,6 +80,26 @@ impl PinDomain {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn digit_range_rejects_disallowed_input_and_invalid_bounds() {
+        let range = PinDomain {
+            length: 4,
+            alphabet: PinAlphabet::DigitRange { first: 0, last: 3 },
+        };
+        assert!(range.complete("0123"));
+        assert_eq!(
+            range.validate_value("014"),
+            Err(PinRejection::InvalidCharacter)
+        );
+        for (first, last) in [(4, 3), (0, 10), (250, 255)] {
+            let invalid = PinDomain {
+                alphabet: PinAlphabet::DigitRange { first, last },
+                ..range
+            };
+            assert_eq!(invalid.validate(), Err(PinRejection::InvalidCharacter));
+            assert!(invalid.validate_value("").is_err());
+        }
+    }
     #[test]
     fn domain_is_finite_and_rejects_invalid_counts_before_allocating_cells() {
         for length in [0, 17, usize::MAX] {

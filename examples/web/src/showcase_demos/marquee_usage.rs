@@ -1,39 +1,83 @@
 use glory::prelude::*;
 pub fn demo(theme: sapid::Theme) -> impl Widget {
-    widget(move |scope| {
-        let paused = scope.cage(false);
-        let animated = scope.cage(true);
-        sapid::stack()
-            .theme(theme.clone())
-            .gap(12.)
-            .fill((
-                sapid::marquee()
-                    .theme(theme.clone())
-                    .text(TEXT_1)
-                    .style(
-                        Style::new()
-                            .width(Length::Percent(100.))
-                            .max_width(glory::style::Limit::Px(360.)),
-                    )
-                    .paused(paused)
-                    .animated(animated)
-                    .period_millis(12000u32),
-                sapid::group().theme(theme.clone()).gap(12.).fill((
-                    sapid::checkbox()
-                        .theme(theme.clone())
-                        .label("Pause studio message")
-                        .checked(paused)
-                        .on_checked_change(move |v| paused.revise(|s| *s = v)),
-                    sapid::checkbox()
-                        .theme(theme.clone())
-                        .label("Animate studio message")
-                        .checked(animated)
-                        .on_checked_change(move |v| animated.revise(|s| *s = v)),
-                )),
-            ))
-            .show_in(scope)
-    })
+    sapid::marquee()
+        .theme(theme)
+        .text("Sapid logos in eight colors")
+        .visual_content(|| logo_strip(false, false))
+        .repeat(4)
+        .gap(16.)
+        .class("sapid-marquee-fade-horizontal")
+        .period_millis(40000u32)
 }
 
-const TEXT_1: &str =
-    "Design with focus · Share clear ideas · Keep useful notes · Make room for your next project";
+pub(crate) fn logo_strip(vertical: bool, wide: bool) -> impl glory::ui::Widget {
+    use glory::prelude::*;
+    let size = if wide { 32. } else { 22. };
+    let colors = [
+        Color(34, 139, 230, 255),
+        Color(21, 170, 191, 255),
+        Color(18, 184, 134, 255),
+        Color(64, 192, 87, 255),
+        Color(130, 201, 30, 255),
+        Color(250, 176, 5, 255),
+        Color(253, 126, 20, 255),
+        Color(250, 82, 82, 255),
+    ];
+    view()
+        .class("sapid-demo-marquee-logos")
+        .style(
+            Style::new()
+                .display(glory::style::Display::InlineFlex)
+                .flex_direction(if vertical {
+                    glory::style::FlexDirection::Column
+                } else {
+                    glory::style::FlexDirection::Row
+                })
+                .gap(if wide { 24. } else { 16. }),
+        )
+        .fill(
+            colors
+                .into_iter()
+                .map(|color| {
+                    view()
+                        .class("sapid-demo-marquee-logo")
+                        .style(Style {
+                            align: Some(Align::Center),
+                            ..Style::new()
+                                .display(glory::style::Display::InlineFlex)
+                                .gap(6.)
+                        })
+                        .fill((
+                            view()
+                                .style(Style {
+                                    background: Some(color),
+                                    ..Style::new()
+                                        .width(Length::Px(size))
+                                        .height(Length::Px(size))
+                                        .radius(size / 2.)
+                                        .padding(Edges::all(3.))
+                                })
+                                .fill(
+                                    glory::ui::image()
+                                        .class("sapid-demo-marquee-symbol")
+                                        .alt("")
+                                        .source(format!(
+                                            "{}/sapid-logo.svg",
+                                            option_env!("SAPID_SHOWCASE_MEDIA")
+                                                .unwrap_or("/assets")
+                                        ))
+                                        .style(
+                                            Style::new()
+                                                .width(Length::Percent(100.))
+                                                .height(Length::Percent(100.)),
+                                        ),
+                                ),
+                            text().content("Sapid").style(Style {
+                                font_size: Some(if wide { 20. } else { 15. }),
+                                ..Style::new().font_weight(700.)
+                            }),
+                        ))
+                })
+                .collect::<Vec<_>>(),
+        )
+}

@@ -21,6 +21,7 @@ pub(super) struct Visual {
     unstyled: bool,
     pub(super) label_position: SwitchLabelPosition,
     pub(super) marks: bool,
+    thumb_indicator: bool,
 }
 impl Visual {
     pub(super) fn new(
@@ -75,15 +76,16 @@ impl Visual {
             unstyled,
             label_position,
             marks: switch.marks,
+            thumb_indicator: switch.thumb_indicator,
         }
     }
     pub(super) fn show(self, scope: &Scope, control: glory::ui::Check) -> Result {
-        let (width, height) = match self.size {
-            Size::ExtraSmall => (26., 14.),
-            Size::Small => (30., 16.),
-            Size::Medium => (34., 20.),
-            Size::Large => (42., 24.),
-            Size::ExtraLarge => (50., 28.),
+        let (width, height, diameter) = match self.size {
+            Size::ExtraSmall => (32., 16., 12.),
+            Size::Small => (38., 20., 14.),
+            Size::Medium => (46., 24., 18.),
+            Size::Large => (56., 30., 22.),
+            Size::ExtraLarge => (72., 36., 28.),
         };
         let checked = self.checked.clone();
         let theme = self.theme.clone();
@@ -121,33 +123,59 @@ impl Visual {
             }));
         let checked = self.checked.clone();
         let theme = self.theme.clone();
-        track = track.fill(
-            glory::ui::view()
-                .class("sapid-switch-thumb")
-                .style(scope.bond(move || {
-                    let mut style = Style::new()
-                        .position(Position::Absolute)
-                        .left(Length::Px(if checked.get() {
-                            width - height + 2.
-                        } else {
-                            2.
-                        }))
-                        .top(Length::Px(2.))
-                        .width(Length::Px(height - 4.))
-                        .height(Length::Px(height - 4.))
-                        .radius((height - 4.) / 2.);
-                    style.background = Some(if unstyled {
-                        if checked.get() {
-                            theme.surface
-                        } else {
-                            theme.foreground
-                        }
+        let inset = (height - diameter) / 2.;
+        let mut thumb = glory::ui::view()
+            .class("sapid-switch-thumb")
+            .style(scope.bond(move || {
+                let mut style = Style::new()
+                    .position(Position::Absolute)
+                    .left(Length::Px(if checked.get() {
+                        width - diameter - inset
                     } else {
-                        theme.control_thumb
-                    });
-                    style
-                })),
-        );
+                        inset
+                    }))
+                    .top(Length::Px(inset))
+                    .width(Length::Px(diameter))
+                    .height(Length::Px(diameter))
+                    .radius(diameter / 2.);
+                style.background = Some(if unstyled {
+                    if checked.get() {
+                        theme.surface
+                    } else {
+                        theme.foreground
+                    }
+                } else {
+                    theme.control_thumb
+                });
+                style
+            }));
+        if self.thumb_indicator {
+            let checked = self.checked.clone();
+            let theme = self.theme.clone();
+            let mark = diameter * 0.4;
+            let offset = (diameter - mark) / 2.;
+            thumb = thumb.fill(
+                glory::ui::view()
+                    .class("sapid-switch-thumb-indicator")
+                    .style(scope.bond(move || {
+                        Style {
+                            background: Some(if checked.get() {
+                                theme.accent
+                            } else {
+                                theme.border
+                            }),
+                            ..Style::new()
+                                .position(Position::Absolute)
+                                .left(Length::Px(offset))
+                                .top(Length::Px(offset))
+                                .width(Length::Px(mark))
+                                .height(Length::Px(mark))
+                                .radius(mark / 2.)
+                        }
+                    })),
+            );
+        }
+        track = track.fill(thumb);
         let states = self.metadata;
         let focused = self.focused;
         let ring = self.theme.focus_ring;

@@ -36,6 +36,12 @@ pub enum ScrollbarOffset {
     Present,
 }
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum VerticalScrollbarPosition {
+    Left,
+    #[default]
+    Right,
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum OverscrollBehavior {
     #[default]
     Auto,
@@ -45,6 +51,7 @@ pub enum OverscrollBehavior {
 #[derive(Clone, Copy, Debug, PartialEq)]
 struct PresentationSettings {
     bars: Scrollbars,
+    position: VerticalScrollbarPosition,
     size: f64,
     offset: ScrollbarOffset,
     overscroll: OverscrollBehavior,
@@ -332,6 +339,9 @@ pub struct ScrollArea {
     key: String,
     axes: Vary<ScrollAxes>,
     scrollbars: Vary<Scrollbars>,
+    vertical_position: Vary<VerticalScrollbarPosition>,
+    drag_axis: Option<Orientation>,
+    initial_fraction: Option<(f64, f64)>,
     scrollbar_size: Vary<f64>,
     offset_scrollbars: Vary<ScrollbarOffset>,
     overscroll: Vary<OverscrollBehavior>,
@@ -351,6 +361,9 @@ pub fn scroll_area(key: impl Into<String>) -> ScrollArea {
         key: key.into(),
         axes: ScrollAxes::Vertical.into(),
         scrollbars: Scrollbars::Auto.into(),
+        vertical_position: VerticalScrollbarPosition::Right.into(),
+        drag_axis: None,
+        initial_fraction: None,
         scrollbar_size: 12.0.into(),
         offset_scrollbars: ScrollbarOffset::None.into(),
         overscroll: OverscrollBehavior::Auto.into(),
@@ -415,6 +428,13 @@ impl ScrollArea {
         self.scrollbars = value.into();
         self
     }
+    pub fn vertical_scrollbar_position(
+        mut self,
+        value: impl Into<Vary<VerticalScrollbarPosition>>,
+    ) -> Self {
+        self.vertical_position = value.into();
+        self
+    }
     pub fn scrollbar_size(mut self, value: impl Into<Vary<f64>>) -> Self {
         self.scrollbar_size = value.into();
         self
@@ -466,6 +486,11 @@ impl ScrollArea {
         self.scroll_change = Some(Box::new(callback));
         self
     }
+    /// Apply a relative initial scroll position when the host first measures the mounted viewport.
+    pub fn initial_scroll_fraction(mut self, x: f64, y: f64) -> Self {
+        self.initial_fraction = Some((x, y));
+        self
+    }
     pub fn on_ready(mut self, callback: impl FnMut(ScrollHandle) + 'static) -> Self {
         self.ready = Some(Box::new(callback));
         self
@@ -474,6 +499,20 @@ impl ScrollArea {
         composite::id("scroll", &self.key, "viewport", "viewport")?;
         if !self.step.is_finite() || self.step <= 0.0 || self.step > 1_000_000.0 {
             return Err(invalid("scroll step must be finite and in 0..=1000000"));
+        }
+        let mut initial = VecDeque::new();
+        if let Some((x, y)) = self.initial_fraction {
+            let axes = self.axes.try_get()?;
+            if !(0. ..=1.).contains(&x)
+                || !(0. ..=1.).contains(&y)
+                || x != 0. && !axes.allows(Orientation::Horizontal)
+                || y != 0. && !axes.allows(Orientation::Vertical)
+            {
+                return Err(invalid(
+                    "initial scroll fractions require an enabled axis and finite values in 0..=1",
+                ));
+            }
+            initial.push_back(Intent::Fraction(x, y));
         }
         let metrics = scope.cage(None);
         let inner = Rc::new(Controller {
@@ -484,7 +523,7 @@ impl ScrollArea {
             metrics,
             axes: self.axes.clone(),
             step: self.step,
-            queue: RefCell::new(VecDeque::new()),
+            queue: RefCell::new(initial),
             requesting: Cell::new(false),
             observed: Callback::new(self.observed.take()),
         });
@@ -499,6 +538,7 @@ impl ScrollArea {
         let owner = scope.id();
         let reference = handle.inner.viewport;
         let bars = self.scrollbars.clone();
+        let position = self.vertical_position.clone();
         let size = self.scrollbar_size.clone();
         let offset = self.offset_scrollbars.clone();
         let overscroll = self.overscroll.clone();
@@ -507,6 +547,7 @@ impl ScrollArea {
         let raw: Vary<PresentationSettings> = scope
             .bond(move || PresentationSettings {
                 bars: bars.get(),
+                position: position.get(),
                 size: size.get(),
                 offset: offset.get(),
                 overscroll: overscroll.get(),
@@ -547,7 +588,8 @@ impl ScrollArea {
             let value = settings.get();
             let behavior = match value.bars { Scrollbars::Auto => "auto", Scrollbars::Always => "always", Scrollbars::Hover => "hover", Scrollbars::Scroll => "scroll", Scrollbars::Never => "never" };
             let overscroll = match value.overscroll { OverscrollBehavior::Auto => "auto", OverscrollBehavior::Contain => "contain", OverscrollBehavior::None => "none" };
-            format!("{} sapid-scroll-{behavior} sapid-scroll-size-{} sapid-overscroll-{overscroll}{}", original.get(), value.size as u8, if visible.get() || value.bars == Scrollbars::Hover && hovered.get() { " is-scrolling" } else { "" })
+            let position = if value.position == VerticalScrollbarPosition::Left { " sapid-scroll-left" } else { "" };
+            format!("{}{position} sapid-scroll-{behavior} sapid-scroll-size-{} sapid-overscroll-{overscroll}{}", original.get(), value.size as u8, if visible.get() || value.bars == Scrollbars::Hover && hovered.get() { " is-scrolling" } else { "" })
         }).into();
         let axes = self.axes.clone();
         let mut structural = Style::new()
@@ -558,6 +600,7 @@ impl ScrollArea {
             structural.background = Some(self.common.theme.surface);
         }
         let custom = self.common.style.clone();
+        let drag_axis = self.drag_axis;
         let mut viewport = configure!(
             self.common,
             glory::ui::view(),
@@ -598,10 +641,53 @@ impl ScrollArea {
                 composite::metadata(Semantics {
                     id: Some(id.clone()),
                     scroll_keyboard: keyboard.then(|| axes.get()),
+                    drag_capture: drag_axis.map(|_| glory::render::DragCapture::Threshold),
                     ..Default::default()
                 })
             })
         });
+        if let Some(axis) = drag_axis {
+            let drag = handle.clone();
+            let weak = scope.downgrade();
+            let mut previous = None;
+            let mut observers = self
+                .common
+                .handlers
+                .remove(&EventKind::Drag)
+                .unwrap_or_default();
+            viewport = viewport.on(EventKind::Drag, move |event| {
+                if let Event::Drag { phase, x, y, .. } = event {
+                    use glory::render::DragPhase;
+                    let current = if axis == Orientation::Horizontal {
+                        x
+                    } else {
+                        y
+                    };
+                    match phase {
+                        DragPhase::Start => previous = Some(current),
+                        DragPhase::Cancel => previous = None,
+                        DragPhase::Move | DragPhase::Drop => {
+                            if let Some(last) = previous {
+                                let delta = last - current;
+                                let (dx, dy) = if axis == Orientation::Horizontal {
+                                    (delta, 0.)
+                                } else {
+                                    (0., delta)
+                                };
+                                if delta != 0.
+                                    && let Err(error) = drag.scroll_by(dx, dy)
+                                    && let Some(scope) = weak.upgrade()
+                                {
+                                    scope.report_error(error);
+                                }
+                            }
+                            previous = (phase == DragPhase::Move).then_some(current);
+                        }
+                    }
+                }
+                observe(&mut observers, owner, event);
+            });
+        }
         if self.scrollbars.is_reactive()
             || self.scrollbars.try_get()? == Scrollbars::Hover
             || self.common.handlers.contains_key(&EventKind::PointerWithin)
@@ -704,8 +790,16 @@ impl ScrollArea {
                     };
                 Style::new().padding(Edges {
                     top: 0.0,
-                    left: 0.0,
-                    right: if vertical { value.size } else { 0.0 },
+                    left: if vertical && value.position == VerticalScrollbarPosition::Left {
+                        value.size
+                    } else {
+                        0.0
+                    },
+                    right: if vertical && value.position == VerticalScrollbarPosition::Right {
+                        value.size
+                    } else {
+                        0.0
+                    },
                     bottom: if horizontal { value.size } else { 0.0 },
                 })
             }))
@@ -775,6 +869,7 @@ pub struct Scroller {
     controls: bool,
     control_size: Option<f64>,
     scroll_step: Option<f64>,
+    mouse_drag: bool,
     previous_icon: Option<Box<dyn Widget>>,
     next_icon: Option<Box<dyn Widget>>,
 }
@@ -785,6 +880,7 @@ pub fn scroller(key: impl Into<String>) -> Scroller {
         controls: true,
         control_size: None,
         scroll_step: None,
+        mouse_drag: false,
         previous_icon: None,
         next_icon: None,
     }
@@ -801,6 +897,11 @@ impl Scroller {
     }
     pub fn controls(mut self, value: bool) -> Self {
         self.controls = value;
+        self
+    }
+    /// Drag the viewport along its scroll axis. A threshold preserves clicks on its children.
+    pub fn mouse_drag(mut self, value: bool) -> Self {
+        self.mouse_drag = value;
         self
     }
     pub fn control_size(mut self, value: f64) -> Self {
@@ -887,6 +988,7 @@ impl Widget for Scroller {
             })
             .into();
         let mut ready = self.area.ready.take();
+        self.area.drag_axis = self.mouse_drag.then_some(self.axis);
         self.area.mount_view(&parent, handle.clone())?;
         if !self.controls {
             scope.retain(parent)?;

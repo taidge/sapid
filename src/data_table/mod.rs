@@ -240,6 +240,7 @@ pub struct DataTable {
     changed: Option<Box<dyn FnMut(DataTableQuery)>>,
     selection_changed: Option<Box<dyn FnMut(BTreeSet<String>)>>,
     selectable: bool,
+    with_controls: bool,
     height: f64,
     row_height: f64,
     position: Option<Vary<f64>>,
@@ -260,6 +261,7 @@ pub fn data_table(key: impl Into<String>) -> DataTable {
         changed: None,
         selection_changed: None,
         selectable: true,
+        with_controls: true,
         height: 320.,
         row_height: 44.,
         position: None,
@@ -305,6 +307,11 @@ impl DataTable {
     }
     pub fn on_selection_change(mut self, value: impl FnMut(BTreeSet<String>) + 'static) -> Self {
         self.selection_changed = Some(Box::new(value));
+        self
+    }
+    /// Shows or hides the filter, column visibility choices and pagination controls.
+    pub fn with_controls(mut self, visible: bool) -> Self {
+        self.with_controls = visible;
         self
     }
     pub fn selectable(mut self, value: bool) -> Self {
@@ -527,73 +534,76 @@ impl Widget for DataTable {
         let enabled = self.common.enabled.clone();
         let size = self.common.size;
         let unstyled = self.common.unstyled;
-        let edit = controller.clone();
-        let weak = scope.downgrade();
-        let mut filter = crate::text_field()
-            .theme(theme.clone())
-            .size(size)
-            .name("Filter table rows")
-            .enabled(enabled.clone())
-            .value(query.map(|q| q.request.filter.clone()))
-            .on_value_change(move |value| {
-                if let Err(error) = edit.propose(move |q| {
-                    q.request.filter = value;
-                    q.request.page = 1
-                }) && let Some(scope) = weak.upgrade()
-                {
-                    scope.report_error(error)
-                }
-            });
-        if unstyled {
-            filter = filter.unstyled()
-        }
-        filter.show_in(&parent)?;
-        let visibility = parent.cage(None);
-        glory::ui::view()
-            .class("sapid-data-table-columns")
-            .style(row_style().gap(8.))
-            .node_ref(visibility)
-            .show_in(&parent)?;
-        let visibility_scope = parent.child_in(visibility.get().unwrap())?;
-        for column in columns.iter() {
-            let key = column.key.clone();
-            let name = format!("Show {}", column.label);
+        if self.with_controls {
             let edit = controller.clone();
             let weak = scope.downgrade();
-            let current = key.clone();
-            let validation = columns.clone();
-            let source = enabled.clone();
-            let visibility_key = key.clone();
-            let active = scope.bond(move || {
-                source.get()
-                    && (query.with(|q| {
-                        q.hidden.contains(&visibility_key) || q.hidden.len() + 1 < validation.len()
-                    }))
-            });
-            let mut check = crate::checkbox()
+            let mut filter = crate::text_field()
                 .theme(theme.clone())
                 .size(size)
-                .label(name)
-                .enabled(active)
-                .checked(query.map(move |q| !q.hidden.contains(&current)))
-                .on_checked_change(move |checked| {
-                    if let Err(error) = edit.propose(|q| {
-                        if checked {
-                            q.hidden.remove(&key);
-                        } else {
-                            q.hidden.insert(key.clone());
-                        }
+                .name("Filter table rows")
+                .enabled(enabled.clone())
+                .value(query.map(|q| q.request.filter.clone()))
+                .on_value_change(move |value| {
+                    if let Err(error) = edit.propose(move |q| {
+                        q.request.filter = value;
+                        q.request.page = 1
                     }) && let Some(scope) = weak.upgrade()
                     {
                         scope.report_error(error)
                     }
                 });
             if unstyled {
-                check = check.unstyled()
+                filter = filter.unstyled()
             }
-            check.show_in(&visibility_scope)?;
+            filter.show_in(&parent)?;
+            let visibility = parent.cage(None);
+            glory::ui::view()
+                .class("sapid-data-table-columns")
+                .style(row_style().gap(8.))
+                .node_ref(visibility)
+                .show_in(&parent)?;
+            let visibility_scope = parent.child_in(visibility.get().unwrap())?;
+            for column in columns.iter() {
+                let key = column.key.clone();
+                let name = format!("Show {}", column.label);
+                let edit = controller.clone();
+                let weak = scope.downgrade();
+                let current = key.clone();
+                let validation = columns.clone();
+                let source = enabled.clone();
+                let visibility_key = key.clone();
+                let active = scope.bond(move || {
+                    source.get()
+                        && (query.with(|q| {
+                            q.hidden.contains(&visibility_key)
+                                || q.hidden.len() + 1 < validation.len()
+                        }))
+                });
+                let mut check = crate::checkbox()
+                    .theme(theme.clone())
+                    .size(size)
+                    .label(name)
+                    .enabled(active)
+                    .checked(query.map(move |q| !q.hidden.contains(&current)))
+                    .on_checked_change(move |checked| {
+                        if let Err(error) = edit.propose(|q| {
+                            if checked {
+                                q.hidden.remove(&key);
+                            } else {
+                                q.hidden.insert(key.clone());
+                            }
+                        }) && let Some(scope) = weak.upgrade()
+                        {
+                            scope.report_error(error)
+                        }
+                    });
+                if unstyled {
+                    check = check.unstyled()
+                }
+                check.show_in(&visibility_scope)?;
+            }
+            parent.retain(visibility_scope)?;
         }
-        parent.retain(visibility_scope)?;
         let scroll = parent.cage(None);
         glory::ui::view()
             .class("sapid-data-table-horizontal")
@@ -902,60 +912,62 @@ impl Widget for DataTable {
             .show_in(&table_scope)?;
         horizontal.retain(table_scope)?;
         parent.retain(horizontal)?;
-        let footer = parent.cage(None);
-        glory::ui::view()
-            .style(row_style().gap(8.))
-            .node_ref(footer)
-            .show_in(&parent)?;
-        let footer_scope = parent.child_in(footer.get().unwrap())?;
-        for next in [false, true] {
-            let edit = controller.clone();
-            let weak = scope.downgrade();
-            let active = enabled.clone();
-            let available = scope.bond(move || {
-                active.get()
-                    && if next {
-                        resolved.with(|page| page.plan.has_next)
-                    } else {
-                        query.with(|q| q.request.page > 1)
-                    }
-            });
-            let mut button = crate::button()
-                .theme(theme.clone())
-                .size(size)
-                .enabled(available)
-                .label(if next {
-                    "Next table page"
-                } else {
-                    "Previous table page"
-                })
-                .on_press(move || {
-                    if let Err(error) = edit.propose(|q| {
-                        q.request.page = if next {
-                            q.request.page.saturating_add(1)
+        if self.with_controls {
+            let footer = parent.cage(None);
+            glory::ui::view()
+                .style(row_style().gap(8.))
+                .node_ref(footer)
+                .show_in(&parent)?;
+            let footer_scope = parent.child_in(footer.get().unwrap())?;
+            for next in [false, true] {
+                let edit = controller.clone();
+                let weak = scope.downgrade();
+                let active = enabled.clone();
+                let available = scope.bond(move || {
+                    active.get()
+                        && if next {
+                            resolved.with(|page| page.plan.has_next)
                         } else {
-                            q.request.page.saturating_sub(1).max(1)
+                            query.with(|q| q.request.page > 1)
                         }
-                    }) && let Some(scope) = weak.upgrade()
-                    {
-                        scope.report_error(error)
-                    }
                 });
-            if unstyled {
-                button = button.unstyled()
+                let mut button = crate::button()
+                    .theme(theme.clone())
+                    .size(size)
+                    .enabled(available)
+                    .label(if next {
+                        "Next table page"
+                    } else {
+                        "Previous table page"
+                    })
+                    .on_press(move || {
+                        if let Err(error) = edit.propose(|q| {
+                            q.request.page = if next {
+                                q.request.page.saturating_add(1)
+                            } else {
+                                q.request.page.saturating_sub(1).max(1)
+                            }
+                        }) && let Some(scope) = weak.upgrade()
+                        {
+                            scope.report_error(error)
+                        }
+                    });
+                if unstyled {
+                    button = button.unstyled()
+                }
+                button.show_in(&footer_scope)?;
             }
-            button.show_in(&footer_scope)?;
+            glory::ui::text()
+                .content(scope.bond(move || {
+                    format!(
+                        "Page {} · {} selected",
+                        query.with(|q| q.request.page),
+                        selected.with(BTreeSet::len)
+                    )
+                }))
+                .show_in(&footer_scope)?;
+            parent.retain(footer_scope)?;
         }
-        glory::ui::text()
-            .content(scope.bond(move || {
-                format!(
-                    "Page {} · {} selected",
-                    query.with(|q| q.request.page),
-                    selected.with(BTreeSet::len)
-                )
-            }))
-            .show_in(&footer_scope)?;
-        parent.retain(footer_scope)?;
         scope.retain(parent)?;
         Ok(())
     }

@@ -4,7 +4,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
     widget(move |scope| {
         let range = HeatmapRange::new(
             CivilDate::parse_iso("2024-01-01").unwrap(),
-            CivilDate::parse_iso("2024-03-31").unwrap(),
+            CivilDate::parse_iso("2024-12-31").unwrap(),
         )
         .unwrap();
         let data = HeatmapData::new(
@@ -23,9 +23,19 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                     .name("Project contributions")
                     .range(range)
                     .data(data)
-                    .with_month_labels(true)
-                    .with_weekday_labels(true)
-                    .with_legend(true)
+                    .cell_size(10.)
+                    .gap(2.)
+                    .radius(2.)
+                    .colors([
+                        glory::style::Color(235, 237, 240, 255),
+                        glory::style::Color(155, 233, 168, 255),
+                        glory::style::Color(64, 196, 99, 255),
+                        glory::style::Color(48, 161, 78, 255),
+                        glory::style::Color(33, 110, 57, 255),
+                    ])
+                    .with_month_labels(false)
+                    .with_weekday_labels(false)
+                    .with_legend(false)
                     .with_tooltip(true)
                     .on_day_click(move |cell| {
                         selected.revise(|old| {

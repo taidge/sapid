@@ -1,13 +1,21 @@
 use glory::prelude::*;
+
 pub fn demo(theme: sapid::Theme) -> impl Widget {
-    sapid::field("textarea-bio")
-        .theme(theme)
-        .label("Biography")
-        .description("Tell us a little about yourself.")
-        .control(|field| {
-            sapid::textarea()
-                .field(field)
-                .rows(3)
-                .placeholder("Your experience, interests and current projects")
-        })
+    controls::field_playground(
+        theme,
+        "textarea-bio",
+        "Input label",
+        "Input description",
+        move |field, style| {
+            let mut field = Some(field);
+            widget(move |scope| {
+                sapid::textarea()
+                    .field(field.take().expect("mount once"))
+                    .style(controls::multiline_playground_style(scope, style, false))
+                    .rows(2)
+                    .placeholder("Input placeholder")
+                    .show_in(scope)
+            })
+        },
+    )
 }

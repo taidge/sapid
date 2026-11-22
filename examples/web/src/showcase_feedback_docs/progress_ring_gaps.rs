@@ -1,32 +1,32 @@
 use glory::prelude::*;
-use glory::style::Color;
-use sapid::{ProgressSection, group, ring_progress};
 pub fn demo(theme: sapid::Theme) -> impl Widget {
     let sections = [
-        ProgressSection::new(20., Color(240, 62, 62, 255)),
-        ProgressSection::new(30., Color(34, 139, 230, 255)),
-        ProgressSection::new(10., Color(64, 192, 87, 255)),
+        sapid::ProgressSection::new(40., Color(21, 170, 191, 255)),
+        sapid::ProgressSection::new(15., Color(253, 126, 20, 255)),
+        sapid::ProgressSection::new(15., Color(190, 75, 219, 255)),
     ];
-    group().theme(theme.clone()).gap(28.).fill((
-        ring_progress(60.)
-            .theme(theme.clone())
-            .size(124.)
-            .thickness(12.)
-            .sections(sections)
-            .label("0° gap"),
-        ring_progress(60.)
-            .theme(theme.clone())
-            .size(124.)
-            .thickness(12.)
-            .sections(sections)
-            .section_gap(6.)
-            .label("6° gap"),
-        ring_progress(60.)
-            .theme(theme.clone())
-            .size(124.)
-            .thickness(12.)
-            .sections(sections)
-            .section_gap(18.)
-            .label("18° gap"),
-    ))
+    sapid::stack()
+        .theme(theme.clone())
+        .align(Align::Center)
+        .gap(16.)
+        .fill(
+            [(0., "No gap (default)"), (5., "5° gap"), (10., "10° gap")]
+                .map(|(gap, label)| {
+                    sapid::stack()
+                        .theme(theme.clone())
+                        .align(Align::Center)
+                        .gap(4.)
+                        .fill((
+                            sapid::text().theme(theme.clone()).content(label),
+                            sapid::ring_progress(70.)
+                                .theme(theme.clone())
+                                .size(112.)
+                                .thickness(12.)
+                                .sections(sections)
+                                .section_gap(gap),
+                        ))
+                })
+                .into_iter()
+                .collect::<Vec<_>>(),
+        )
 }

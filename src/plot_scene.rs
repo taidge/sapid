@@ -8,7 +8,7 @@ use glory::render::{
 use glory::style::Color;
 use std::{
     collections::BTreeSet,
-    f64::consts::{FRAC_PI_2, PI, TAU},
+    f64::consts::{FRAC_PI_2, TAU},
 };
 /// Clockwise arc presentation in degrees. Start is bounded to one revolution;
 /// sweep is greater than zero and at most 360 degrees.
@@ -25,6 +25,38 @@ impl Default for PlotAngles {
         }
     }
 }
+/// A compact bullet track with a quantitative label at each threshold.
+#[derive(Clone, Debug, PartialEq)]
+pub struct BulletTrack {
+    pub vertical: bool,
+    pub thickness: f64,
+    pub bar: Color,
+    pub target: Color,
+    pub label_divisor: f64,
+    pub label_prefix: String,
+    pub label_suffix: String,
+}
+impl BulletTrack {
+    fn label(&self, value: f64) -> String {
+        format!(
+            "{}{}{}",
+            self.label_prefix,
+            value / self.label_divisor,
+            self.label_suffix
+        )
+    }
+}
+
+/// Fixed-size matrix tiles. Color encodes value, while omitted cells use the neutral grid color.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct MatrixTiles {
+    pub size: f64,
+    pub gap: f64,
+    pub x_labels: bool,
+    pub y_labels: bool,
+    pub legend: bool,
+}
+
 /// A finite grid of at most 20 by 20 cells. Gap is in the declared frame's units.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct WaffleGrid {
@@ -52,18 +84,107 @@ impl Default for BubbleRadius {
         Self { min: 0., max: 24. }
     }
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SegmentLabelValue {
+    Value,
+    Percent,
+    Name,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SegmentLabelPosition {
+    Inside,
+    Outside,
+    Left,
+    Right,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct SegmentLabels {
+    pub value: SegmentLabelValue,
+    pub position: SegmentLabelPosition,
+    pub leader: bool,
+}
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum WaffleDirection {
+    #[default]
+    LeftToRight,
+    RightToLeft,
+    TopToBottom,
+    BottomToTop,
+}
+impl WaffleDirection {
+    fn cell(self, index: usize, rows: usize, columns: usize) -> (usize, usize) {
+        match self {
+            Self::LeftToRight => (index % columns, index / columns),
+            Self::RightToLeft => (columns - 1 - index % columns, index / columns),
+            Self::TopToBottom => (index / rows, index % rows),
+            Self::BottomToTop => (index / rows, rows - 1 - index % rows),
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct RadarParts {
+    pub grid: bool,
+    pub angles: bool,
+    pub radius: bool,
+    pub dots: bool,
+}
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct CandleAxes {
+    pub grid: crate::charts::ChartAxes,
+    pub ticks: crate::charts::ChartAxes,
+    pub x: bool,
+    pub y: bool,
+}
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct SparklineStyle {
+    pub curve: crate::charts::ChartCurve,
+    pub stroke_width: f64,
+    pub fill_opacity: f64,
+    pub gradient: bool,
+}
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct PlotOptions {
     pub hidden: BTreeSet<String>,
     pub domain: Option<ChartDomain>,
     pub x_domain: Option<ChartDomain>,
     pub angles: Option<PlotAngles>,
-    /// Donut inner radius as a fraction of the outer radius, inclusive 0..=0.95.
+    /// Donut inner radius as a fraction of the outer radius, in 0..1.
     pub donut_inner_ratio: Option<f64>,
-    /// Donut-only ordinary text, at most 64 UTF-8 bytes on one line.
+    /// Center text for a donut or gauge, at most 64 UTF-8 bytes on one line.
     pub center_label: Option<String>,
     pub waffle_grid: Option<WaffleGrid>,
+    pub matrix_tiles: Option<MatrixTiles>,
+    pub bullet_track: Option<BulletTrack>,
+    /// Fraction of the outer radius left clear in the middle of a sunburst.
+    pub sunburst_inner_ratio: Option<f64>,
+    /// Draw pie and donut values in counterclockwise order from the configured start.
+    pub counterclockwise: bool,
+    /// Optional gauge ring thickness in frame units.
+    pub gauge_thickness: Option<f64>,
+    pub gauge_value_label: bool,
+    /// Draw rounded endpoints on the gauge track and its filled sections.
+    pub gauge_round_caps: bool,
+    /// Optional Sankey node width and vertical spacing in frame units.
+    pub sankey_node_size: Option<(f64, f64)>,
+    /// Display names at the centers of visible sunburst sectors.
+    pub hierarchy_labels: bool,
+    /// Link opacity as a fraction of full color strength.
+    pub link_opacity: Option<f64>,
     pub bubble_radius: Option<BubbleRadius>,
+    pub segment_labels: Option<SegmentLabels>,
+    /// Angular gap between neighboring wedges, in degrees.
+    pub padding_angle: Option<f64>,
+    pub segment_stroke: Option<f64>,
+    pub waffle_direction: WaffleDirection,
+    pub hierarchy_gap: Option<f64>,
+    pub radar_stroke: Option<Color>,
+    pub radar_parts: Option<RadarParts>,
+    pub candle_axes: Option<CandleAxes>,
+    pub sparkline: Option<SparklineStyle>,
+    pub tooltip: bool,
+    /// Include each visible segment in the tooltip instead of only the active segment.
+    pub tooltip_all_segments: bool,
+    pub bar_labels: bool,
 }
 pub(crate) fn path_key(key: &str, part: &str) -> String {
     format!("record-{}_{key}-{}_{part}", key.len(), part.len())
@@ -691,9 +812,38 @@ impl PlotScene {
         if options.hidden.len() > MAX_MATRIX_CELLS {
             return Err(ChartError::Budget);
         }
+        if options.radar_parts.is_some() && kind != PlotKind::Radar
+            || options.candle_axes.is_some() && kind != PlotKind::Candlestick
+            || options.sparkline.is_some_and(|s| {
+                kind != PlotKind::Sparkline
+                    || !(0.0..=32.).contains(&s.stroke_width)
+                    || !(0.0..=1.).contains(&s.fill_opacity)
+            })
+        {
+            return Err(ChartError::Presentation);
+        }
+        if options.padding_angle.is_some_and(|angle| {
+            !matches!(kind, PlotKind::Pie | PlotKind::Donut) || !(0.0..=45.0).contains(&angle)
+        }) || options.segment_stroke.is_some_and(|width| {
+            !matches!(kind, PlotKind::Pie | PlotKind::Donut | PlotKind::Funnel)
+                || !(0.0..=32.0).contains(&width)
+        }) || options.hierarchy_gap.is_some_and(|width| {
+            !matches!(kind, PlotKind::Sunburst | PlotKind::Treemap)
+                || !(0.0..=32.0).contains(&width)
+        }) || options
+            .segment_labels
+            .is_some_and(|_| !matches!(kind, PlotKind::Pie | PlotKind::Donut | PlotKind::Funnel))
+            || (options.radar_stroke.is_some() && kind != PlotKind::Radar)
+            || (options.waffle_direction != WaffleDirection::LeftToRight
+                && kind != PlotKind::Waffle)
+        {
+            return Err(ChartError::Presentation);
+        }
         if let Some(angles) = options.angles
-            && (!matches!(kind, PlotKind::Pie | PlotKind::Donut | PlotKind::RadialBar)
-                || !angles.start.is_finite()
+            && (!matches!(
+                kind,
+                PlotKind::Pie | PlotKind::Donut | PlotKind::RadialBar | PlotKind::Gauge
+            ) || !angles.start.is_finite()
                 || !(-360.0..=360.0).contains(&angles.start)
                 || !angles.sweep.is_finite()
                 || !(0.0..=360.0).contains(&angles.sweep)
@@ -701,17 +851,61 @@ impl PlotScene {
         {
             return Err(ChartError::Presentation);
         }
+        if options.tooltip_all_segments
+            && !matches!(kind, PlotKind::Pie | PlotKind::Donut | PlotKind::Funnel)
+        {
+            return Err(ChartError::Presentation);
+        }
         if let Some(ratio) = options.donut_inner_ratio
-            && (kind != PlotKind::Donut || !ratio.is_finite() || !(0.0..=0.95).contains(&ratio))
+            && (kind != PlotKind::Donut || !ratio.is_finite() || !(0.0..1.0).contains(&ratio))
         {
             return Err(ChartError::Presentation);
         }
         if let Some(label) = &options.center_label
-            && (kind != PlotKind::Donut
+            && (!matches!(kind, PlotKind::Donut | PlotKind::Gauge)
                 || label.len() > 64
                 || label.contains(['\0', '\r', '\n', '\u{2028}', '\u{2029}']))
         {
             return Err(ChartError::CenterLabel);
+        }
+        if options.sankey_node_size.is_some_and(|(width, gap)| {
+            kind != PlotKind::Sankey || !(1. ..=64.).contains(&width) || !(0. ..=64.).contains(&gap)
+        }) || (options.gauge_round_caps && kind != PlotKind::Gauge)
+            || (options.hierarchy_labels && kind != PlotKind::Sunburst)
+        {
+            return Err(ChartError::Presentation);
+        }
+        if let Some(track) = &options.bullet_track
+            && (kind != PlotKind::Bullet
+                || !(2.0..=240.0).contains(&track.thickness)
+                || !track.label_divisor.is_finite()
+                || track.label_divisor < 1.
+                || track.label_prefix.len() > 16
+                || track.label_suffix.len() > 16
+                || track.label_prefix.contains(['\0', '\n', '\r'])
+                || track.label_suffix.contains(['\0', '\n', '\r']))
+        {
+            return Err(ChartError::Presentation);
+        }
+        if let Some(tiles) = options.matrix_tiles
+            && (kind != PlotKind::Matrix
+                || !(4.0..=64.).contains(&tiles.size)
+                || !(0.0..=16.).contains(&tiles.gap))
+        {
+            return Err(ChartError::Presentation);
+        }
+        if options
+            .sunburst_inner_ratio
+            .is_some_and(|ratio| kind != PlotKind::Sunburst || !(0.0..1.0).contains(&ratio))
+            || options.gauge_thickness.is_some_and(|width| {
+                kind != PlotKind::Gauge
+                    || !(1.0..=frame.width.min(frame.height) / 2.).contains(&width)
+            })
+            || options
+                .link_opacity
+                .is_some_and(|v| kind != PlotKind::Sankey || !(0.0..=1.0).contains(&v))
+        {
+            return Err(ChartError::Presentation);
         }
         if let Some(grid) = options.waffle_grid {
             if kind != PlotKind::Waffle
@@ -843,19 +1037,34 @@ impl PlotScene {
                         if sweep <= 0. {
                             continue;
                         }
+                        let radius = if options
+                            .segment_labels
+                            .is_some_and(|labels| labels.position == SegmentLabelPosition::Outside)
+                        {
+                            radius * 0.8
+                        } else {
+                            radius
+                        };
                         let inner = if kind == PlotKind::Donut {
                             radius * options.donut_inner_ratio.unwrap_or(0.62)
                         } else {
                             0.
                         };
                         let color = theme.series[i % 8];
+                        let gap = options.padding_angle.unwrap_or(0.).to_radians().min(sweep);
+                        let width = options.segment_stroke.unwrap_or(1.);
+                        let from = if options.counterclockwise {
+                            start - sweep
+                        } else {
+                            start
+                        };
                         self.layer(
                             path_key(&r.key, "shape"),
-                            ring(cx, cy, inner, radius, start, sweep),
+                            ring(cx, cy, inner, radius, from + gap / 2., sweep - gap),
                             Some(color),
-                            Some(stroke(theme.grid, 1.)),
+                            (width > 0.).then(|| stroke(theme.grid, width)),
                         )?;
-                        let angle = start + sweep / 2.;
+                        let angle = from + sweep / 2.;
                         let middle = (inner + radius) / 2.;
                         self.mark(
                             &r.key,
@@ -865,7 +1074,43 @@ impl PlotScene {
                             cy + middle * libm::sin(angle),
                             color,
                         )?;
-                        start += sweep;
+                        if let Some(labels) = options.segment_labels {
+                            let outside = labels.position == SegmentLabelPosition::Outside;
+                            let distance = if outside { radius + 18. } else { middle };
+                            let x = libm::cos(angle);
+                            let y = libm::sin(angle);
+                            if outside && labels.leader {
+                                self.layer(
+                                    path_key(&r.key, "leader"),
+                                    vec![
+                                        Cmd::Move(Point::new(cx + radius * x, cy + radius * y)),
+                                        Cmd::Line(Point::new(
+                                            cx + (distance - 3.) * x,
+                                            cy + (distance - 3.) * y,
+                                        )),
+                                    ],
+                                    None,
+                                    Some(stroke(color, 1.)),
+                                )?;
+                            }
+                            let text = match labels.value {
+                                SegmentLabelValue::Name => r.label.clone(),
+                                SegmentLabelValue::Value => value.to_string(),
+                                SegmentLabelValue::Percent => {
+                                    format!("{:.0}%", value * 100. / total)
+                                }
+                            };
+                            self.labels.push(PlotLabel {
+                                text,
+                                x: cx + distance * x,
+                                y: cy + distance * y,
+                            });
+                        }
+                        start += if options.counterclockwise {
+                            -sweep
+                        } else {
+                            sweep
+                        };
                     }
                 }
             }
@@ -926,6 +1171,7 @@ impl PlotScene {
                 if domain.min() != 0. {
                     return Err(ChartError::Domain);
                 }
+                let parts = options.radar_parts;
                 let mut axes = Vec::new();
                 let mut polygon = Vec::new();
                 let mut open = false;
@@ -939,11 +1185,13 @@ impl PlotScene {
                             cy + radius * libm::sin(angle),
                         )),
                     ]);
-                    self.labels.push(PlotLabel {
-                        text: r.label.clone(),
-                        x: cx + (radius + 8.) * libm::cos(angle),
-                        y: cy + (radius + 8.) * libm::sin(angle),
-                    });
+                    if parts.is_none_or(|parts| parts.angles) {
+                        self.labels.push(PlotLabel {
+                            text: r.label.clone(),
+                            x: cx + (radius + 8.) * libm::cos(angle),
+                            y: cy + (radius + 8.) * libm::sin(angle),
+                        });
+                    }
                     if let Some(value) = r.value {
                         let fraction = domain.fraction(value)?.clamp(0., 1.);
                         if value > domain.max() {
@@ -972,7 +1220,41 @@ impl PlotScene {
                         gaps = true;
                     }
                 }
-                self.layer("axes", axes, None, Some(stroke(theme.grid, 1.)))?;
+                if parts.is_none_or(|p| p.grid) && !axes.is_empty() {
+                    self.layer("axes", axes, None, Some(stroke(theme.grid, 1.)))?;
+                }
+                if let Some(parts) = parts {
+                    for tick in 1..=4 {
+                        let r = radius * f64::from(tick) / 4.;
+                        if parts.grid && current.len() >= 3 {
+                            let mut ring = Vec::new();
+                            for i in 0..current.len() {
+                                let a = -FRAC_PI_2 + TAU * i as f64 / current.len() as f64;
+                                let point =
+                                    Point::new(cx + r * libm::cos(a), cy + r * libm::sin(a));
+                                ring.push(if i == 0 {
+                                    Cmd::Move(point)
+                                } else {
+                                    Cmd::Line(point)
+                                });
+                            }
+                            ring.push(Cmd::Close);
+                            self.layer(
+                                format!("radar-grid-{tick}"),
+                                ring,
+                                None,
+                                Some(stroke(theme.grid, 1.)),
+                            )?;
+                        }
+                        if parts.radius {
+                            self.labels.push(PlotLabel {
+                                text: format!("{:.0}", domain.max() * f64::from(tick) / 4.),
+                                x: cx + r,
+                                y: cy,
+                            });
+                        }
+                    }
+                }
                 if !polygon.is_empty() {
                     let mut color = theme.series[0];
                     color.3 = 80;
@@ -983,7 +1265,7 @@ impl PlotScene {
                         "radar",
                         polygon,
                         (!gaps).then_some(color),
-                        Some(stroke(theme.series[0], 2.)),
+                        Some(stroke(options.radar_stroke.unwrap_or(theme.series[0]), 2.)),
                     )?;
                 }
             }
@@ -998,12 +1280,20 @@ impl PlotScene {
                     let Some(value) = r.value else {
                         continue;
                     };
-                    let top = (w - 48.) * value / max;
+                    let plot_width = if options
+                        .segment_labels
+                        .is_some_and(|labels| labels.position != SegmentLabelPosition::Inside)
+                    {
+                        w * 0.67
+                    } else {
+                        w - 48.
+                    };
+                    let top = plot_width * value / max;
                     let next = current
                         .get(row + 1)
                         .and_then(|(_, r)| r.value)
                         .unwrap_or(value);
-                    let bottom = (w - 48.) * next / max;
+                    let bottom = plot_width * next / max;
                     let y = 16. + row as f64 * height;
                     let color = theme.series[i % 8];
                     self.layer(
@@ -1016,8 +1306,23 @@ impl PlotScene {
                             Cmd::Close,
                         ],
                         Some(color),
-                        None,
+                        options
+                            .segment_stroke
+                            .filter(|w| *w > 0.)
+                            .map(|w| stroke(theme.grid, w)),
                     )?;
+                    if let Some(labels) = options.segment_labels {
+                        let x = match labels.position {
+                            SegmentLabelPosition::Left => cx - (top + bottom) / 4. - 24.,
+                            SegmentLabelPosition::Inside => cx,
+                            _ => cx + (top + bottom) / 4. + 24.,
+                        };
+                        self.labels.push(PlotLabel {
+                            text: r.label.clone(),
+                            x,
+                            y: y + height * 0.42,
+                        });
+                    }
                     self.mark(
                         &r.key,
                         &r.label,
@@ -1034,6 +1339,8 @@ impl PlotScene {
                     .unwrap_or(scale(current.iter().filter_map(|(_, r)| r.value))?);
                 let mut drawing = Vec::new();
                 let mut open = false;
+                let mut runs = Vec::new();
+                let mut run = Vec::new();
                 for (index, (i, r)) in current.iter().enumerate() {
                     if let Some(value) = r.value {
                         let fraction = domain.fraction(value)?.clamp(0., 1.);
@@ -1044,6 +1351,7 @@ impl PlotScene {
                             + (w - 32.) * index as f64
                                 / (current.len().saturating_sub(1)).max(1) as f64;
                         let y = h - 16. - (h - 32.) * fraction;
+                        run.push((x, y, h - 16.));
                         drawing.push(if open {
                             Cmd::Line(Point::new(x, y))
                         } else {
@@ -1060,9 +1368,57 @@ impl PlotScene {
                         )?;
                     } else {
                         open = false;
+                        if !run.is_empty() {
+                            runs.push(std::mem::take(&mut run));
+                        }
                     }
                 }
-                if !drawing.is_empty() {
+                if !run.is_empty() {
+                    runs.push(run);
+                }
+                if let Some(style) = options.sparkline {
+                    for (index, run) in runs.iter().enumerate() {
+                        let tangents = style.curve.tangents(run);
+                        let mut start = 0;
+                        let limit = 250 / style.curve.commands_per_edge();
+                        while start < run.len() {
+                            let end = (start + limit).min(run.len());
+                            let mut line = vec![Cmd::Move(Point::new(run[start].0, run[start].1))];
+                            for i in start + 1..end {
+                                style.curve.edge(run, i, &tangents, &mut line);
+                            }
+                            if style.fill_opacity > 0. {
+                                let mut fill = line.clone();
+                                let base = h - 16.;
+                                fill.extend([
+                                    Cmd::Line(Point::new(run[end - 1].0, base)),
+                                    Cmd::Line(Point::new(run[start].0, base)),
+                                    Cmd::Close,
+                                ]);
+                                let mut color = theme.series[0];
+                                color.3 = (255. * style.fill_opacity).round() as u8;
+                                self.layer(
+                                    format!("spark-fill-{index}-{start}"),
+                                    fill,
+                                    Some(color),
+                                    None,
+                                )?;
+                            }
+                            if style.stroke_width > 0. {
+                                self.layer(
+                                    format!("spark-line-{index}-{start}"),
+                                    line,
+                                    None,
+                                    Some(stroke(theme.series[0], style.stroke_width)),
+                                )?;
+                            }
+                            if end == run.len() {
+                                break;
+                            }
+                            start = end - 1;
+                        }
+                    }
+                } else if !drawing.is_empty() {
                     self.layer(
                         "sparkline",
                         drawing,
@@ -1105,10 +1461,12 @@ impl PlotScene {
                 for (i, count, _) in allocations {
                     let r = &values[i];
                     let mut commands = Vec::new();
-                    let first = next;
+                    let (first_col, first_row) =
+                        options
+                            .waffle_direction
+                            .cell(next.min(units - 1), rows, columns);
                     for _ in 0..count {
-                        let col = next % columns;
-                        let row = next / columns;
+                        let (col, row) = options.waffle_direction.cell(next, rows, columns);
                         if commands.len() + 5 > 256 {
                             self.layer(
                                 path_key(&r.key, &format!("cells-{next}")),
@@ -1136,8 +1494,8 @@ impl PlotScene {
                             &r.key,
                             &r.label,
                             format!("{}; {count} of {units} cells", r.value.unwrap_or(0.)),
-                            left + (first % columns) as f64 * cell + cell / 2.,
-                            top + (first / columns) as f64 * cell + cell / 2.,
+                            left + first_col as f64 * cell + cell / 2.,
+                            top + first_row as f64 * cell + cell / 2.,
                             theme.series[i % 8],
                         )?;
                     }
@@ -1166,6 +1524,18 @@ impl PlotScene {
                         Some(theme.series[i % 8]),
                         None,
                     )?;
+                    if options.bar_labels {
+                        self.labels.push(PlotLabel {
+                            text: r.label.clone(),
+                            x: 28.,
+                            y: y + 3.,
+                        });
+                        self.labels.push(PlotLabel {
+                            text: format!("{value}"),
+                            x: w - 73.,
+                            y: y + 3.,
+                        });
+                    }
                     self.mark(
                         &r.key,
                         &r.label,
@@ -1308,12 +1678,72 @@ impl PlotScene {
             .domain
             .unwrap_or(scale(current.iter().flat_map(|r| [r.low, r.high]))?);
         let (w, h) = (self.frame.width, self.frame.height);
-        let band = (w - 48.) / current.len().max(1) as f64;
+        let left = if options.candle_axes.is_some_and(|a| a.y) {
+            46.
+        } else {
+            24.
+        };
+        let right = w - 24.;
+        let band = (right - left) / current.len().max(1) as f64;
         let y = |v: f64| -> Result<f64, ChartError> {
             Ok(h - 24. - domain.fraction(v)?.clamp(0., 1.) * (h - 48.))
         };
+        if let Some(axes) = options.candle_axes {
+            let mut grid = Vec::new();
+            for v in domain.ticks(5)? {
+                let py = y(v)?;
+                if axes.grid.x() {
+                    grid.extend([
+                        Cmd::Move(Point::new(left, py)),
+                        Cmd::Line(Point::new(right, py)),
+                    ]);
+                }
+                if axes.y {
+                    self.labels.push(PlotLabel {
+                        text: format!("{v:.1}"),
+                        x: 0.,
+                        y: py - 6.,
+                    });
+                    if axes.ticks.y() {
+                        grid.extend([
+                            Cmd::Move(Point::new(left - 4., py)),
+                            Cmd::Line(Point::new(left, py)),
+                        ]);
+                    }
+                }
+            }
+            for (i, record) in current
+                .iter()
+                .enumerate()
+                .step_by(current.len().div_ceil(8).max(1))
+            {
+                let px = left + band * (i as f64 + 0.5);
+                if axes.grid.y() {
+                    grid.extend([
+                        Cmd::Move(Point::new(px, 24.)),
+                        Cmd::Line(Point::new(px, h - 24.)),
+                    ]);
+                }
+                if axes.x {
+                    self.labels.push(PlotLabel {
+                        text: record.label.clone(),
+                        x: px - 10.,
+                        y: h - 21.,
+                    });
+                    if axes.ticks.x() {
+                        grid.extend([
+                            Cmd::Move(Point::new(px, h - 24.)),
+                            Cmd::Line(Point::new(px, h - 20.)),
+                        ]);
+                    }
+                }
+            }
+            if !grid.is_empty() {
+                self.layer("candle-grid", grid, None, Some(stroke(theme.grid, 1.)))?;
+            }
+        }
         for (index, r) in current.into_iter().enumerate() {
-            let x = 24. + band * (index as f64 + 0.5);
+            let x = left + band * (index as f64 + 0.5);
             let color = theme.series[if r.close >= r.open { 2 } else { 1 }];
             let width = band * 0.6;
             let mut commands = vec![
@@ -1364,6 +1794,9 @@ impl PlotScene {
         let domain = options
             .domain
             .unwrap_or(scale(current.iter().map(|r| r.value))?);
+        if let Some(tiles) = options.matrix_tiles {
+            return self.tile_matrix(data, options, theme, domain, tiles);
+        }
         for i in 0..5 {
             let fraction = f64::from(i) / 4.;
             self.scale_legend.push(PlotScaleStop {
@@ -1444,6 +1877,210 @@ impl PlotScene {
         }
         Ok(())
     }
+    fn tile_matrix(
+        &mut self,
+        data: &MatrixData,
+        options: &PlotOptions,
+        theme: &ChartTheme,
+        domain: ChartDomain,
+        tiles: MatrixTiles,
+    ) -> Result<(), ChartError> {
+        let step = tiles.size + tiles.gap;
+        let left = if tiles.y_labels { 48. } else { 0. };
+        let top = if tiles.x_labels { 22. } else { 0. };
+        let cells = data
+            .cells
+            .iter()
+            .map(|c| ((c.row.as_str(), c.column.as_str()), c))
+            .collect::<std::collections::BTreeMap<_, _>>();
+        if tiles.legend {
+            for i in 0..5 {
+                let fraction = f64::from(i) / 4.;
+                self.scale_legend.push(PlotScaleStop {
+                    value: domain.min() + (domain.max() - domain.min()) * fraction,
+                    color: color_mix(theme.series[0], theme.series[1], fraction),
+                });
+            }
+        }
+        if tiles.y_labels {
+            for (i, row) in data.rows.iter().enumerate() {
+                self.labels.push(PlotLabel {
+                    text: row.label.clone(),
+                    x: 0.,
+                    y: top + i as f64 * step + tiles.size / 2.,
+                });
+            }
+        }
+        if tiles.x_labels {
+            for (j, column) in data.columns.iter().enumerate() {
+                self.labels.push(PlotLabel {
+                    text: column.label.clone(),
+                    x: left + j as f64 * step,
+                    y: 0.,
+                });
+            }
+        }
+        for (i, row) in data.rows.iter().enumerate() {
+            for (j, column) in data.columns.iter().enumerate() {
+                let x = left + j as f64 * step;
+                let y = top + i as f64 * step;
+                let cell = cells
+                    .get(&(row.key.as_str(), column.key.as_str()))
+                    .filter(|c| !options.hidden.contains(&c.key));
+                let color = if let Some(c) = cell {
+                    let fraction = domain.fraction(c.value)?;
+                    if !(0.0..=1.).contains(&fraction) {
+                        self.clipped_values += 1;
+                    }
+                    let color = color_mix(theme.series[0], theme.series[1], fraction.clamp(0., 1.));
+                    self.mark(
+                        &c.key,
+                        &format!("{} · {}", row.label, column.label),
+                        c.value.to_string(),
+                        x + tiles.size / 2.,
+                        y + tiles.size / 2.,
+                        color,
+                    )?;
+                    color
+                } else {
+                    theme.grid
+                };
+                self.layer(
+                    format!("cell-{i}-{j}"),
+                    rect(x, y, tiles.size, tiles.size),
+                    Some(color),
+                    None,
+                )?;
+            }
+        }
+        Ok(())
+    }
+    fn bullet_track(
+        &mut self,
+        data: &TargetDatum,
+        track: &BulletTrack,
+        top: f64,
+        row_height: f64,
+        theme: &ChartTheme,
+    ) -> Result<(), ChartError> {
+        let width = self.frame.width;
+        let domain = ChartDomain::new(data.min, data.max)?;
+        let thickness = track.thickness.min(if track.vertical {
+            width * 0.5
+        } else {
+            row_height * 0.65
+        });
+        let length = if track.vertical {
+            row_height - 12.
+        } else {
+            width - 32.
+        };
+        let cross = if track.vertical {
+            width / 2.
+        } else {
+            top + row_height / 2.
+        };
+        let axis = |v: f64| -> Result<f64, ChartError> {
+            let fraction = domain.fraction(v)?.clamp(0., 1.);
+            Ok(if track.vertical {
+                top + row_height - 6. - fraction * length
+            } else {
+                16. + fraction * length
+            })
+        };
+        let box_path = |a: f64, b: f64, th: f64| {
+            if track.vertical {
+                rect(cross - th / 2., a.min(b), th, (a - b).abs())
+            } else {
+                rect(a.min(b), cross - th / 2., (a - b).abs(), th)
+            }
+        };
+        let mut previous = axis(data.min)?;
+        for (i, threshold) in data.bands.iter().enumerate() {
+            let end = axis(*threshold)?;
+            self.layer(
+                path_key(&data.key, &format!("band-{i}")),
+                box_path(previous, end, thickness),
+                Some(theme.series[i % 8]),
+                None,
+            )?;
+            let (x, y) = if track.vertical {
+                (cross + thickness / 2. + 24., end)
+            } else {
+                (end, cross - thickness / 2. - 11.)
+            };
+            self.labels.push(PlotLabel {
+                text: track.label(*threshold),
+                x,
+                y,
+            });
+            previous = end;
+        }
+        let value = axis(data.value)?;
+        self.layer(
+            path_key(&data.key, "shape"),
+            box_path(axis(data.min)?, value, thickness * 0.34),
+            Some(track.bar),
+            None,
+        )?;
+        if let Some(target) = data.target {
+            let point = axis(target)?;
+            self.layer(
+                path_key(&data.key, "target"),
+                box_path(point - 1.5, point + 1.5, thickness * 0.8),
+                Some(track.target),
+                None,
+            )?;
+            let (x, y) = if track.vertical {
+                (cross + thickness / 2. + 24., point)
+            } else {
+                (point, cross - thickness / 2. - 11.)
+            };
+            self.labels.push(PlotLabel {
+                text: track.label(target),
+                x,
+                y,
+            });
+        }
+        let (x, y) = if track.vertical {
+            (cross - thickness / 2. - 20., value)
+        } else {
+            (value, cross + thickness / 2. + 13.)
+        };
+        self.labels.push(PlotLabel {
+            text: track.label(data.value),
+            x,
+            y,
+        });
+        let (x, y) = if track.vertical {
+            (cross, value)
+        } else {
+            (value, cross)
+        };
+        self.mark(
+            &data.key,
+            &data.label,
+            track.label(data.value),
+            x,
+            y,
+            track.bar,
+        )?;
+        self.ranges.push(PlotRange {
+            key: data.key.clone(),
+            label: data.label.clone(),
+            value: ProgressValue {
+                min: data.min,
+                max: data.max,
+                current: Some(data.value),
+                value_text: Some(track.label(data.value)),
+            },
+            x: 0.,
+            y: top,
+            width,
+            height: row_height,
+        });
+        Ok(())
+    }
     fn targets(
         &mut self,
         values: &[TargetDatum],
@@ -1461,36 +2098,116 @@ impl PlotScene {
             let domain = ChartDomain::new(r.min, r.max)?;
             let fraction = domain.fraction(r.value)?;
             let top = 16. + index as f64 * row_height;
-            self.labels.extend([
-                PlotLabel {
-                    text: r.min.to_string(),
-                    x: 24.,
-                    y: top + row_height * 0.78,
-                },
-                PlotLabel {
-                    text: r.max.to_string(),
-                    x: w - 80.,
-                    y: top + row_height * 0.78,
-                },
-            ]);
+            if let Some(track) = &options.bullet_track {
+                self.bullet_track(r, track, top, row_height, theme)?;
+                continue;
+            }
+            if !options.gauge_value_label {
+                self.labels.extend([
+                    PlotLabel {
+                        text: r.min.to_string(),
+                        x: 24.,
+                        y: top + row_height * 0.78,
+                    },
+                    PlotLabel {
+                        text: r.max.to_string(),
+                        x: w - 80.,
+                        y: top + row_height * 0.78,
+                    },
+                ]);
+            }
             if kind == PlotKind::Gauge {
-                let radius = (w.min(h) - 48.) / 2.;
-                let (cx, cy) = (w / 2., h / 2.);
-                let inner = radius * 0.78;
+                let (radius, cx, cy) = if options.gauge_value_label {
+                    // A partial dial can use the entire width and end above the bottom
+                    // of a square. The frame leaves room for its value and needle.
+                    let radius = (w / 2.).min(h * 0.65);
+                    (radius, w / 2., radius)
+                } else {
+                    ((w.min(h) - 48.) / 2., w / 2., h / 2.)
+                };
+                let inner = options
+                    .gauge_thickness
+                    .map_or(radius * 0.78, |w| (radius - w).max(0.));
+                let angles = options.angles.unwrap_or(PlotAngles {
+                    start: 180.,
+                    sweep: 180.,
+                });
+                let start = angles.start.to_radians();
+                let sweep = angles.sweep.to_radians();
                 self.layer(
                     "track",
-                    ring(cx, cy, inner, radius, PI, PI),
+                    ring(cx, cy, inner, radius, start, sweep),
                     Some(theme.grid),
                     None,
                 )?;
-                self.layer(
-                    path_key(&r.key, "shape"),
-                    ring(cx, cy, inner, radius, PI, PI * fraction),
-                    Some(theme.series[0]),
-                    None,
-                )?;
+                let center_radius = (inner + radius) / 2.;
+                let cap_radius = (radius - inner) / 2.;
+                let cap = |angle: f64| {
+                    ring(
+                        cx + center_radius * libm::cos(angle),
+                        cy + center_radius * libm::sin(angle),
+                        0.,
+                        cap_radius,
+                        0.,
+                        TAU,
+                    )
+                };
+                if options.gauge_round_caps {
+                    for (key, angle) in [("track-start", start), ("track-end", start + sweep)] {
+                        self.layer(key, cap(angle), Some(theme.grid), None)?;
+                    }
+                }
+                if r.bands.is_empty() {
+                    self.layer(
+                        path_key(&r.key, "shape"),
+                        ring(cx, cy, inner, radius, start, sweep * fraction),
+                        Some(theme.series[0]),
+                        None,
+                    )?;
+                    if options.gauge_round_caps && fraction > 0. {
+                        for (key, angle) in [
+                            ("fill-start", start),
+                            ("fill-end", start + sweep * fraction),
+                        ] {
+                            self.layer(key, cap(angle), Some(theme.series[0]), None)?;
+                        }
+                    }
+                } else {
+                    let mut previous = 0.;
+                    for (i, &limit) in r.bands.iter().enumerate() {
+                        let end = domain.fraction(limit)?;
+                        let color = theme.series[i % theme.series.len()];
+                        self.layer(
+                            format!("section-{i}"),
+                            ring(
+                                cx,
+                                cy,
+                                inner,
+                                radius,
+                                start + previous * sweep,
+                                (end - previous) * sweep,
+                            ),
+                            Some(color),
+                            None,
+                        )?;
+                        if options.gauge_round_caps && (i == 0 || i + 1 == r.bands.len()) {
+                            if i == 0 {
+                                self.layer("section-start", cap(start), Some(color), None)?;
+                            }
+                            if i + 1 == r.bands.len() {
+                                self.layer(
+                                    "section-end",
+                                    cap(start + end * sweep),
+                                    Some(color),
+                                    None,
+                                )?;
+                            }
+                        }
+                        previous = end;
+                    }
+                }
                 if let Some(target) = r.target {
-                    let angle = PI + PI * domain.fraction(target)?;
+                    let angle = start + sweep * domain.fraction(target)?;
                     self.layer(
                         "target",
                         vec![
@@ -1522,9 +2239,24 @@ impl PlotScene {
                     theme.series[0],
                 )?;
                 self.labels.push(PlotLabel {
-                    text: format!("{} / {}", r.value, r.max),
-                    x: cx - 32.,
-                    y: cy + 16.,
+                    text: if options.gauge_value_label {
+                        options
+                            .center_label
+                            .clone()
+                            .unwrap_or_else(|| r.value.to_string())
+                    } else {
+                        format!("{} / {}", r.value, r.max)
+                    },
+                    x: if options.gauge_value_label {
+                        cx
+                    } else {
+                        cx - 32.
+                    },
+                    y: if options.gauge_value_label {
+                        cy
+                    } else {
+                        cy + 16.
+                    },
                 });
             } else {
                 let mut previous = r.min;

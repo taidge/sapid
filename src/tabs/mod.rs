@@ -53,6 +53,7 @@ pub struct Tabs {
     policy: ContentPolicy,
     variant: TabsVariant,
     grow: bool,
+    deactivate: bool,
 }
 pub fn tabs(key: impl Into<String>) -> Tabs {
     Tabs {
@@ -69,6 +70,7 @@ pub fn tabs(key: impl Into<String>) -> Tabs {
         policy: ContentPolicy::KeepMounted,
         variant: TabsVariant::Default,
         grow: false,
+        deactivate: false,
     }
 }
 impl Tabs {
@@ -125,6 +127,11 @@ impl Tabs {
         self.activation = activation;
         self
     }
+    /// Allow explicitly activating the selected tab to clear all panels.
+    pub fn allow_deactivation(mut self, allow: bool) -> Self {
+        self.deactivate = allow;
+        self
+    }
     pub fn loop_focus(mut self, looping: bool) -> Self {
         self.looping = looping;
         self
@@ -138,25 +145,31 @@ impl Tabs {
 struct Selection {
     control: Control<String>,
     keys: Rc<Vec<String>>,
+    deactivate: bool,
     callback: Callback<String>,
     pending: Cell<Option<usize>>,
     dirty: Dirty,
     owner: glory::core::InstanceId,
 }
 impl Selection {
-    fn propose(&self, index: usize) -> Result {
+    fn propose(&self, index: usize, activate: bool) -> Result {
         let old = self.control.source.try_get()?;
-        if !self.keys.contains(&old) {
+        if !(self.keys.contains(&old) || self.deactivate && old.is_empty()) {
             return Err(glory::render::Error::InvalidProps("unknown tab value").into());
         }
         let next = &self.keys[index];
-        if &old == next || self.pending.get() == Some(index) {
+        if (&old == next && !(self.deactivate && activate)) || self.pending.get() == Some(index) {
             return Ok(());
         }
         self.pending.set(Some(index));
         self.dirty.touch()?;
-        self.control.accept(next)?;
-        self.callback.emit(self.owner, next.clone());
+        let next = if &old == next {
+            String::new()
+        } else {
+            next.clone()
+        };
+        self.control.accept(&next)?;
+        self.callback.emit(self.owner, next);
         Ok(())
     }
 }
@@ -196,8 +209,9 @@ impl Widget for Tabs {
         }
         let control = std::mem::take(&mut self.value).mount(scope);
         let known = keys.clone();
+        let deactivate = self.deactivate;
         let selected = composite::validated(scope, &control.source, move |value| {
-            if known.contains(value) {
+            if known.contains(value) || (deactivate && value.is_empty()) {
                 Ok(())
             } else {
                 Err(glory::render::Error::InvalidProps("unknown tab value").into())
@@ -211,7 +225,7 @@ impl Widget for Tabs {
             let flags = live.flags().expect("live tab inputs");
             let chosen = selected
                 .with(|value| values.iter().position(|key| key == value))
-                .expect("validated tab");
+                .unwrap_or_else(|| focused.get());
             let current = if within.get() { focused.get() } else { chosen };
             if flags.get(current) == Some(&true) {
                 current
@@ -222,6 +236,7 @@ impl Widget for Tabs {
         let selection = Rc::new(Selection {
             control,
             keys: keys.clone(),
+            deactivate,
             callback: Callback::new(self.on_change.take()),
             pending: Cell::new(None),
             dirty: Dirty::new(scope),
@@ -317,7 +332,7 @@ impl Widget for Tabs {
                     if automatic {
                         let result = live.flags().and_then(|flags| {
                             if flags[index] {
-                                on_focus.propose(index)
+                                on_focus.propose(index, false)
                             } else {
                                 Ok(())
                             }
@@ -336,7 +351,7 @@ impl Widget for Tabs {
                 if let Some(scope) = weak.upgrade() {
                     let result = live.flags().and_then(|flags| {
                         if flags[index] {
-                            on_press.propose(index)
+                            on_press.propose(index, true)
                         } else {
                             Ok(())
                         }

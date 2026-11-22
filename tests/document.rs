@@ -340,6 +340,24 @@ fn whole_word_highlights_preserve_spelling_and_utf8_boundaries() {
     }
 }
 
+#[cfg(feature = "accent-matching")]
+#[test]
+fn accent_matching_preserves_original_text_and_combining_marks() {
+    let original = "CAFÉ café cafe\u{301} cafe";
+    let html = glory::ssr::render(
+        highlight()
+            .content(original)
+            .query("cafe")
+            .ignore_ascii_case(true)
+            .ignore_accents(true),
+    )
+    .unwrap();
+    assert_eq!(html.matches("<mark").count(), 4);
+    for word in ["CAFÉ", "café", "cafe\u{301}", "cafe"] {
+        assert!(html.contains(&format!(">{word}</mark>")));
+    }
+}
+
 #[test]
 fn highlight_exact_matches_keep_canonical_text_order_and_longest_overlap() {
     let app = App::memory();

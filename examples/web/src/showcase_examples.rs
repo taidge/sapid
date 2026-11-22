@@ -3,7 +3,11 @@ use glory::prelude::*;
 
 pub fn demo(id: &str, theme: sapid::Theme) -> Box<dyn Widget> {
     let selected = crate::showcase_catalog::find(id).expect("catalogued widget");
-    Box::new(view().class("site-example").fill((selected.build)(theme)))
+    Box::new(
+        view()
+            .class(format!("site-example site-example-{id}"))
+            .fill((selected.build)(theme)),
+    )
 }
 
 pub struct DetailSection {
@@ -21,7 +25,8 @@ fn time_picker_sections(theme: sapid::Theme) -> Vec<DetailSection> {
     super::showcase_dates_docs::sections("time-picker", theme)
 }
 pub fn detail_sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
-    match id {
+    let field_theme = theme.clone();
+    let mut sections = match id {
         "code-highlight"
         | "json-viewer"
         | "notifications-system"
@@ -131,11 +136,29 @@ pub fn detail_sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             super::showcase_navigation_extra_docs::sections(id, theme)
         }
         _ => Vec::new(),
-    }
+    };
+    sections.extend(super::showcase_configurator_docs::sections(
+        id,
+        field_theme.clone(),
+    ));
+    sections.extend(super::showcase_field_docs::section(id, field_theme.clone()));
+    sections.extend(super::showcase_field_states::sections(id, field_theme));
+    sections
 }
 
+fn date_picker_links() -> Vec<(&'static str, &'static str)> {
+    vec![
+        ("Actions and forms", "#date-picker-actions"),
+        ("Multiple and range", "#date-picker-modes"),
+        ("Number of columns", "#date-picker-columns"),
+        ("Input columns", "#date-picker-input-columns"),
+        ("Value format", "#date-picker-value-format"),
+        ("Levels", "#date-picker-levels"),
+        ("Week numbers", "#date-picker-calendar-rows"),
+    ]
+}
 pub fn detail_navigation(id: &str) -> Vec<(&'static str, &'static str)> {
-    match id {
+    let mut sections = match id {
         "code-highlight"
         | "json-viewer"
         | "notifications-system"
@@ -162,7 +185,7 @@ pub fn detail_navigation(id: &str) -> Vec<(&'static str, &'static str)> {
         | "gauge-chart" | "waffle-chart" | "treemap" | "sunburst-chart" | "sankey-chart"
         | "matrix-chart" => super::showcase_chart_docs::contents(id),
         "date-picker" => {
-            let mut navigation = detail_navigation("date-picker-input");
+            let mut navigation = date_picker_links();
             navigation.extend(super::showcase_dates_docs::navigation(id));
             navigation
         }
@@ -220,6 +243,9 @@ pub fn detail_navigation(id: &str) -> Vec<(&'static str, &'static str)> {
         | "space" | "stack" | "splitter" => super::showcase_layout_docs::navigation(id),
         "app-shell" => vec![
             ("Layout regions", "#shell-regions"),
+            ("Disable AppShell regions", "#shell-disabled"),
+            ("Hide header on scroll", "#shell-headroom"),
+            ("Nested AppShell", "#shell-nested"),
             ("Responsive navigation", "#shell-responsive"),
             ("Collapsed navigation", "#shell-collapsed"),
             ("Scrolling and sections", "#shell-scrolling"),
@@ -227,15 +253,7 @@ pub fn detail_navigation(id: &str) -> Vec<(&'static str, &'static str)> {
             ("Resizable folder pane", "#shell-resizable"),
             ("Full-window frame", "#shell-viewport"),
         ],
-        "date-picker-input" => vec![
-            ("Actions and forms", "#date-picker-actions"),
-            ("Multiple and range", "#date-picker-modes"),
-            ("Number of columns", "#date-picker-columns"),
-            ("Input columns", "#date-picker-input-columns"),
-            ("Value format", "#date-picker-value-format"),
-            ("Levels", "#date-picker-levels"),
-            ("Week numbers", "#date-picker-calendar-rows"),
-        ],
+        "date-picker-input" => date_picker_links(),
         "color-input" => vec![
             ("Controlled swatches only", "#swatches-only"),
             ("Controlled", "#controlled"),
@@ -283,7 +301,14 @@ pub fn detail_navigation(id: &str) -> Vec<(&'static str, &'static str)> {
             ("Collision behavior", "#range-collision"),
         ],
         "progress" | "ring-progress" | "semi-circle-progress" => vec![
-            ("Geometry", "#progress-geometry"),
+            (
+                if id == "ring-progress" {
+                    "Size, thickness & rounded caps"
+                } else {
+                    "Geometry"
+                },
+                "#progress-geometry",
+            ),
             ("Compound sections", "#progress-sections"),
             ("Vertical orientation", "#progress-vertical"),
             ("Semicircle direction", "#progress-semicircle-direction"),
@@ -292,7 +317,10 @@ pub fn detail_navigation(id: &str) -> Vec<(&'static str, &'static str)> {
             ("Ring angles", "#progress-ring-angles"),
             ("Ring caps and label", "#progress-ring-caps-label"),
             ("States and values", "#progress-states"),
-        ],
+        ]
+        .into_iter()
+        .chain(super::showcase_feedback_docs::navigation(id))
+        .collect(),
         "select" => super::showcase_select_docs::navigation(),
         "date-time-picker" => vec![
             ("Actions and forms", "#date-time-picker-actions"),
@@ -318,7 +346,11 @@ pub fn detail_navigation(id: &str) -> Vec<(&'static str, &'static str)> {
             ("Custom labels", "#tree-render-label"),
         ],
         _ => Vec::new(),
-    }
+    };
+    sections.extend(super::showcase_configurator_docs::navigation(id));
+    sections.extend(super::showcase_field_docs::navigation(id));
+    sections.extend(super::showcase_field_states::navigation(id));
+    sections
 }
 
 #[cfg(test)]
@@ -329,13 +361,13 @@ mod tests {
     #[test]
     fn extension_documentation_mounts_each_complete_source_and_retires() {
         for (slug, count) in [
-            ("code-highlight", 5),
-            ("json-viewer", 4),
-            ("notifications-system", 5),
-            ("spotlight", 4),
-            ("lightbox", 4),
+            ("code-highlight", 12),
+            ("json-viewer", 14),
+            ("notifications-system", 13),
+            ("spotlight", 7),
+            ("lightbox", 15),
             ("navigation-progress", 4),
-            ("modals-manager", 4),
+            ("modals-manager", 8),
         ] {
             let sections = detail_sections(slug, sapid::Theme::blue_light());
             assert_eq!(sections.len(), count);
@@ -355,17 +387,17 @@ mod tests {
     fn schedule_documentation_mounts_each_complete_source_and_retires_its_graph() {
         for (slug, count) in [
             ("schedule", 5),
-            ("day-view", 5),
-            ("week-view", 5),
-            ("month-view", 5),
-            ("year-view", 5),
-            ("mobile-month-view", 5),
-            ("agenda-view", 5),
-            ("resources-day-view", 5),
-            ("resources-week-view", 5),
-            ("resources-month-view", 5),
-            ("resources-schedule", 5),
-            ("recurring-events", 4),
+            ("day-view", 18),
+            ("week-view", 21),
+            ("month-view", 15),
+            ("year-view", 13),
+            ("mobile-month-view", 11),
+            ("agenda-view", 11),
+            ("resources-day-view", 12),
+            ("resources-week-view", 12),
+            ("resources-month-view", 9),
+            ("resources-schedule", 7),
+            ("recurring-events", 8),
             ("events-data", 3),
         ] {
             let sections = detail_sections(slug, sapid::Theme::blue_light());
@@ -385,27 +417,27 @@ mod tests {
     #[test]
     fn chart_documentation_mounts_each_full_source_example_and_retires_its_owned_graph() {
         for (slug, count) in [
-            ("area-chart", 6),
-            ("bar-chart", 6),
-            ("line-chart", 5),
-            ("composite-chart", 5),
+            ("area-chart", 32),
+            ("bar-chart", 26),
+            ("line-chart", 27),
+            ("composite-chart", 27),
             ("candlestick-chart", 4),
-            ("donut-chart", 4),
-            ("pie-chart", 4),
-            ("funnel-chart", 4),
-            ("radar-chart", 4),
-            ("scatter-chart", 4),
-            ("bubble-chart", 4),
-            ("radial-bar-chart", 4),
+            ("donut-chart", 15),
+            ("pie-chart", 13),
+            ("funnel-chart", 12),
+            ("radar-chart", 6),
+            ("scatter-chart", 5),
+            ("bubble-chart", 6),
+            ("radial-bar-chart", 7),
             ("sparkline", 4),
-            ("bars-list", 4),
-            ("bullet-chart", 4),
-            ("gauge-chart", 4),
-            ("waffle-chart", 4),
-            ("treemap", 4),
-            ("sunburst-chart", 4),
-            ("sankey-chart", 4),
-            ("matrix-chart", 4),
+            ("bars-list", 5),
+            ("bullet-chart", 10),
+            ("gauge-chart", 10),
+            ("waffle-chart", 8),
+            ("treemap", 8),
+            ("sunburst-chart", 10),
+            ("sankey-chart", 9),
+            ("matrix-chart", 10),
         ] {
             let sections = detail_sections(slug, sapid::Theme::blue_light());
             assert_eq!(sections.len(), count);
@@ -424,64 +456,64 @@ mod tests {
     #[test]
     fn shell_and_menubar_documentation_sections_mount_real_widgets_and_retire() {
         for (slug, count) in [
-            ("app-shell", 7),
-            ("aspect-ratio", 2),
-            ("center", 1),
-            ("container", 1),
+            ("app-shell", 13),
+            ("aspect-ratio", 5),
+            ("center", 2),
+            ("container", 4),
             ("flex", 2),
-            ("grid", 2),
+            ("grid", 13),
             ("group", 2),
-            ("simple-grid", 2),
-            ("space", 1),
+            ("simple-grid", 5),
+            ("space", 2),
             ("stack", 1),
-            ("splitter", 3),
-            ("menubar", 9),
-            ("menu", 6),
-            ("mini-calendar", 4),
-            ("heatmap", 4),
+            ("splitter", 7),
+            ("menubar", 10),
+            ("menu", 17),
+            ("mini-calendar", 7),
+            ("heatmap", 11),
             ("transition", 5),
-            ("password-input", 5),
+            ("password-input", 12),
             ("alpha-slider", 2),
             ("hue-slider", 2),
-            ("angle-slider", 2),
-            ("checkbox", 3),
-            ("radio", 3),
-            ("chip", 2),
+            ("angle-slider", 4),
+            ("checkbox", 22),
+            ("radio", 13),
+            ("chip", 4),
             ("fieldset", 2),
             ("rating", 3),
-            ("segmented-control", 5),
-            ("switch", 4),
-            ("input", 4),
-            ("text-input", 4),
-            ("textarea", 3),
-            ("json-input", 4),
-            ("number-input", 5),
-            ("mask-input", 4),
-            ("phone-input", 1),
-            ("native-select", 4),
-            ("file-input", 4),
-            ("slider", 5),
+            ("segmented-control", 11),
+            ("switch", 12),
+            ("input", 14),
+            ("text-input", 9),
+            ("textarea", 10),
+            ("json-input", 9),
+            ("number-input", 15),
+            ("mask-input", 10),
+            ("phone-input", 15),
+            ("native-select", 13),
+            ("file-input", 10),
+            ("slider", 10),
             ("range-slider", 8),
-            ("anchor", 2),
-            ("burger", 1),
-            ("nav-link", 2),
+            ("anchor", 3),
+            ("burger", 2),
+            ("nav-link", 4),
             ("breadcrumbs", 2),
-            ("pagination", 3),
-            ("accordion", 4),
-            ("tabs", 5),
-            ("timeline", 3),
-            ("pin-input", 3),
-            ("scroller", 3),
-            ("rich-text-editor", 4),
+            ("pagination", 15),
+            ("accordion", 14),
+            ("tabs", 12),
+            ("timeline", 6),
+            ("pin-input", 6),
+            ("scroller", 8),
+            ("rich-text-editor", 14),
             ("affix", 3),
             ("background-image", 2),
-            ("time-grid", 3),
-            ("select", 6),
-            ("month-picker-input", 4),
-            ("year-picker-input", 4),
-            ("floating-window", 4),
-            ("carousel", 4),
-            ("dropzone", 4),
+            ("time-grid", 6),
+            ("select", 26),
+            ("month-picker-input", 11),
+            ("year-picker-input", 11),
+            ("floating-window", 7),
+            ("carousel", 18),
+            ("dropzone", 10),
         ] {
             let sections = detail_sections(slug, sapid::Theme::blue_light());
             assert_eq!(sections.len(), count, "{slug}");
@@ -498,6 +530,73 @@ mod tests {
         }
     }
 
+    #[test]
+    fn display_examples_mount_independently_and_match_their_navigation() {
+        for slug in [
+            "alert",
+            "empty-state",
+            "loader",
+            "notification",
+            "progress",
+            "ring-progress",
+            "semi-circle-progress",
+            "skeleton",
+            "accordion",
+            "avatar",
+            "background-image",
+            "badge",
+            "card",
+            "color-swatch",
+            "data-list",
+            "image",
+            "indicator",
+            "kbd",
+            "number-formatter",
+            "overflow-list",
+            "rolling-number",
+            "spoiler",
+            "theme-icon",
+            "timeline",
+            "blockquote",
+            "code",
+            "highlight",
+            "list",
+            "mark",
+            "table",
+            "text",
+            "title",
+            "typography",
+            "box",
+            "collapse",
+            "divider",
+            "focus-trap",
+            "marquee",
+            "paper",
+            "portal",
+            "scroll-area",
+            "scroller",
+            "toolbar",
+            "transition",
+            "visually-hidden",
+        ] {
+            let sections = detail_sections(slug, sapid::Theme::blue_light());
+            let nav = detail_navigation(slug);
+            assert_eq!(sections.len(), nav.len(), "{slug} navigation");
+            for section in sections {
+                assert!(
+                    nav.iter()
+                        .any(|(_, href)| href.strip_prefix('#') == Some(section.id)),
+                    "{slug} missing anchor {}",
+                    section.id
+                );
+                let app = App::memory();
+                app.mount(section.example)
+                    .unwrap_or_else(|e| panic!("{slug}/{}: {e}", section.id));
+                app.clear().unwrap();
+                assert_eq!(app.stats().nodes, 0, "{slug}/{}", section.id);
+            }
+        }
+    }
     #[test]
     fn clean_examples_build_real_widgets_and_retire_their_owned_state() {
         for id in [
@@ -520,7 +619,8 @@ mod tests {
                 while let Some(id) = pending.pop() {
                     let tree = app.tree();
                     let node = tree.node(id).unwrap();
-                    if matches!(node.descriptor.view().props, Props::Button(p) if p.label == "Filled button")
+                    if matches!(node.descriptor.view().props, Props::Button(p) if p.label == "Button")
+                        && node.descriptor.view().name.as_deref() == Some("Filled button")
                     {
                         button = Some(id);
                     }
@@ -572,6 +672,7 @@ mod tests {
                 "success",
                 "disabled",
                 "read-only",
+                "color-input-styles-example",
             ]
         );
         for section in sections {
@@ -583,14 +684,19 @@ mod tests {
             assert!(!app.tree().is_empty(), "empty section: {}", section.id);
             if section.id == "formats" {
                 let mut pending = app.tree().roots().to_vec();
+                let mut formats = 0;
                 let mut inputs = 0;
                 while let Some(id) = pending.pop() {
                     let tree = app.tree();
                     let node = tree.node(id).unwrap();
                     inputs += usize::from(matches!(node.descriptor.view().props, Props::Input(_)));
+                    if let Props::Select(options) = node.descriptor.view().props {
+                        formats += options.entries.len();
+                    }
                     pending.extend(node.children.iter().copied());
                 }
-                assert_eq!(inputs, 6, "every documented color format must render");
+                assert_eq!(inputs, 1, "the active format has one editable input");
+                assert_eq!(formats, 6, "each format must be available in the selector");
             }
             app.clear().unwrap();
             assert_eq!(app.stats().nodes, 0, "retired section: {}", section.id);
@@ -606,10 +712,14 @@ mod tests {
                 .map(|section| section.id)
                 .collect::<Vec<_>>(),
             [
+                "picker-default-swatches",
                 "picker-swatches",
                 "picker-swatches-only",
                 "picker-precision",
-                "picker-form-value"
+                "picker-form-value",
+                "color-picker-format",
+                "color-picker-size",
+                "color-picker-styles-example",
             ]
         );
         for section in sections {
@@ -643,7 +753,7 @@ mod tests {
                 pending.extend(node.children.iter().copied());
             }
             if section.id == "picker-swatches-only" {
-                assert_eq!(swatches, 7);
+                assert_eq!(swatches, 21);
                 assert_eq!(planes, 0);
             }
             app.clear().unwrap();
@@ -660,12 +770,21 @@ mod tests {
                 .map(|section| section.id)
                 .collect::<Vec<_>>(),
             [
+                "modal-without-header",
+                "modal-backdrop",
+                "modal-close-icon",
                 "modal-centered",
                 "modal-full-screen",
                 "modal-sizes",
                 "modal-scroll",
                 "modal-controlled",
-                "modal-nested"
+                "modal-nested",
+                "modal-transition-callbacks",
+                "modal-compound-components",
+                "modal-change-transitions",
+                "modal-initial-focus",
+                "modal-size-auto",
+                "modal-change-offsets"
             ]
         );
         for section in sections {
@@ -704,7 +823,12 @@ mod tests {
                 "controlled",
                 "change-end",
                 "bounds-and-step",
-                "marks"
+                "marks",
+                "slider-thumb-size",
+                "slider-marks-demo",
+                "slider-hidden-marks-demo",
+                "slider-vertical-slider-demo",
+                "slider-styles-example",
             ]
         );
         for section in sections {
@@ -791,23 +915,44 @@ mod tests {
     fn progress_documentation_builds_geometry_sections_and_accessibility_states() {
         for id in ["progress", "ring-progress", "semi-circle-progress"] {
             let sections = detail_sections(id, sapid::Theme::blue_light());
+            let common = [
+                "progress-geometry",
+                "progress-sections",
+                "progress-vertical",
+                "progress-semicircle-direction",
+                "progress-semicircle-labels",
+                "progress-ring-gaps",
+                "progress-ring-angles",
+                "progress-ring-caps-label",
+                "progress-states",
+            ];
+            let extra: &[&str] = match id {
+                "progress" => &[
+                    "progress-style-selectors",
+                    "progress-tooltips",
+                    "progress-fill-transition",
+                    "progress-password",
+                ],
+                "ring-progress" => &[
+                    "ring-background",
+                    "ring-tooltips",
+                    "ring-events",
+                    "ring-fill-transition",
+                ],
+                _ => &["semi-fill-transition", "semi-empty-color"],
+            };
+            let expected = common
+                .into_iter()
+                .chain(extra.iter().copied())
+                .collect::<Vec<_>>();
             assert_eq!(
                 sections
                     .iter()
                     .map(|section| section.id)
                     .collect::<Vec<_>>(),
-                [
-                    "progress-geometry",
-                    "progress-sections",
-                    "progress-vertical",
-                    "progress-semicircle-direction",
-                    "progress-semicircle-labels",
-                    "progress-ring-gaps",
-                    "progress-ring-angles",
-                    "progress-ring-caps-label",
-                    "progress-states",
-                ]
+                expected
             );
+            assert_eq!(detail_navigation(id).len(), expected.len());
             for section in sections {
                 let app = App::memory();
                 app.mount(section.example).unwrap();
@@ -849,6 +994,22 @@ mod tests {
                 "autocomplete-blur",
                 "autocomplete-data",
                 "autocomplete-limit",
+                "input-properties",
+                "autocomplete-left-and-right-sections-demo",
+                "autocomplete-inside-popover-demo",
+                "autocomplete-dropdown-padding-demo",
+                "autocomplete-dropdown-shadow-demo",
+                "autocomplete-dropdown-animation-demo",
+                "autocomplete-scrollable-dropdown-demo",
+                "autocomplete-fit-dropdown-to-viewport-height-demo",
+                "autocomplete-control-dropdown-opened-state-demo",
+                "autocomplete-sort-options-demo",
+                "autocomplete-renderoption-demo",
+                "autocomplete-styles-example",
+                "autocomplete-readonly-example",
+                "autocomplete-disabled-example",
+                "autocomplete-error-example",
+                "autocomplete-success-example",
             ]
         );
         for section in sections {
@@ -913,6 +1074,26 @@ mod tests {
                 "select-geometry",
                 "select-searchable",
                 "select-states",
+                "select-check-icon",
+                "input-properties",
+                "select-left-and-right-sections-demo",
+                "select-inside-popover-demo",
+                "select-options-filtering-demo",
+                "select-nothing-found-demo",
+                "select-open-on-focus-demo",
+                "select-dropdown-padding-demo",
+                "select-dropdown-shadow-demo",
+                "select-dropdown-animation-demo",
+                "select-dropdown-width-demo",
+                "select-dropdown-offset-demo",
+                "select-fit-dropdown-to-viewport-height-demo",
+                "select-control-dropdown-opened-state-demo",
+                "select-sort-options-demo",
+                "select-styles-example",
+                "select-readonly-example",
+                "select-disabled-example",
+                "select-error-example",
+                "select-success-example",
             ]
         );
         for section in sections {
@@ -1017,6 +1198,12 @@ mod tests {
                 "tree-filter",
                 "tree-drag-drop",
                 "tree-render-label",
+                "tree-drag-handle",
+                "tree-virtual-rows",
+                "tree-docs-editor",
+                "tree-connecting-lines",
+                "tree-fuzzy-search",
+                "tree-restricted-drop",
             ]
         );
         for section in sections {
@@ -1077,6 +1264,29 @@ mod tests {
                 "multi-select-data",
                 "multi-select-wrapping",
                 "multi-select-states",
+                "multi-select-check-icon",
+                "input-properties",
+                "multi-select-left-and-right-sections-demo",
+                "multi-select-inside-popover-demo",
+                "multi-select-options-filtering-demo",
+                "multi-select-dropdown-padding-demo",
+                "multi-select-dropdown-shadow-demo",
+                "multi-select-dropdown-animation-demo",
+                "multi-select-dropdown-width-demo",
+                "multi-select-scrollable-dropdown-demo",
+                "multi-select-fit-dropdown-to-viewport-height-demo",
+                "multi-select-control-dropdown-opened-state-demo",
+                "multi-select-sort-options-demo",
+                "multi-select-renderoption-demo",
+                "multi-select-clearable-demo",
+                "multi-select-searchable-demo",
+                "multi-select-hide-selected-options-demo",
+                "multi-select-disabled-options-demo",
+                "multi-select-styles-example",
+                "multi-select-readonly-example",
+                "multi-select-disabled-example",
+                "multi-select-error-example",
+                "multi-select-success-example",
             ]
         );
         for section in sections {
@@ -1112,6 +1322,15 @@ mod tests {
                 match section.id {
                     "multi-select-loading" => 2,
                     "multi-select-states" => 5,
+                    "multi-select-clearable-demo" => 1,
+                    id if id.starts_with("multi-select-") && id.ends_with("-demo") => 0,
+                    "input-properties"
+                    | "multi-select-check-icon"
+                    | "multi-select-styles-example"
+                    | "multi-select-disabled-example"
+                    | "multi-select-readonly-example"
+                    | "multi-select-error-example"
+                    | "multi-select-success-example" => 0,
                     _ => 1,
                 }
             );
@@ -1135,6 +1354,29 @@ mod tests {
                 "tags-blur",
                 "tags-parsing",
                 "tags-composition",
+                "input-properties",
+                "tags-input-with-suggestions-demo",
+                "tags-input-options-filtering-demo",
+                "tags-input-sort-options-demo",
+                "tags-input-group-options-demo",
+                "tags-input-disabled-options-demo",
+                "tags-input-renderoption-demo",
+                "tags-input-large-data-sets-demo",
+                "tags-input-fit-dropdown-to-viewport-height-demo",
+                "tags-input-dropdown-position-demo",
+                "tags-input-dropdown-animation-demo",
+                "tags-input-dropdown-width-demo",
+                "tags-input-dropdown-shadow-demo",
+                "tags-input-control-dropdown-opened-state-demo",
+                "tags-input-dropdown-padding-demo",
+                "tags-input-scrollable-dropdown-demo",
+                "tags-input-left-and-right-sections-demo",
+                "tags-input-inside-popover-demo",
+                "tags-input-styles-example",
+                "tags-input-readonly-example",
+                "tags-input-disabled-example",
+                "tags-input-error-example",
+                "tags-input-success-example",
             ]
         );
         for section in sections {
@@ -1181,7 +1423,8 @@ mod tests {
                 "pills-loading",
                 "pills-policies",
                 "pills-wrapping",
-                "pills-states"
+                "pills-states",
+                "input-properties",
             ]
         );
     }
@@ -1200,6 +1443,8 @@ mod tests {
                 "time-input-precision",
                 "time-input-placeholder",
                 "time-input-states",
+                "reference-time-input-with-seconds",
+                "reference-time-input-disabled-state",
             ]
         );
         for section in sections {
@@ -1255,6 +1500,24 @@ mod tests {
                 "time-picker-labels-focus",
                 "time-picker-popup-layout",
                 "time-picker-states",
+                "reference-time-picker-time-presets",
+                "reference-time-picker-time-presets-groups",
+                "reference-time-picker-time-presets-range",
+                "reference-time-picker-close-dropdown-on-preset-select",
+                "reference-time-picker-dropdown-position",
+                "reference-time-picker-dropdown-width",
+                "reference-time-picker-min-and-max-values",
+                "reference-time-picker-paste-events",
+                "reference-time-picker-control-dropdown-opened-state",
+                "reference-time-picker-with-seconds",
+                "reference-time-picker-12-hour-format",
+                "reference-time-picker-change-am-pm-labels",
+                "reference-time-picker-with-dropdown",
+                "reference-time-picker-hours-minutes-seconds-step",
+                "reference-time-picker-clearable",
+                "reference-time-picker-disabled",
+                "reference-time-picker-read-only",
+                "input-properties",
             ]
         );
         for section in sections {
@@ -1310,7 +1573,10 @@ mod tests {
 
     #[test]
     fn date_picker_documentation_builds_modes_columns_and_input_columns() {
-        let sections = detail_sections("date-picker", sapid::Theme::blue_light());
+        let sections: Vec<_> = detail_sections("date-picker", sapid::Theme::blue_light())
+            .into_iter()
+            .filter(|section| !section.id.starts_with("reference-date-picker-"))
+            .collect();
         assert_eq!(
             sections
                 .iter()
@@ -1328,6 +1594,7 @@ mod tests {
                 "dates-constraints",
                 "dates-controlled",
                 "dates-keyboard",
+                "date-picker-size",
             ]
         );
         for section in sections {
@@ -1361,7 +1628,10 @@ mod tests {
                 })
                 .count();
             match section.id {
-                "date-picker-actions" | "dates-constraints" | "dates-controlled" => {
+                "date-picker-actions"
+                | "dates-constraints"
+                | "dates-controlled"
+                | "date-picker-size" => {
                     assert_eq!(grid_count, 1)
                 }
                 "dates-locale" => assert_eq!(grid_count, 2),
@@ -1393,6 +1663,7 @@ mod tests {
                 "date-time-picker-range",
                 "date-time-picker-inline-range",
                 "date-time-picker-states",
+                "input-properties",
             ]
         );
         for section in sections {

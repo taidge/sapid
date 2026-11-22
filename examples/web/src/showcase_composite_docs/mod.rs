@@ -1,3 +1,16 @@
+mod accordion_composed;
+mod accordion_custom_styles;
+mod accordion_icons;
+mod accordion_labels;
+mod accordion_no_collapse;
+mod accordion_plus;
+mod accordion_style_selectors;
+mod accordion_transition_none;
+mod accordion_transition_slow;
+mod accordion_unstyled;
+mod timeline_alternate;
+mod timeline_opposite;
+mod timeline_props_play;
 use super::showcase_examples::DetailSection;
 mod accordion_content;
 mod accordion_controlled;
@@ -26,6 +39,76 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
     }
     match slug {
         "accordion" => vec![
+            DetailSection {
+                id: "accordion-custom-styles",
+                title: "Custom accordion styles",
+                note: "The expanded fruit lifts above the surrounding controls.",
+                example: Box::new(accordion_custom_styles::demo(theme.clone())),
+                source: include_str!("accordion_custom_styles.rs"),
+            },
+            DetailSection {
+                id: "accordion-plus",
+                title: "Change chevron",
+                note: "Expand an item to rotate its plus icon.",
+                example: Box::new(accordion_plus::demo(theme.clone())),
+                source: include_str!("accordion_plus.rs"),
+            },
+            DetailSection {
+                id: "accordion-style-selectors",
+                title: "Component Styles API",
+                note: "Hover or focus a selector to outline the corresponding component element.",
+                example: Box::new(accordion_style_selectors::demo(theme.clone())),
+                source: include_str!("accordion_style_selectors.rs"),
+            },
+            DetailSection {
+                id: "accordion-transition-none",
+                title: "Without transition",
+                note: "Open and close a panel with a transition duration of 0 milliseconds.",
+                example: Box::new(accordion_transition_none::demo(theme.clone())),
+                source: include_str!("accordion_transition_none.rs"),
+            },
+            DetailSection {
+                id: "accordion-transition-slow",
+                title: "Slow transition",
+                note: "Open and close a panel with a transition duration of 500 milliseconds.",
+                example: Box::new(accordion_transition_slow::demo(theme.clone())),
+                source: include_str!("accordion_transition_slow.rs"),
+            },
+            DetailSection {
+                id: "accordion-labels",
+                title: "Custom control label",
+                note: "Each control contains an avatar, a title and a description.",
+                example: Box::new(accordion_labels::demo(theme.clone())),
+                source: include_str!("accordion_labels.rs"),
+            },
+            DetailSection {
+                id: "accordion-icons",
+                title: "With icons",
+                note: "Each disclosure keeps its own leading icon and direction indicator.",
+                example: Box::new(accordion_icons::demo(theme.clone())),
+                source: include_str!("accordion_icons.rs"),
+            },
+            DetailSection {
+                id: "accordion-composed",
+                title: "Compose controls",
+                note: "The adjacent action runs independently of disclosure activation.",
+                example: Box::new(accordion_composed::demo(theme.clone())),
+                source: include_str!("accordion_composed.rs"),
+            },
+            DetailSection {
+                id: "accordion-no-collapse",
+                title: "Disable collapse",
+                note: "Select another question to switch panels while keeping one answer open.",
+                example: Box::new(accordion_no_collapse::demo(theme.clone())),
+                source: include_str!("accordion_no_collapse.rs"),
+            },
+            DetailSection {
+                id: "accordion-unstyled",
+                title: "Unstyled Accordion",
+                note: "Expand each answer using the unstyled control.",
+                example: Box::new(accordion_unstyled::demo(theme.clone())),
+                source: include_str!("accordion_unstyled.rs"),
+            },
             section!(
                 accordion_variants,
                 "accordion-variants",
@@ -35,8 +118,8 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             section!(
                 accordion_controlled,
                 "accordion-controlled",
-                "Multiple sections and controlled state",
-                "multiple(true) permits independent open sections. open/on_open_change proposes the full accepted key list; local defaults apply only without a controlled source. enabled(false) disables a section, while collapsible(false) keeps the last section open. Arrow keys, Home and End navigate enabled headings; loop_focus and direction control the finite policy."
+                "Disabled items",
+                "Bananas is disabled. Apples and Broccoli remain available."
             ),
             section!(
                 accordion_content,
@@ -85,6 +168,26 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         ],
         "timeline" => vec![
             section!(
+                timeline_props_play,
+                "timeline-props-play",
+                "Line and bullet props",
+                "Adjust the event markers, connector and active position."
+            ),
+            DetailSection {
+                id: "timeline-opposite",
+                title: "Opposite content",
+                note: "Timestamps occupy the column opposite the event description.",
+                example: Box::new(timeline_opposite::demo(theme.clone())),
+                source: include_str!("timeline_opposite.rs"),
+            },
+            DetailSection {
+                id: "timeline-alternate",
+                title: "Alternate items",
+                note: "Timeline items alternate across the central line.",
+                example: Box::new(timeline_alternate::demo(theme.clone())),
+                source: include_str!("timeline_alternate.rs"),
+            },
+            section!(
                 timeline_progress,
                 "timeline-progress",
                 "Reactive progress",
@@ -110,6 +213,16 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
 pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
     match slug {
         "accordion" => vec![
+            ("Custom accordion styles", "#accordion-custom-styles"),
+            ("Change chevron", "#accordion-plus"),
+            ("Component Styles API", "#accordion-style-selectors"),
+            ("Without transition", "#accordion-transition-none"),
+            ("Slow transition", "#accordion-transition-slow"),
+            ("Custom control label", "#accordion-labels"),
+            ("With icons", "#accordion-icons"),
+            ("Compose controls", "#accordion-composed"),
+            ("Disable collapse", "#accordion-no-collapse"),
+            ("Unstyled Accordion", "#accordion-unstyled"),
             ("Variants", "#accordion-variants"),
             ("Controlled state", "#accordion-controlled"),
             ("Content lifetime", "#accordion-content"),
@@ -123,6 +236,9 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ("Keyed tabs", "#tabs-dynamic"),
         ],
         "timeline" => vec![
+            ("Line and bullet props", "#timeline-props-play"),
+            ("Opposite content", "#timeline-opposite"),
+            ("Alternate items", "#timeline-alternate"),
             ("Progress", "#timeline-progress"),
             ("Markers", "#timeline-markers"),
             ("Semantics", "#timeline-semantics"),

@@ -37,6 +37,13 @@ pub struct Carousel {
     controls: bool,
     indicators: bool,
     control_size: f64,
+    control_icons: Option<(crate::Icon, crate::Icon)>,
+    controls_offset: f64,
+    slide_fraction: f64,
+    slide_gap: f64,
+    slide_align: Align,
+    viewport_height: Option<f64>,
+    drag_free: bool,
 }
 pub fn carousel() -> Carousel {
     Carousel {
@@ -58,7 +65,14 @@ pub fn carousel() -> Carousel {
         hover_pause: true,
         controls: true,
         indicators: false,
-        control_size: 32.,
+        control_size: 26.,
+        control_icons: None,
+        controls_offset: 8.,
+        slide_fraction: 1.,
+        slide_gap: 0.,
+        slide_align: Align::Start,
+        viewport_height: None,
+        drag_free: false,
     }
 }
 impl Carousel {
@@ -74,6 +88,37 @@ impl Carousel {
     }
     pub fn control_size(mut self, value: f64) -> Self {
         self.control_size = value;
+        self
+    }
+    /// Supply independent previous and next glyphs. Their hit targets keep the configured control size.
+    pub fn control_icons(mut self, previous: crate::Icon, next: crate::Icon) -> Self {
+        self.control_icons = Some((previous, next));
+        self
+    }
+    pub fn controls_offset(mut self, pixels: f64) -> Self {
+        self.controls_offset = pixels;
+        self
+    }
+    /// Portion of the viewport occupied by each slide (one third through one).
+    pub fn slide_fraction(mut self, fraction: f64) -> Self {
+        self.slide_fraction = fraction;
+        self
+    }
+    pub fn slide_gap(mut self, pixels: f64) -> Self {
+        self.slide_gap = pixels;
+        self
+    }
+    pub fn slide_align(mut self, align: Align) -> Self {
+        self.slide_align = align;
+        self
+    }
+    pub fn viewport_height(mut self, pixels: f64) -> Self {
+        self.viewport_height = Some(pixels);
+        self
+    }
+    /// Retain the fractional scroll position after releasing a drag.
+    pub fn drag_free(mut self, enabled: bool) -> Self {
+        self.drag_free = enabled;
         self
     }
     pub fn count(mut self, value: impl Into<Vary<usize>>) -> Self {
@@ -134,8 +179,15 @@ impl Carousel {
         self
     }
 }
-fn control_style(axis: Orientation, direction: Direction, previous: bool, size: f64) -> Style {
+fn control_style(
+    axis: Orientation,
+    direction: Direction,
+    previous: bool,
+    size: f64,
+    offset: f64,
+) -> Style {
     let mut style = Style::new()
+        .pointer_events(glory::style::PointerEvents::Auto)
         .position(Position::Absolute)
         .width(Length::Px(size))
         .height(Length::Px(size))
@@ -150,9 +202,9 @@ fn control_style(axis: Orientation, direction: Direction, previous: bool, size: 
             ..Edges::all(0.)
         });
         if previous == (direction == Direction::Ltr) {
-            style.left = Some(Length::Px(8.));
+            style.left = Some(Length::Px(offset));
         } else {
-            style.right = Some(Length::Px(8.));
+            style.right = Some(Length::Px(offset));
         }
     } else {
         style.left = Some(Length::Percent(50.));
@@ -161,21 +213,26 @@ fn control_style(axis: Orientation, direction: Direction, previous: bool, size: 
             ..Edges::all(0.)
         });
         if previous {
-            style.top = Some(Length::Px(8.));
+            style.top = Some(Length::Px(offset));
         } else {
-            style.bottom = Some(Length::Px(8.));
+            style.bottom = Some(Length::Px(offset));
         }
     }
     style
 }
-fn indicator_style(unstyled: bool) -> Style {
+fn indicator_style(unstyled: bool, axis: Orientation) -> Style {
+    let (width, height) = if axis == Orientation::Horizontal {
+        (25., 5.)
+    } else {
+        (5., 25.)
+    };
     let mut style = Style {
         align: Some(Align::Center),
         justify: Some(Justify::Center),
         ..Style::new()
             .display(Display::InlineFlex)
-            .width(Length::Px(24.))
-            .height(Length::Px(24.))
+            .width(Length::Px(width))
+            .height(Length::Px(height))
             .min_width(Length::Px(0.))
             .min_height(Length::Px(0.))
             .padding(Edges::all(0.))
@@ -204,6 +261,9 @@ struct Controller {
     measuring: Cell<bool>,
     repeat: Cell<bool>,
     swipe: Cell<Option<(Page, f64, u64)>>,
+    // Fractions of one slide, relative to the accepted logical page.
+    scroll: Cage<(usize, f64)>,
+    drag_origin: Cell<f64>,
     axis: Orientation,
     direction: Direction,
     delay: Rc<OwnerDelay>,
@@ -227,15 +287,26 @@ impl Controller {
         }
     }
     fn propose(&self, proposal: usize) -> Result {
+        self.settle(proposal, 0.)
+    }
+    fn settle(&self, proposal: usize, remainder: f64) -> Result {
         if !self.owner.is_alive() || !self.enabled.try_get()? {
             return Ok(());
         }
         let page = self.live_page()?;
-        if proposal >= page.count || proposal == page.current {
+        if proposal >= page.count {
             return Ok(());
         }
-        self.control.accept(&proposal)?;
-        self.changed.emit(self.owner, proposal);
+        if proposal != page.current {
+            self.control.accept(&proposal)?;
+            self.changed.emit(self.owner, proposal);
+        }
+        if self.owner.is_alive() {
+            let accepted = self.live_page()?.current;
+            self.scroll.try_revise(|offset| {
+                *offset = (accepted, if accepted == proposal { remainder } else { 0. })
+            })?;
+        }
         Ok(())
     }
     fn step(&self, step: Step) -> Result {
@@ -318,8 +389,22 @@ impl Controller {
 }
 impl Widget for Carousel {
     fn build(&mut self, scope: &Scope) -> Result {
-        if !self.control_size.is_finite() || !(20.0..=64.0).contains(&self.control_size) {
-            return Err(invalid("carousel control size must be 20–64 finite pixels"));
+        if !self.control_size.is_finite() || !(14.0..=64.0).contains(&self.control_size) {
+            return Err(invalid("carousel control size must be 14–64 finite pixels"));
+        }
+        if !((1. / 3.)..=1.0).contains(&self.slide_fraction)
+            || !(0.0..=64.).contains(&self.slide_gap)
+            || !(0.0..=128.).contains(&self.controls_offset)
+            || self
+                .viewport_height
+                .is_some_and(|h| !(1.0..=4096.).contains(&h))
+            || !matches!(self.slide_align, Align::Start | Align::Center | Align::End)
+            || ((self.slide_fraction != 1. || self.drag_free) && self.overscan == 0)
+            || (self.axis == Orientation::Vertical
+                && self.slide_fraction < 1.
+                && self.viewport_height.is_none())
+        {
+            return Err(invalid("carousel slide geometry"));
         }
         let owner = scope.child()?;
         let controlled = self.current.source.is_some();
@@ -349,6 +434,8 @@ impl Widget for Carousel {
             measuring: Cell::new(false),
             repeat: Cell::new(false),
             swipe: Cell::new(None),
+            scroll: owner.cage((initial.current, 0.)),
+            drag_origin: Cell::new(0.),
             axis: self.axis,
             direction: self.direction,
             delay: OwnerDelay::new(&owner)?,
@@ -383,6 +470,11 @@ impl Widget for Carousel {
                 }
                 .validate()?;
                 if page.try_get()? != next {
+                    if reconcile.scroll.try_get()?.0 != index {
+                        reconcile
+                            .scroll
+                            .try_revise(|offset| *offset = (index, 0.))?;
+                    }
                     reconcile.swipe.set(None);
                     page.try_revise(|value| *value = next)?;
                 }
@@ -463,6 +555,8 @@ impl Widget for Carousel {
             observe(&mut observers, local.owner, event);
         });
         let local = state.clone();
+        let drag_free = self.drag_free;
+        let fraction = self.slide_fraction;
         let mut observers = self
             .common
             .handlers
@@ -485,11 +579,25 @@ impl Widget for Carousel {
                     };
                     match phase {
                         DragPhase::Start => {
+                            let (index, offset) = local.scroll.try_get()?;
+                            local
+                                .drag_origin
+                                .set(if index == local.page.try_get()?.current {
+                                    offset
+                                } else {
+                                    0.
+                                });
                             local
                                 .swipe
                                 .set(Some((local.page.try_get()?, point, revision)))
                         }
-                        DragPhase::Cancel => local.swipe.set(None),
+                        DragPhase::Cancel => {
+                            if let Some((start, _, _)) = local.swipe.take() {
+                                local.scroll.try_revise(|scroll| {
+                                    *scroll = (start.current, local.drag_origin.get())
+                                })?;
+                            }
+                        }
                         DragPhase::Drop => {
                             if let Some((start, position, captured)) = local.swipe.take()
                                 && captured == revision
@@ -502,14 +610,45 @@ impl Widget for Carousel {
                                 } else {
                                     local.direction
                                 };
-                                if let Some(next) =
+                                if drag_free {
+                                    let offset = start.scroll_offset(
+                                        point - position,
+                                        extent * fraction,
+                                        direction,
+                                        local.drag_origin.get(),
+                                    )?;
+                                    let step = offset.round() as isize;
+                                    let next = start.index_at(step);
+                                    local.settle(next, offset - step as f64)?;
+                                } else if let Some(next) =
                                     start.swipe(point - position, extent, direction)?
                                 {
                                     local.propose(next)?;
                                 }
                             }
                         }
-                        DragPhase::Move => {}
+                        DragPhase::Move => {
+                            if drag_free
+                                && let Some((start, position, captured)) = local.swipe.get()
+                                && captured == revision
+                                && let Some(extent) = local.extent.get()
+                            {
+                                let direction = if local.axis == Orientation::Vertical {
+                                    Direction::Ltr
+                                } else {
+                                    local.direction
+                                };
+                                let offset = start.scroll_offset(
+                                    point - position,
+                                    extent * fraction,
+                                    direction,
+                                    local.drag_origin.get(),
+                                )?;
+                                local
+                                    .scroll
+                                    .try_revise(|scroll| *scroll = (start.current, offset))?;
+                            }
+                        }
                     }
                 }
                 Ok(())
@@ -590,46 +729,141 @@ impl Widget for Carousel {
             .take()
             .ok_or_else(|| invalid("carousel requires an index slide factory"))?;
         let viewport_ref = owner.cage(None);
+        let fraction = self.slide_fraction;
+        let gap = self.slide_gap;
+        let scroll = state.scroll;
+        let align = match self.slide_align {
+            Align::Center => 0.5,
+            Align::End => 1.,
+            _ => 0.,
+        };
+        let positioned = fraction != 1. || self.drag_free;
+        let mut viewport_style = Style::new()
+            .position(Position::Relative)
+            .min_width(Length::Px(0.))
+            .width(Length::Percent(100.));
+        if positioned {
+            viewport_style = viewport_style
+                .overflow_x(Overflow::Hidden)
+                .overflow_y(Overflow::Hidden);
+        }
+        if let Some(height) = self.viewport_height {
+            viewport_style.height = Some(Length::Px(height));
+        }
+        let mut track_style = Style::new()
+            .position(Position::Relative)
+            .width(Length::Percent(100.));
+        if self.viewport_height.is_some() {
+            track_style.height = Some(Length::Percent(100.));
+        }
         glory::ui::view()
             .class("sapid-carousel-viewport")
             .node_ref(viewport_ref)
-            .style(
-                Style::new()
-                    .position(Position::Relative)
-                    .min_width(Length::Px(0.))
-                    .width(Length::Percent(100.)),
-            )
+            .style(viewport_style)
             .fill(
-                glory::ui::each(indices)
-                    .key(|index| *index)
-                    .children(move |entry| {
-                        let index = entry.value;
-                        let index = index.get();
-                        let mut content = Some(factory(index));
-                        glory::ui::widget(move |scope| {
-                            let current = current_page;
-                            glory::ui::view()
-                                .class(format!("sapid-carousel-slide sapid-carousel-slide-{index}"))
-                                .name(scope.bond(move || {
-                                    format!("Slide {} of {}", index + 1, current.get().count)
-                                }))
-                                .semantics(scope.bond(move || {
-                                    let hidden = current.get().current != index;
-                                    Some(Box::new(Semantics {
-                                        hidden,
-                                        inert: hidden,
-                                        ..Default::default()
-                                    }))
-                                }))
-                                .fill(content.take().ok_or(glory::ui::Error::Gone)?)
-                                .show_in(scope)?;
-                            Ok(())
-                        })
-                    }),
+                glory::ui::view()
+                    .class("sapid-carousel-container")
+                    .style(track_style)
+                    .fill(
+                        glory::ui::each(indices)
+                            .key(|index| *index)
+                            .children(move |entry| {
+                                let index = entry.value;
+                                let index = index.get();
+                                let mut content = Some(factory(index));
+                                glory::ui::widget(move |scope| {
+                                    let current = current_page;
+                                    glory::ui::view()
+                                        .class(format!(
+                                            "sapid-carousel-slide sapid-carousel-slide-{index}"
+                                        ))
+                                        .name(scope.bond(move || {
+                                            format!(
+                                                "Slide {} of {}",
+                                                index + 1,
+                                                current.get().count
+                                            )
+                                        }))
+                                        .style(scope.bond(move || {
+                                            if !positioned {
+                                                return Style::new();
+                                            }
+                                            let page = current.get();
+                                            let (anchor, offset) = scroll.get();
+                                            let delta = page.distance_to(index) as f64
+                                                - if anchor == page.current { offset } else { 0. };
+                                            let start = (1. - fraction) * align + delta * fraction;
+                                            let mut style =
+                                                Style::new().position(if page.current == index {
+                                                    Position::Relative
+                                                } else {
+                                                    Position::Absolute
+                                                });
+                                            if axis == Orientation::Horizontal {
+                                                style.width =
+                                                    Some(Length::Percent(fraction * 100.));
+                                                if direction == Direction::Rtl {
+                                                    style.right =
+                                                        Some(Length::Percent(start * 100.));
+                                                } else {
+                                                    style.left =
+                                                        Some(Length::Percent(start * 100.));
+                                                }
+                                                style.top = Some(Length::Px(0.));
+                                                style.padding = Some(Edges {
+                                                    left: gap / 2.,
+                                                    right: gap / 2.,
+                                                    ..Edges::all(0.)
+                                                });
+                                            } else {
+                                                style.height =
+                                                    Some(Length::Percent(fraction * 100.));
+                                                style.top = Some(Length::Percent(start * 100.));
+                                                style.width = Some(Length::Percent(100.));
+                                                style.left = Some(Length::Px(0.));
+                                                style.padding = Some(Edges {
+                                                    top: gap / 2.,
+                                                    bottom: gap / 2.,
+                                                    ..Edges::all(0.)
+                                                });
+                                            }
+                                            style
+                                        }))
+                                        .semantics(scope.bond(move || {
+                                            let hidden =
+                                                !positioned && current.get().current != index;
+                                            Some(Box::new(Semantics {
+                                                hidden,
+                                                inert: current.get().current != index,
+                                                ..Default::default()
+                                            }))
+                                        }))
+                                        .fill(content.take().ok_or(glory::ui::Error::Gone)?)
+                                        .show_in(scope)?;
+                                    Ok(())
+                                })
+                            }),
+                    ),
             )
             .show_in(&child)?;
         let viewport = child.child_in(viewport_ref.get().ok_or(glory::ui::Error::Gone)?)?;
         if self.controls {
+            let navigation_ref = owner.cage(None);
+            glory::ui::view()
+                .class("sapid-carousel-navigation")
+                .node_ref(navigation_ref)
+                .style(
+                    Style::new()
+                        .position(Position::Absolute)
+                        .top(Length::Px(0.))
+                        .left(Length::Px(0.))
+                        .width(Length::Percent(100.))
+                        .height(Length::Percent(100.))
+                        .pointer_events(glory::style::PointerEvents::None),
+                )
+                .show_in(&viewport)?;
+            let navigation =
+                viewport.child_in(navigation_ref.get().ok_or(glory::ui::Error::Gone)?)?;
             for (step, label, class, previous) in [
                 (
                     Step::Previous,
@@ -643,7 +877,13 @@ impl Widget for Carousel {
                 let available =
                     owner.bond(move || enabled.get() && page.get().propose(step).is_some());
                 let local = state.clone();
-                let style = control_style(self.axis, self.direction, previous, self.control_size);
+                let style = control_style(
+                    self.axis,
+                    self.direction,
+                    previous,
+                    self.control_size,
+                    self.controls_offset,
+                );
                 let plain = self.common.unstyled;
                 let icon = match (self.axis, self.direction, previous) {
                     (Orientation::Vertical, _, true) => crate::Icon::ChevronUp,
@@ -653,6 +893,9 @@ impl Widget for Carousel {
                     }
                     _ => crate::Icon::ChevronLeft,
                 };
+                let icon = self
+                    .control_icons
+                    .map_or(icon, |(left, right)| if previous { left } else { right });
                 let mut button = crate::action_icon(label)
                     .class(class)
                     .theme(self.common.theme.clone())
@@ -680,8 +923,9 @@ impl Widget for Carousel {
                 if self.common.unstyled {
                     button = button.unstyled();
                 }
-                button.show_in(&viewport)?;
+                button.show_in(&navigation)?;
             }
+            viewport.retain(navigation)?;
         }
         let control_ref = owner.cage(None);
         glory::ui::view()
@@ -721,7 +965,12 @@ impl Widget for Carousel {
                     ..Style::new()
                         .display(Display::Flex)
                         .flex_wrap(FlexWrap::Wrap)
-                        .gap(2.)
+                        .flex_direction(if axis == Orientation::Horizontal {
+                            FlexDirection::Row
+                        } else {
+                            FlexDirection::Column
+                        })
+                        .gap(8.)
                         .min_width(Length::Px(0.))
                         .max_width(Limit::Percent(100.))
                 })
@@ -740,27 +989,25 @@ impl Widget for Carousel {
                                 let color_enabled = enabled.clone();
                                 let selected =
                                     scope.bond(move || page.with(|page| page.current == index));
-                                let circle = glory::ui::graphic()
+                                let dot = glory::ui::text()
+                                    .content("")
                                     .class("sapid-carousel-indicator-dot")
-                                    .drawing(scope.bond(move || glory::render::GraphicProps {
-                                        width: 24.,
-                                        height: 24.,
-                                        fill: Some(if !color_enabled.get() {
-                                            unavailable
-                                        } else if selected.get() {
-                                            foreground
-                                        } else {
-                                            muted
-                                        }),
-                                        commands: crate::theme_icon::circle_path(),
-                                        ..Default::default()
-                                    }))
-                                    .style(
-                                        Style::new()
-                                            .width(Length::Px(10.))
-                                            .height(Length::Px(10.))
-                                            .pointer_events(glory::style::PointerEvents::None),
-                                    );
+                                    .style(scope.bond(move || {
+                                        Style {
+                                            background: Some(if !color_enabled.get() {
+                                                unavailable
+                                            } else if selected.get() {
+                                                foreground
+                                            } else {
+                                                muted
+                                            }),
+                                            ..Style::new()
+                                                .width(Length::Percent(100.))
+                                                .height(Length::Percent(100.))
+                                                .radius(4.)
+                                                .pointer_events(glory::style::PointerEvents::None)
+                                        }
+                                    }));
                                 let controller = local.clone();
                                 let mut button = crate::button()
                                     .theme(theme.clone())
@@ -769,9 +1016,9 @@ impl Widget for Carousel {
                                     .label("")
                                     .name(format!("Go to slide {}", index + 1))
                                     .pressed(selected)
-                                    .fill(circle)
+                                    .fill(dot)
                                     .enabled(enabled.clone())
-                                    .style(indicator_style(plain))
+                                    .style(indicator_style(plain, axis))
                                     .on_press(move || {
                                         if let Err(error) = controller.propose(index) {
                                             controller.report(error);

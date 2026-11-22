@@ -2,7 +2,7 @@ use glory::prelude::*;
 
 pub fn demo(theme: sapid::Theme) -> impl Widget {
     widget(move |scope| {
-        let open = scope.cage(vec!["shipping".to_owned()]);
+        let open = scope.cage(vec!["apples".to_owned()]);
         let variant = scope.cage(Some("default".to_owned()));
         let radius = scope.cage(6.);
         let position = scope.cage("right".to_owned());
@@ -35,31 +35,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                 Some("unstyled") => accordion.unstyled(),
                 _ => accordion,
             };
-            for (key, question, answer) in [
-                (
-                    "shipping",
-                    "How long does shipping take?",
-                    "Orders usually arrive within 3–5 business days.",
-                ),
-                (
-                    "returns",
-                    "What is your return policy?",
-                    "You can request a return within 30 days.",
-                ),
-                (
-                    "support",
-                    "How can I contact support?",
-                    "Send a message to the support team from your account.",
-                ),
-            ] {
-                let theme = palette.clone();
-                accordion = accordion.item(
-                    sapid::accordion_item(key)
-                        .label(question)
-                        .content(move || sapid::text().theme(theme.clone()).content(answer)),
-                );
-            }
-            accordion
+            fruit_items(accordion, None)
         });
         let side = sapid::stack().theme(theme.clone()).gap(8.).fill((
             sapid::text()
@@ -77,7 +53,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                 .on_value_change(move |next| position.revise(|v| *v = next)),
         ));
         view()
-            .class("site-configurator")
+            .class("site-configurator site-display-configurator")
             .fill(controls::playground(
                 Box::new(preview),
                 vec![
@@ -110,6 +86,39 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
             ))
             .show_in(scope)
     })
+}
+
+const FRUIT: [(&str, &str, &str, &str); 3] = [
+    (
+        "apples",
+        "🍎",
+        "Apples",
+        "Apples are crisp fruit that range from tart to sweet. Eat them fresh, bake them into pies, or slice them into salads. Several thousand varieties grow around the world.",
+    ),
+    (
+        "bananas",
+        "🍌",
+        "Bananas",
+        "Bananas have sweet flesh beneath a bright yellow peel. They are a convenient snack, blend well in smoothies, and soften as they ripen.",
+    ),
+    (
+        "broccoli",
+        "🥦",
+        "Broccoli",
+        "Broccoli has green florets and firm, edible stems. Steam it, roast it, or add it to a stir-fry to preserve its texture and color.",
+    ),
+];
+fn fruit_items(mut accordion: sapid::Accordion, disabled: Option<&str>) -> sapid::Accordion {
+    for (key, glyph, label, description) in FRUIT {
+        accordion = accordion.item(
+            sapid::accordion_item(key)
+                .label(label)
+                .enabled(disabled != Some(key))
+                .trigger_content(move || text().content(format!("{glyph}　{label}")))
+                .content(move || text().content(description)),
+        );
+    }
+    accordion
 }
 
 #[allow(unused_imports)]
@@ -188,6 +197,8 @@ mod controls {
         Box::new(
             sapid::switch()
                 .theme(theme.clone())
+                .size(Size::Small)
+                .with_thumb_indicator(true)
                 .label(label.to_owned())
                 .checked(value)
                 .on_checked_change(move |next| value.revise(|current| *current = next)),
@@ -211,7 +222,16 @@ mod controls {
                     .class("site-control-label")
                     .content(value.map({
                         let label = label.clone();
-                        move |v| format!("{label} · {v:.0}")
+                        move |v| {
+                            let decimals = if step.fract() == 0. {
+                                0
+                            } else if (step * 10.).fract() == 0. {
+                                1
+                            } else {
+                                2
+                            };
+                            format!("{label} · {v:.decimals$}")
+                        }
                     })),
                 sapid::slider(key.to_owned())
                     .theme(theme.clone())

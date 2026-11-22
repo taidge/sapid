@@ -1,6 +1,7 @@
 use glory::prelude::*;
 pub fn demo(theme: sapid::Theme) -> impl Widget {
     sapid::field("primary-pills-input")
+        .class("site-field-example")
         .theme(theme.clone())
         .label("Project topics")
         .control(move |field| {

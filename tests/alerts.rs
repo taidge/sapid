@@ -314,7 +314,7 @@ fn filled_messages_choose_readable_text_for_bright_and_dark_custom_colors() {
                     .view()
                     .style
                     .width,
-                Some(Length::Px(24.))
+                Some(Length::Px(20.))
             );
         }
     }

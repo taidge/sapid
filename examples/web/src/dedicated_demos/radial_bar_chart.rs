@@ -1,28 +1,31 @@
 use glory::prelude::*;
 use sapid::charts::*;
-fn values(values: &[(&str, &str, f64)]) -> PlotData {
-    PlotData::Values(
-        values
-            .iter()
-            .map(|(key, label, value)| ValueDatum::new(*key, *label, *value))
-            .collect(),
-    )
-}
-fn sample_data() -> PlotData {
-    values(&[
-        ("speed", "Speed", 80.0),
-        ("quality", "Quality", 65.0),
-        ("support", "Support", 72.0),
-    ])
-}
-
 pub fn demo(theme: sapid::Theme) -> impl Widget {
+    let palette = controls::chart_palette(&theme);
     radial_bar_chart("radial-bar-chart-overview")
-        .name("Independent tracks and a fixed maximum")
         .theme(theme)
-        .data(sample_data())
-        .default_options(PlotOptions {
-            domain: Some(ChartDomain::new(0., 100.).unwrap()),
-            ..Default::default()
+        .name("Distribution by age")
+        .chart_theme(palette)
+        .data(PlotData::values([
+            ValueDatum::new("group0", "18-24", 31.47),
+            ValueDatum::new("group1", "25-29", 26.69),
+            ValueDatum::new("group2", "30-34", 15.69),
+            ValueDatum::new("group3", "35-39", 8.22),
+            ValueDatum::new("group4", "40-49", 8.63),
+            ValueDatum::new("group5", "50+", 2.63),
+            ValueDatum::new("group6", "unknown", 6.67),
+        ]))
+        .frame(ChartFrame {
+            width: 320.,
+            height: 320.,
         })
+        .default_options(PlotOptions::default())
+        .style(
+            Style::new()
+                .width(Length::Px(260.))
+                .max_width(Limit::Percent(100.)),
+        )
+        .legend(false)
+        .navigation(false)
+        .data_table(false)
 }

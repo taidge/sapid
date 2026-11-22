@@ -511,6 +511,7 @@ pub struct Slider {
     committed: Option<Box<dyn FnMut(f64)>>,
     track_content: Option<Box<dyn Widget>>,
     thumb_color: Option<Vary<glory::style::Color>>,
+    thumb_size: Option<Vary<f64>>,
     mapping: Mapping,
     default_text: bool,
     marks: Vec<SliderMark>,
@@ -538,6 +539,7 @@ pub fn slider(key: impl Into<String>) -> Slider {
         committed: None,
         track_content: None,
         thumb_color: None,
+        thumb_size: None,
         mapping: Mapping::Linear,
         default_text: false,
         marks: Vec::new(),
@@ -545,6 +547,11 @@ pub fn slider(key: impl Into<String>) -> Slider {
     }
 }
 impl Slider {
+    /// Diameter of a linear thumb, or width of the angular dial marker, in pixels.
+    pub fn thumb_size(mut self, value: impl Into<Vary<f64>>) -> Self {
+        self.thumb_size = Some(value.into());
+        self
+    }
     pub(crate) fn angular(mut self) -> Self {
         self.mapping = Mapping::Angle;
         self.default_text = true;
@@ -675,6 +682,22 @@ impl Slider {
 }
 impl Widget for Slider {
     fn build(&mut self, scope: &Scope) -> Result {
+        let thumb_size = self
+            .thumb_size
+            .as_ref()
+            .map(|size| {
+                composite::validated(scope, size, |n| {
+                    if n.is_finite() && (1.0..=256.0).contains(n) {
+                        Ok(())
+                    } else {
+                        Err(
+                            glory::render::Error::InvalidProps("slider thumb size must be 1–256px")
+                                .into(),
+                        )
+                    }
+                })
+            })
+            .transpose()?;
         let mapping = self.mapping;
         let mut id = composite::id(
             if mapping == Mapping::Angle {
@@ -961,7 +984,13 @@ impl Widget for Slider {
                 &parent,
                 accepted,
                 self.common.theme.clone(),
-                self.thumb_color.clone(),
+                scope.bond(move || {
+                    let width = match geometry.get().width {
+                        Some(Length::Px(px)) if px > 0. => px,
+                        _ => size * 3. + 12.,
+                    };
+                    thumb_size.map_or(3., |n| n.get()) * 100. / width
+                }),
                 self.common.unstyled,
             )?;
             scope.retain(parent)?;
@@ -1017,10 +1046,10 @@ impl Widget for Slider {
                 .style(scope.bond(move || line(true)))
                 .show_in(&parent)?;
         }
-        let thumb = size * 0.5;
         glory::ui::view()
             .class("sapid-slider-thumb")
             .style(scope.bond(move || {
+                let thumb = thumb_size.map_or(size * 0.5, |n| n.get());
                 let state = accepted.get();
                 let mut fraction = state.range.range.fraction().unwrap_or(0.0) * 100.0;
                 if horizontal && direction == Direction::Rtl {
@@ -1175,19 +1204,19 @@ fn draw_angle(
     parent: &Scope,
     state: Cage<Snapshot>,
     theme: crate::Theme,
-    preview: Option<Vary<glory::style::Color>>,
+    marker_width: glory::Bond<f64>,
     unstyled: bool,
 ) -> Result {
     use glory::render::{GraphicPoint, GraphicProps, GraphicStroke, PathCommand};
     let accent = if unstyled {
         theme.foreground
     } else {
-        theme.accent
+        theme.muted
     };
     let ring = if unstyled {
         theme.foreground
     } else {
-        theme.border
+        theme.disabled
     };
     let style = Style::new()
         .position(Position::Absolute)
@@ -1201,12 +1230,8 @@ fn draw_angle(
         .drawing(GraphicProps {
             width: 100.,
             height: 100.,
-            commands: circle(50., 50., 40.),
-            stroke: Some(GraphicStroke {
-                color: ring,
-                width: 2.,
-                cap: Default::default(),
-            }),
+            commands: circle(50., 50., 50.),
+            fill: Some(ring),
             ..Default::default()
         })
         .show_in(parent)?;
@@ -1219,34 +1244,18 @@ fn draw_angle(
                 width: 100.,
                 height: 100.,
                 commands: vec![
-                    PathCommand::Move(GraphicPoint::new(50., 50.)),
+                    PathCommand::Move(GraphicPoint::new(
+                        50. + 36. * radians.sin(),
+                        50. - 36. * radians.cos(),
+                    )),
                     PathCommand::Line(GraphicPoint::new(
-                        50. + 40. * radians.sin(),
-                        50. - 40. * radians.cos(),
+                        50. + 50. * radians.sin(),
+                        50. - 50. * radians.cos(),
                     )),
                 ],
                 stroke: Some(GraphicStroke {
                     color: accent,
-                    width: 2.,
-                    cap: glory::render::StrokeCap::Round,
-                }),
-                ..Default::default()
-            }
-        }))
-        .show_in(parent)?;
-    glory::ui::graphic()
-        .class("sapid-angle-slider-thumb")
-        .style(style)
-        .drawing(scope.bond(move || {
-            let radians = state.with(|s| s.range.range.value.to_radians());
-            GraphicProps {
-                width: 100.,
-                height: 100.,
-                commands: circle(50. + 40. * radians.sin(), 50. - 40. * radians.cos(), 5.),
-                fill: Some(preview.as_ref().map_or(theme.surface, Vary::get)),
-                stroke: Some(GraphicStroke {
-                    color: accent,
-                    width: 2.,
+                    width: marker_width.get(),
                     cap: Default::default(),
                 }),
                 ..Default::default()

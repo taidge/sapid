@@ -14,18 +14,18 @@ const { chromium, base, outputPath, outputRoot, writeReport } = require('./showc
     await page.waitForFunction(() => window.ready === true
       && document.documentElement.getAttribute('data-sapid-widget') === 'color-picker');
 
-    const withSwatches = page.locator('#picker-swatches').locator('..');
+    const withSwatches = page.locator('#picker-default-swatches').locator('..');
     assert.equal(await withSwatches.locator('.sapid-color-plane').count(), 1);
-    assert.equal(await withSwatches.locator('.sapid-color-picker-swatch').count(), 7);
-    report.checks.push('Continuous ColorPicker renders seven genuine preset actions');
+    assert.equal(await withSwatches.locator('.sapid-color-picker-swatch').count(), 14);
+    report.checks.push('Continuous ColorPicker renders fourteen preset actions');
 
     const only = page.locator('#picker-swatches-only').locator('..');
     assert.equal(await only.locator('.sapid-color-plane').count(), 0);
-    assert.equal(await only.locator('.sapid-color-picker-swatch').count(), 7);
-    assert.equal(await only.locator('.sapid-color-picker').evaluate(element => getComputedStyle(element).width), '420px');
-    await only.getByRole('button', { name: '#12b886', exact: true }).click();
+    assert.equal(await only.locator('.sapid-color-picker-swatch').count(), 21);
+    assert.equal(await only.locator('.sapid-color-picker').evaluate(element => getComputedStyle(element).width), '220px');
+    await only.getByRole('button', { name: '#228be6', exact: true }).click();
     await page.waitForFunction(() => document.querySelector('#picker-swatches-only')?.parentElement
-      ?.querySelector('button[aria-label="#12b886"]')?.getAttribute('aria-pressed') === 'true');
+      ?.querySelector('button[aria-label="#228be6"]')?.getAttribute('aria-pressed') === 'true');
     assert.equal(await only.locator('.sapid-color-picker-swatch[aria-pressed=true]').count(), 1);
     report.checks.push('Swatches-only full-width picker publishes the selected color');
 

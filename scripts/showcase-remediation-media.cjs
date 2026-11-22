@@ -37,7 +37,7 @@ const {matrix, chromium, base, outputPath, writeReport, tempDir } = require('./s
         const primary = page.locator('.site-preview .site-demo').first();
         const overflow = await primary.evaluate(element => ({ local: element.scrollWidth - element.clientWidth, page: document.documentElement.scrollWidth - innerWidth }));
         assert(overflow.local <= 1 && overflow.page <= 1, `${key}: ${JSON.stringify(overflow)}`);
-        assert.equal(await page.locator('.site-component-detail').count(), 4);
+        assert.equal(await page.locator('.site-component-detail').count(), {'floating-window':4,carousel:18,dropzone:10}[slug]);
         if (slug === 'floating-window') {
           assert.equal(await page.getByRole('dialog').count(), 0, 'windows start closed');
           await primary.getByRole('button', { name: 'Open notes', exact: true }).click(); await tick();
@@ -97,25 +97,18 @@ const {matrix, chromium, base, outputPath, writeReport, tempDir } = require('./s
             await window.getByRole('button', { name: 'Close window', exact: true }).click(); await tick();
           }
         } else if (slug === 'carousel') {
-          const carousel = primary.getByRole('group', { name: 'Project highlights', exact: true });
+          const carousel = primary.getByRole('group', { name: 'Numbered slides', exact: true });
           const next = carousel.getByRole('button', { name: 'Next slide', exact: true });
           const bounds = await next.boundingBox(); assert(bounds.width <= 34 && bounds.height <= 34);
           await next.evaluate(element => { element.click(); element.click(); }); await tick();
           assert.equal(await carousel.getByRole('button', { name: 'Go to slide 3', exact: true }).getAttribute('aria-pressed'), 'true', 'same-task commands read latest source');
-          assert(await carousel.getByText('Share', { exact: true }).isVisible());
+          assert(await carousel.getByText('3', { exact: true }).isVisible());
           await carousel.getByRole('button', { name: 'Go to slide 1', exact: true }).click(); await tick();
-          const contrast = await carousel.locator('.sapid-carousel-indicator[aria-pressed="true"] svg').evaluate(element => {
-            const luminance = color => {
-              const channels = color.match(/[\d.]+/g).slice(0, 3).map(Number).map(value => value / 255).map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4);
-              return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
-            };
-            let parent = element;
-            while (parent && getComputedStyle(parent).backgroundColor === 'rgba(0, 0, 0, 0)') parent = parent.parentElement;
-            const foreground = luminance(getComputedStyle(element.querySelector('path')).fill);
-            const background = luminance(parent ? getComputedStyle(parent).backgroundColor : 'rgb(255,255,255)');
-            return (Math.max(foreground, background) + 0.05) / (Math.min(foreground, background) + 0.05);
-          });
-          assert(contrast >= 3, `selected indicator contrast ${contrast}`);
+          const activeDot = carousel.locator('.sapid-carousel-indicator[aria-pressed="true"] .sapid-carousel-indicator-dot');
+          const inactiveDot = carousel.locator('.sapid-carousel-indicator[aria-pressed="false"] .sapid-carousel-indicator-dot').first();
+          assert.equal(await activeDot.evaluate(e=>getComputedStyle(e).opacity), '1');
+          assert(Number(await inactiveDot.evaluate(e=>getComputedStyle(e).opacity)) < 1);
+          assert.equal(await activeDot.evaluate(e=>getComputedStyle(e).height), '4px');
           const geometry = detail('Control size, direction and visibility');
           const rtl = geometry.getByRole('group', { name: 'RTL cards', exact: true });
           assert((await rtl.getByRole('button', { name: 'Previous slide', exact: true }).boundingBox()).x > (await rtl.getByRole('button', { name: 'Next slide', exact: true }).boundingBox()).x);
@@ -135,7 +128,7 @@ const {matrix, chromium, base, outputPath, writeReport, tempDir } = require('./s
           assert(await auto.getByRole('button', { name: 'Autoplay paused', exact: true }).isDisabled());
           if (width === 1280 && theme === 'blue' && scheme === 'light') {
             await auto.getByRole('checkbox', { name: 'Run autoplay', exact: true }).check();
-            await page.mouse.move(0, 0); await primary.getByRole('group', { name: 'Project highlights', exact: true }).focus();
+            await page.mouse.move(0, 0); await primary.getByRole('group', { name: 'Numbered slides', exact: true }).focus();
             await auto.getByRole('button', { name: 'Go to slide 2', exact: true }).waitFor();
             await page.waitForFunction(() => document.querySelector('[aria-label="Automatic cards"] .sapid-carousel-indicator[aria-pressed="true"]')?.getAttribute('aria-label') === 'Go to slide 2', undefined, { timeout: 6000 });
             await auto.getByRole('checkbox', { name: 'Run autoplay', exact: true }).uncheck(); await tick();
@@ -143,8 +136,9 @@ const {matrix, chromium, base, outputPath, writeReport, tempDir } = require('./s
           }
           await primary.screenshot({ path: outputPath(`media-remediation/${key}.png`) });
         } else {
-          await choose(primary.getByRole('button', { name: 'Drop files here or choose files', exact: true }), [text]);
-          assert.equal(await primary.getByRole('button', { name: 'Remove review.txt', exact: true }).count(), 1);
+          const imageFixture = fs.readFileSync(require('node:path').join(__dirname, '../examples/web/assets/image-pattern.png'));
+          await choose(primary.getByRole('button', { name: 'Drop files here or choose files', exact: true }), [{ name: 'review.png', buffer: imageFixture }]);
+          assert.equal(await primary.getByRole('button', { name: 'Remove review.png', exact: true }).count(), 1);
           assert(await primary.getByText('1 file selected', { exact: true }).isVisible());
           const limits = detail('File limits and rejection');
           const chooser = limits.getByRole('button', { name: 'Choose text or PNG files', exact: true });
@@ -165,13 +159,13 @@ const {matrix, chromium, base, outputPath, writeReport, tempDir } = require('./s
           assert.equal(await states.getByRole('button', { name: 'Remove review.txt', exact: true }).count(), 0);
           await states.getByRole('checkbox', { name: 'Enable file selection', exact: true }).uncheck(); await tick(); assert(await configured.isDisabled());
           // A genuine Chromium drag operation supplies the owned on-disk fixture.
-          const path = `${tempDir}/media-drop.txt`; fs.writeFileSync(path, 'Actual Dropzone fixture');
+          const path = `${tempDir}/media-drop.png`; fs.writeFileSync(path, imageFixture);
           const target = primary.getByRole('button', { name: 'Drop files here or choose files', exact: true });
           await target.scrollIntoViewIfNeeded(); const box = await target.boundingBox();
           const cdp = await context.newCDPSession(page); const data = { items: [], files: [path], dragOperationsMask: 1 };
           for (const type of ['dragEnter', 'dragOver', 'drop']) await cdp.send('Input.dispatchDragEvent', { type, x: box.x + box.width / 2, y: box.y + box.height / 2, data });
           await tick(); await cdp.detach();
-          await primary.getByRole('button', { name: 'Remove media-drop.txt', exact: true }).waitFor();
+          await primary.getByRole('button', { name: 'Remove media-drop.png', exact: true }).waitFor();
           const previews = detail('Explicit image previews');
           const image = fs.readFileSync(require('node:path').join(__dirname, '../examples/web/assets/image-pattern.png'));
           await choose(previews.getByRole('button', { name: 'Choose PNG or JPEG images', exact: true }), [{ name: 'pattern.png', mimeType: 'image/png', buffer: image }]);

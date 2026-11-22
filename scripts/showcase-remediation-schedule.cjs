@@ -28,7 +28,7 @@ const resources=['resources-day-view','resources-week-view','resources-month-vie
    await page.setViewportSize({width,height:1100});await visit(base+'/showcase.html?widget='+slug+'&theme='+theme+'&scheme='+scheme);await page.waitForFunction(slug=>window.ready===true&&document.documentElement.getAttribute('data-sapid-widget')===slug,slug,{timeout:30000});await tick();
    const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;
    assert(await page.locator('.site-title,.site-section-title').evaluateAll(es=>es.every(e=>getComputedStyle(e).fontWeight==='400')));
-   assert.equal(await page.locator('.site-component-detail').count(),slug==='recurring-events'?4:slug==='events-data'?3:5);
+   assert.equal(await page.locator('.site-component-detail').count(),({"day-view": 15, "week-view": 17, "month-view": 15, "mobile-month-view": 11, "year-view": 13, "agenda-view": 7, "recurring-events": 8, "events-data": 3, "resources-day-view": 12, "resources-week-view": 12, "resources-month-view": 9, "resources-schedule": 7})[slug]??5);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
    const primary=page.locator('.site-preview .site-demo').first();
    if(normal.includes(slug)){
@@ -66,7 +66,7 @@ const resources=['resources-day-view','resources-week-view','resources-month-vie
      const header=primary.locator('.sapid-resource-schedule-view-controls');await remember(header,'resourceHeader');
      for(const [label,view] of [['Week','week'],['Month','month'],['Day','day']]){const button=header.getByRole('button',{name:label,exact:true});await click(button);assert.equal(await button.getAttribute('aria-pressed'),'true');assert.equal(await primary.locator('.sapid-resources-'+view+'-view').count(),1);await retained(header,'resourceHeader');}
     }
-    await click(primary.getByRole('button',{name:/^Project planning/}).first());await primary.getByText(/^Selected: Project planning/).waitFor();
+    await click(primary.getByRole('button',{name:/^Team Standup/}).first());await primary.getByText(/^Selected: Team Standup/).waitFor();
     const windows=section(slug,'window'),label=windows.getByText(/^Rooms:/);assert((await label.textContent()).includes('Room A, Room B'));await click(windows.getByRole('button',{name:'Next resources',exact:true}));assert((await label.textContent()).includes('Room C, Room D'));const range=await label.textContent();await click(windows.getByRole('button',{name:'Next date window',exact:true}));assert.notEqual(await label.textContent(),range);
     const controlled=section(slug,'controlled');await click(controlled.getByRole('button',{name:/^Project planning/}).first());await waitText(controlled,'Choose an event or an available time.');await check(controlled.getByLabel('Accept booking changes',{exact:true}));await click(controlled.getByRole('button',{name:/^Project planning/}).first());await controlled.getByText(/^Selected: Project planning/).waitFor();
     const editing=section(slug,'editing');await click(editing.getByRole('button',{name:/^Edit Design review/}));await click(editing.getByRole('button',{name:'Move later',exact:true}));await editing.getByText(/^Saved Design review/).waitFor();await check(editing.getByLabel('Accept booking edits',{exact:true}),false);await click(editing.getByRole('button',{name:'Move later',exact:true}));await waitText(editing,'Changes were not saved.');

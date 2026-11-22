@@ -5,7 +5,7 @@ use glory::ui::{Result, Widget};
 use glory::{Cage, Scope, Vary};
 
 #[derive(Clone, Copy)]
-pub(super) struct State {
+pub(crate) struct State {
     pub config: Cage<CollapseConfig>,
     presented: Cage<bool>,
     policy: ContentPolicy,
@@ -108,7 +108,9 @@ impl State {
         Ok(())
     }
 }
-pub(super) struct Panel {
+pub(crate) struct Panel {
+    pub class: &'static str,
+    pub role: Option<glory::render::Role>,
     pub id: glory::render::SemanticId,
     pub label: glory::render::SemanticId,
     pub state: State,
@@ -128,7 +130,7 @@ impl Widget for Panel {
         let mut last_completion = state.config.try_get()?.revision;
         let mut on_end = self.on_end.take();
         let mut panel = glory::ui::view()
-            .class("sapid-collapsible-panel")
+            .class(self.class)
             .style(
                 Style::new()
                     .overflow_x(Overflow::Hidden)
@@ -169,6 +171,9 @@ impl Widget for Panel {
                     focused.revise(|focused| *focused = value);
                 }
             });
+        if let Some(role) = self.role {
+            panel = panel.role(role);
+        }
         if let Some(reference) = self.reference {
             panel = panel.node_ref(reference);
         }

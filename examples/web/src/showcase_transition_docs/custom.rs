@@ -1,36 +1,46 @@
 use glory::prelude::*;
-use sapid::{TransitionEffect, TransitionStyles};
 pub fn demo(theme: sapid::Theme) -> impl Widget {
     widget(move |scope| {
-        let mounted = scope.cage(true);
-        let child_theme = theme.clone();
-        let closed = TransitionStyles {
-            opacity: 300,
-            scale_x: 800,
-            scale_y: 500,
-            translate_y: -12,
-            rotate: -6,
-            origin_y: 0,
-            ..Default::default()
-        };
+        let open = scope.cage(false);
+        let palette = theme.clone();
         sapid::stack()
             .theme(theme.clone())
-            .gap(12.)
+            .align(Align::Center)
+            .gap(8.)
             .fill((
                 sapid::button()
                     .theme(theme.clone())
-                    .label("Toggle custom transition")
-                    .on_press(move || mounted.revise(|v| *v = !*v)),
+                    .label(open.map(|on| {
+                        if *on {
+                            "Close dropdown".to_owned()
+                        } else {
+                            "Open dropdown".to_owned()
+                        }
+                    }))
+                    .on_press(move || open.revise(|v| *v = !*v)),
                 sapid::transition()
-                    .mounted(mounted)
-                    .effect(TransitionEffect::Custom(closed))
-                    .duration(500)
+                    .theme(theme.clone())
+                    .mounted(open)
+                    .duration(220)
+                    .exit_duration(180)
+                    .effect(sapid::TransitionEffect::Custom(sapid::TransitionStyles {
+                        opacity: 0,
+                        scale_x: 1000,
+                        scale_y: 0,
+                        translate_x: 0,
+                        translate_y: -8,
+                        origin_y: 0,
+                        ..Default::default()
+                    }))
                     .content(move || {
-                        sapid::paper().theme(child_theme.clone()).fill(
-                            sapid::text()
-                                .theme(child_theme.clone())
-                                .content("Custom top-origin presence"),
-                        )
+                        sapid::paper()
+                            .theme(palette.clone())
+                            .class("sapid-demo-transition-content")
+                            .fill(
+                                sapid::text()
+                                    .theme(palette.clone())
+                                    .content("This dropdown is animated."),
+                            )
                     }),
             ))
             .show_in(scope)

@@ -1,97 +1,67 @@
 use glory::prelude::*;
-use sapid::prelude::*;
-fn media(name: &str) -> String {
-    format!(
-        "{}/{name}",
-        option_env!("SAPID_SHOWCASE_MEDIA").unwrap_or("/assets")
-    )
-}
 pub fn demo(theme: sapid::Theme) -> impl Widget {
     widget(move |scope| {
-        let images = scope.cage(vec![
-            sapid::lightbox_image(
-                "lake",
-                media("alpine-lake-photo.png"),
-                "A fictional alpine village beside a lake",
-            )
-            .caption("Morning beside an imaginary alpine lake"),
-            sapid::lightbox_image(
-                "portrait",
-                media("team-member-photo.png"),
-                "A fictional team member in a workspace",
-            )
-            .caption("A fictional team portrait"),
-        ]);
-        let view = scope.cage(LightboxView::default());
+        let media = option_env!("SAPID_SHOWCASE_MEDIA").unwrap_or("/assets");
+        let photos = [
+            ("lake", "alpine-lake-photo.png", "Alpine lake"),
+            ("portrait", "team-member-photo.png", "Studio portrait"),
+            ("mountain", "mountain-evening.svg", "Mountain evening"),
+            (
+                "village",
+                "alpine-lake-photo.png#village",
+                "Village waterfront",
+            ),
+            ("ridge", "alpine-lake-photo.png#ridge", "Mountain ridge"),
+        ];
         let open = scope.cage(false);
-        let accept = scope.cage(true);
-        let first_close = scope.cage(false);
-        let feedback = scope.cage("Choose a photo".to_string());
-        let _ = (accept, first_close);
-        let mut cards = Vec::new();
-        for (key, file, label) in [
-            ("lake", "alpine-lake-photo.png", "Open lake photo"),
-            ("portrait", "team-member-photo.png", "Open portrait photo"),
-        ] {
-            cards.push(
-                sapid::stack()
+        let view = scope.cage(sapid::LightboxView::default());
+        let sources = photos
+            .iter()
+            .map(|&(key, file, label)| {
+                sapid::lightbox_image(key, format!("{media}/{file}"), label).caption(label)
+            })
+            .collect::<Vec<_>>();
+        let buttons = photos
+            .into_iter()
+            .map(|(key, file, label)| {
+                sapid::button()
                     .theme(theme.clone())
-                    .style(Style::new().width(Length::Px(140.)))
-                    .fill((
-                        sapid::image(media(file))
+                    .class("showcase-gallery-tile")
+                    .name(format!("Open {label}"))
+                    .label("")
+                    .fill(
+                        sapid::image(format!("{media}/{file}"))
                             .theme(theme.clone())
-                            .alt(if key == "lake" {
-                                "Alpine lake thumbnail"
-                            } else {
-                                "Team portrait thumbnail"
-                            })
-                            .fit(glory::style::ObjectFit::Cover)
-                            .style(Style::new().width(Length::Px(140.)).height(Length::Px(94.))),
-                        sapid::button()
-                            .theme(theme.clone())
-                            .label(label)
-                            .on_press(move || {
-                                view.revise(|o| {
-                                    *o = LightboxView {
-                                        current: Some(key.into()),
-                                        zoom: LightboxZoom::Fit,
-                                    }
-                                });
-                                open.revise(|o| *o = true);
-                            }),
-                    )),
-            )
-        }
+                            .alt(label)
+                            .fit(glory::style::ObjectFit::Cover),
+                    )
+                    .on_press(move || {
+                        view.revise(|value| {
+                            *value = sapid::LightboxView {
+                                current: Some(key.into()),
+                                zoom: sapid::LightboxZoom::Fit,
+                            }
+                        });
+                        open.revise(|value| *value = true)
+                    })
+            })
+            .collect::<Vec<_>>();
         sapid::stack()
             .theme(theme.clone())
+            .gap(0.)
             .fill((
-                sapid::group()
-                    .theme(theme.clone())
-                    .wrap(glory::style::FlexWrap::Wrap)
-                    .fill(cards),
+                glory::ui::view()
+                    .class("showcase-gallery-grid")
+                    .fill(buttons),
                 sapid::lightbox("photos-primary")
                     .theme(theme.clone())
                     .show_trigger(false)
                     .title("Project photo gallery")
-                    .images(images)
+                    .images(sources)
                     .view(view)
                     .open(open)
-                    .on_view_change(move |next| {
-                        if accept.get() {
-                            view.revise(|o| *o = next)
-                        }
-                    })
-                    .on_open_change(move |next| {
-                        if !next && first_close.get() {
-                            first_close.revise(|o| *o = false);
-                            feedback.revise(|o| {
-                                *o = "First close refused; close again to leave the gallery.".into()
-                            });
-                        } else {
-                            open.revise(|o| *o = next);
-                        }
-                    }),
-                sapid::text().theme(theme.clone()).content(feedback),
+                    .on_view_change(move |value| view.revise(|old| *old = value))
+                    .on_open_change(move |value| open.revise(|old| *old = value)),
             ))
             .show_in(scope)
     })

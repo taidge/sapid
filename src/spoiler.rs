@@ -15,6 +15,7 @@ pub struct Spoiler {
     illustration: Option<crate::Image>,
     expanded: Value<bool>,
     max_height: f64,
+    animated: bool,
     more: String,
     less: String,
     on_change: Option<Box<dyn FnMut(bool)>>,
@@ -29,6 +30,7 @@ pub fn spoiler(key: impl Into<String>) -> Spoiler {
         illustration: None,
         expanded: Value::default(),
         max_height: 120.0,
+        animated: true,
         more: "Show more".into(),
         less: "Show less".into(),
         on_change: None,
@@ -49,6 +51,11 @@ impl Spoiler {
     }
     pub fn max_height(mut self, height: f64) -> Self {
         self.max_height = height;
+        self
+    }
+    /// Animate measured height changes; disable to expand and collapse immediately.
+    pub fn animated(mut self, value: bool) -> Self {
+        self.animated = value;
         self
     }
     pub fn expanded(mut self, value: impl Into<Vary<bool>>) -> Self {
@@ -109,7 +116,7 @@ impl Widget for Spoiler {
             Style::new()
                 .min_width(Length::Px(0.0))
                 .max_height(if style_open.get() {
-                    Limit::None
+                    measured.get().map_or(Limit::None, Limit::Px)
                 } else {
                     Limit::Px(max_height)
                 })
@@ -163,7 +170,11 @@ impl Widget for Spoiler {
         );
         let viewport_ref = self.viewport.unwrap_or_else(|| scope.cage(None));
         let viewport = glory::ui::view()
-            .class("sapid-spoiler-viewport")
+            .class(if self.animated {
+                "sapid-spoiler-viewport sapid-spoiler-animated"
+            } else {
+                "sapid-spoiler-viewport"
+            })
             .style(clip_style)
             .node_ref(viewport_ref)
             .semantics(composite::metadata(Semantics {

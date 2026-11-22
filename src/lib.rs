@@ -72,6 +72,8 @@ pub use cascader::{Cascader, cascader};
 #[cfg(feature = "charts")]
 mod chart_aux;
 #[cfg(feature = "charts")]
+mod chart_curve;
+#[cfg(feature = "charts")]
 mod chart_model;
 #[cfg(feature = "charts")]
 mod chart_scene;
@@ -409,8 +411,8 @@ pub use modals::{
 };
 pub use multi_select::{MultiSelect, MultiSelectHandle, MultiSelectLoadingPosition, multi_select};
 pub use native_select::{
-    MAX_NATIVE_SELECT_OPTIONS, NativeOption, NativeOptionGroup, NativeSelect, native_select,
-    select_group, select_option,
+    MAX_NATIVE_SELECT_OPTIONS, NativeOption, NativeOptionGroup, NativeSelect, NativeSelectVariant,
+    native_select, select_group, select_option,
 };
 pub use navigation::*;
 pub use navigation_progress::{
@@ -419,8 +421,8 @@ pub use navigation_progress::{
 };
 pub use notifications::{
     MAX_NOTIFICATIONS, MAX_VISIBLE_NOTIFICATIONS, Notification, NotificationClock,
-    NotificationCloseReason, NotificationRequest, NotificationToken, NotificationsHandle, Toaster,
-    notification, notification_request, notifications, toaster,
+    NotificationCloseReason, NotificationProgressPosition, NotificationRequest, NotificationToken,
+    NotificationsHandle, Toaster, notification, notification_request, notifications, toaster,
 };
 pub use number_formatter::{
     Currency, NumberFormat, NumberFormatter, NumberLocale, number_formatter,
@@ -716,7 +718,7 @@ pub mod prelude {
     };
     pub use crate::{
         MAX_PENDING_SCROLL_INTENTS, OverscrollBehavior, ScrollArea, ScrollContext, ScrollHandle,
-        ScrollbarOffset, Scrollbars, Scroller, scroll_area, scroller,
+        ScrollbarOffset, Scrollbars, Scroller, VerticalScrollbarPosition, scroll_area, scroller,
     };
     pub use crate::{
         MAX_PORTAL_TARGETS, MAX_PORTALS, Portal, PortalContext, PortalTarget, portal,
@@ -737,9 +739,9 @@ pub mod prelude {
         NavigationProgressToken, navigation_progress,
     };
     pub use crate::{
-        Notification, NotificationClock, NotificationCloseReason, NotificationRequest,
-        NotificationToken, NotificationsHandle, Toaster, notification, notification_request,
-        notifications, toaster,
+        Notification, NotificationClock, NotificationCloseReason, NotificationProgressPosition,
+        NotificationRequest, NotificationToken, NotificationsHandle, Toaster, notification,
+        notification_request, notifications, toaster,
     };
     pub use crate::{
         PillsInput, TagDuplicatePolicy, TagRejection, TagsInput, TagsInputLoadingPosition,

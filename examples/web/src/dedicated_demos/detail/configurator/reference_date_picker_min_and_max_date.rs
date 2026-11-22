@@ -1,0 +1,13 @@
+use glory::prelude::*;
+use sapid::prelude::*;
+pub fn demo(theme: sapid::Theme) -> impl Widget {
+    let date = CivilDate::new(2026, 11, 4).unwrap();
+    let provider = DatesProvider::new(date).bounds(
+        DateBounds::new(
+            Some(CivilDate::new(2026, 11, 3).unwrap()),
+            Some(CivilDate::new(2026, 11, 20).unwrap()),
+        )
+        .unwrap(),
+    );
+    sapid::date_picker("reference-date-picker-min-and-max-date", provider).theme(theme)
+}

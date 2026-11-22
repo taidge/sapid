@@ -20,7 +20,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                     ))
             }));
         view()
-            .class("site-configurator")
+            .class("site-configurator site-display-configurator")
             .fill(controls::playground(
                 Box::new(icon),
                 vec![controls::gradient_controls(from, to, angle, &theme)],
@@ -74,33 +74,6 @@ mod controls {
         )
     }
 
-    pub fn select(
-        key: &str,
-        label: &str,
-        value: Cage<Option<String>>,
-        options: &'static [(&'static str, &'static str)],
-        theme: &Theme,
-    ) -> Box<dyn Widget> {
-        let field_key = format!("control-{key}");
-        let select_key = format!("control-select-{key}");
-        Box::new(
-            sapid::field(field_key)
-                .theme(theme.clone())
-                .label(label.to_owned())
-                .control(move |field| {
-                    let mut select = sapid::native_select(select_key.clone()).field(field);
-                    for (value, label) in options {
-                        select = select.option(sapid::select_option(*value, *label));
-                    }
-                    select.value(value).on_value_change(move |next| {
-                        if next.is_some() {
-                            value.revise(|current| *current = next)
-                        }
-                    })
-                }),
-        )
-    }
-
     pub fn range(
         key: &str,
         label: &str,
@@ -118,7 +91,16 @@ mod controls {
                     .class("site-control-label")
                     .content(value.map({
                         let label = label.clone();
-                        move |v| format!("{label} · {v:.0}")
+                        move |v| {
+                            let decimals = if step.fract() == 0. {
+                                0
+                            } else if (step * 10.).fract() == 0. {
+                                1
+                            } else {
+                                2
+                            };
+                            format!("{label} · {v:.decimals$}")
+                        }
                     })),
                 sapid::slider(key.to_owned())
                     .theme(theme.clone())
@@ -132,8 +114,7 @@ mod controls {
         )
     }
     const COLORS: &[(&str, Color)] = &[
-        ("Yellow", Color(250, 176, 5, 255)),
-        ("Orange", Color(253, 126, 20, 255)),
+        ("Gray", Color(134, 142, 150, 255)),
         ("Red", Color(250, 82, 82, 255)),
         ("Pink", Color(230, 73, 128, 255)),
         ("Grape", Color(190, 75, 219, 255)),
@@ -143,7 +124,9 @@ mod controls {
         ("Cyan", Color(21, 170, 191, 255)),
         ("Teal", Color(18, 184, 134, 255)),
         ("Green", Color(64, 192, 87, 255)),
-        ("Gray", Color(134, 142, 150, 255)),
+        ("Lime", Color(130, 201, 30, 255)),
+        ("Yellow", Color(250, 176, 5, 255)),
+        ("Orange", Color(253, 126, 20, 255)),
     ];
 
     fn choice_color(name: &str) -> Option<Color> {
@@ -152,6 +135,93 @@ mod controls {
             .find(|(label, _)| *label == name)
             .map(|(_, color)| *color)
             .or_else(|| sapid::parse_hex_color(name).ok())
+    }
+
+    pub fn named_color_choices(
+        key: &'static str,
+        label: &'static str,
+        selected: glory::Vary<String>,
+        set: impl Fn(String) + Copy + 'static,
+        theme: &Theme,
+    ) -> Box<dyn Widget> {
+        let palette = theme.clone();
+        Box::new(widget(move |scope| {
+            let source = selected.clone();
+            let selected = scope.bond(move || source.get());
+            let draft = scope.bond(move || {
+                let value = selected.get();
+                choice_color(&value)
+                    .map(|color| sapid::format_hex_color(color, false))
+                    .unwrap_or(value)
+            });
+            let custom = scope.cage(false);
+            let mut chips: Vec<Box<dyn Widget>> = COLORS
+                .iter()
+                .map(|(name, color)| {
+                    let active = scope.bond(move || {
+                        if selected.get() == *name {
+                            "site-control-swatch is-active".to_owned()
+                        } else {
+                            "site-control-swatch".to_owned()
+                        }
+                    });
+                    Box::new(
+                        sapid::button()
+                            .unstyled()
+                            .class(active)
+                            .name(if label == "Color" {
+                                format!("Use {name}")
+                            } else {
+                                format!("{label}: use {name}")
+                            })
+                            .label("")
+                            .style(Style {
+                                background: Some(*color),
+                                ..Style::new()
+                            })
+                            .on_press(move || set((*name).to_owned())),
+                    ) as Box<dyn Widget>
+                })
+                .collect();
+            chips.push(Box::new(
+                sapid::button()
+                    .unstyled()
+                    .class("site-control-swatch site-custom-color-trigger")
+                    .name(if label == "Color" {
+                        "Custom color".to_owned()
+                    } else {
+                        format!("{label}: custom color")
+                    })
+                    .label("")
+                    .on_press(move || custom.revise(|v| *v = !*v)),
+            ));
+            let editor_theme = palette.clone();
+            sapid::stack()
+                .theme(palette.clone())
+                .gap(4.)
+                .fill((
+                    sapid::text()
+                        .theme(palette.clone())
+                        .class("site-control-label")
+                        .content(label),
+                    sapid::group()
+                        .theme(palette.clone())
+                        .class("site-control-swatches")
+                        .fill(chips),
+                    when(custom, move || {
+                        sapid::field(key)
+                            .theme(editor_theme.clone())
+                            .label("Custom color")
+                            .control(move |field| {
+                                sapid::color_input(format!("{key}-picker"))
+                                    .field(field)
+                                    .value(draft)
+                                    .on_value_change(set)
+                            })
+                    }),
+                ))
+                .show_in(scope)
+        }))
     }
 
     pub fn gradient_style(
@@ -174,24 +244,25 @@ mod controls {
         angle: Cage<f64>,
         theme: &Theme,
     ) -> Box<dyn Widget> {
-        const STOPS: &[(&str, &str)] = &[
-            ("Blue", "Blue"),
-            ("Grape", "Grape"),
-            ("Orange", "Orange"),
-            ("Green", "Green"),
-            ("Pink", "Pink"),
-            ("Teal", "Teal"),
-        ];
+        let stop = |key, label, value: Cage<Option<String>>| {
+            named_color_choices(
+                key,
+                label,
+                value.map(|v| v.clone().unwrap_or_default()).into(),
+                move |next| value.revise(|current| *current = Some(next)),
+                theme,
+            )
+        };
         Box::new(sapid::stack().theme(theme.clone()).gap(12.).fill((
-            select("gradient-start", "Gradient from", from, STOPS, theme),
-            select("gradient-end", "Gradient to", to, STOPS, theme),
+            stop("gradient-start", "Gradient from", from),
+            stop("gradient-end", "Gradient to", to),
             range(
                 "gradient-angle",
-                "Gradient angle",
+                "Gradient degree",
                 angle,
                 0.,
                 360.,
-                5.,
+                1.,
                 theme,
             ),
         )))

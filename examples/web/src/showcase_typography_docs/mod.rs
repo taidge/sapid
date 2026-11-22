@@ -1,35 +1,77 @@
 mod code_block;
 mod code_colors;
 mod code_inline;
+mod highlight_accents;
 mod highlight_case;
 mod highlight_empty;
 mod highlight_literals;
+mod highlight_mark_style;
 mod highlight_multiple;
+mod highlight_per_term;
+mod highlight_text_props;
+mod highlight_whole_words;
 mod list_icons;
 mod list_nested;
 mod list_order;
+mod list_reversed;
 mod list_spacing;
+mod list_start;
+mod list_values;
 mod mark_colors;
 mod mark_highlight;
 mod mark_wrapping;
+mod periodic_data;
 mod quote_attribution;
 mod quote_color;
 mod quote_icon;
 mod table_borders;
+mod table_caption_foot {
+    use super::periodic_data::element_table;
+    include!("table_caption_foot.rs");
+}
+mod table_data_rows {
+    use super::periodic_data::element_table;
+    include!("table_data_rows.rs");
+}
+mod table_horizontal_scroll {
+    use super::periodic_data::element_table;
+    include!("table_horizontal_scroll.rs");
+}
+mod table_max_height {
+    use super::periodic_data::element_table;
+    include!("table_max_height.rs");
+}
+mod table_native_scroll {
+    use super::periodic_data::element_table;
+    include!("table_native_scroll.rs");
+}
+mod table_numbers_play;
 mod table_scroll;
-mod table_selection;
+pub(crate) mod table_selection;
 mod table_spacing;
+mod table_sticky {
+    use super::periodic_data::element_table;
+    include!("table_sticky.rs");
+}
 mod table_structure;
 mod table_vertical;
+mod table_virtual;
+mod text_clamp_play;
+mod text_gradient_play;
 mod text_inline;
 mod text_metrics;
 mod text_reactive;
+mod text_truncate_play;
 mod text_truncation;
+mod text_wrap_play;
+mod title_clamp_play;
 mod title_levels;
 mod title_presentation;
 mod title_truncation;
+mod title_wrap_play;
 mod typography_article;
 mod typography_scope;
+mod typography_styles;
 mod typography_table;
 use super::showcase_examples::DetailSection;
 pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
@@ -82,6 +124,41 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         ],
         "highlight" => vec![
             DetailSection {
+                id: "highlight-whole-words",
+                title: "Whole word matching",
+                note: "Compare whole-word and substring matches for the same text.",
+                example: Box::new(highlight_whole_words::demo(theme.clone())),
+                source: include_str!("highlight_whole_words.rs"),
+            },
+            DetailSection {
+                id: "highlight-accents",
+                title: "Accent-sensitive matching",
+                note: "Compare a literal match with a match that ignores combining accents.",
+                example: Box::new(highlight_accents::demo(theme.clone())),
+                source: include_str!("highlight_accents.rs"),
+            },
+            DetailSection {
+                id: "highlight-per-term",
+                title: "Custom colors per term",
+                note: "Each matched term uses a distinct background.",
+                example: Box::new(highlight_per_term::demo(theme.clone())),
+                source: include_str!("highlight_per_term.rs"),
+            },
+            DetailSection {
+                id: "highlight-mark-style",
+                title: "Change highlight styles",
+                note: "Compare default marks with an emphasized match.",
+                example: Box::new(highlight_mark_style::demo(theme.clone())),
+                source: include_str!("highlight_mark_style.rs"),
+            },
+            DetailSection {
+                id: "highlight-text-props",
+                title: "Text props",
+                note: "The enclosing typography controls the size, weight and alignment of highlighted text.",
+                example: Box::new(highlight_text_props::demo(theme.clone())),
+                source: include_str!("highlight_text_props.rs"),
+            },
+            DetailSection {
                 id: "highlight-multiple",
                 title: "Multiple matches and overlapping queries",
                 note: "Queries are finite literal strings. The earliest match wins; at the same start the longest query wins. Repeated matches become actual Mark ranges with the original text preserved.",
@@ -111,6 +188,27 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             },
         ],
         "list" => vec![
+            DetailSection {
+                id: "list-start",
+                title: "Start from specific number",
+                note: "The visible ordinals follow the ordered-list settings.",
+                example: Box::new(list_start::demo(theme.clone())),
+                source: include_str!("list_start.rs"),
+            },
+            DetailSection {
+                id: "list-reversed",
+                title: "Reversed numbering",
+                note: "The visible ordinals follow the ordered-list settings.",
+                example: Box::new(list_reversed::demo(theme.clone())),
+                source: include_str!("list_reversed.rs"),
+            },
+            DetailSection {
+                id: "list-values",
+                title: "Custom item values",
+                note: "The visible ordinals follow the ordered-list settings.",
+                example: Box::new(list_values::demo(theme.clone())),
+                source: include_str!("list_values.rs"),
+            },
             DetailSection {
                 id: "list-order",
                 title: "Ordered and unordered lists",
@@ -165,6 +263,34 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         ],
         "text" => vec![
             DetailSection {
+                id: "text-gradient-play",
+                title: "Gradient variant",
+                note: "Choose two color stops and change the gradient direction.",
+                example: Box::new(text_gradient_play::demo(theme.clone())),
+                source: include_str!("text_gradient_play.rs"),
+            },
+            DetailSection {
+                id: "text-truncate-play",
+                title: "Truncate",
+                note: "Choose which end of the line stays visible.",
+                example: Box::new(text_truncate_play::demo(theme.clone())),
+                source: include_str!("text_truncate_play.rs"),
+            },
+            DetailSection {
+                id: "text-clamp-play",
+                title: "Line clamp",
+                note: "Limit the number of visible lines.",
+                example: Box::new(text_clamp_play::demo(theme.clone())),
+                source: include_str!("text_clamp_play.rs"),
+            },
+            DetailSection {
+                id: "text-wrap-play",
+                title: "Text wrap",
+                note: "Compare normal and balanced line breaks.",
+                example: Box::new(text_wrap_play::demo(theme.clone())),
+                source: include_str!("text_wrap_play.rs"),
+            },
+            DetailSection {
                 id: "text-metrics",
                 title: "Font sizes, weights and colors",
                 note: "Theme size controls typography metrics. Explicit font_size, line_height, weight and color override their own fields, leaving the remaining theme declarations intact.",
@@ -195,6 +321,20 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         ],
         "title" => vec![
             DetailSection {
+                id: "title-wrap-play",
+                title: "Text wrap",
+                note: "Compare normal and balanced line breaks.",
+                example: Box::new(title_wrap_play::demo(theme.clone())),
+                source: include_str!("title_wrap_play.rs"),
+            },
+            DetailSection {
+                id: "title-clamp-play",
+                title: "Line clamp",
+                note: "Limit the number of visible lines.",
+                example: Box::new(title_clamp_play::demo(theme.clone())),
+                source: include_str!("title_clamp_play.rs"),
+            },
+            DetailSection {
                 id: "title-levels",
                 title: "Six semantic heading levels",
                 note: "The constructor selects h1 through h6. Visual typography can be adjusted independently; a smaller-looking heading keeps its actual semantic level.",
@@ -217,6 +357,86 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             },
         ],
         "table" => vec![
+            DetailSection {
+                id: "table-data-rows",
+                title: "data prop",
+                note: "Table rows are built from element data.",
+                example: Box::new(table_data_rows::demo(theme.clone())),
+                source: concat!(
+                    include_str!("table_data_rows.rs"),
+                    "\n",
+                    include_str!("periodic_data.rs")
+                ),
+            },
+            DetailSection {
+                id: "table-caption-foot",
+                title: "Caption and tfoot",
+                note: "Column titles are repeated below the data.",
+                example: Box::new(table_caption_foot::demo(theme.clone())),
+                source: concat!(
+                    include_str!("table_caption_foot.rs"),
+                    "\n",
+                    include_str!("periodic_data.rs")
+                ),
+            },
+            DetailSection {
+                id: "table-sticky",
+                title: "Sticky header",
+                note: "Scroll vertically to keep the column headings in view.",
+                example: Box::new(table_sticky::demo(theme.clone())),
+                source: concat!(
+                    include_str!("table_sticky.rs"),
+                    "\n",
+                    include_str!("periodic_data.rs")
+                ),
+            },
+            DetailSection {
+                id: "table-horizontal-scroll",
+                title: "Scroll container",
+                note: "The table scrolls horizontally at narrow widths.",
+                example: Box::new(table_horizontal_scroll::demo(theme.clone())),
+                source: concat!(
+                    include_str!("table_horizontal_scroll.rs"),
+                    "\n",
+                    include_str!("periodic_data.rs")
+                ),
+            },
+            DetailSection {
+                id: "table-native-scroll",
+                title: "Native scroll container",
+                note: "The browser provides the horizontal scrollbar.",
+                example: Box::new(table_native_scroll::demo(theme.clone())),
+                source: concat!(
+                    include_str!("table_native_scroll.rs"),
+                    "\n",
+                    include_str!("periodic_data.rs")
+                ),
+            },
+            DetailSection {
+                id: "table-max-height",
+                title: "Scroll container with max height",
+                note: "The longer table scrolls within a 200px viewport.",
+                example: Box::new(table_max_height::demo(theme.clone())),
+                source: concat!(
+                    include_str!("table_max_height.rs"),
+                    "\n",
+                    include_str!("periodic_data.rs")
+                ),
+            },
+            DetailSection {
+                id: "table-virtual",
+                title: "Example: Table virtualization",
+                note: "Scroll through 2,000 records while the table mounts a bounded window of rows.",
+                example: Box::new(table_virtual::demo(theme.clone())),
+                source: include_str!("table_virtual.rs"),
+            },
+            DetailSection {
+                id: "table-numbers-play",
+                title: "Tabular numbers",
+                note: "Compare digit widths in the numeric column.",
+                example: Box::new(table_numbers_play::demo(theme.clone())),
+                source: include_str!("table_numbers_play.rs"),
+            },
             DetailSection {
                 id: "table-structure",
                 title: "Caption, headers and footer",
@@ -262,6 +482,13 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         ],
         "typography" => vec![
             DetailSection {
+                id: "typography-styles",
+                title: "All styles demo",
+                note: "The same typography scope styles headings, paragraphs, lists and quotations.",
+                example: Box::new(typography_styles::demo(theme.clone())),
+                source: include_str!("typography_styles.rs"),
+            },
+            DetailSection {
                 id: "typography-article",
                 title: "An article with real document structure",
                 note: "Headings, paragraphs, lists, a quotation and a descriptive link use ordinary semantic widgets. Typography supplies layout and an explicit builder context, without parsing arbitrary HTML.",
@@ -305,6 +532,11 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ),
         ],
         "highlight" => vec![
+            ("Whole word matching", "#highlight-whole-words"),
+            ("Accent-sensitive matching", "#highlight-accents"),
+            ("Custom colors per term", "#highlight-per-term"),
+            ("Change highlight styles", "#highlight-mark-style"),
+            ("Text props", "#highlight-text-props"),
             (
                 "Multiple matches and overlapping queries",
                 "#highlight-multiple",
@@ -317,6 +549,9 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ("No match and wrapping long prose", "#highlight-empty"),
         ],
         "list" => vec![
+            ("Start from specific number", "#list-start"),
+            ("Reversed numbering", "#list-reversed"),
+            ("Custom item values", "#list-values"),
             ("Ordered and unordered lists", "#list-order"),
             ("Nested lists and real list membership", "#list-nested"),
             ("Passive icons beside text", "#list-icons"),
@@ -328,6 +563,10 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ("Explicit Mark and literal Highlight", "#mark-highlight"),
         ],
         "text" => vec![
+            ("Gradient variant", "#text-gradient-play"),
+            ("Truncate", "#text-truncate-play"),
+            ("Line clamp", "#text-clamp-play"),
+            ("Text wrap", "#text-wrap-play"),
             ("Font sizes, weights and colors", "#text-metrics"),
             (
                 "Single-line truncation and a line limit",
@@ -337,6 +576,8 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ("Reactive content and explicit appearance", "#text-reactive"),
         ],
         "title" => vec![
+            ("Text wrap", "#title-wrap-play"),
+            ("Line clamp", "#title-clamp-play"),
             ("Six semantic heading levels", "#title-levels"),
             (
                 "Typography independent of heading level",
@@ -348,6 +589,14 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ),
         ],
         "table" => vec![
+            ("data prop", "#table-data-rows"),
+            ("Caption and tfoot", "#table-caption-foot"),
+            ("Sticky header", "#table-sticky"),
+            ("Scroll container", "#table-horizontal-scroll"),
+            ("Native scroll container", "#table-native-scroll"),
+            ("Scroll container with max height", "#table-max-height"),
+            ("Example: Table virtualization", "#table-virtual"),
+            ("Tabular numbers", "#table-numbers-play"),
             ("Caption, headers and footer", "#table-structure"),
             (
                 "Local horizontal scrolling and sticky headings",
@@ -359,6 +608,7 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ("Application-owned row selection", "#table-selection"),
         ],
         "typography" => vec![
+            ("All styles demo", "#typography-styles"),
             (
                 "An article with real document structure",
                 "#typography-article",

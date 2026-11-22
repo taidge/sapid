@@ -111,9 +111,9 @@ fn action_buttons_recheck_disabled_sources_before_typed_and_generic_callbacks_in
 #[test]
 fn icon_action_is_named_native_button_with_real_content_and_square_sizes() {
     for (size, side) in [
-        (Size::Small, 30.0),
-        (Size::Medium, 36.0),
-        (Size::Large, 42.0),
+        (Size::Small, 22.0),
+        (Size::Medium, 28.0),
+        (Size::Large, 34.0),
     ] {
         let app = App::memory();
         app.mount(

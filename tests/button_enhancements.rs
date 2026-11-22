@@ -50,13 +50,13 @@ fn label(app: &App) -> NodeId {
     panic!("label")
 }
 #[test]
-fn five_sizes_share_control_tokens_and_icon_dimensions() {
-    for (size, height) in [
-        (Size::ExtraSmall, 24.0),
-        (Size::Small, 30.0),
-        (Size::Medium, 36.0),
-        (Size::Large, 42.0),
-        (Size::ExtraLarge, 50.0),
+fn five_sizes_set_button_height_and_square_action_icon_dimensions() {
+    for (size, height, icon_size) in [
+        (Size::ExtraSmall, 24.0, 18.0),
+        (Size::Small, 30.0, 22.0),
+        (Size::Medium, 36.0, 28.0),
+        (Size::Large, 42.0, 34.0),
+        (Size::ExtraLarge, 50.0, 44.0),
     ] {
         let app = App::memory();
         app.mount(button().size(size).label("Save")).unwrap();
@@ -79,8 +79,8 @@ fn five_sizes_share_control_tokens_and_icon_dimensions() {
         .unwrap();
         let tree = app.tree();
         let style = tree.node(root(&app)).unwrap().descriptor.view().style;
-        assert_eq!(style.width, Some(Length::Px(height)));
-        assert_eq!(style.height, Some(Length::Px(height)));
+        assert_eq!(style.width, Some(Length::Px(icon_size)));
+        assert_eq!(style.height, Some(Length::Px(icon_size)));
     }
 }
 

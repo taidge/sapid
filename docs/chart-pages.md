@@ -61,7 +61,7 @@ let bubbles = PlotOptions {
 
 Angles are clockwise degrees: start −360..360, sweep greater than zero and at
 most 360. They apply to Pie, Donut and RadialBar, including unfilled tracks.
-Defaults remain −90/360. Donut inner radius accepts 0..0.95 (default 0.62).
+Defaults remain −90/360. Donut inner radius accepts 0 <= ratio < 1 (default 0.62).
 Center text is ordinary application supplied text, at most 64 UTF-8 bytes without
 NUL, CR/LF or Unicode line separators. It is clipped to the inner area and does
 not silently recompute a total after legend changes.

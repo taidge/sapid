@@ -148,6 +148,26 @@ impl Controller {
         self.grid_events.clear();
     }
 }
+#[derive(Clone)]
+struct TimelineLabels {
+    time: Option<Rc<dyn Fn(u8, u8) -> String>>,
+    day: Option<DateLabel>,
+    interval: Option<std::num::NonZeroU16>,
+    repeat_in_slots: bool,
+}
+impl Default for TimelineLabels {
+    fn default() -> Self {
+        Self {
+            time: None,
+            day: None,
+            interval: None,
+            repeat_in_slots: true,
+        }
+    }
+}
+type DateLabel = Rc<dyn Fn(crate::CivilDate) -> String>;
+type AgendaContent =
+    Rc<dyn Fn(ScheduleKey, Vary<String>, Vary<ScheduleInterval>) -> Box<dyn Widget>>;
 /// A finite current-window schedule. The application accepts page requests by
 /// supplying new ScheduleData; no network, clock or route is installed.
 pub struct Schedule {
@@ -157,6 +177,12 @@ pub struct Schedule {
     selection: Value<Option<ScheduleSelection>>,
     readonly: Vary<bool>,
     locale: DateLocale,
+    window_date_label: Option<DateLabel>,
+    agenda_date_label: Option<DateLabel>,
+    timeline_labels: TimelineLabels,
+    minimum_column_width: Option<f64>,
+    timeline_gutter_width: f64,
+    agenda_content: Option<AgendaContent>,
     requested: Option<Box<dyn FnMut(ScheduleRequest)>>,
     selected: Option<Box<dyn FnMut(ScheduleSelection)>>,
     view: ScheduleView,
@@ -186,6 +212,12 @@ pub fn schedule(key: impl Into<String>, data: impl Into<Vary<ScheduleData>>) -> 
         selection: Value::default(),
         readonly: false.into(),
         locale: DateLocale::En,
+        window_date_label: None,
+        agenda_date_label: None,
+        timeline_labels: TimelineLabels::default(),
+        minimum_column_width: None,
+        timeline_gutter_width: 64.,
+        agenda_content: None,
         requested: None,
         selected: None,
         view: ScheduleView::Agenda,
@@ -270,6 +302,67 @@ impl Schedule {
     /// Height of one timeline interval row in px (20..=128).
     pub fn slot_height(mut self, value: f64) -> Self {
         self.slot_height = value;
+        self
+    }
+    /// Format each date in the range heading.
+    pub fn window_date_label(
+        mut self,
+        format: impl Fn(crate::CivilDate) -> String + 'static,
+    ) -> Self {
+        self.window_date_label = Some(Rc::new(format));
+        self
+    }
+    /// Divide the timeline viewport between days and allow horizontal scrolling
+    /// when the available width cannot accommodate this minimum per day.
+    pub fn fit_timeline_columns(mut self, minimum: f64) -> Self {
+        self.minimum_column_width = Some(minimum);
+        self
+    }
+    /// Set the width of the timeline's time-label column in logical pixels.
+    pub fn timeline_gutter_width(mut self, width: f64) -> Self {
+        self.timeline_gutter_width = width;
+        self
+    }
+    /// Format the time gutter in day and week timelines with a civil hour and minute.
+    pub fn slot_label_format(mut self, format: impl Fn(u8, u8) -> String + 'static) -> Self {
+        self.timeline_labels.time = Some(Rc::new(format));
+        self
+    }
+    /// Label aligned time slots at this interval in minutes, measured from midnight.
+    pub fn slot_label_interval(mut self, minutes: std::num::NonZeroU16) -> Self {
+        self.timeline_labels.interval = Some(minutes);
+        self
+    }
+    /// Format the day heading above each timeline column.
+    pub fn timeline_day_label(
+        mut self,
+        format: impl Fn(crate::CivilDate) -> String + 'static,
+    ) -> Self {
+        self.timeline_labels.day = Some(Rc::new(format));
+        self
+    }
+    /// Repeat each time label inside its button. Accessible time ranges remain available either way.
+    pub fn with_slot_text(mut self, display: bool) -> Self {
+        self.timeline_labels.repeat_in_slots = display;
+        self
+    }
+    /// Format the day headings in the agenda.
+    pub fn agenda_date_label(
+        mut self,
+        format: impl Fn(crate::CivilDate) -> String + 'static,
+    ) -> Self {
+        self.agenda_date_label = Some(Rc::new(format));
+        self
+    }
+    /// Supply inline content for each agenda event button. Its key is stable,
+    /// and the title and interval update when the underlying event changes.
+    pub fn agenda_event_content<W: Widget + 'static>(
+        mut self,
+        content: impl Fn(ScheduleKey, Vary<String>, Vary<ScheduleInterval>) -> W + 'static,
+    ) -> Self {
+        self.agenda_content = Some(Rc::new(move |key, title, interval| {
+            Box::new(content(key, title, interval))
+        }));
         self
     }
     pub fn week_start(mut self, value: crate::Weekday) -> Self {
@@ -525,6 +618,9 @@ impl Schedule {
         let enabled = self.common.enabled.clone();
         let readonly = self.readonly.clone();
         let locale = self.locale;
+        let window_label = self.window_date_label.clone();
+        let day_label = self.agenda_date_label.clone();
+        let event_content = self.agenda_content.clone();
         let time_window = self.time_window;
         let direction = self.direction;
         let column_width = self.column_width;
@@ -537,6 +633,9 @@ impl Schedule {
         let max_events_per_day = self.max_events_per_day;
         let with_all_day = self.with_all_day;
         let slot_height = self.slot_height;
+        let timeline_labels = self.timeline_labels.clone();
+        let minimum_column_width = self.minimum_column_width;
+        let timeline_gutter_width = self.timeline_gutter_width;
         let size = self.common.size;
         let unstyled = self.common.unstyled;
         let selection_source = selection.source.clone();
@@ -601,6 +700,12 @@ impl Schedule {
                         let _ = selection.accept(&Some(value.clone()));
                         selected.emit(owner, value);
                     });
+                child.window_date_label = window_label.clone();
+                child.agenda_date_label = day_label.clone();
+                child.timeline_labels = timeline_labels.clone();
+                child.minimum_column_width = minimum_column_width;
+                child.timeline_gutter_width = timeline_gutter_width;
+                child.agenda_content = event_content.clone();
                 if let Some(width) = column_width {
                     child = child.column_width(width);
                 }
@@ -628,6 +733,11 @@ impl Widget for Schedule {
             || self
                 .column_width
                 .is_some_and(|v| !v.is_finite() || !(96. ..=1024.).contains(&v))
+            || self
+                .minimum_column_width
+                .is_some_and(|v| !v.is_finite() || !(1. ..=1024.).contains(&v))
+            || !self.timeline_gutter_width.is_finite()
+            || !(1. ..=1024.).contains(&self.timeline_gutter_width)
             || !self.viewport_height.is_finite()
             || !(80. ..=2048.).contains(&self.viewport_height)
             || !self.slot_height.is_finite()
@@ -738,6 +848,31 @@ impl Widget for Schedule {
         widget.show_in(scope)?;
         let content = child(scope, root)?;
         let mut header_scope = None;
+        let locale = self.locale;
+        let window_label = self.window_date_label.clone();
+        let title = accepted.map(move |data| {
+            if let Some(format) = &window_label {
+                let last_day = data
+                    .window()
+                    .end()
+                    .date()
+                    .checked_add_days(-1)
+                    .expect("window has at least one day");
+                if last_day == data.window().start().date() {
+                    return format(last_day);
+                }
+                return format!(
+                    "{} — {}",
+                    format(data.window().start().date()),
+                    format(last_day)
+                );
+            }
+            format!(
+                "{} — {}",
+                locale.date_label(data.window().start().date()),
+                data.window().end().date()
+            )
+        });
         if self.with_header {
             let header = scope.cage(None);
             glory::ui::view()
@@ -754,17 +889,17 @@ impl Widget for Schedule {
                 (1, "Next schedule window"),
             ] {
                 let s = state.clone();
-                let mut button = crate::button()
-                    .label(
-                        if (delta < 0) == (self.direction == glory::render::Direction::Ltr) {
-                            "‹"
-                        } else {
-                            "›"
-                        },
+                let icon = if (delta < 0) == (self.direction == glory::render::Direction::Ltr) {
+                    crate::Icon::ChevronLeft
+                } else {
+                    crate::Icon::ChevronRight
+                };
+                let mut button = crate::action_icon(label)
+                    .icon(
+                        glory::ui::graphic()
+                            .drawing(icon.drawing(self.common.theme.foreground))
+                            .style(Style::new().width(Length::Px(16.)).height(Length::Px(16.))),
                     )
-                    .name(label)
-                    .compact(true)
-                    .variant(crate::ButtonVariant::Secondary)
                     .theme(self.common.theme.clone())
                     .size(self.common.size)
                     .enabled(scope.bond(move || {
@@ -780,22 +915,24 @@ impl Widget for Schedule {
                     button = button.unstyled();
                 }
                 button.show_in(&mounted)?;
+                if delta < 0 {
+                    crate::text()
+                        .theme(self.common.theme.clone())
+                        .class("sapid-schedule-window")
+                        .content(title)
+                        .show_in(&mounted)?;
+                }
             }
             header_scope = Some(mounted);
         }
-        let locale = self.locale;
-        let title = accepted.map(move |data| {
-            format!(
-                "{} — {}",
-                locale.date_label(data.window().start().date()),
-                data.window().end().date()
-            )
-        });
-        crate::text()
-            .theme(self.common.theme.clone())
-            .class("sapid-schedule-window")
-            .content(title)
-            .show_in(&content)?;
+        if !self.with_header {
+            crate::text()
+                .theme(self.common.theme.clone())
+                .class("sapid-schedule-window")
+                .content(title)
+                .show_in(&content)?;
+        }
+        let day_label = self.agenda_date_label.clone();
         let groups = scope.bond(move || {
             accepted.with(|data| {
                 if matches!(
@@ -805,6 +942,11 @@ impl Widget for Schedule {
                     return vec![];
                 }
                 let mut groups = agenda_groups(data, locale);
+                if let Some(format) = &day_label {
+                    for day in &mut groups {
+                        day.label = format(day.date);
+                    }
+                }
                 if matches!(view, ScheduleView::Day | ScheduleView::Week) {
                     for group in &mut groups {
                         group.rows.retain(|row| row.all_day);
@@ -818,12 +960,14 @@ impl Widget for Schedule {
         let size = self.common.size;
         let unstyled = self.common.unstyled;
         let s = state.clone();
+        let event_content = self.agenda_content.clone();
         if self.with_all_day || !matches!(view, ScheduleView::Day | ScheduleView::Week) {
             glory::ui::each(groups)
                 .key(|day| day.date)
                 .children(move |entry| {
                     let day = entry.value;
                     AgendaDayWidget {
+                        event_content: event_content.clone(),
                         day,
                         state: s.clone(),
                         theme: theme.clone(),
@@ -854,6 +998,9 @@ impl Widget for Schedule {
                     }),
                     viewport_height: self.viewport_height,
                     slot_height: self.slot_height,
+                    labels: self.timeline_labels.clone(),
+                    minimum_column_width: self.minimum_column_width,
+                    gutter_width: self.timeline_gutter_width,
                 },
             )?;
         } else if view != ScheduleView::Agenda {
@@ -904,6 +1051,7 @@ impl Widget for Schedule {
 }
 #[derive(Clone)]
 struct AgendaRow {
+    color: Option<glory::style::Color>,
     key: ScheduleKey,
     candidate: u32,
     interval: ScheduleInterval,
@@ -911,6 +1059,35 @@ struct AgendaRow {
     resource: String,
     all_day: bool,
     selectable: bool,
+}
+impl AgendaRow {
+    fn paint(
+        &self,
+        theme: &crate::Theme,
+        chosen: bool,
+    ) -> (
+        glory::style::Color,
+        glory::style::Color,
+        glory::style::Color,
+    ) {
+        let accent = self.color.unwrap_or(theme.accent);
+        let surface = if chosen {
+            accent
+        } else if self.color.is_some() {
+            let tint = |a: u8, b: u8| ((u16::from(a) + 4 * u16::from(b)) / 5) as u8;
+            glory::style::Color(
+                tint(accent.0, theme.surface.0),
+                tint(accent.1, theme.surface.1),
+                tint(accent.2, theme.surface.2),
+                255,
+            )
+        } else {
+            theme.accent_soft
+        };
+        let ink =
+            theme.contrasting_foreground(surface, if chosen { theme.on_accent } else { accent });
+        (surface, ink, accent)
+    }
 }
 #[derive(Clone)]
 struct AgendaDay {
@@ -941,6 +1118,7 @@ fn agenda_groups(data: &snapshot::Snapshot, locale: DateLocale) -> Vec<AgendaDay
             candidate: occurrence.candidate_index(),
             interval: occurrence.interval(),
             title: event.title().into(),
+            color: event.event_color(),
             resource: event
                 .resource_key()
                 .map(|key| key.as_str().to_owned())
@@ -952,6 +1130,7 @@ fn agenda_groups(data: &snapshot::Snapshot, locale: DateLocale) -> Vec<AgendaDay
     groups
 }
 struct AgendaDayWidget {
+    event_content: Option<AgendaContent>,
     day: Cage<AgendaDay>,
     state: Rc<Controller>,
     theme: crate::Theme,
@@ -996,11 +1175,13 @@ impl Widget for AgendaDayWidget {
         let theme = self.theme.clone();
         let size = self.size;
         let unstyled = self.unstyled;
+        let event_content = self.event_content.clone();
         glory::ui::each(day.map(|day| day.rows.clone()))
             .key(|row| (row.key.clone(), row.interval.start()))
             .children(move |entry| {
                 let row = entry.value;
                 AgendaEventWidget {
+                    event_content: event_content.clone(),
                     row,
                     state: state.clone(),
                     theme: theme.clone(),
@@ -1014,6 +1195,7 @@ impl Widget for AgendaDayWidget {
     }
 }
 struct AgendaEventWidget {
+    event_content: Option<AgendaContent>,
     row: Cage<AgendaRow>,
     state: Rc<Controller>,
     theme: crate::Theme,
@@ -1110,6 +1292,13 @@ impl Widget for AgendaEventWidget {
                 state.report(state.event(&value));
                 state.activated.emit(state.owner, Event::Activate);
             });
+        if let Some(content) = &self.event_content {
+            button = button.name(label).label("").fill(content(
+                row.with(|r| r.key.clone()),
+                row.map(|r| r.title.clone()).into(),
+                row.map(|r| r.interval).into(),
+            ));
+        }
         if self.unstyled {
             button = button.unstyled();
         }

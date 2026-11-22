@@ -81,6 +81,10 @@ macro_rules! text_input_methods {
             self.input = self.input.loading_position(value);
             self
         }
+        pub fn bottom_section(mut self, value: impl glory::ui::IntoChildren) -> Self {
+            self.input = self.input.bottom_section(value);
+            self
+        }
         pub fn left_section(mut self, value: impl glory::ui::IntoChildren) -> Self {
             self.input = self.input.left_section(value);
             self

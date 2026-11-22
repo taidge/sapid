@@ -20,6 +20,13 @@ Use disabled when selection must be unavailable, with its corresponding focus
 behavior. Five theme sizes affect the actual select; platform popup appearance,
 keyboard conventions and multiple-selection gestures remain host-owned.
 
+The Usage panel lets you change `NativeSelectVariant` (Default, Filled or
+Unstyled), control size and corner radius while keeping the selected value.
+The label, description and error update through `Field`. Its `with_asterisk`
+builder controls the visible label marker independently of form validation.
+Styled single-row dropdowns show paired chevrons at the trailing edge. Listboxes
+keep their native row presentation.
+
 The public page separates native groups/disabled options, single/multiple modes,
 controlled/required/disabled states and sizes into four complete compiled source
 examples. Custom popup children, matching and filtering belong to Select or

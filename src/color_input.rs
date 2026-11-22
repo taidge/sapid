@@ -98,6 +98,7 @@ pub struct ColorInput {
     picker: bool,
     direction: Direction,
     format: ColorFormat,
+    placeholder: Vary<String>,
     fix_on_blur: bool,
     disallow_input: bool,
     preview: bool,
@@ -135,6 +136,7 @@ pub fn color_input(key: impl Into<String>) -> ColorInput {
         picker: true,
         direction: Direction::Ltr,
         format: ColorFormat::Hex,
+        placeholder: String::new().into(),
         fix_on_blur: true,
         disallow_input: false,
         preview: true,
@@ -215,6 +217,10 @@ impl ColorInput {
     }
     pub fn value(mut self, value: impl Into<Vary<String>>) -> Self {
         self.value.source = Some(value.into());
+        self
+    }
+    pub fn placeholder(mut self, value: impl Into<Vary<String>>) -> Self {
+        self.placeholder = value.into();
         self
     }
     pub fn default_value(mut self, value: impl Into<String>) -> Self {
@@ -483,6 +489,7 @@ impl Widget for ColorInput {
             .theme(self.common.theme.clone())
             .size(self.common.size)
             .value(accepted)
+            .placeholder(self.placeholder.clone())
             .enabled(enabled.clone())
             .readonly(scope.bond({
                 let readonly = self.readonly.clone();
@@ -751,6 +758,7 @@ impl Widget for ColorInput {
                     let weak = palette_scope.clone();
                     swatch_widgets.push(Box::new(
                         crate::color_swatch(color)
+                            .class("sapid-color-picker-swatch")
                             .theme(theme.clone())
                             .style(crate::color_swatch::palette_cell_style())
                             .side(
@@ -803,6 +811,7 @@ impl Widget for ColorInput {
                 if !swatch_widgets.is_empty() {
                     content.push(Box::new(
                         crate::group()
+                            .class("sapid-color-picker-swatches")
                             .theme(theme.clone())
                             .style(crate::color_swatch::palette_style(swatches_per_row))
                             .gap(6.)
@@ -1054,7 +1063,10 @@ impl Widget for ColorInput {
             if let Some(icon) = self.eye_dropper_icon.take() {
                 button = button.fill(icon);
             } else {
-                button = button.fill(glory::ui::text().content("◉"));
+                button = button.fill(crate::input_actions::glyph(
+                    crate::Icon::EyeDropper,
+                    self.common.theme.muted,
+                ));
             }
             editor = editor.fill(button);
         }

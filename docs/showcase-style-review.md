@@ -3,6 +3,17 @@
 后续的全量 API/功能核对与实施批次见 [181 项 Mantine 对照报告](mantine-api-comparison.md)，
 以及 [完整 Props/本地入口索引](mantine-api-surface.md)。本页保留第一轮样式修复的记录。
 
+## 2026-11-22 逐例核对
+
+[Mantine 9.8.2 对照清单](showcase-mantine-examples.json) 按官方页面的示例顺序记录本地章节、配置名和 Styles API 选择器。
+同一页的同名章节按出现位置区分。已有独立示例记为 `paired`，一个本地章节只覆盖部分行为时记为 `partial`，尚未找到对应实现时记为 `missing`。
+
+在 Sapid 仓库运行 `node scripts/showcase-example-review.cjs local` 和 `node scripts/showcase-example-review.cjs upstream` 可分别采集两侧截图。
+`SAPID_SHOWCASE_BASE` 指向本地站点，`SAPID_MANTINE_BASE` 可指向相同版本的 Mantine 文档镜像。默认宽度 1336px，将 `SAPID_REVIEW_WIDTH` 设为 `390` 可单独保存手机截图。
+运行 `node scripts/showcase-panel-review.cjs` 可操作各示例的配置项并记录预览变化。
+在 Web 示例工作区运行 `cargo metadata --no-deps --format-version 1` 后，将其输出的 `target_directory` 下的 `example-review` 目录传给 `scripts/showcase-example-report.py` 即可生成并排报告。
+`--measure-images` 量测截图中的可见边界。`--check-panels` 会列出缺少的面板、字段、选择器和缺少操作证据的属性。
+
 Reviewed 2026-10-25 against [Mantine Core](https://mantine.dev/core/package/),
 [MultiSelect](https://mantine.dev/core/multi-select/),
 [Pill](https://mantine.dev/core/pill/),

@@ -37,7 +37,7 @@ const { chromium, base, outputPath, writeReport } = require('./showcase-browser-
         result.currentPage=await page.locator('.site-demo [aria-current=page]').first().innerText();
       }
       if(slug==='accordion') {
-        const trigger=page.getByRole('button',{name:'How long does shipping take?',exact:true}).first();
+        const trigger=page.getByRole('button',{name:'Apples',exact:true}).first();
         const before=await trigger.getAttribute('aria-expanded');await trigger.click();await tick();
         result.toggle={before,after:await trigger.getAttribute('aria-expanded')};
       }

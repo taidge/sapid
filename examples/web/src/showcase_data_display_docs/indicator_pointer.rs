@@ -1,34 +1,36 @@
 use glory::prelude::*;
+
 pub fn demo(theme: sapid::Theme) -> impl Widget {
-    widget(move |scope| {
-        let count = scope.cage(0u32);
-        let show = scope.cage(true);
-        sapid::stack()
-            .align(Align::Start)
+    sapid::group().theme(theme.clone()).fill(
+        sapid::indicator()
             .theme(theme.clone())
-            .gap(16.)
-            .fill((
-                sapid::indicator()
-                    .theme(theme.clone())
-                    .position(sapid::IndicatorPosition::MiddleCenter)
-                    .diameter(26.)
-                    .label("!")
-                    .visible(show)
-                    .fill(
-                        sapid::button()
-                            .theme(theme.clone())
-                            .label("Confirm notification")
-                            .on_press(move || count.revise(|n| *n += 1)),
-                    ),
-                sapid::checkbox()
-                    .theme(theme.clone())
-                    .label("Show overlapping marker")
-                    .checked(show)
-                    .on_checked_change(move |v| show.revise(|s| *s = v)),
-                sapid::text()
-                    .theme(theme.clone())
-                    .content(count.map(|n| format!("Confirmed {n} times"))),
-            ))
-            .show_in(scope)
-    })
+            .diameter(16.)
+            .with_border(false)
+            .label("New")
+            .class("site-inline-indicator")
+            .fill(portrait(theme.clone(), true, false)),
+    )
+}
+
+fn portrait(theme: sapid::Theme, alternate: bool, round: bool) -> impl Widget {
+    let media = option_env!("SAPID_SHOWCASE_MEDIA").unwrap_or("/assets");
+    let file = if alternate {
+        "team-member-photo.png"
+    } else {
+        "menu-user-avatar.png"
+    };
+    sapid::avatar("Portrait")
+        .theme(theme)
+        .source(format!("{media}/{file}"))
+        .shape(if round {
+            sapid::AvatarShape::Circle
+        } else {
+            sapid::AvatarShape::Square
+        })
+        .style(
+            Style::new()
+                .width(Length::Px(56.))
+                .height(Length::Px(56.))
+                .radius(if round { 28. } else { 4. }),
+        )
 }

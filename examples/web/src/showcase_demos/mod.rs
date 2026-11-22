@@ -172,10 +172,6 @@ mod copy_button_usage;
 pub fn copy_button_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(copy_button_usage::demo(theme))
 }
-mod core_tabs;
-pub fn core_tabs_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(core_tabs::demo(theme))
-}
 mod data_list_usage;
 pub fn data_list_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(data_list_usage::demo(theme))
@@ -259,10 +255,6 @@ pub fn focus_trap_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
 mod focused_breadcrumbs;
 pub fn focused_breadcrumbs_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(focused_breadcrumbs::demo(theme))
-}
-mod focused_pagination;
-pub fn focused_pagination_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(focused_pagination::demo(theme))
 }
 mod funnel_chart_usage;
 pub fn funnel_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
@@ -435,6 +427,10 @@ pub fn overflow_list_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
 mod overlay_usage;
 pub fn overlay_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(overlay_usage::demo(theme))
+}
+mod pagination_usage;
+pub fn pagination_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
+    Box::new(pagination_usage::demo(theme))
 }
 mod paper_usage;
 pub fn paper_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
@@ -620,6 +616,10 @@ mod table_usage;
 pub fn table_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(table_usage::demo(theme))
 }
+mod tabs_usage;
+pub fn tabs_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
+    Box::new(tabs_usage::demo(theme))
+}
 mod tags_input_usage;
 pub fn tags_input_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(tags_input_usage::demo(theme))
@@ -728,3 +728,4 @@ mod year_view_usage;
 pub fn year_view_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(year_view_usage::demo(theme))
 }
+pub(crate) use toolbar_usage::{ToolbarExample, format_toolbar};

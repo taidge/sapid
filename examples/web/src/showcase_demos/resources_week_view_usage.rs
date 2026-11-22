@@ -1,166 +1,226 @@
 use glory::prelude::*;
 use sapid::prelude::*;
-fn day(value: &str) -> CivilDate {
-    CivilDate::parse_iso(value).unwrap()
-}
-fn dt(value: &str) -> LocalDateTime {
-    parse_local_date_time(value).unwrap()
-}
-fn window(view: ScheduleView) -> ScheduleWindow {
-    match view {
-        ScheduleView::Day => ScheduleWindow::days(day("2026-11-04"), 1),
-        ScheduleView::Week | ScheduleView::Agenda => ScheduleWindow::days(day("2026-11-02"), 7),
-        ScheduleView::Month | ScheduleView::MobileMonth => {
-            ScheduleWindow::month(YearMonth::new(2026, 11).unwrap())
-        }
-        ScheduleView::Year => ScheduleWindow::year(CivilYear::new(2026).unwrap()),
-    }
-    .unwrap()
-}
-fn interval_label(span: ScheduleInterval) -> String {
-    format!(
-        "{} to {} (end exclusive)",
-        format_local_date_time(span.start()),
-        format_local_date_time(span.end())
-    )
-}
-fn selection_label(data: &ScheduleData, value: &Option<ScheduleSelection>) -> String {
-    match value {
-        Some(ScheduleSelection::Event { key, interval, .. }) => format!(
-            "Selected: {} · {}",
-            data.events()
-                .iter()
-                .find(|event| event.key() == key)
-                .map_or("Event", |event| event.title()),
-            interval_label(*interval)
-        ),
-        Some(ScheduleSelection::Slot { interval, .. }) => {
-            format!("Selected time: {}", interval_label(*interval))
-        }
-        None => "Choose an event or an available time.".to_owned(),
-    }
-}
-fn resource_window(view: ResourceScheduleView) -> ScheduleWindow {
-    window(match view {
-        ResourceScheduleView::Day => ScheduleView::Day,
-        ResourceScheduleView::Week => ScheduleView::Week,
-        ResourceScheduleView::Month => ScheduleView::Month,
-    })
-}
-fn resource_sample(view: ResourceScheduleView) -> ResourceScheduleData {
-    let rooms = [
-        ("room-a", "Room A", "Project planning"),
-        ("room-b", "Room B", "Design review"),
-        ("room-c", "Room C", "Workshop"),
-        ("room-d", "Room D", "Testing"),
-        ("room-e", "Room E", "Interview"),
-        ("room-f", "Room F", "Research"),
-    ];
-    let permission = SchedulePermissions {
-        select: true,
-        move_event: true,
-        resize_event: true,
-    };
-    let mut events = rooms
-        .iter()
-        .enumerate()
-        .map(|(index, (room, _, title))| {
-            ScheduleEvent::new(
-                ScheduleKey::new(format!("booking-{index}")).unwrap(),
-                *title,
-                ScheduleInterval::new(dt("2026-11-04T09:00"), dt("2026-11-04T10:00")).unwrap(),
-            )
-            .unwrap()
-            .resource(ScheduleKey::new(*room).unwrap())
-            .permissions(permission)
-        })
-        .collect::<Vec<_>>();
-    events.push(
-        ScheduleEvent::new(
-            ScheduleKey::new("overlap").unwrap(),
-            "Client review",
-            ScheduleInterval::new(dt("2026-11-04T09:30"), dt("2026-11-04T10:30")).unwrap(),
-        )
-        .unwrap()
-        .resource(ScheduleKey::new("room-a").unwrap())
-        .permissions(permission),
-    );
-    events.push(
-        ScheduleEvent::new(
-            ScheduleKey::new("release").unwrap(),
-            "Release day",
-            ScheduleInterval::all_day(day("2026-11-04"), day("2026-11-05")).unwrap(),
-        )
-        .unwrap()
-        .all_day()
-        .unwrap()
-        .resource(ScheduleKey::new("room-a").unwrap()),
-    );
-    ResourceScheduleData::new(
-        ScheduleData::new(ScheduleZone::Civil, resource_window(view), events).unwrap(),
-        ScheduleResources::new(rooms.iter().map(|(room, title, _)| {
-            ScheduleResource::new(ScheduleKey::new(*room).unwrap(), *title).unwrap()
-        }))
-        .unwrap(),
-        ScheduleResourceWindow::new(0, 2).unwrap(),
-    )
-    .unwrap()
-}
-fn resource_request(source: Cage<ResourceScheduleData>, request: ResourceScheduleRequest) {
-    source.revise(|current| {
-        *current = ResourceScheduleData::new(
-            ScheduleData::new(
-                request.zone,
-                request.window,
-                current.data().events().iter().cloned(),
-            )
-            .unwrap(),
-            current.resources().clone(),
-            request.resource_window,
-        )
-        .unwrap()
-    });
-}
 pub fn demo(theme: sapid::Theme) -> impl Widget {
     widget(move |scope| {
-        let data = scope.cage(resource_sample(ResourceScheduleView::Week));
+        let data = scope.cage(controls::meeting_rooms(
+            ResourceScheduleView::Week,
+            false,
+            false,
+        ));
         let selected = scope.cage(None::<ScheduleSelection>);
-        let window_status = data.map(|model| {
-            format!(
-                "Rooms: {} · {} to {} (end exclusive)",
-                model
-                    .visible_resources()
-                    .iter()
-                    .map(|room| room.title())
-                    .collect::<Vec<_>>()
-                    .join(", "),
-                model.data().window().start().date(),
-                model.data().window().end().date()
-            )
-        });
-        let selection_status = scope.bond(move || {
-            data.with(|model| selected.with(|value| selection_label(model.data(), value)))
-        });
-        let bookings = resources_week_view("resources-week-view-primary", data)
+        let chart = sapid::resources_week_view("resources-week-view-primary", data)
             .theme(theme.clone())
-            .name("Room bookings")
+            .axis(ResourceAxis::Rows)
+            .resource_page_size(4)
+            .column_width(96.)
             .viewport_height(320.)
-            .column_width(160.)
-            .resource_page_size(2)
-            .time_window(ScheduleTimeWindow::new(8 * 60, 16 * 60, 30).unwrap())
+            .time_window(ScheduleTimeWindow::new(8 * 60, 18 * 60, 60).unwrap())
             .selection(selected)
-            .on_selection_change(move |value| selected.revise(|old| *old = Some(value)))
-            .on_window_request(move |request| {
-                resource_request(data, request);
-                selected.revise(|old| *old = None);
-            });
-        sapid::stack()
-            .theme(theme.clone())
-            .fill((
-                bookings,
-                sapid::text().theme(theme.clone()).content(window_status),
-                sapid::text().theme(theme.clone()).content(selection_status),
-            ))
+            .on_selection_change(move |next| selected.revise(|v| *v = Some(next)))
+            .on_window_request(move |request| controls::change_booking_window(data, request));
+        let summary = scope.bond(move || {
+            data.with(|current| {
+                selected.with(|v| match v {
+                    Some(ScheduleSelection::Event { key, .. }) => current
+                        .data()
+                        .events()
+                        .iter()
+                        .find(|e| e.key() == key)
+                        .map_or_else(String::new, |e| format!("Selected: {}", e.title())),
+                    _ => String::new(),
+                })
+            })
+        });
+        view()
+            .fill((chart, sapid::text().theme(theme.clone()).content(summary)))
             .show_in(scope)
     })
+}
+
+#[allow(unused_imports)]
+mod controls {
+    use glory::prelude::*;
+    use glory::style::{Color, FlexWrap};
+    use sapid::{Size, Theme};
+
+    pub fn schedule_date(value: &str) -> sapid::CivilDate {
+        use sapid::prelude::*;
+        CivilDate::parse_iso(value).unwrap()
+    }
+    pub fn schedule_time(value: &str) -> sapid::LocalDateTime {
+        use sapid::prelude::*;
+        parse_local_date_time(value).unwrap()
+    }
+    pub fn schedule_period(view: sapid::ScheduleView) -> sapid::ScheduleWindow {
+        use sapid::prelude::*;
+        match view {
+            ScheduleView::Day => ScheduleWindow::days(schedule_date("2026-11-04"), 1),
+            ScheduleView::Week | ScheduleView::Agenda => {
+                ScheduleWindow::days(schedule_date("2026-11-02"), 7)
+            }
+            ScheduleView::Month | ScheduleView::MobileMonth => {
+                ScheduleWindow::month(YearMonth::new(2026, 11).unwrap())
+            }
+            ScheduleView::Year => ScheduleWindow::year(CivilYear::new(2026).unwrap()),
+        }
+        .unwrap()
+    }
+    pub fn meeting_rooms(
+        view: sapid::ResourceScheduleView,
+        all_day: bool,
+        recurring: bool,
+    ) -> sapid::ResourceScheduleData {
+        use sapid::prelude::*;
+        let view = match view {
+            ResourceScheduleView::Day => ScheduleView::Day,
+            ResourceScheduleView::Week => ScheduleView::Week,
+            ResourceScheduleView::Month => ScheduleView::Month,
+        };
+        let rooms = ScheduleResources::new(
+            [
+                ("tokyo", "Meeting room: Tokyo"),
+                ("paris", "Meeting room: Paris"),
+                ("new-york", "Meeting room: New York"),
+                ("london", "Meeting room: London"),
+            ]
+            .map(|(id, label)| {
+                ScheduleResource::new(ScheduleKey::new(id).unwrap(), label).unwrap()
+            }),
+        )
+        .unwrap();
+        let mut events = [
+            (
+                "Team Standup",
+                "tokyo",
+                "09:00",
+                "09:30",
+                Color(34, 139, 230, 255),
+            ),
+            (
+                "Sprint Planning",
+                "tokyo",
+                "10:00",
+                "11:30",
+                Color(64, 192, 87, 255),
+            ),
+            (
+                "Client Call",
+                "paris",
+                "09:30",
+                "10:30",
+                Color(121, 80, 242, 255),
+            ),
+            (
+                "Design Review",
+                "paris",
+                "13:00",
+                "14:00",
+                Color(253, 126, 20, 255),
+            ),
+            (
+                "1:1 Meeting",
+                "new-york",
+                "11:00",
+                "11:30",
+                Color(21, 170, 191, 255),
+            ),
+            (
+                "Workshop",
+                "new-york",
+                "14:00",
+                "16:00",
+                Color(230, 73, 128, 255),
+            ),
+            (
+                "Architecture Review",
+                "london",
+                "10:00",
+                "11:00",
+                Color(250, 82, 82, 255),
+            ),
+            (
+                "Retrospective",
+                "london",
+                "15:00",
+                "16:00",
+                Color(190, 75, 219, 255),
+            ),
+        ]
+        .into_iter()
+        .enumerate()
+        .map(|(i, (title, room, start, end, color))| {
+            let interval = ScheduleInterval::new(
+                schedule_time(&format!("2026-11-04T{start}")),
+                schedule_time(&format!("2026-11-04T{end}")),
+            )
+            .unwrap();
+            let event = ScheduleEvent::new(
+                ScheduleKey::new(format!("booking-{i}")).unwrap(),
+                title,
+                interval,
+            )
+            .unwrap()
+            .color(color)
+            .resource(ScheduleKey::new(room).unwrap());
+            if recurring && i == 0 {
+                event
+                    .recurring(
+                        ScheduleRecurrence::new(
+                            RecurrenceFrequency::Daily,
+                            1,
+                            RecurrenceEnd::Count(14),
+                        )
+                        .unwrap(),
+                    )
+                    .unwrap()
+            } else {
+                event
+            }
+        })
+        .collect::<Vec<_>>();
+        if all_day {
+            events.push(
+                ScheduleEvent::new(
+                    ScheduleKey::new("conference").unwrap(),
+                    "Conference",
+                    ScheduleInterval::all_day(
+                        schedule_date("2026-11-04"),
+                        schedule_date("2026-11-06"),
+                    )
+                    .unwrap(),
+                )
+                .unwrap()
+                .all_day()
+                .unwrap()
+                .resource(ScheduleKey::new("paris").unwrap())
+                .color(Color(253, 126, 20, 255)),
+            );
+        }
+        ResourceScheduleData::new(
+            ScheduleData::new(ScheduleZone::Civil, schedule_period(view), events).unwrap(),
+            rooms,
+            ScheduleResourceWindow::new(0, 4).unwrap(),
+        )
+        .unwrap()
+    }
+
+    pub fn change_booking_window(
+        data: Cage<sapid::ResourceScheduleData>,
+        request: sapid::ResourceScheduleRequest,
+    ) {
+        use sapid::prelude::*;
+        data.revise(|current| {
+            *current = ResourceScheduleData::new(
+                ScheduleData::new(
+                    request.zone,
+                    request.window,
+                    current.data().events().iter().cloned(),
+                )
+                .unwrap(),
+                current.resources().clone(),
+                request.resource_window,
+            )
+            .unwrap();
+        });
+    }
 }

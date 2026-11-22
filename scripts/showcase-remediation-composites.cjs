@@ -71,6 +71,7 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
           assert(await editor.evaluate(element => element === window.keyedTabEditor));
         }
         if (slug === 'timeline') {
+          const primary=page.locator('.site-component-detail').filter({has:page.locator('#timeline-props-play')});
           const items=primary.locator('.sapid-timeline-item');
           const list=primary.locator('.sapid-timeline');
           await primary.getByRole('combobox',{name:'Align'}).selectOption('alternate');

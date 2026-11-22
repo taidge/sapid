@@ -13,7 +13,7 @@ use glory::ui::{Result, WeakScope, Widget};
 use glory::{Cage, Scope, Vary};
 use std::{
     cell::{Cell, RefCell},
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     rc::{Rc, Weak},
 };
 
@@ -34,6 +34,7 @@ struct Entry {
 }
 struct Registry {
     key: String,
+    spotlight: bool,
     owner: glory::core::InstanceId,
     pulse: Cage<()>,
     entries: RefCell<BTreeMap<String, Entry>>,
@@ -43,25 +44,44 @@ struct Registry {
 #[derive(Clone)]
 pub struct TourContext(Rc<Registry>);
 pub fn tour_context(scope: &Scope, key: impl Into<String>) -> Result<TourContext> {
-    let key = key.into();
-    composite::id("tour", &key, "context", "root")?;
-    let state = Rc::new(Registry {
-        key,
-        owner: scope.id(),
-        pulse: scope.cage(()),
-        entries: RefCell::new(BTreeMap::new()),
-        attached: Cell::new(false),
-    });
-    let weak = Rc::downgrade(&state);
-    scope.on_cleanup(move || {
-        if let Some(state) = weak.upgrade() {
-            let entries = std::mem::take(&mut *state.entries.borrow_mut());
-            drop(entries);
-        }
-    })?;
-    Ok(TourContext(state))
+    TourContext::create(scope, key.into(), false)
 }
 impl TourContext {
+    /// Create a tour that highlights each anchored step in a viewport backdrop.
+    /// Hosts without CSS anchor positioning retain the ordinary anchored dialog.
+    pub fn with_spotlight(scope: &Scope, key: impl Into<String>) -> Result<Self> {
+        Self::create(scope, key.into(), true)
+    }
+
+    fn target_id(&self, key: &str) -> Result<SemanticId> {
+        let id = composite::id("tour", &self.0.key, "target", key)?;
+        if self.0.spotlight {
+            Ok(SemanticId::new(format!("--{}", id.as_str()))?)
+        } else {
+            Ok(id)
+        }
+    }
+
+    fn create(scope: &Scope, key: String, spotlight: bool) -> Result<Self> {
+        composite::id("tour", &key, "context", "root")?;
+        let state = Rc::new(Registry {
+            key,
+            spotlight,
+            owner: scope.id(),
+            pulse: scope.cage(()),
+            entries: RefCell::new(BTreeMap::new()),
+            attached: Cell::new(false),
+        });
+        let weak = Rc::downgrade(&state);
+        scope.on_cleanup(move || {
+            if let Some(state) = weak.upgrade() {
+                let entries = std::mem::take(&mut *state.entries.borrow_mut());
+                drop(entries);
+            }
+        })?;
+        Ok(TourContext(state))
+    }
+
     pub fn len(&self) -> usize {
         self.0.entries.borrow().len()
     }
@@ -105,7 +125,7 @@ impl TourTarget {
 impl Widget for TourTarget {
     fn build(&mut self, scope: &Scope) -> Result {
         self.context.ensure(scope)?;
-        let id = composite::id("tour", &self.context.0.key, "target", &self.key)?;
+        let id = self.context.target_id(&self.key)?;
         {
             let mut entries = self.context.0.entries.borrow_mut();
             if entries.contains_key(&self.key) {
@@ -197,6 +217,7 @@ struct State {
     weak: WeakScope,
     context: TourContext,
     steps: Vec<TourStep>,
+    targets: BTreeMap<String, Option<String>>,
     current: Control<usize>,
     input_current: Vary<usize>,
     open: Control<bool>,
@@ -220,8 +241,17 @@ impl State {
         }
         Ok(index)
     }
+    fn target_key(&self, index: usize) -> Option<&str> {
+        let key = &self.steps[index].key;
+        match self.targets.get(key) {
+            Some(value) => value.as_deref(),
+            None => Some(key),
+        }
+    }
     fn entry(&self) -> Result<Option<Entry>> {
-        let key = &self.steps[self.index()?].key;
+        let Some(key) = self.target_key(self.index()?) else {
+            return Ok(None);
+        };
         Ok(self
             .context
             .0
@@ -274,6 +304,15 @@ impl State {
         self.ensure()?;
         self.cancel_work();
         let current = self.index()?;
+        if self.target_key(current).is_none() {
+            self.shown.set(None);
+            self.loss.set(false);
+            let visible = self.open.source.try_get()?;
+            if self.visible.try_get()? != visible {
+                self.visible.try_revise(|v| *v = visible)?;
+            }
+            return Ok(());
+        }
         if self.shown.get()
             != self
                 .entry()?
@@ -415,10 +454,22 @@ pub struct Tour {
     context: TourContext,
     common: Common,
     steps: Vec<TourStep>,
+    targets: BTreeMap<String, Option<String>>,
+    placements: BTreeMap<String, AnchorPlacement>,
+    over_target: BTreeSet<String>,
+    previous_label: String,
+    next_label: String,
+    finish_label: String,
+    cancel_label: String,
+    counter: Rc<dyn Fn(usize, usize) -> String>,
     overflow: bool,
     current: Value<usize>,
     open: Value<bool>,
     placement: AnchorPlacement,
+    escape: Vary<bool>,
+    outside: Vary<bool>,
+    show_cancel: Vary<bool>,
+    compact_navigation: bool,
     changed: Option<Box<dyn FnMut(usize)>>,
     opened: Option<Box<dyn FnMut(bool)>>,
     cancelled: Option<Box<dyn FnMut(DismissReason)>>,
@@ -432,10 +483,22 @@ pub fn tour(context: &TourContext, key: impl Into<String>) -> Tour {
         context: context.clone(),
         common: Common::default(),
         steps: Vec::new(),
+        targets: BTreeMap::new(),
+        placements: BTreeMap::new(),
+        over_target: BTreeSet::new(),
+        previous_label: "Previous step".into(),
+        next_label: "Next step".into(),
+        finish_label: "Finish".into(),
+        cancel_label: "Cancel tour".into(),
+        counter: Rc::new(|current, total| format!("Step {current} of {total}")),
         overflow: false,
         current: Value::default(),
         open: Value::default(),
         placement: AnchorPlacement::default(),
+        escape: true.into(),
+        outside: false.into(),
+        show_cancel: true.into(),
+        compact_navigation: false,
         changed: None,
         opened: None,
         cancelled: None,
@@ -445,6 +508,23 @@ pub fn tour(context: &TourContext, key: impl Into<String>) -> Tour {
     }
 }
 impl Tour {
+    /// Place the progress count and compact navigation controls in one footer.
+    pub fn compact_navigation(mut self, value: bool) -> Self {
+        self.compact_navigation = value;
+        self
+    }
+    pub fn close_on_escape(mut self, value: impl Into<Vary<bool>>) -> Self {
+        self.escape = value.into();
+        self
+    }
+    pub fn close_on_outside_press(mut self, value: impl Into<Vary<bool>>) -> Self {
+        self.outside = value.into();
+        self
+    }
+    pub fn with_close_button(mut self, value: impl Into<Vary<bool>>) -> Self {
+        self.show_cancel = value.into();
+        self
+    }
     pub fn step(mut self, step: TourStep) -> Self {
         if self.steps.len() < MAX_TOUR_STEPS
             && step.key.len() <= 64
@@ -458,6 +538,66 @@ impl Tour {
         }
         self
     }
+    /// Display this step in the viewport center without registering a target.
+    pub fn centered_step(
+        mut self,
+        title: impl Into<String>,
+        description: impl Into<String>,
+    ) -> Self {
+        let key = format!("centered-{}", self.steps.len());
+        self.targets.insert(key.clone(), None);
+        self.step(tour_step(key, title, description))
+    }
+
+    /// Give a step its own identity and position while reusing a registered target.
+    pub fn anchored_step(
+        mut self,
+        step: TourStep,
+        target: impl Into<String>,
+        placement: AnchorPlacement,
+    ) -> Self {
+        let target = target.into();
+        if target.len() > 64 || SemanticId::new(&target).is_err() || placement.validate().is_err() {
+            self.overflow = true;
+            return self;
+        }
+        self.targets.insert(step.key.clone(), Some(target));
+        self.placements.insert(step.key.clone(), placement);
+        self.step(step)
+    }
+
+    /// Center this step over its target, keeping the panel inside the viewport.
+    pub fn over_target_step(mut self, step: TourStep, target: impl Into<String>) -> Self {
+        self.over_target.insert(step.key.clone());
+        self.anchored_step(
+            step,
+            target,
+            AnchorPlacement::new(
+                glory::render::AnchorSide::Bottom,
+                glory::render::AnchorAlign::Center,
+            ),
+        )
+    }
+
+    pub fn navigation_labels(
+        mut self,
+        previous: impl Into<String>,
+        next: impl Into<String>,
+        finish: impl Into<String>,
+        cancel: impl Into<String>,
+    ) -> Self {
+        self.previous_label = previous.into();
+        self.next_label = next.into();
+        self.finish_label = finish.into();
+        self.cancel_label = cancel.into();
+        self
+    }
+
+    pub fn step_counter(mut self, label: impl Fn(usize, usize) -> String + 'static) -> Self {
+        self.counter = Rc::new(label);
+        self
+    }
+
     pub fn steps(mut self, steps: impl IntoIterator<Item = TourStep>) -> Self {
         for step in steps {
             if self.steps.len() == MAX_TOUR_STEPS {
@@ -559,6 +699,7 @@ impl Widget for Tour {
             weak: scope.downgrade(),
             context: self.context.clone(),
             steps: std::mem::take(&mut self.steps),
+            targets: std::mem::take(&mut self.targets),
             current,
             input_current,
             open,
@@ -584,31 +725,68 @@ impl Widget for Tour {
         })?;
         let s = state.clone();
         let placement = self.placement;
+        let placements = std::mem::take(&mut self.placements);
+        let outside = self.outside.clone();
+        let escape = self.escape.clone();
         let labelled = title_id.clone();
         let described = desc_id.clone();
+        let over_target = std::mem::take(&mut self.over_target);
+        let styled = state.clone();
+        let spotlight = self.context.0.spotlight;
+        let compact = self.compact_navigation;
+        let classes = scope.bond(move || {
+            let mut classes = "sapid-tour sapid-layer".to_owned();
+            if compact {
+                classes.push_str(" sapid-tour-compact");
+            }
+            if spotlight {
+                classes.push_str(" sapid-tour-spotlight");
+            }
+            if over_target.contains(&styled.steps[styled.current.source.get()].key) {
+                classes.push_str(" sapid-tour-over-target");
+            }
+            classes
+        });
         let mut panel = glory::ui::view()
-            .class("sapid-tour sapid-layer")
+            .class(classes)
             .role(Role::Dialog)
             .focus(FocusMode::Programmatic)
             .semantics(scope.bond(move || {
                 s.context.0.pulse.get();
-                let target_key = &s.steps[s.current.source.get()].key;
-                let anchor = composite::id("tour", &s.context.0.key, "target", target_key)
-                    .expect("validated Tour target key");
-                let entry = s.context.0.entries.borrow().get(target_key).cloned();
+                let index = s.current.source.get();
+                let target = s.target_key(index);
+                let anchor =
+                    target.map(|key| s.context.target_id(key).expect("validated Tour target key"));
+                let detached = target.is_some_and(|key| {
+                    s.context
+                        .0
+                        .entries
+                        .borrow()
+                        .get(key)
+                        .is_none_or(|e| e.node.is_none())
+                });
+                let position = if target.is_some() {
+                    LayerPlacement::Anchor(
+                        placements
+                            .get(&s.steps[index].key)
+                            .copied()
+                            .unwrap_or(placement),
+                    )
+                } else {
+                    LayerPlacement::Center
+                };
                 composite::metadata(Semantics {
                     id: Some(id.clone()),
                     labelled_by: Some(labelled.clone()),
                     described_by: Some(described.clone()),
-                    hidden: !s.open.source.get()
-                        || !s.visible.get()
-                        || entry.is_none_or(|e| e.node.is_none()),
+                    hidden: !s.open.source.get() || !s.visible.get() || detached,
                     layer: Some(Layer {
                         modal: false,
-                        outside: false,
-                        placement: LayerPlacement::Anchor(placement),
-                        anchor: Some(anchor.clone()),
-                        return_focus: Some(anchor),
+                        outside: outside.get(),
+                        escape: escape.get(),
+                        placement: position,
+                        anchor: anchor.clone(),
+                        return_focus: anchor,
                         ..Default::default()
                     }),
                     ..Default::default()
@@ -648,8 +826,8 @@ impl Widget for Tour {
         let s = state.clone();
         let description = scope.bond(move || s.steps[s.current.source.get()].description.clone());
         let s = state.clone();
-        let progress =
-            scope.bond(move || format!("Step {} of {}", s.current.source.get() + 1, s.steps.len()));
+        let counter = self.counter.clone();
+        let progress = scope.bond(move || counter(s.current.source.get() + 1, s.steps.len()));
         let h = TourHandle(Rc::downgrade(&state));
         let previous = h.clone();
         let next = h.clone();
@@ -657,13 +835,14 @@ impl Widget for Tour {
         let s = state.clone();
         let previous_enabled = scope.bond(move || s.current.source.get() > 0);
         let s = state.clone();
+        let next_word = self.next_label.clone();
+        let finish_word = self.finish_label.clone();
         let next_label = scope.bond(move || {
             if s.current.source.get() + 1 == s.steps.len() {
-                "Finish"
+                finish_word.clone()
             } else {
-                "Next step"
+                next_word.clone()
             }
-            .to_string()
         });
         let weak = scope.downgrade();
         let previous_scope = weak.clone();
@@ -672,7 +851,7 @@ impl Widget for Tour {
             .theme(self.common.theme.clone())
             .size(crate::Size::Small)
             .variant(crate::ButtonVariant::Outline)
-            .label("Previous step")
+            .label(self.previous_label.clone())
             .enabled(previous_enabled)
             .on_press(move || {
                 if let Err(error) = previous.previous()
@@ -694,9 +873,19 @@ impl Widget for Tour {
             });
         let mut cancel_button = crate::button()
             .theme(self.common.theme.clone())
+            .style({
+                let visible = self.show_cancel.clone();
+                scope.bond(move || {
+                    if visible.get() {
+                        Style::new()
+                    } else {
+                        Style::new().display(glory::style::Display::None)
+                    }
+                })
+            })
             .size(crate::Size::Small)
             .variant(crate::ButtonVariant::Subtle)
-            .label("Cancel tour")
+            .label(self.cancel_label.clone())
             .on_press(move || {
                 if let Err(error) = cancel.cancel()
                     && let Some(scope) = weak.upgrade()
@@ -722,6 +911,21 @@ impl Widget for Tour {
                 .theme
                 .description(crate::Size::Small)
                 .font_weight(400.);
+        }
+        if compact {
+            let close = h.clone();
+            let scope_ref = scope.downgrade();
+            let close_button = crate::close_button()
+                .theme(self.common.theme.clone())
+                .name("Close tour")
+                .on_press(move || {
+                    if let Err(error) = close.cancel()
+                        && let Some(scope) = scope_ref.upgrade()
+                    {
+                        scope.report_error(error);
+                    }
+                });
+            panel = panel.fill(close_button);
         }
         panel
             .fill((

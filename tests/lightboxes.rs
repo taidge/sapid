@@ -254,3 +254,27 @@ fn external_gallery_openers_need_no_duplicate_builtin_trigger() {
     app.clear().unwrap();
     assert_eq!(app.stats().handlers, 0);
 }
+
+#[test]
+fn thumbnail_selection_and_loop_steps_update_the_same_gallery() {
+    let app = App::memory();
+    app.mount(
+        lightbox("loop")
+            .images(images())
+            .thumbnails(true)
+            .loop_navigation(true)
+            .default_open(true),
+    )
+    .unwrap();
+    let displayed = class(&app, "sapid-lightbox-image")[0];
+    app.dispatch(named(&app, "Previous image"), Event::Activate)
+        .unwrap();
+    assert!(text(&app).contains("Second caption"));
+    app.dispatch(named(&app, "Next image"), Event::Activate)
+        .unwrap();
+    assert!(text(&app).contains("First caption"));
+    app.dispatch(named(&app, "Show Second image"), Event::Activate)
+        .unwrap();
+    assert!(text(&app).contains("Second caption"));
+    assert_eq!(class(&app, "sapid-lightbox-image"), [displayed]);
+}

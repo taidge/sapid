@@ -148,6 +148,8 @@ struct State {
     within: Cell<Option<bool>>,
     max_values: usize,
     keep_branch_open: bool,
+    close_on_select: bool,
+    allow_deselect: bool,
 }
 impl State {
     fn report(&self, result: Result) {
@@ -199,7 +201,22 @@ impl State {
             .borrow()
             .clone()
             .unwrap_or_else(|| accepted.values.clone());
-        let next = accepted.model.toggle(&current, key).map_err(error)?;
+        let next = if self.allow_deselect
+            && !accepted.model.multiple()
+            && current
+                .paths()
+                .first()
+                .is_some_and(|path| path.leaf() == key)
+            && accepted
+                .model
+                .tree()
+                .index(key)
+                .is_some_and(|i| !accepted.model.tree().nodes()[i].disabled)
+        {
+            TreeChoices::default()
+        } else {
+            accepted.model.toggle(&current, key).map_err(error)?
+        };
         if next.paths().len() > self.max_values && next.paths().len() > current.paths().len() {
             return Ok(());
         }
@@ -209,7 +226,8 @@ impl State {
                 .tree()
                 .index(key)
                 .map(|index| &accepted.model.tree().nodes()[index]);
-            if !accepted.model.multiple()
+            if self.close_on_select
+                && !accepted.model.multiple()
                 && node.is_some_and(|node| {
                     !node.disabled
                         && (node.kind == TreeKind::Leaf
@@ -226,6 +244,7 @@ impl State {
         self.dirty.touch()?;
         self.changed.emit(self.owner, next);
         if self.owner.is_alive()
+            && self.close_on_select
             && !accepted.model.multiple()
             && (!self.keep_branch_open
                 || accepted
@@ -300,6 +319,9 @@ pub struct TreeSelect {
     invalid: Vary<bool>,
     columns: bool,
     keep_branch_open: bool,
+    close_on_select: bool,
+    allow_deselect: bool,
+    path_separator: Option<String>,
 }
 pub fn tree_select(key: impl Into<String>) -> TreeSelect {
     TreeSelect {
@@ -338,6 +360,9 @@ pub fn tree_select(key: impl Into<String>) -> TreeSelect {
         invalid: false.into(),
         columns: false,
         keep_branch_open: false,
+        close_on_select: true,
+        allow_deselect: false,
+        path_separator: None,
     }
 }
 impl TreeSelect {
@@ -446,6 +471,21 @@ impl TreeSelect {
     }
     pub fn nothing_found_message(mut self, value: impl Into<String>) -> Self {
         self.nothing_found = value.into();
+        self
+    }
+    /// Keep the popup open after choosing a leaf when set to false.
+    pub fn close_on_select(mut self, close: bool) -> Self {
+        self.close_on_select = close;
+        self
+    }
+    /// Allow activating the current single selection to clear it.
+    pub fn allow_deselect(mut self, allow: bool) -> Self {
+        self.allow_deselect = allow;
+        self
+    }
+    /// Display all labels in a selected path, joined by the supplied separator.
+    pub fn path_separator(mut self, separator: impl Into<String>) -> Self {
+        self.path_separator = Some(separator.into());
         self
     }
     pub fn with_lines(mut self, value: bool) -> Self {
@@ -594,6 +634,8 @@ impl Widget for TreeSelect {
             within: Cell::new(None),
             max_values: self.max_values,
             keep_branch_open: self.keep_branch_open,
+            close_on_select: self.close_on_select,
+            allow_deselect: self.allow_deselect,
         });
         let weak = Rc::downgrade(&state);
         scope.on_cleanup(move || {
@@ -618,11 +660,21 @@ impl Widget for TreeSelect {
                 }
             }
         });
+        let separator = self.path_separator.take();
         let label = accepted.map(move |a| {
             a.values
                 .paths()
                 .iter()
                 .map(|path| {
+                    if let Some(separator) = &separator {
+                        return path
+                            .keys()
+                            .iter()
+                            .filter_map(|key| a.model.tree().index(key))
+                            .map(|index| a.model.tree().nodes()[index].label.as_str())
+                            .collect::<Vec<_>>()
+                            .join(separator);
+                    }
                     let key = path.leaf();
                     a.model
                         .tree()
@@ -669,6 +721,8 @@ impl Widget for TreeSelect {
         let root = scope.create(glory::render::Descriptor::new(Props::Group))?;
         let content = scope.child_in(root)?;
         let control = self.common.theme.control(self.common.size);
+        let section_width = crate::input_actions::side(&self.common);
+        let chevron_size = crate::input_actions::selector_size(section_width);
         let padding = control.padding.unwrap_or(Edges::all(0.));
         let base = Style {
             display: Some(glory::style::Display::Flex),
@@ -991,16 +1045,16 @@ impl Widget for TreeSelect {
             ));
         }
         controls.push(Box::new(
-            crate::theme_icon(crate::Icon::ChevronDown)
+            crate::theme_icon(crate::Icon::Selector)
                 .theme(self.common.theme.clone())
-                .size(crate::Size::ExtraSmall)
+                .icon_size(chevron_size)
                 .unstyled()
                 .color(action_color)
                 .class("sapid-tree-select-chevron")
                 .style(scope.bond(move || Style {
                     position: Some(glory::style::Position::Absolute),
                     top: Some(Length::Px(0.)),
-                    right: Some(Length::Px(10.)),
+                    right: Some(Length::Px(0.)),
                     display: Some(if clear_visible.get() {
                         glory::style::Display::None
                     } else {
@@ -1008,7 +1062,7 @@ impl Widget for TreeSelect {
                     }),
                     align: Some(glory::style::Align::Center),
                     justify: Some(glory::style::Justify::Center),
-                    width: Some(Length::Px(16.)),
+                    width: Some(Length::Px(section_width)),
                     height: Some(Length::Percent(100.)),
                     pointer_events: Some(glory::style::PointerEvents::None),
                     ..Style::new()

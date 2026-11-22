@@ -475,3 +475,33 @@ fn picker_cancel_and_rejection_preserve_previous_files_and_disabled_cannot_start
     app.flush().unwrap();
     assert_eq!(wire.actions.borrow().len(), before);
 }
+
+#[test]
+fn loading_dropzone_blocks_manual_open_and_pending_open_cannot_start_twice() {
+    let (app, wire) = app();
+    let scope = app.scope();
+    let busy = scope.cage(true);
+    let controller = scope.cage(None::<sapid::FileController>);
+    let status = scope.cage(FileStatus::Idle);
+    app.mount(
+        sapid::dropzone()
+            .loading(busy)
+            .controller_ref(controller)
+            .status_ref(status),
+    )
+    .unwrap();
+    let driver = controller.get().unwrap();
+    driver.open_picker().unwrap();
+    assert_eq!(status.get(), FileStatus::Idle);
+    let before = wire.actions.borrow().len();
+    busy.revise(|value| *value = false);
+    app.flush().unwrap();
+    driver.open_picker().unwrap();
+    app.flush().unwrap();
+    assert_eq!(status.get(), FileStatus::Choosing);
+    let once = wire.actions.borrow().len();
+    assert!(once > before);
+    driver.open_picker().unwrap();
+    app.flush().unwrap();
+    assert_eq!(wire.actions.borrow().len(), once);
+}

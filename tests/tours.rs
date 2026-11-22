@@ -225,3 +225,55 @@ fn four_theme_ssr_is_repeatable_with_real_hidden_dialog_and_finite_anchor_policy
         );
     }
 }
+
+#[test]
+fn centered_steps_and_repeated_targets_keep_their_own_placement() {
+    use glory::render::{AnchorAlign, AnchorPlacement, AnchorSide, LayerPlacement};
+    let app = App::memory();
+    let context = tour_context(app.scope(), "positions").unwrap();
+    let current = app.scope().cage(0usize);
+    let left = AnchorPlacement::new(AnchorSide::Left, AnchorAlign::Center);
+    let right = AnchorPlacement::new(AnchorSide::Right, AnchorAlign::Center);
+    app.mount(
+        glory::ui::view().fill((
+            tour_target(&context, "button").fill(glory::ui::button().label("Target")),
+            tour(&context, "placement")
+                .default_open(true)
+                .current(current)
+                .centered_step("Welcome", "No target is needed.")
+                .anchored_step(tour_step("left", "Left", "To the left."), "button", left)
+                .anchored_step(
+                    tour_step("right", "Right", "To the right."),
+                    "button",
+                    right,
+                ),
+        )),
+    )
+    .unwrap();
+    let read = || {
+        let tree = app.tree();
+        let semantics = tree
+            .node(panel(&app))
+            .unwrap()
+            .descriptor
+            .view()
+            .semantics
+            .as_ref()
+            .unwrap();
+        (semantics.hidden, semantics.layer.clone().unwrap())
+    };
+    let (hidden, first) = read();
+    assert!(!hidden);
+    assert_eq!(first.placement, LayerPlacement::Center);
+    assert_eq!(first.anchor, None);
+    current.revise(|index| *index = 1);
+    app.flush().unwrap();
+    let (_, second) = read();
+    current.revise(|index| *index = 2);
+    app.flush().unwrap();
+    let (_, third) = read();
+    assert_eq!(second.placement, LayerPlacement::Anchor(left));
+    assert_eq!(third.placement, LayerPlacement::Anchor(right));
+    assert!(second.anchor.is_some());
+    assert_eq!(second.anchor, third.anchor);
+}

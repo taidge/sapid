@@ -3,6 +3,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
     widget(move |scope| {
         let value = scope.cage(None::<String>);
         sapid::field("preferred-framework")
+            .class("site-field-example")
             .theme(theme.clone())
             .label("Your favorite framework")
             .description("Choose one option")

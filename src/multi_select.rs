@@ -27,6 +27,14 @@ impl MultiSelect {
         self
     }
 
+    pub fn check_position(mut self, value: crate::SelectCheckPosition) -> Self {
+        self.inner = self.inner.check_position(value);
+        self
+    }
+    pub fn with_aligned_labels(mut self, value: bool) -> Self {
+        self.inner = self.inner.with_aligned_labels(value);
+        self
+    }
     pub fn option_content(
         mut self,
         key: impl Into<String>,
@@ -48,6 +56,11 @@ impl MultiSelect {
     /// Hide accepted selected options, including now-empty groups.
     pub fn hide_picked_options(mut self, hide: bool) -> Self {
         self.inner = self.inner.hide_picked_options(hide);
+        self
+    }
+    /// Keep options inside an enclosing popup that handles their positioning.
+    pub fn inline_list(mut self, value: bool) -> Self {
+        self.inner = self.inner.inline_list(value);
         self
     }
     pub fn clearable(mut self, clearable: bool) -> Self {

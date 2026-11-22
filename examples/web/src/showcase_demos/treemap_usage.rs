@@ -1,40 +1,59 @@
 use glory::prelude::*;
 use sapid::charts::*;
-fn hierarchy() -> PlotData {
-    PlotData::Hierarchy(vec![
-        HierarchyDatum {
-            key: "regions".into(),
-            label: "Regions".into(),
-            parent: None,
-            weight: None,
-        },
-        HierarchyDatum {
-            key: "north".into(),
-            label: "North".into(),
-            parent: Some("regions".into()),
-            weight: Some(3.),
-        },
-        HierarchyDatum {
-            key: "south".into(),
-            label: "South".into(),
-            parent: Some("regions".into()),
-            weight: Some(7.),
-        },
-        HierarchyDatum {
-            key: "west".into(),
-            label: "West".into(),
-            parent: Some("regions".into()),
-            weight: Some(5.),
-        },
-    ])
-}
-fn sample_data() -> PlotData {
-    hierarchy()
+pub fn demo(theme: sapid::Theme) -> impl Widget {
+    let mut palette = controls::chart_palette(&theme);
+    palette.series[..4].copy_from_slice(&[
+        Color(59, 91, 219, 255),
+        Color(224, 49, 49, 255),
+        Color(9, 146, 104, 255),
+        Color(52, 58, 64, 255),
+    ]);
+    palette.grid = theme.surface;
+    treemap("treemap-overview")
+        .theme(theme)
+        .name("Treemap chart")
+        .chart_theme(palette)
+        .data(PlotData::Hierarchy(
+            [
+                ("usa", "USA", 400.),
+                ("india", "India", 300.),
+                ("japan", "Japan", 100.),
+                ("other", "Other", 200.),
+            ]
+            .into_iter()
+            .map(|(k, label, v)| HierarchyDatum {
+                key: k.into(),
+                label: label.into(),
+                weight: Some(v),
+                parent: None,
+            })
+            .collect(),
+        ))
+        .frame(ChartFrame {
+            width: 684.,
+            height: 300.,
+        })
+        .default_options(PlotOptions::default())
+        .style(Style::new().width(Length::Percent(100.)))
+        .legend(false)
+        .navigation(false)
+        .data_table(false)
 }
 
-pub fn demo(theme: sapid::Theme) -> impl Widget {
-    treemap("treemap-overview")
-        .name("Hierarchy, weights and small regions")
-        .theme(theme)
-        .data(sample_data())
+#[allow(unused_imports)]
+mod controls {
+    use glory::prelude::*;
+    use glory::style::{Color, FlexWrap};
+    use sapid::{Size, Theme};
+
+    pub fn chart_palette(theme: &Theme) -> sapid::charts::ChartTheme {
+        let mut palette = sapid::charts::ChartTheme::from_theme(theme);
+        palette.series[..4].copy_from_slice(&[
+            Color(76, 110, 245, 255),
+            Color(250, 176, 5, 255),
+            Color(18, 184, 134, 255),
+            Color(134, 142, 150, 255),
+        ]);
+        palette
+    }
 }

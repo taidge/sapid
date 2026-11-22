@@ -1,27 +1,34 @@
 use glory::prelude::*;
 use sapid::charts::*;
-fn cartesian_data() -> ChartData {
-    ChartData {
-        categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
-            .into_iter()
-            .enumerate()
-            .map(|(index, label)| ChartCategory::new(format!("m{index}"), label))
-            .collect(),
-        series: vec![
-            ChartSeries::new(
-                "revenue",
-                "Revenue",
-                [12., 18., 14., 20., 17., 24.].map(Some),
-            ),
-            ChartSeries::new("cost", "Cost", [8., 10., 9., 12., 11., 13.].map(Some))
-                .kind(ChartSeriesKind::Bar),
-        ],
-    }
-}
-
 pub fn demo(theme: sapid::Theme) -> impl Widget {
-    bar_chart("bar-chart-overview")
-        .name("Monthly revenue and costs")
-        .theme(theme)
-        .data(cartesian_data())
+    let categories = ["January", "February", "March", "April", "May", "June"]
+        .into_iter()
+        .enumerate()
+        .map(|(i, label)| ChartCategory::new(format!("c{i}"), label))
+        .collect();
+    controls::cartesian_playground(
+        theme,
+        "bar-chart-overview",
+        CartesianKind::Bar,
+        ChartData {
+            categories,
+            series: vec![
+                ChartSeries::new(
+                    "smartphones",
+                    "Smartphones",
+                    [1200.0, 1900.0, 400.0, 1000.0, 800.0, 750.0].map(Some),
+                ),
+                ChartSeries::new(
+                    "laptops",
+                    "Laptops",
+                    [900.0, 1200.0, 1000.0, 200.0, 1400.0, 600.0].map(Some),
+                ),
+                ChartSeries::new(
+                    "tablets",
+                    "Tablets",
+                    [200.0, 400.0, 200.0, 800.0, 1200.0, 1000.0].map(Some),
+                ),
+            ],
+        },
+    )
 }

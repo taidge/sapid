@@ -1,18 +1,27 @@
 mod alert_colors;
 mod alert_content;
 mod alert_controlled;
+mod alert_style_selectors;
 mod alert_variants;
+mod empty_cart;
 mod empty_compact;
 mod empty_search;
 mod empty_slots;
+mod empty_state_style_selectors;
+mod empty_variant_play;
+mod loader_css;
 mod loader_custom;
 mod loader_inline;
+mod loader_size_play;
 mod loader_sizes;
 mod loader_types;
 mod notification_controlled;
 mod notification_loading;
 mod notification_presentation;
+mod notification_style_selectors;
+mod progress_fill_transition;
 mod progress_geometry;
+mod progress_password;
 mod progress_ring_angles;
 mod progress_ring_caps_label;
 mod progress_ring_gaps;
@@ -20,19 +29,40 @@ mod progress_sections;
 mod progress_semicircle_direction;
 mod progress_semicircle_labels;
 mod progress_states;
+mod progress_style_selectors;
+mod progress_tooltips;
 mod progress_vertical;
+mod ring_background;
+mod ring_events;
+mod ring_fill_transition;
+mod ring_size_play;
+mod ring_tooltips;
+mod semi_empty_color;
+mod semi_fill_transition;
 mod skeleton_animation;
 mod skeleton_content;
 mod skeleton_shapes;
 use super::showcase_examples::DetailSection;
-pub fn progress_sections(theme: sapid::Theme) -> Vec<DetailSection> {
+fn progress_sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
     vec![
         DetailSection {
             id: "progress-geometry",
-            title: "Line, ring and semicircle geometry",
+            title: if slug == "ring-progress" {
+                "Size, thickness & rounded caps"
+            } else {
+                "Line, ring and semicircle geometry"
+            },
             note: "Each view keeps one progressbar semantic while size and thickness change only its finite presentation geometry.",
-            example: Box::new(progress_geometry::demo(theme.clone())),
-            source: include_str!("progress_geometry.rs"),
+            example: if slug == "ring-progress" {
+                Box::new(ring_size_play::demo(theme.clone()))
+            } else {
+                Box::new(progress_geometry::demo(theme.clone()))
+            },
+            source: if slug == "ring-progress" {
+                include_str!("ring_size_play.rs")
+            } else {
+                include_str!("progress_geometry.rs")
+            },
         },
         DetailSection {
             id: "progress-sections",
@@ -95,12 +125,102 @@ pub fn progress_sections(theme: sapid::Theme) -> Vec<DetailSection> {
 
 pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
     match slug {
-        "progress" | "ring-progress" | "semi-circle-progress" => progress_sections(theme),
+        "progress" | "ring-progress" | "semi-circle-progress" => {
+            let mut docs = progress_sections(slug, theme.clone());
+            let extra = match slug {
+                "progress" => vec![
+                    DetailSection {
+                        id: "progress-style-selectors",
+                        title: "Component Styles API",
+                        note: "Hover or focus a selector to outline the corresponding component element.",
+                        example: Box::new(progress_style_selectors::demo(theme.clone())),
+                        source: include_str!("progress_style_selectors.rs"),
+                    },
+                    DetailSection {
+                        id: "progress-tooltips",
+                        title: "With tooltips",
+                        note: "Hover a section to inspect its labeled share of the total.",
+                        example: Box::new(progress_tooltips::demo(theme.clone())),
+                        source: include_str!("progress_tooltips.rs"),
+                    },
+                    DetailSection {
+                        id: "progress-fill-transition",
+                        title: "Section width transition",
+                        note: "Change the percentage and follow the filled segment.",
+                        example: Box::new(progress_fill_transition::demo(theme.clone())),
+                        source: include_str!("progress_fill_transition.rs"),
+                    },
+                    DetailSection {
+                        id: "progress-password",
+                        title: "Example: progress with segments",
+                        note: "The four segments change color and fill as you add length, digits, upper and lower case letters, and symbols.",
+                        example: Box::new(progress_password::demo(theme.clone())),
+                        source: include_str!("progress_password.rs"),
+                    },
+                ],
+                "ring-progress" => vec![
+                    DetailSection {
+                        id: "ring-background",
+                        title: "Background color",
+                        note: "The unfilled portion of the ring uses a custom background.",
+                        example: Box::new(ring_background::demo(theme.clone())),
+                        source: include_str!("ring_background.rs"),
+                    },
+                    DetailSection {
+                        id: "ring-tooltips",
+                        title: "Sections tooltips",
+                        note: "Hover each arc to read its category and percentage.",
+                        example: Box::new(ring_tooltips::demo(theme.clone())),
+                        source: include_str!("ring_tooltips.rs"),
+                    },
+                    DetailSection {
+                        id: "ring-events",
+                        title: "Section events",
+                        note: "The active section changes as the pointer enters and leaves each arc.",
+                        example: Box::new(ring_events::demo(theme.clone())),
+                        source: include_str!("ring_events.rs"),
+                    },
+                    DetailSection {
+                        id: "ring-fill-transition",
+                        title: "Filled segment transition",
+                        note: "Change the percentage and follow the filled segment.",
+                        example: Box::new(ring_fill_transition::demo(theme.clone())),
+                        source: include_str!("ring_fill_transition.rs"),
+                    },
+                ],
+                "semi-circle-progress" => vec![
+                    DetailSection {
+                        id: "semi-fill-transition",
+                        title: "Filled segment transition",
+                        note: "Change the percentage and follow the filled segment.",
+                        example: Box::new(semi_fill_transition::demo(theme.clone())),
+                        source: include_str!("semi_fill_transition.rs"),
+                    },
+                    DetailSection {
+                        id: "semi-empty-color",
+                        title: "Change empty segment color",
+                        note: "The track remains visible behind the completed part.",
+                        example: Box::new(semi_empty_color::demo(theme.clone())),
+                        source: include_str!("semi_empty_color.rs"),
+                    },
+                ],
+                _ => Vec::new(),
+            };
+            docs.extend(extra);
+            docs
+        }
         "alert" => vec![
+            DetailSection {
+                id: "alert-style-selectors",
+                title: "Component Styles API",
+                note: "Hover or focus a selector to outline the corresponding component element.",
+                example: Box::new(alert_style_selectors::demo(theme.clone())),
+                source: include_str!("alert_style_selectors.rs"),
+            },
             DetailSection {
                 id: "alert-variants",
                 title: "Four message variants",
-                note: "Light, Filled, Outline and Transparent change the presentation of the same finite message. Title and description relationships remain stable; the close control is a named 24-pixel action with a passive 16-pixel vector.",
+                note: "Light, Filled, Outline and Transparent change the presentation of the same finite message. Title and description relationships remain stable; the close control is a named 20-pixel action with a passive 16-pixel vector.",
                 example: Box::new(alert_variants::demo(theme.clone())),
                 source: include_str!("alert_variants.rs"),
             },
@@ -128,6 +248,27 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         ],
         "empty-state" => vec![
             DetailSection {
+                id: "empty-cart",
+                title: "Indicator background",
+                note: "The shopping cart uses a circular indicator background.",
+                example: Box::new(empty_cart::demo(theme.clone())),
+                source: include_str!("empty_cart.rs"),
+            },
+            DetailSection {
+                id: "empty-state-style-selectors",
+                title: "Component Styles API",
+                note: "Hover or focus a selector to outline the corresponding component element.",
+                example: Box::new(empty_state_style_selectors::demo(theme.clone())),
+                source: include_str!("empty_state_style_selectors.rs"),
+            },
+            DetailSection {
+                id: "empty-variant-play",
+                title: "Variant",
+                note: "Change the indicator background and icon color.",
+                example: Box::new(empty_variant_play::demo(theme.clone())),
+                source: include_str!("empty_variant_play.rs"),
+            },
+            DetailSection {
                 id: "empty-search",
                 title: "Empty search results and a real reset action",
                 note: "The application filters a finite local project list. Reset clears the accepted query and reveals the matching-result count. EmptyState supplies illustration, title, explanation and actions without installing a live announcement or owning search state.",
@@ -151,6 +292,13 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         ],
         "notification" => vec![
             DetailSection {
+                id: "notification-style-selectors",
+                title: "Component Styles API",
+                note: "Hover or focus a selector to outline the corresponding component element.",
+                example: Box::new(notification_style_selectors::demo(theme.clone())),
+                source: include_str!("notification_style_selectors.rs"),
+            },
+            DetailSection {
                 id: "notification-presentation",
                 title: "Icons, borders, titles and longer content",
                 note: "Standalone notifications use the same finite message presentation as Alert. Icons are passive typed content; an outlined variant, an untitled message and a persistent nonclosable notice are independent configurations. Long text wraps beside the compact action.",
@@ -173,6 +321,20 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             },
         ],
         "loader" => vec![
+            DetailSection {
+                id: "loader-css",
+                title: "Custom CSS only loader",
+                note: "The animated circle respects the reduced-motion preference.",
+                example: Box::new(loader_css::demo(theme.clone())),
+                source: include_str!("loader_css.rs"),
+            },
+            DetailSection {
+                id: "loader-size-play",
+                title: "Size prop",
+                note: "Compare spinner diameters.",
+                example: Box::new(loader_size_play::demo(theme.clone())),
+                source: include_str!("loader_size_play.rs"),
+            },
             DetailSection {
                 id: "loader-types",
                 title: "Oval, bars and dots",
@@ -230,7 +392,24 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
 }
 pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
     match slug {
+        "progress" => vec![
+            ("Component Styles API", "#progress-style-selectors"),
+            ("With tooltips", "#progress-tooltips"),
+            ("Section width transition", "#progress-fill-transition"),
+            ("Example: progress with segments", "#progress-password"),
+        ],
+        "ring-progress" => vec![
+            ("Background color", "#ring-background"),
+            ("Sections tooltips", "#ring-tooltips"),
+            ("Section events", "#ring-events"),
+            ("Filled segment transition", "#ring-fill-transition"),
+        ],
+        "semi-circle-progress" => vec![
+            ("Filled segment transition", "#semi-fill-transition"),
+            ("Change empty segment color", "#semi-empty-color"),
+        ],
         "alert" => vec![
+            ("Component Styles API", "#alert-style-selectors"),
             ("Four message variants", "#alert-variants"),
             ("Severity and explicit colors", "#alert-colors"),
             (
@@ -240,6 +419,9 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ("Untitled and long messages", "#alert-content"),
         ],
         "empty-state" => vec![
+            ("Indicator background", "#empty-cart"),
+            ("Component Styles API", "#empty-state-style-selectors"),
+            ("Variant", "#empty-variant-play"),
             (
                 "Empty search results and a real reset action",
                 "#empty-search",
@@ -251,6 +433,7 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ),
         ],
         "notification" => vec![
+            ("Component Styles API", "#notification-style-selectors"),
             (
                 "Icons, borders, titles and longer content",
                 "#notification-presentation",
@@ -265,6 +448,8 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ),
         ],
         "loader" => vec![
+            ("Custom CSS only loader", "#loader-css"),
+            ("Size prop", "#loader-size-play"),
             ("Oval, bars and dots", "#loader-types"),
             ("Theme sizes, numeric diameter and color", "#loader-sizes"),
             (

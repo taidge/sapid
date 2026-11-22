@@ -122,16 +122,28 @@ pub fn pagination_window(
             last = value;
         }
     };
-    push(1, u64::from(boundaries).min(total));
-    push(
-        page.saturating_sub(u64::from(siblings)).max(1),
-        page.saturating_add(u64::from(siblings)).min(total),
-    );
+    let siblings = u64::from(siblings);
+    let boundaries = u64::from(boundaries);
+    let capacity = 2 * siblings + 2 * boundaries + 3;
+    if total <= capacity {
+        return Ok((1..=total).map(PageItem::Page).collect());
+    }
+    let edge_length = 2 * siblings + boundaries + 2;
+    let mut start = page.saturating_sub(siblings).max(1);
+    let mut end = page.saturating_add(siblings).min(total);
     if boundaries != 0 {
-        push(
-            total.saturating_sub(u64::from(boundaries) - 1).max(1),
-            total,
-        );
+        if start <= boundaries + 2 {
+            start = 1;
+            end = edge_length;
+        } else if end >= total - boundaries - 1 {
+            start = total - edge_length + 1;
+            end = total;
+        }
+    }
+    push(1, boundaries);
+    push(start, end);
+    if boundaries != 0 {
+        push(total - boundaries + 1, total);
     }
     Ok(result)
 }
@@ -152,6 +164,9 @@ pub struct Pagination {
     boundaries: u8,
     with_controls: bool,
     with_edges: bool,
+    start: u64,
+    icons: Option<[crate::Icon; 4]>,
+    href: Option<std::rc::Rc<dyn Fn(u64) -> String>>,
     change: Option<Box<dyn FnMut(u64)>>,
 }
 pub fn pagination(key: impl Into<String>) -> Pagination {
@@ -168,6 +183,9 @@ pub fn pagination(key: impl Into<String>) -> Pagination {
         boundaries: 1,
         with_controls: true,
         with_edges: true,
+        start: 1,
+        icons: None,
+        href: None,
         change: None,
     }
 }
@@ -175,6 +193,11 @@ impl Pagination {
     navigation_methods!();
     pub fn enabled(mut self, value: impl Into<Vary<bool>>) -> Self {
         self.common.enabled = value.into();
+        self
+    }
+    /// Render native links with destinations for each numbered and directional control.
+    pub fn page_href(mut self, href: impl Fn(u64) -> String + 'static) -> Self {
+        self.href = Some(std::rc::Rc::new(href));
         self
     }
     pub fn page(mut self, value: impl Into<Vary<u64>>) -> Self {
@@ -191,6 +214,19 @@ impl Pagination {
     }
     pub fn has_next(mut self, value: impl Into<Vary<bool>>) -> Self {
         self.has_next = value.into();
+        self
+    }
+    /// Set the first numbered page, including the lower bound of navigation.
+    pub fn start_value(mut self, start: u64) -> Self {
+        self.start = start;
+        if self.page.source.is_none() && self.page.default == 1 {
+            self.page.default = start;
+        }
+        self
+    }
+    /// Set the first, previous, next and last control graphics, in that order.
+    pub fn control_icons(mut self, icons: [crate::Icon; 4]) -> Self {
+        self.icons = Some(icons);
         self
     }
     pub fn siblings(mut self, value: u8) -> Self {
@@ -230,8 +266,34 @@ impl Widget for Pagination {
         let source = control.source.clone();
         let total = self.total.clone();
         let next = self.has_next.clone();
+        let start = self.start;
+        if start == 0 {
+            return Err(invalid("pagination start must be positive"));
+        }
         let siblings = self.siblings;
         let boundaries = self.boundaries;
+        let page_items = move |state: &PageState| -> Result<Vec<PageItem>> {
+            let offset = start - 1;
+            let page = state
+                .page
+                .checked_sub(offset)
+                .ok_or_else(|| invalid("page before pagination start"))?;
+            let total = state
+                .total
+                .map(|end| {
+                    end.checked_sub(offset)
+                        .ok_or_else(|| invalid("total before pagination start"))
+                })
+                .transpose()?;
+            let items = pagination_window(page, total, siblings, boundaries)?;
+            Ok(items
+                .into_iter()
+                .map(|item| match item {
+                    PageItem::Page(value) => PageItem::Page(value + offset),
+                    PageItem::Gap => PageItem::Gap,
+                })
+                .collect())
+        };
         let accepted = composite::validated(
             scope,
             &scope
@@ -241,14 +303,11 @@ impl Widget for Pagination {
                     has_next: next.get(),
                 })
                 .into(),
-            move |state: &PageState| {
-                pagination_window(state.page, state.total, siblings, boundaries).map(|_| ())
-            },
+            move |state: &PageState| page_items(state).map(|_| ()),
         )?;
         let window = scope.bond(move || {
             let state = accepted.get();
-            pagination_window(state.page, state.total, siblings, boundaries)
-                .expect("accepted pagination")
+            page_items(&state).expect("accepted pagination")
         });
         let callback = Callback::new(self.change.take());
         let observers = observers(&mut self.common);
@@ -304,7 +363,7 @@ impl Widget for Pagination {
                 let state = accepted.get();
                 enabled.get()
                     && match index {
-                        0 | 1 => state.page > 1,
+                        0 | 1 => state.page > start,
                         2 => {
                             state.page < u64::MAX
                                 && state
@@ -328,6 +387,8 @@ impl Widget for Pagination {
             });
             let callback = callback.clone();
             let observers = observers.clone();
+            let link_control = control.clone();
+            let link_changed = callback.clone();
             let control = control.clone();
             let weak = scope.downgrade();
             let mut button = glory::ui::button()
@@ -336,6 +397,50 @@ impl Widget for Pagination {
                 .enabled(enabled)
                 .semantics(metadata)
                 .class("sapid-button sapid-page-button");
+            if index < 4 && !self.common.unstyled {
+                let side = (self
+                    .common
+                    .theme
+                    .tokens
+                    .control(self.common.size)
+                    .min_height
+                    * 0.5)
+                    .round();
+                let icon = if index < 2 {
+                    crate::Icon::ChevronLeft
+                } else {
+                    crate::Icon::ChevronRight
+                };
+                let theme = self.common.theme.clone();
+                let custom = self.icons.map(|icons| icons[index]);
+                let icon = custom.unwrap_or(icon);
+                let drawing = scope.bond(move || {
+                    let mut shape = icon.drawing(if enabled.get() {
+                        theme.foreground
+                    } else {
+                        theme.disabled_text
+                    });
+                    if matches!(index, 0 | 3) {
+                        use glory::render::{GraphicPoint, PathCommand};
+                        let x = if index == 0 { 5. } else { 19. };
+                        shape.commands.extend([
+                            PathCommand::Move(GraphicPoint::new(x, 5.)),
+                            PathCommand::Line(GraphicPoint::new(x, 19.)),
+                        ]);
+                    }
+                    shape
+                });
+                button = button.label("").fill(
+                    glory::ui::graphic()
+                        .class("sapid-page-chevron")
+                        .drawing(drawing)
+                        .style(
+                            Style::new()
+                                .width(Length::Px(side))
+                                .height(Length::Px(side)),
+                        ),
+                );
+            }
             if !self.common.unstyled {
                 let theme = self.common.theme.clone();
                 let size = self.common.size;
@@ -371,7 +476,7 @@ impl Widget for Pagination {
                     }
                     let state = accepted.try_get()?;
                     let proposal = match index {
-                        0 => Some(1),
+                        0 => Some(start),
                         1 => state.page.checked_sub(1),
                         2 => state.page.checked_add(1),
                         3 => state.total,
@@ -395,6 +500,50 @@ impl Widget for Pagination {
                     scope.report_error(error);
                 }
             });
+            let button: Box<dyn Widget> = if let Some(href) = self.href.clone() {
+                let next = scope.bond(move || {
+                    let state = accepted.get();
+                    match index {
+                        0 => start,
+                        1 => state.page.saturating_sub(1).max(start),
+                        2 => state
+                            .page
+                            .saturating_add(1)
+                            .min(state.total.unwrap_or(u64::MAX)),
+                        3 => state.total.unwrap_or(state.page),
+                        _ => match window.get().get(slot.unwrap()) {
+                            Some(PageItem::Page(page)) => *page,
+                            _ => state.page,
+                        },
+                    }
+                });
+                let href = scope.bond(move || href(next.get()));
+                let link_meta = scope.bond(move || {
+                    let mut meta = metadata.get().unwrap_or_default();
+                    meta.disabled = !enabled.get();
+                    meta.link_request = meta.disabled;
+                    Some(meta)
+                });
+                Box::new(
+                    glory::ui::link()
+                        .class("sapid-page-link")
+                        .name(label)
+                        .label(visible_label)
+                        .target(href)
+                        .semantics(link_meta)
+                        .on(EventKind::Activate, move |_| {
+                            let page = next.get();
+                            if enabled.get()
+                                && accepted.get().page != page
+                                && link_control.accept(&page).is_ok()
+                            {
+                                link_changed.emit(owner, page);
+                            }
+                        }),
+                )
+            } else {
+                Box::new(button)
+            };
             if let Some(slot) = slot {
                 let visible =
                     scope.bond(move || matches!(window.get().get(slot), Some(PageItem::Page(_))));

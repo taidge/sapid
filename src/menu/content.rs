@@ -134,7 +134,13 @@ impl Sections {
         }
         // Group flattens passive children; nested controls remain rejected by
         // Glory's shared restricted-button placement contract.
-        button.label("").name(label.clone()).fill((
+        button
+            .label("")
+            .name(label.clone())
+            .fill(self.children(label))
+    }
+    pub fn children(self, label: Vary<String>) -> Children {
+        (
             glory::ui::group().fill(self.left.unwrap_or_else(|| ().into_children())),
             glory::ui::text()
                 .class("sapid-menu-item-label")
@@ -148,6 +154,7 @@ impl Sections {
                         .overflow_x(glory::style::Overflow::Hidden)
                 }),
             glory::ui::group().fill(self.right.unwrap_or_else(|| ().into_children())),
-        ))
+        )
+            .into_children()
     }
 }

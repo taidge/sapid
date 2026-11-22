@@ -86,6 +86,7 @@ struct State {
     enabled: Vary<bool>,
     limits: WindowLimits,
     step: f64,
+    drag_axis: Vary<Option<glory::render::Orientation>>,
     reference: Cage<Option<NodeId>>,
     changed: Callback<WindowBounds>,
     open_changed: Callback<bool>,
@@ -254,6 +255,11 @@ impl Pad {
         let dx = work.latest.0 - work.start.0;
         let dy = work.latest.1 - work.start.1;
         if dx != 0. || dy != 0. {
+            let (dx, dy) = match (work.resize, state.drag_axis.try_get()?) {
+                (false, Some(glory::render::Orientation::Horizontal)) => (dx, 0.),
+                (false, Some(glory::render::Orientation::Vertical)) => (0., dy),
+                _ => (dx, dy),
+            };
             let next = state.limits.change(baseline, dx, dy, work.resize)?;
             if let Some(work) = self.work.borrow_mut().as_mut() {
                 work.proposed = Some(next)
@@ -383,6 +389,7 @@ pub struct FloatingWindow {
     open: Value<bool>,
     limits: WindowLimits,
     step: f64,
+    drag_axis: Vary<Option<glory::render::Orientation>>,
     padding: f64,
     constrain: bool,
     changed: Option<Box<dyn FnMut(WindowBounds)>>,
@@ -397,6 +404,7 @@ pub fn floating_window(key: impl Into<String>) -> FloatingWindow {
     FloatingWindow {
         common: Common::default(),
         key: key.into(),
+        drag_axis: None.into(),
         title: "Window".into(),
         bounds: Value::default(),
         open: Value {
@@ -417,6 +425,11 @@ pub fn floating_window(key: impl Into<String>) -> FloatingWindow {
     }
 }
 impl FloatingWindow {
+    /// Restrict pointer movement to a single axis. Resizing remains independent.
+    pub fn drag_axis(mut self, axis: impl Into<Vary<Option<glory::render::Orientation>>>) -> Self {
+        self.drag_axis = axis.into();
+        self
+    }
     common_methods!();
     /// Initially expand the compact keyboard movement/resize toolbar.
     pub fn default_actions_open(mut self, value: bool) -> Self {
@@ -518,6 +531,7 @@ impl Widget for FloatingWindow {
         let open = std::mem::take(&mut self.open).mount(scope);
         let reference = self.common.node_ref.unwrap_or_else(|| scope.cage(None));
         let state = Rc::new(State {
+            drag_axis: self.drag_axis.clone(),
             owner: scope.id(),
             weak: scope.downgrade(),
             bounds,

@@ -33,8 +33,8 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
           assert(labels.indexOf('Previous page') < labels.indexOf('Page 3') && labels.indexOf('Page 3') < labels.indexOf('Next page'), key);
           assert(await nav.getByRole('button').evaluateAll(elements => elements.every(element => element.getBoundingClientRect().height <= 52)), `${key}: compact controls`);
           await nav.getByRole('button', { name: 'Next page', exact: true }).click(); await tick();
-          assert.equal(await nav.locator('[aria-current=page]').getAttribute('aria-label'), 'Page 4');
-          assert.equal(await nav.locator('[aria-current=page]').innerText(), '4');
+          assert.equal(await nav.locator('[aria-current=page]').getAttribute('aria-label'), 'Page 2');
+          assert.equal(await nav.locator('[aria-current=page]').innerText(), '2');
           const numbers = page.getByRole('navigation', { name: 'Numbers only', exact: true });
           assert.equal(await numbers.getByRole('button', { name: 'Next page', exact: true }).count(), 0);
           assert.equal(await numbers.getByRole('button', { name: 'First page', exact: true }).count(), 0);
@@ -44,7 +44,7 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
           assert(await unknown.getByRole('button', { name: 'Last page', exact: true }).isDisabled());
         }
         if (slug === 'breadcrumbs') {
-          assert.equal(await primary.locator('.sapid-breadcrumb-separator').count(), 3);
+          assert.equal(await primary.locator('.sapid-breadcrumb-separator').count(), 4);
           assert.equal(await detail('Separator and spacing').locator('.sapid-breadcrumb-separator').first().innerText(), '→');
           const path = detail('Long paths and controlled expansion');
           await path.getByRole('button', { name: 'Expand breadcrumb path', exact: true }).click(); await tick();
@@ -52,9 +52,9 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
           assert(await path.getByRole('link', { name: 'Docs', exact: true }).isVisible());
         }
         if (slug === 'nav-link') {
-          assert.equal(await primary.locator('.sapid-nav-link').count(), 3);
-          assert.equal(await primary.getByRole('link', { name: 'Overview', exact: true }).getAttribute('aria-current'), 'page');
-          assert(await primary.getByText('Recent activity across your workspace', { exact: true }).isVisible());
+          assert.equal(await primary.locator('.sapid-nav-link').count(), 7);
+          assert.equal(await primary.getByRole('link', { name: 'Active filled', exact: true }).getAttribute('aria-current'), 'page');
+          assert(await primary.getByText('Additional information', { exact: true }).isVisible());
           const nested = detail('Nested links and controlled expansion');
           const input = nested.getByRole('textbox', { name: 'Account note', exact: true });
           await input.fill('Retained account note');
@@ -66,7 +66,7 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
           assert(await input.evaluate(element => element === window.remediationNote), `${key}: retained editor identity`);
         }
         if (slug === 'anchor') {
-          assert.equal(await primary.getByRole('link').count(), 3);
+          assert.equal(await primary.getByRole('link').count(), 1);
           const before = page.url();
           await detail('Application-owned navigation requests').getByRole('link', { name: 'Open project settings', exact: true }).click(); await tick();
           assert.equal(page.url(), before);

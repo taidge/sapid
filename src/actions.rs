@@ -58,14 +58,17 @@ macro_rules! action_methods {
     };
 }
 
-fn square(common: &Common) -> Style {
-    let side = match common.size {
-        crate::Size::ExtraSmall => 24.0,
-        crate::Size::Small => 30.0,
-        crate::Size::Medium => 36.0,
-        crate::Size::Large => 42.0,
-        crate::Size::ExtraLarge => 50.0,
-    };
+fn icon_side(size: crate::Size) -> f64 {
+    match size {
+        crate::Size::ExtraSmall => 18.,
+        crate::Size::Small => 22.,
+        crate::Size::Medium => 28.,
+        crate::Size::Large => 34.,
+        crate::Size::ExtraLarge => 44.,
+    }
+}
+
+fn square(common: &Common, side: f64) -> Style {
     let mut style = common.theme.control(common.size);
     style.width = Some(Length::Px(side));
     style.height = Some(Length::Px(side));
@@ -114,6 +117,7 @@ fn validate_name(name: &str) -> Result {
 pub struct ActionIcon {
     common: Common,
     action_name: String,
+    loader_type: crate::LoaderType,
     icon: Option<Children>,
     class: &'static str,
     variant: ActionIconVariant,
@@ -125,6 +129,7 @@ pub fn action_icon(name: impl Into<String>) -> ActionIcon {
     ActionIcon {
         common: Common::default(),
         action_name: name.into(),
+        loader_type: crate::LoaderType::Oval,
         icon: None,
         class: "sapid-action-icon",
         variant: ActionIconVariant::Default,
@@ -175,6 +180,10 @@ impl Widget for ActionIconContent {
     }
 }
 impl ActionIcon {
+    pub fn loader_type(mut self, kind: crate::LoaderType) -> Self {
+        self.loader_type = kind;
+        self
+    }
     action_methods!();
     pub fn loading(mut self, value: impl Into<Vary<bool>>) -> Self {
         self.loading = value.into();
@@ -211,7 +220,7 @@ impl Widget for ActionIcon {
             let loading = self.loading.clone();
             self.common.enabled = scope.bond(move || enabled.get() && !loading.get()).into();
         }
-        let mut base = square(&self.common);
+        let mut base = square(&self.common, icon_side(self.common.size));
         let theme = self.common.theme.clone();
         match self.variant {
             ActionIconVariant::Default => {}
@@ -275,8 +284,6 @@ impl Widget for ActionIcon {
         .enabled(self.common.enabled.clone());
         button = if has_loading {
             let busy = self.loading.clone();
-            let visible = self.loading.clone();
-            let rotating = self.loading.clone();
             let loader_color = self.common.theme.accent;
             button
                 .semantics(scope.bond(move || {
@@ -290,29 +297,13 @@ impl Widget for ActionIcon {
                         content: Some(icon),
                         loading: self.loading.clone(),
                     },
-                    glory::ui::graphic()
-                        .class("sapid-action-icon-loader")
-                        .drawing(scope.bond(move || {
-                            let mut drawing = crate::progress::spinner_arc(16., 2., loader_color);
-                            drawing.animation =
-                                rotating
-                                    .get()
-                                    .then_some(glory::render::GraphicAnimation::Rotate {
-                                        period_millis: 1000,
-                                    });
-                            drawing
-                        }))
-                        .style(scope.bond(move || {
-                            Style::new()
-                                .display(if visible.get() {
-                                    Display::Block
-                                } else {
-                                    Display::None
-                                })
-                                .width(Length::Px(16.))
-                                .height(Length::Px(16.))
-                                .pointer_events(glory::style::PointerEvents::None)
-                        })),
+                    inline_loader(
+                        scope,
+                        self.loading.clone(),
+                        loader_color,
+                        self.loader_type,
+                        "sapid-action-icon-loader",
+                    ),
                 ))
         } else {
             button.fill(icon)
@@ -433,13 +424,7 @@ impl CloseButton {
 impl Widget for CloseButton {
     fn build(&mut self, scope: &Scope) -> Result {
         if !self.custom_icon {
-            let side = match self.inner.common.size {
-                crate::Size::ExtraSmall => 12.,
-                crate::Size::Small => 14.,
-                crate::Size::Medium => 16.,
-                crate::Size::Large => 18.,
-                crate::Size::ExtraLarge => 20.,
-            };
+            let side = icon_side(self.inner.common.size) * 0.70;
             let enabled = self.inner.common.enabled.clone();
             let theme = self.inner.common.theme.clone();
             let variant = self.inner.variant;
@@ -468,21 +453,45 @@ impl Widget for CloseButton {
     }
 }
 
-pub(crate) fn loading_indicator(
+pub(crate) fn inline_loader(
     scope: &Scope,
     loading: Vary<bool>,
     color: Color,
+    kind: crate::LoaderType,
+    class: &'static str,
 ) -> glory::ui::Graphic {
-    let rotating = loading.clone();
+    let animated = loading.clone();
     glory::ui::graphic()
-        .class("sapid-button-loader")
+        .class(class)
         .drawing(scope.bond(move || {
+            use glory::render::{
+                GraphicAnimation, GraphicPoint as P, PathCommand as Path, StrokeCap,
+            };
             let mut drawing = crate::progress::spinner_arc(16., 2., color);
-            drawing.animation = rotating
-                .get()
-                .then_some(glory::render::GraphicAnimation::Rotate {
+            let motion = if kind == crate::LoaderType::Oval {
+                GraphicAnimation::Rotate {
                     period_millis: 1000,
-                });
+                }
+            } else {
+                let (top, bottom) = if kind == crate::LoaderType::Dots {
+                    (7.99, 8.01)
+                } else {
+                    (3., 13.)
+                };
+                drawing.commands = [3., 8., 13.]
+                    .into_iter()
+                    .flat_map(|x| [Path::Move(P::new(x, top)), Path::Line(P::new(x, bottom))])
+                    .collect();
+                if let Some(stroke) = &mut drawing.stroke {
+                    stroke.width = 3.1;
+                    stroke.cap = StrokeCap::Round;
+                }
+                GraphicAnimation::Pulse {
+                    period_millis: 1000,
+                    phase_millis: 0,
+                }
+            };
+            drawing.animation = animated.get().then_some(motion);
             drawing
         }))
         .style(scope.bond(move || {
@@ -508,6 +517,7 @@ pub struct Burger {
     close_name: Vary<String>,
     animated: Vary<bool>,
     duration_millis: u16,
+    line_size: Option<Vary<f64>>,
     controls: Option<SemanticId>,
     presses: Vec<Box<dyn FnMut()>>,
 }
@@ -520,11 +530,17 @@ pub fn burger() -> Burger {
         close_name: "Close navigation".into(),
         animated: true.into(),
         duration_millis: 180,
+        line_size: None,
         controls: None,
         presses: Vec::new(),
     }
 }
 impl Burger {
+    /// Stroke thickness in the icon's 24-unit drawing coordinate system.
+    pub fn line_size(mut self, value: impl Into<Vary<f64>>) -> Self {
+        self.line_size = Some(value.into());
+        self
+    }
     pub fn animated(mut self, value: impl Into<Vary<bool>>) -> Self {
         self.animated = value.into();
         self
@@ -594,11 +610,20 @@ impl Widget for Burger {
         let unstyled = self.common.unstyled;
         let enabled = self.common.enabled.clone();
         let own_style = self.common.style.clone();
-        let mut base = square(&self.common)
+        let icon_side = match self.common.size {
+            crate::Size::ExtraSmall => 12.,
+            crate::Size::Small => 18.,
+            crate::Size::Medium => 24.,
+            crate::Size::Large => 34.,
+            crate::Size::ExtraLarge => 42.,
+        };
+        let mut base = square(&self.common, icon_side + 10.)
             .display(Display::InlineFlex)
             .padding(Edges::all(4.0));
         base.align = Some(glory::style::Align::Center);
         base.justify = Some(glory::style::Justify::Center);
+        base.border_width = Some(Edges::all(0.));
+        base.background = Some(glory::style::Color(0, 0, 0, 0));
         self.common.style = scope
             .bond(move || {
                 let mut style = if unstyled { Style::new() } else { base.clone() };
@@ -612,12 +637,26 @@ impl Widget for Burger {
             .into();
         let style = self.common.style.clone();
         let fallback = self.common.theme.foreground;
+        let line_size = crate::composite::validated(
+            scope,
+            &self.line_size.take().unwrap_or_else(|| 2.0.into()),
+            |width| {
+                if width.is_finite() && (0.5..=10.).contains(width) {
+                    Ok(())
+                } else {
+                    Err(
+                        glory::render::Error::InvalidProps("burger stroke width outside 0.5..=10")
+                            .into(),
+                    )
+                }
+            },
+        )?;
         let drawing = scope.bond(move || {
             use glory::render::{GraphicPoint as P, PathCommand as C};
             let coordinates = if open.get() {
                 [(5., 5., 19., 19.), (12., 12., 12., 12.), (5., 19., 19., 5.)]
             } else {
-                [(4., 6., 20., 6.), (4., 12., 20., 12.), (4., 18., 20., 18.)]
+                [(1., 5., 23., 5.), (1., 12., 23., 12.), (1., 19., 23., 19.)]
             };
             glory::render::GraphicProps {
                 commands: coordinates
@@ -626,7 +665,7 @@ impl Widget for Burger {
                     .collect(),
                 stroke: Some(glory::render::GraphicStroke {
                     color: style.get().color.unwrap_or(fallback),
-                    width: 2.,
+                    width: line_size.get(),
                     cap: glory::render::StrokeCap::Round,
                 }),
                 transition: animated
@@ -635,13 +674,6 @@ impl Widget for Burger {
                 ..Default::default()
             }
         });
-        let icon_side = match self.common.size {
-            crate::Size::ExtraSmall => 12.,
-            crate::Size::Small => 15.,
-            crate::Size::Medium => 18.,
-            crate::Size::Large => 21.,
-            crate::Size::ExtraLarge => 25.,
-        };
         let mut button = configure!(
             self.common,
             glory::ui::button(),

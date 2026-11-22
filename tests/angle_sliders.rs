@@ -236,12 +236,14 @@ fn owner_retirement_cancels_pending_geometry_without_a_late_callback() {
     assert_eq!(changes.get(), 0);
 }
 #[test]
-fn ssr_has_a_real_slider_and_three_bounded_decorative_graphics() {
+fn ssr_renders_a_filled_dial_and_separate_radial_index() {
     let html = glory::ssr::render(angle_slider("angle").default_value(360.)).unwrap();
     assert!(html.contains("role=\"slider\""));
     assert!(html.contains("aria-valuemax=\"360\""));
     assert!(html.contains("aria-valuenow=\"360\""));
     assert!(html.contains("aria-valuetext=\"360 degrees\""));
-    assert_eq!(html.matches("<svg").count(), 3);
+    assert_eq!(html.matches("<svg").count(), 2);
+    assert!(html.contains("sapid-angle-slider-ring"));
+    assert!(html.contains("sapid-angle-slider-hand"));
     assert!(!html.contains("role=\"separator\""));
 }

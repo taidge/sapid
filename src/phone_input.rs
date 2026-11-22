@@ -2,6 +2,7 @@
 use crate::composite::{self, Callback};
 use crate::state::Value;
 use glory::render::{FormControl, Purpose, Semantics};
+use glory::style::{Align, Display, FlexWrap, Length, PointerEvents, Position, Style};
 use glory::ui::{Result, Widget};
 use glory::{Scope, Vary};
 use phonenumber::{Mode, PhoneNumber, country, metadata::DATABASE};
@@ -52,10 +53,13 @@ pub struct PhoneInput {
     key: String,
     value: Value<PhoneDraft>,
     regions: Option<Vec<(String, String)>>,
+    searchable_region: bool,
+    region_open: bool,
     label: Vary<String>,
     country_label: Vary<String>,
     theme: crate::Theme,
     size: crate::Size,
+    editor_style: Vary<glory::style::Style>,
     enabled: Vary<bool>,
     readonly: Vary<bool>,
     required: Vary<bool>,
@@ -73,10 +77,13 @@ pub fn phone_input(key: impl Into<String>) -> PhoneInput {
         key: key.into(),
         value: Value::default(),
         regions: None,
+        searchable_region: false,
+        region_open: false,
         label: "Phone number".into(),
         country_label: "Country or region".into(),
         theme: crate::Theme::default(),
         size: crate::Size::default(),
+        editor_style: glory::style::Style::new().into(),
         enabled: true.into(),
         readonly: false.into(),
         required: false.into(),
@@ -97,6 +104,11 @@ impl PhoneInput {
     }
     pub fn size(mut self, size: crate::Size) -> Self {
         self.size = size;
+        self
+    }
+    /// Apply appearance overrides to the telephone editor.
+    pub fn editor_style(mut self, style: impl Into<Vary<glory::style::Style>>) -> Self {
+        self.editor_style = style.into();
         self
     }
     pub fn label(mut self, label: impl Into<Vary<String>>) -> Self {
@@ -152,6 +164,18 @@ impl PhoneInput {
         self.value.default = value;
         self
     }
+    /// Offer a searchable country list in place of the platform-native menu.
+    pub fn searchable_region(mut self, value: bool) -> Self {
+        self.searchable_region = value;
+        self
+    }
+
+    /// Open the searchable country menu on mount.
+    pub fn default_region_open(mut self, value: bool) -> Self {
+        self.region_open = value;
+        self
+    }
+
     /// Display the supplied ISO codes and localized labels in their declared order.
     /// Without a list, all geographic regions in the numbering database are available.
     pub fn regions(
@@ -242,6 +266,7 @@ impl Widget for PhoneInput {
         }
         let mut regions = BTreeSet::new();
         let mut options = Vec::with_capacity(labels.len());
+        let mut searchable_options = Vec::new();
         for (id, label) in labels {
             let meta = DATABASE.by_id(id.as_str()).ok_or_else(invalid)?;
             if id.parse::<country::Id>().is_err()
@@ -251,6 +276,13 @@ impl Widget for PhoneInput {
                 || !regions.insert(id.clone())
             {
                 return Err(invalid().into());
+            }
+            if self.searchable_region {
+                searchable_options.push((
+                    id.clone(),
+                    label.clone(),
+                    format!("+{}", meta.country_code()),
+                ));
             }
             options.push(crate::select_option(
                 id,
@@ -290,35 +322,31 @@ impl Widget for PhoneInput {
         let plain = field.as_ref().is_some_and(|f| f.unstyled);
         let choose = editor.clone();
         let weak = scope.downgrade();
-        let mut select = crate::native_select(&self.key)
-            .theme(self.theme.clone())
-            .size(self.size)
-            .label(self.country_label.clone())
-            .enabled(scope.bond(move || select_enabled.get() && !readonly.get()))
-            .options(options)
-            .value(scope.bond(move || Some(draft.with(|d| d.region.clone()))))
-            .on_value_change(move |id| {
-                if let Some(id) = id
-                    && let Some(scope) = weak.upgrade()
-                {
-                    let mut next = choose.control.source.get();
-                    if next.region == id {
-                        return;
-                    }
-                    if next.text.trim_start().starts_with('+')
-                        && let Some(number) = next.number()
-                    {
-                        next.text = number.format().mode(Mode::National).to_string();
-                    }
-                    next.region = id;
-                    if let Err(err) = choose.update(next, false) {
-                        scope.report_error(err);
-                    }
+        let region_enabled = scope.bond(move || select_enabled.get() && !readonly.get());
+        let region_value = scope.bond(move || Some(draft.with(|d| d.region.clone())));
+        let choose_region = move |id| {
+            if let Some(id) = id
+                && let Some(scope) = weak.upgrade()
+            {
+                let mut next = choose.control.source.get();
+                if next.region == id {
+                    return;
                 }
-            });
-        if plain {
-            select = select.unstyled();
-        }
+                if let (Some(old), Some(new)) = (DATABASE.by_id(&next.region), DATABASE.by_id(&id))
+                    && next.text.trim() == format!("+{}", old.country_code())
+                {
+                    next.text = format!("+{}", new.country_code());
+                } else if next.text.trim_start().starts_with('+')
+                    && let Some(number) = next.number()
+                {
+                    next.text = number.format().mode(Mode::National).to_string();
+                }
+                next.region = id;
+                if let Err(err) = choose.update(next, false) {
+                    scope.report_error(err);
+                }
+            }
+        };
         let edit = |commit: bool| {
             let handler = editor.clone();
             let weak = scope.downgrade();
@@ -334,6 +362,7 @@ impl Widget for PhoneInput {
         let mut input = crate::text_field()
             .theme(self.theme.clone())
             .size(self.size)
+            .style(self.editor_style.clone())
             .purpose(Purpose::Tel)
             .placeholder(self.placeholder.clone())
             .enabled(self.enabled.clone())
@@ -359,9 +388,149 @@ impl Widget for PhoneInput {
                     .control(move |field| input.take().expect("mount once").field(field)),
             )
         };
+        // Keep the dialing region and telephone editor on one line. The full
+        // country names and dialing prefixes remain in the native option list.
+        let flag = scope.bond(move || {
+            draft.with(|draft| {
+                draft
+                    .region
+                    .bytes()
+                    .filter(u8::is_ascii_alphabetic)
+                    .map(|ascii| {
+                        char::from_u32(0x1F1E6 + u32::from(ascii.to_ascii_uppercase() - b'A'))
+                            .unwrap_or_default()
+                    })
+                    .collect::<String>()
+            })
+        });
+        let appearance = self.editor_style.clone();
+        let region_style = scope.bond(move || {
+            let field = appearance.get();
+            Style {
+                min_height: field.min_height,
+                radius: field.radius,
+                background: field.background,
+                border_color: field.border_color,
+                ..Style::new().width(Length::Percent(100.))
+            }
+        });
+        let country: Box<dyn Widget> = if self.searchable_region {
+            let open = scope.cage(self.region_open);
+            let search = scope.cage(String::new());
+            let mut chooser = crate::combobox(format!("{}-regions", self.key))
+                .theme(self.theme.clone())
+                .name("Search countries")
+                .placeholder("Search countries")
+                .inline_list(true)
+                .search(search)
+                .on_search_change(move |next| search.revise(|value| *value = next))
+                .open(true)
+                .value(region_value)
+                .on_value_change({
+                    move |next| {
+                        if next.is_some() {
+                            choose_region(next);
+                            open.revise(|value| *value = false);
+                        }
+                    }
+                });
+            for (id, label, code) in searchable_options {
+                chooser = chooser
+                    .option(crate::select_option(&id, label))
+                    .option_content(id, crate::SelectOptionContent::default().trailing(code));
+            }
+            let mut chooser = Some(chooser);
+            // Keep the search/listbox mounted when the anchor closes, retaining the
+            // selected country and allowing the menu to reopen with keyboard focus.
+            Box::new(
+                glory::ui::view()
+                    .class("sapid-phone-region sapid-phone-searchable")
+                    .fill(
+                        crate::popover(format!("{}-region-picker", self.key))
+                            .theme(self.theme.clone())
+                            .label(self.country_label.clone())
+                            .enabled(region_enabled)
+                            .open(open)
+                            .on_open_change(move |next| {
+                                search.revise(|value| value.clear());
+                                open.revise(|value| *value = next);
+                            })
+                            .trigger_content(move || {
+                                glory::ui::text()
+                                    .class("sapid-phone-country-flag")
+                                    .content(flag)
+                            })
+                            .trigger_style(region_style)
+                            .width(crate::PopoverWidth::Px(260.))
+                            .show_close(false)
+                            .content_policy(crate::ContentPolicy::KeepMounted)
+                            .content(move || chooser.take().expect("country search mounts once")),
+                    ),
+            )
+        } else {
+            let mut select = crate::native_select(&self.key)
+                .theme(self.theme.clone())
+                .size(self.size)
+                .label(self.country_label.clone())
+                .enabled(region_enabled)
+                .options(options)
+                .value(region_value)
+                .on_value_change(choose_region);
+            if plain {
+                select = select.unstyled();
+            }
+            Box::new(
+                glory::ui::view()
+                    .class("sapid-phone-region")
+                    .style(Style {
+                        shrink: Some(0.),
+                        ..Style::new()
+                            .position(Position::Relative)
+                            .width(Length::Px(54.))
+                    })
+                    .fill((
+                        select.style(region_style),
+                        glory::ui::view()
+                            .class("sapid-phone-flag")
+                            .semantics(Some(Box::new(Semantics {
+                                inert: true,
+                                ..Default::default()
+                            })))
+                            .style(Style {
+                                align: Some(Align::Center),
+                                ..Style::new()
+                                    .position(Position::Absolute)
+                                    .left(Length::Px(10.))
+                                    .top(Length::Px(0.))
+                                    .height(Length::Percent(100.))
+                                    .display(Display::None)
+                                    .pointer_events(PointerEvents::None)
+                            })
+                            .fill(glory::ui::text().content(flag)),
+                    )),
+            )
+        };
         crate::group()
             .theme(self.theme.clone())
-            .fill((select, editor))
+            .class("sapid-phone-input")
+            .gap(0.)
+            .style(Style {
+                align: Some(Align::End),
+                ..Style::new()
+                    .width(Length::Percent(100.))
+                    .flex_wrap(FlexWrap::NoWrap)
+            })
+            .fill((
+                country,
+                glory::ui::view()
+                    .class("sapid-phone-editor")
+                    .style(Style {
+                        grow: Some(1.),
+                        shrink: Some(1.),
+                        ..Style::new().min_width(Length::Px(0.))
+                    })
+                    .fill(editor),
+            ))
             .show_in(scope)?;
         if let Some(name) = form_name {
             let value = scope.bond(move || draft.with(PhoneDraft::rfc3966));

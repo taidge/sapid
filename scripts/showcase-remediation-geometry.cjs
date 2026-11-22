@@ -129,10 +129,10 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
         }
         if (slug === 'time-grid') {
           const grid = primary.getByRole('grid', { name: 'Appointment time', exact: true });
-          await grid.getByRole('button', { name: '09:30', exact: true }).click(); await tick();
-          assert.equal(await grid.locator('[role=gridcell][aria-selected=true]').innerText(), '09:30');
+          await grid.getByRole('button', { name: '11:00', exact: true }).click(); await tick();
+          assert.equal(await grid.locator('[role=gridcell][aria-selected=true]').innerText(), '11:00');
           await page.keyboard.press('ArrowRight'); await page.keyboard.press('Enter'); await tick();
-          assert.equal(await grid.locator('[role=gridcell][aria-selected=true]').innerText(), '10:00');
+          assert.equal(await grid.locator('[role=gridcell][aria-selected=true]').innerText(), '12:00');
           const dense = detail('Intervals, columns and time format').getByRole('grid', { name: 'Dense column window', exact: true });
           assert(await dense.evaluate(element => element.scrollWidth > element.clientWidth + 100));
           await dense.getByRole('button').first().focus(); await page.keyboard.press('End'); await tick();

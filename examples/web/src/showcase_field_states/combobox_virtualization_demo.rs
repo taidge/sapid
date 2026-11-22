@@ -1,0 +1,29 @@
+use glory::prelude::*;
+
+pub fn demo(theme: sapid::Theme) -> impl Widget {
+    sapid::stack()
+        .theme(theme.clone())
+        .class("site-field-state-example")
+        .gap(16.)
+        .style(
+            Style::new()
+                .width(Length::Percent(100.))
+                .max_width(Limit::Px(340.)),
+        )
+        .fill(
+            view().class("site-dd-scroll").fill(
+                sapid::field("combo-virtual-field")
+                    .theme(theme.clone())
+                    .label("Pick value")
+                    .control(move |field| {
+                        sapid::combobox("combo-virtual")
+                            .placeholder("Pick value")
+                            .options((0..1000).map(|i| {
+                                sapid::select_option(format!("value-{i}"), format!("Label {i}"))
+                            }))
+                            .virtualized(true)
+                            .field(field)
+                    }),
+            ),
+        )
+}

@@ -18,18 +18,18 @@ const {matrix,chromium, base, outputPath, writeReport} = require('./showcase-bro
    await page.goto(`${base}/showcase.html?widget=switch&theme=${theme}&scheme=${scheme}`);
    await page.waitForFunction(()=>window.ready===true,undefined,{timeout:20000});
    report.asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]); assert(report.asset);
-   assert.equal(await page.locator('.site-component-detail').count(),4);
-   const primary=page.locator('.site-preview .site-playground-preview'), control=primary.getByRole('switch',{name:'Notifications',exact:true});
+   assert.equal(await page.locator('.site-component-detail').count(),6);
+   const primary=page.locator('.site-preview .site-playground-preview'), control=primary.getByRole('switch',{name:'I agree to sell my privacy',exact:true});
    assert(await control.isChecked()); await control.evaluate(e=>window.switchInput=e);
    const track=primary.locator('.sapid-switch-track'), thumb=primary.locator('.sapid-switch-thumb');
-   const tr=await track.boundingBox(), on=await thumb.boundingBox(); assert.equal(tr.width,34); assert.equal(tr.height,20); assert.equal(on.width,16); assert(on.x>tr.x+10);
+   const tr=await track.boundingBox(), on=await thumb.boundingBox(); assert.equal(tr.width,38); assert.equal(tr.height,20); assert.equal(on.width,14); assert(on.x>tr.x+10);
    await control.focus(); await control.press('Space'); await tick(); assert(!(await control.isChecked()));
-   const off=await thumb.boundingBox(); assert.equal(off.x-tr.x,2); assert(await control.evaluate(e=>e===window.switchInput && document.activeElement===e));
+   const off=await thumb.boundingBox(); assert.equal(off.x-tr.x,3); assert(await control.evaluate(e=>e===window.switchInput && document.activeElement===e));
    const ring=primary.locator('.sapid-switch-focus'); assert.equal(await ring.evaluate(e=>getComputedStyle(e).borderTopWidth),'2px');
-   await clickCaption(primary,'Notifications'); assert(await control.isChecked());
+   await clickCaption(primary,'I agree to sell my privacy'); assert(await control.isChecked());
    const sizes=detail('Sizes and track marks');
    const geometry=await sizes.locator('.sapid-switch-track').evaluateAll(es=>es.map(e=>{const r=e.getBoundingClientRect();return [r.width,r.height];}));
-   assert.deepEqual(geometry,[[26,14],[30,16],[34,20],[42,24],[50,28]]); assert.equal(await sizes.locator('.sapid-switch-mark').count(),5);
+   assert.deepEqual(geometry,[[32,16],[38,20],[46,24],[56,30],[72,36]]); assert.equal(await sizes.locator('.sapid-switch-mark').count(),5);
    const labels=detail('Label position, description and error');
    for(const [name,before] of [['Before the track',true],['After the track',false]]){
     const root=labels.locator('.sapid-switch').filter({has:page.getByRole('switch',{name,exact:true})});
@@ -59,7 +59,7 @@ const {matrix,chromium, base, outputPath, writeReport} = require('./showcase-bro
   try {
    await mobile.goto(`${base}/showcase.html?widget=switch&theme=${theme}&scheme=${scheme}`);
    await mobile.waitForFunction(()=>window.ready===true,undefined,{timeout:20000});
-   const primary=mobile.locator('.site-preview .site-playground-preview'), input=primary.getByRole('switch',{name:'Notifications',exact:true});
+   const primary=mobile.locator('.site-preview .site-playground-preview'), input=primary.getByRole('switch',{name:'I agree to sell my privacy',exact:true});
    await primary.scrollIntoViewIfNeeded(); const r=await primary.locator('.sapid-switch-track').boundingBox(); assert(r);
    await mobile.touchscreen.tap(r.x+r.width-4,r.y+r.height/2); await mobile.waitForTimeout(120); assert(!(await input.isChecked()));
    const label=await primary.locator('.sapid-switch-label').boundingBox(); await mobile.touchscreen.tap(label.x+label.width/2,label.y+label.height/2); await mobile.waitForTimeout(120); assert(await input.isChecked());

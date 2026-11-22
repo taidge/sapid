@@ -6,7 +6,7 @@ use crate::appearance::{Common, common_methods, configure, observe};
 use crate::composite::{self, ContentPolicy, Factory, Panel};
 use crate::state::Value;
 
-mod motion;
+pub(crate) mod motion;
 
 pub struct Collapsible {
     common: Common,
@@ -20,6 +20,7 @@ pub struct Collapsible {
     trigger: Option<Cage<Option<NodeId>>>,
     panel: Option<Cage<Option<NodeId>>>,
     height_duration: Option<Vary<u16>>,
+    horizontal: bool,
     animated: Vary<bool>,
     on_transition_end: Option<Box<dyn FnMut(bool)>>,
 }
@@ -36,6 +37,7 @@ pub fn collapsible(key: impl Into<String>) -> Collapsible {
         trigger: None,
         panel: None,
         height_duration: None,
+        horizontal: false,
         animated: true.into(),
         on_transition_end: None,
     }
@@ -78,6 +80,11 @@ impl Collapsible {
         self.panel = Some(reference);
         self
     }
+    /// Reveal content along the inline axis. The children stay mounted while clipped.
+    pub fn horizontal(mut self, value: bool) -> Self {
+        self.horizontal = value;
+        self
+    }
     /// Opt into finite intrinsic-height motion. Zero settles immediately;
     /// Web and Apace publish revisioned host completion for closing content.
     pub fn height_transition(mut self, millis: impl Into<Vary<u16>>) -> Self {
@@ -106,9 +113,11 @@ impl Widget for Collapsible {
         let trigger_id = composite::id("c", &self.key, "trigger", "root")?;
         let panel_id = composite::id("c", &self.key, "panel", "root")?;
         let control = std::mem::take(&mut self.open).mount(scope);
+        let horizontal = self.horizontal;
         let motion = self
             .height_duration
             .take()
+            .filter(|_| !horizontal)
             .map(|duration| {
                 motion::State::new(
                     scope,
@@ -173,8 +182,11 @@ impl Widget for Collapsible {
                 scope.report_error(error);
             }
         });
+        let width_open = panel_open.clone();
         let panel: Box<dyn Widget> = if let Some(state) = motion {
             Box::new(motion::Panel {
+                class: "sapid-collapsible-panel",
+                role: None,
                 id: panel_id,
                 label: trigger_id,
                 state,
@@ -194,10 +206,33 @@ impl Widget for Collapsible {
                 restore: None,
                 reference: self.panel,
                 factory: self.content.take(),
-                policy: self.policy,
-                class: "sapid-collapsible-panel",
+                policy: if horizontal {
+                    ContentPolicy::KeepMounted
+                } else {
+                    self.policy
+                },
+                class: if horizontal {
+                    "sapid-collapsible-panel sapid-collapsible-inline-clip"
+                } else {
+                    "sapid-collapsible-panel"
+                },
                 unstyled: self.common.unstyled,
             })
+        };
+        let panel: Box<dyn Widget> = if horizontal {
+            Box::new(
+                glory::ui::view()
+                    .class(scope.bond(move || {
+                        if width_open.get() {
+                            "sapid-collapsible-inline is-open".to_owned()
+                        } else {
+                            "sapid-collapsible-inline".to_owned()
+                        }
+                    }))
+                    .fill(panel),
+            )
+        } else {
+            panel
         };
         let mut root = configure!(
             self.common,

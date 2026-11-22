@@ -1,32 +1,30 @@
 use glory::prelude::*;
 use glory::render::{FileConfig, FileFilter};
-pub fn demo(theme: sapid::Theme) -> impl Widget {
-    let description = theme.clone();
+fn image_dropzone(theme: sapid::Theme) -> sapid::Dropzone {
     sapid::dropzone()
-        .theme(theme.clone())
-        .label("Drop files here or choose files")
+        .theme(theme)
+        .class("showcase-image-picker")
+        .name("Drop files here or choose files")
+        .label("Drag images here or click to select files")
         .configuration(FileConfig {
             multiple: true,
-            max_files: 3,
-            max_file_bytes: 1024 * 1024,
-            max_total_bytes: 2 * 1024 * 1024,
-            filters: vec![
-                FileFilter::Mime("text/plain".into()),
-                FileFilter::Mime("image/png".into()),
-                FileFilter::Mime("image/jpeg".into()),
-            ],
+            max_files: 32,
+            max_file_bytes: 5 * 1024 * 1024,
+            max_total_bytes: 160 * 1024 * 1024,
+            filters: vec![FileFilter::Mime("image/*".into())],
             ..Default::default()
         })
-        .style(
-            Style::new()
-                .width(Length::Percent(100.))
-                .min_height(Length::Px(140.))
-                .padding(Edges::all(24.))
-                .border_style(glory::style::BorderStyle::Solid),
-        )
-        .description(move || {
-            sapid::text().theme(description.clone()).content(
-                "Attach text, PNG or JPEG files. Up to 3 files, 1 MiB each and 2 MiB total.",
-            )
+        .description(|| {
+            view().class("showcase-dropzone-message").fill((
+                view().class("showcase-dropzone-icon"),
+                view().class("showcase-dropzone-copy").fill((
+                    text().content("Drag images here or click to select files"),
+                    text().content("Attach up to 32 images, each no larger than 5 MiB."),
+                )),
+            ))
         })
+}
+
+pub fn demo(theme: sapid::Theme) -> impl Widget {
+    image_dropzone(theme)
 }

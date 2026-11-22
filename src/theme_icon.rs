@@ -14,13 +14,25 @@ pub enum Icon {
     Close,
     Info,
     ArrowRight,
+    ArrowLeft,
     ChevronDown,
+    /// Paired up and down arrows for select fields.
+    Selector,
+    SquaresFour,
+    MapPin,
     ChevronRight,
     ChevronLeft,
     ChevronUp,
     More,
     Circle,
     Calendar,
+    Clock,
+    Search,
+    EyeDropper,
+    User,
+    Star,
+    ShoppingCart,
+    Fingerprint,
 }
 impl Icon {
     /// A passive finite 24×24 drawing for intrinsic button, link and menu slots.
@@ -31,7 +43,11 @@ impl Icon {
             commands: path(self),
             stroke: Some(GraphicStroke {
                 color,
-                width: 2.,
+                width: match self {
+                    Self::Selector => 1.44,
+                    Self::SquaresFour | Self::MapPin | Self::Clock => 1.5,
+                    _ => 2.,
+                },
                 cap: StrokeCap::Round,
             }),
             ..Default::default()
@@ -132,6 +148,21 @@ pub(crate) fn path(icon: Icon) -> Vec<Path> {
             Path::Move(p(16., 3.)),
             Path::Line(p(16., 7.)),
         ],
+        Icon::EyeDropper => vec![
+            Path::Move(p(14., 5.)),
+            Path::Line(p(18., 9.)),
+            Path::Move(p(13., 6.)),
+            Path::Line(p(7., 12.)),
+            Path::Line(p(4., 17.)),
+            Path::Line(p(4., 20.)),
+            Path::Line(p(7., 20.)),
+            Path::Line(p(12., 17.)),
+            Path::Line(p(18., 11.)),
+            Path::Move(p(15., 6.)),
+            Path::Line(p(18., 3.)),
+            Path::Line(p(21., 6.)),
+            Path::Line(p(18., 9.)),
+        ],
         Icon::Check => vec![
             Path::Move(p(5., 12.)),
             Path::Line(p(10., 17.)),
@@ -142,6 +173,13 @@ pub(crate) fn path(icon: Icon) -> Vec<Path> {
             Path::Line(p(18., 18.)),
             Path::Move(p(18., 6.)),
             Path::Line(p(6., 18.)),
+        ],
+        Icon::ArrowLeft => vec![
+            Path::Move(p(20., 12.)),
+            Path::Line(p(4., 12.)),
+            Path::Move(p(11., 5.)),
+            Path::Line(p(4., 12.)),
+            Path::Line(p(11., 19.)),
         ],
         Icon::ArrowRight => vec![
             Path::Move(p(4., 12.)),
@@ -154,6 +192,72 @@ pub(crate) fn path(icon: Icon) -> Vec<Path> {
             Path::Move(p(6., 9.)),
             Path::Line(p(12., 15.)),
             Path::Line(p(18., 9.)),
+        ],
+        Icon::Selector => vec![
+            Path::Move(p(8.4, 9.2)),
+            Path::Line(p(12., 5.6)),
+            Path::Line(p(15.6, 9.2)),
+            Path::Move(p(8.4, 14.8)),
+            Path::Line(p(12., 18.4)),
+            Path::Line(p(15.6, 14.8)),
+        ],
+        Icon::SquaresFour => [(4.5, 4.5), (13.5, 4.5), (4.5, 13.5), (13.5, 13.5)]
+            .into_iter()
+            .flat_map(|(x, y)| {
+                [
+                    Path::Move(p(x, y)),
+                    Path::Line(p(x + 6., y)),
+                    Path::Line(p(x + 6., y + 6.)),
+                    Path::Line(p(x, y + 6.)),
+                    Path::Close,
+                ]
+            })
+            .collect(),
+        Icon::MapPin => vec![
+            Path::Move(p(12., 21.75)),
+            Path::Cubic {
+                first: p(10.5, 20.65),
+                second: p(4.5, 15.45),
+                end: p(4.5, 9.75),
+            },
+            Path::Cubic {
+                first: p(4.5, 5.61),
+                second: p(7.86, 2.25),
+                end: p(12., 2.25),
+            },
+            Path::Cubic {
+                first: p(16.14, 2.25),
+                second: p(19.5, 5.61),
+                end: p(19.5, 9.75),
+            },
+            Path::Cubic {
+                first: p(19.5, 15.45),
+                second: p(13.5, 20.65),
+                end: p(12., 21.75),
+            },
+            Path::Close,
+            Path::Move(p(15., 9.75)),
+            Path::Cubic {
+                first: p(15., 11.41),
+                second: p(13.66, 12.75),
+                end: p(12., 12.75),
+            },
+            Path::Cubic {
+                first: p(10.34, 12.75),
+                second: p(9., 11.41),
+                end: p(9., 9.75),
+            },
+            Path::Cubic {
+                first: p(9., 8.09),
+                second: p(10.34, 6.75),
+                end: p(12., 6.75),
+            },
+            Path::Cubic {
+                first: p(13.66, 6.75),
+                second: p(15., 8.09),
+                end: p(15., 9.75),
+            },
+            Path::Close,
         ],
         Icon::ChevronRight => vec![
             Path::Move(p(9., 6.)),
@@ -178,7 +282,125 @@ pub(crate) fn path(icon: Icon) -> Vec<Path> {
             Path::Move(p(19., 12.)),
             Path::Line(p(19.1, 12.)),
         ],
+        Icon::Fingerprint => vec![
+            Path::Move(p(3., 12.)),
+            Path::Cubic {
+                first: p(3., 0.),
+                second: p(21., 0.),
+                end: p(21., 12.),
+            },
+            Path::Move(p(5., 17.)),
+            Path::Cubic {
+                first: p(6.5, 14.),
+                second: p(4.5, 8.),
+                end: p(10., 6.5),
+            },
+            Path::Cubic {
+                first: p(15., 5.),
+                second: p(18., 8.4),
+                end: p(18., 13.),
+            },
+            Path::Line(p(19., 17.)),
+            Path::Move(p(8., 20.)),
+            Path::Cubic {
+                first: p(10., 16.),
+                second: p(8., 10.),
+                end: p(11., 9.5),
+            },
+            Path::Cubic {
+                first: p(14., 8.8),
+                second: p(15., 11.),
+                end: p(15., 14.),
+            },
+            Path::Line(p(16., 19.)),
+            Path::Move(p(11., 21.)),
+            Path::Cubic {
+                first: p(12.8, 18.),
+                second: p(12., 15.),
+                end: p(12., 12.5),
+            },
+        ],
+        Icon::User => vec![
+            Path::Move(p(16., 7.)),
+            Path::Cubic {
+                first: p(16., 12.3),
+                second: p(8., 12.3),
+                end: p(8., 7.),
+            },
+            Path::Cubic {
+                first: p(8., 1.7),
+                second: p(16., 1.7),
+                end: p(16., 7.),
+            },
+            Path::Close,
+            Path::Move(p(4., 21.)),
+            Path::Cubic {
+                first: p(4., 12.),
+                second: p(20., 12.),
+                end: p(20., 21.),
+            },
+        ],
+        Icon::Star => vec![
+            Path::Move(p(12., 3.)),
+            Path::Line(p(14.8, 8.6)),
+            Path::Line(p(21., 9.5)),
+            Path::Line(p(16.5, 13.9)),
+            Path::Line(p(17.6, 20.2)),
+            Path::Line(p(12., 17.2)),
+            Path::Line(p(6.4, 20.2)),
+            Path::Line(p(7.5, 13.9)),
+            Path::Line(p(3., 9.5)),
+            Path::Line(p(9.2, 8.6)),
+            Path::Close,
+        ],
+        Icon::ShoppingCart => vec![
+            Path::Move(p(2., 3.)),
+            Path::Line(p(5., 3.)),
+            Path::Line(p(7.4, 15.)),
+            Path::Line(p(18.5, 15.)),
+            Path::Line(p(21., 6.)),
+            Path::Line(p(6., 6.)),
+            Path::Move(p(9., 19.)),
+            Path::Line(p(9.3, 19.)),
+            Path::Move(p(17., 19.)),
+            Path::Line(p(17.3, 19.)),
+        ],
+        Icon::Search => vec![
+            Path::Move(p(17., 10.)),
+            Path::Cubic {
+                first: p(17., 13.87),
+                second: p(13.87, 17.),
+                end: p(10., 17.),
+            },
+            Path::Cubic {
+                first: p(6.13, 17.),
+                second: p(3., 13.87),
+                end: p(3., 10.),
+            },
+            Path::Cubic {
+                first: p(3., 6.13),
+                second: p(6.13, 3.),
+                end: p(10., 3.),
+            },
+            Path::Cubic {
+                first: p(13.87, 3.),
+                second: p(17., 6.13),
+                end: p(17., 10.),
+            },
+            Path::Close,
+            Path::Move(p(15., 15.)),
+            Path::Line(p(21., 21.)),
+        ],
         Icon::Circle => circle_path(),
+        Icon::Clock => {
+            let mut face = circle_path();
+            face.extend([
+                Path::Move(p(12., 6.75)),
+                Path::Line(p(12., 12.)),
+                Path::Line(p(17.25, 12.)),
+            ]);
+            face
+        }
         Icon::Info => vec![
             Path::Move(p(21., 12.)),
             Path::Cubic {
@@ -356,16 +578,8 @@ impl Widget for ThemeIcon {
         let icon = self.icon.clone();
         let reactive = icon.is_reactive() || accepted.as_ref().is_some_and(Vary::is_reactive);
         let drawing = move || GraphicProps {
-            width: 24.,
-            height: 24.,
-            commands: path(icon.get()),
-            stroke: Some(GraphicStroke {
-                color,
-                width: 2.,
-                cap: StrokeCap::Round,
-            }),
             alternative: accepted.as_ref().map(Vary::get),
-            ..Default::default()
+            ..icon.get().drawing(color)
         };
         let drawing: Vary<GraphicProps> = if reactive {
             scope.bond(drawing).into()

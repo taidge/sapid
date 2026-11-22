@@ -38,6 +38,8 @@ pub struct FileController {
     files: Cage<Vec<FileInfo>>,
     status: Cage<FileStatus>,
     pending: Cage<Option<u64>>,
+    enabled: Vary<bool>,
+    completed: Callback<FileOutcome>,
     output_files: Option<Cage<Vec<FileInfo>>>,
     output_status: Option<Cage<FileStatus>>,
     changed: Callback<Vec<FileInfo>>,
@@ -75,6 +77,29 @@ impl FileController {
         self.set_status(FileStatus::Idle)
     }
     /// Programmatic clear is silent; it does not imitate a user selection callback.
+    /// Open the native chooser from an application-owned user gesture.
+    /// Disabled controls and an outstanding chooser do not start another request.
+    pub fn open_picker(&self) -> Result {
+        let (scope, node) = self.current()?;
+        if !self.enabled.try_get()? || self.pending.try_get()?.is_some() {
+            return Ok(());
+        }
+        match scope.pick_files(node) {
+            Ok(request) => {
+                self.pending.try_revise(|p| *p = Some(request))?;
+                self.set_status(FileStatus::Choosing)
+            }
+            Err(glory::ui::Error::Render(render::Error::Unsupported(_))) => {
+                self.set_status(FileStatus::Rejected(FileRejection::Unavailable))?;
+                self.completed.emit(
+                    scope.id(),
+                    FileOutcome::Rejected(FileRejection::Unavailable),
+                );
+                Ok(())
+            }
+            Err(error) => Err(error),
+        }
+    }
     pub fn clear(&self) -> Result {
         let (scope, node) = self.current()?;
         scope.clear_files(node)?;
@@ -172,6 +197,7 @@ impl FileController {
 }
 pub struct FileButton {
     common: Common,
+    field: Option<crate::FieldControl>,
     label: Vary<String>,
     configuration: Vary<FileConfig>,
     files_ref: Option<Cage<Vec<FileInfo>>>,
@@ -185,6 +211,7 @@ pub struct FileButton {
 pub fn file_button() -> FileButton {
     FileButton {
         common: Common::default(),
+        field: None,
         label: "Choose file".into(),
         configuration: FileConfig::default().into(),
         files_ref: None,
@@ -253,7 +280,13 @@ impl FileButton {
             .configuration
             .try_with(|value| configuration(value, self.force_drop))??;
         let initial_label = self.label.try_with(|value| label(value))??;
-        if self.input_summary && self.common.name.is_none() {
+        if self.input_summary
+            && self.common.name.is_none()
+            && !self
+                .field
+                .as_ref()
+                .is_some_and(crate::FieldControl::has_label)
+        {
             self.common.name = Some(
                 crate::composite::validated(scope, &self.label, |value| label(value).map(|_| ()))?
                     .into(),
@@ -264,7 +297,10 @@ impl FileButton {
         let status = scope.cage(FileStatus::Idle);
         let pending = scope.cage(None);
         let changed = Callback::new(self.changed.take());
+        let completed = Callback::new(self.result.take());
         let control = FileController {
+            enabled: self.common.enabled.clone(),
+            completed: completed.clone(),
             scope: scope.downgrade(),
             node: reference,
             files,
@@ -275,7 +311,6 @@ impl FileButton {
             changed: changed.clone(),
         };
         control.reset()?;
-        let completed = Callback::new(self.result.take());
         let changed_cleanup = changed.clone();
         let completed_cleanup = completed.clone();
         scope.on_cleanup(move || {
@@ -340,11 +375,25 @@ impl FileButton {
                 scope.report_error(error);
             }
         });
+        let field = crate::field::control_metadata(
+            scope,
+            self.field.as_ref(),
+            self.common.name.is_some(),
+            false.into(),
+            false.into(),
+            false.into(),
+        );
         let busy = scope.bond(move || {
-            Some(Box::new(Semantics {
-                busy: Some(status.get() == FileStatus::Choosing),
-                ..Default::default()
-            }))
+            let mut metadata = field.get().unwrap_or_default();
+            // A capability-backed file picker is a button. The surrounding
+            // fieldset owns validation, while the button announces its feedback.
+            metadata.described_by = metadata.error_message.take().or(metadata.described_by);
+            metadata.required = false;
+            metadata.invalid = false;
+            metadata.readonly = false;
+            metadata.form_control = None;
+            metadata.busy = Some(status.get() == FileStatus::Choosing);
+            Some(metadata)
         });
         let overrides = self.common.style.clone();
         let enabled = self.common.enabled.clone();
@@ -387,7 +436,6 @@ impl FileButton {
             .remove(&EventKind::Activate)
             .unwrap_or_default();
         let driver = control.clone();
-        let unavailable = completed.clone();
         let active = self.common.enabled.clone();
         let weak = scope.downgrade();
         inner = inner.on(EventKind::Activate, move |event| {
@@ -402,24 +450,7 @@ impl FileButton {
                     return;
                 }
             }
-            let result = (|| -> Result {
-                if pending.try_get()?.is_none() {
-                    let node = reference.try_get()?.ok_or(glory::ui::Error::Gone)?;
-                    match scope.pick_files(node) {
-                        Ok(request) => {
-                            pending.try_revise(|v| *v = Some(request))?;
-                            driver.set_status(FileStatus::Choosing)?;
-                        }
-                        Err(glory::ui::Error::Render(render::Error::Unsupported(_))) => {
-                            driver.set_status(FileStatus::Rejected(FileRejection::Unavailable))?;
-                            unavailable
-                                .emit(owner, FileOutcome::Rejected(FileRejection::Unavailable));
-                        }
-                        Err(error) => return Err(error),
-                    }
-                }
-                Ok(())
-            })();
+            let result = driver.open_picker();
             if let Err(error) = result {
                 scope.report_error(error);
                 return;
@@ -654,6 +685,7 @@ pub struct FileInput {
     attachment: Option<AttachmentFactory>,
     clearable: bool,
     show_attachments: bool,
+    loading: Option<Vary<bool>>,
 }
 pub type Dropzone = FileInput;
 pub fn file_input() -> FileInput {
@@ -667,6 +699,7 @@ pub fn file_input() -> FileInput {
         attachment: None,
         clearable: false,
         show_attachments: true,
+        loading: None,
     }
 }
 pub fn dropzone() -> Dropzone {
@@ -751,11 +784,24 @@ macro_rules! file_composite_methods {
 }
 impl FileInput {
     file_composite_methods!();
+    /// Associate the picker button with its enclosing field label and messages.
+    pub fn field(mut self, field: crate::FieldControl) -> Self {
+        self.button.common.theme = field.theme.clone();
+        self.button.common.size = field.size;
+        self.button.common.unstyled = field.unstyled;
+        self.button.field = Some(field);
+        self
+    }
     pub fn clearable(mut self, value: bool) -> Self {
         self.clearable = value;
         self
     }
     /// Hide attachment rows without changing the selected host references.
+    /// Prevent new selections and display a busy indicator while processing.
+    pub fn loading(mut self, value: impl Into<Vary<bool>>) -> Self {
+        self.loading = Some(value.into());
+        self
+    }
     pub fn show_attachments(mut self, value: bool) -> Self {
         self.show_attachments = value;
         self
@@ -783,13 +829,23 @@ impl FileInput {
 }
 impl Widget for FileInput {
     fn build(&mut self, scope: &Scope) -> Result {
+        if let Some(field) = &self.button.field {
+            let enabled = field.enabled(scope, self.button.common.enabled.clone());
+            let readonly = field.readonly_state(scope, false.into());
+            self.button.common.enabled =
+                scope.bond(move || enabled.get() && !readonly.get()).into();
+        }
+        if let Some(loading) = self.loading.clone() {
+            let enabled = self.button.common.enabled.clone();
+            self.button.common.enabled = scope.bond(move || enabled.get() && !loading.get()).into();
+        }
         // Validate both sources before creating the wrapper or invoking slots.
         self.button
             .configuration
             .try_with(|value| configuration(value, self.button.force_drop))??;
         self.button.label.try_with(|value| label(value))??;
         let reference = scope.cage(None);
-        glory::ui::view()
+        let mut frame = glory::ui::view()
             .node_ref(reference)
             .class(if self.drop {
                 "sapid-dropzone"
@@ -803,8 +859,43 @@ impl Widget for FileInput {
                     .min_width(Length::Px(0.))
                     .max_width(Limit::Percent(100.))
                     .gap(8.),
-            )
-            .show_in(scope)?;
+            );
+        let busy = self.loading.clone();
+        if let Some(loading) = self.loading.clone() {
+            let visible = loading.clone();
+            let theme = self.button.common.theme.clone();
+            frame = frame
+                .semantics(scope.bond(move || {
+                    Some(Box::new(Semantics {
+                        busy: Some(loading.get()),
+                        ..Default::default()
+                    }))
+                }))
+                .fill(glory::ui::when(visible, move || {
+                    crate::loader()
+                        .theme(theme.clone())
+                        .class("sapid-dropzone-loading")
+                        .name("Processing files")
+                }));
+        }
+        if let Some(field) = &self.button.field {
+            let states = field.metadata(scope, false, false.into(), false.into(), false.into());
+            frame = frame
+                .field_part(render::FieldPart::Fieldset)
+                .semantics(scope.bond(move || {
+                    let state = states.get().unwrap_or_default();
+                    Some(Box::new(Semantics {
+                        busy: busy.as_ref().map(Vary::get),
+                        field_part: Some(render::FieldPart::Fieldset),
+                        labelled_by: state.labelled_by,
+                        described_by: state.described_by,
+                        error_message: state.error_message,
+                        invalid: state.invalid,
+                        ..Default::default()
+                    }))
+                }));
+        }
+        frame.show_in(scope)?;
         let root = reference.get().ok_or(glory::ui::Error::Gone)?;
         let child = scope.child_in(root)?;
         if let Some(factory) = self.description.as_mut() {
@@ -951,8 +1042,21 @@ impl Widget for FileInput {
         }
         let status_files = current.clone();
         let status = controller.status();
+        let compact = !self.show_attachments && !self.drop;
+        let visible_status = status.clone();
         glory::ui::text()
-            .class("sapid-file-status")
+            .class(child.bond(move || {
+                if compact
+                    && matches!(
+                        visible_status.get(),
+                        FileStatus::Idle | FileStatus::Selected
+                    )
+                {
+                    "sapid-file-status sapid-file-status-compact".to_owned()
+                } else {
+                    "sapid-file-status".to_owned()
+                }
+            }))
             .content(child.bond(move || match status.get() {
                 FileStatus::Idle => "No files selected".into(),
                 FileStatus::Choosing => "Choosing files".into(),

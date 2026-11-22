@@ -488,3 +488,37 @@ fn cancellation_destructor_can_flush_row_retirement_without_restoring_its_focus_
     tick(&app, &executor, &time, 100);
     assert_eq!(handle.pending().unwrap(), 0);
 }
+
+#[test]
+fn priority_preemption_pauses_hidden_deadlines_and_progress_uses_the_same_timer() {
+    let (app, executor, time, handle) = fixture(1);
+    handle
+        .show(
+            notification_request("low", "Low priority", "Details")
+                .timeout(Duration::from_millis(1000))
+                .auto_close_progress(sapid::NotificationProgressPosition::Bottom),
+        )
+        .unwrap();
+    app.flush().unwrap();
+    executor.poll_one();
+    tick(&app, &executor, &time, 250);
+    find(&app, "sapid-notification-progress");
+    let high = handle
+        .show(notification_request("high", "Urgent", "Details").priority(10))
+        .unwrap();
+    app.flush().unwrap();
+    assert_eq!(
+        handle.visible_and_queued().unwrap(),
+        (vec!["high".to_owned()], vec!["low".to_owned()])
+    );
+    tick(&app, &executor, &time, 1500);
+    assert_eq!(handle.pending().unwrap(), 2);
+    handle.dismiss(&high).unwrap();
+    app.flush().unwrap();
+    executor.poll_one();
+    tick(&app, &executor, &time, 2249);
+    assert_eq!(handle.pending().unwrap(), 1);
+    executor.poll_one();
+    tick(&app, &executor, &time, 2250);
+    assert_eq!(handle.pending().unwrap(), 0);
+}

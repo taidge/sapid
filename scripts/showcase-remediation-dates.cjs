@@ -3,7 +3,7 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
 (async()=>{
  const browser=await chromium.launch(),context=await browser.newContext(),page=await context.newPage();page.setDefaultTimeout(9000);
  const report={browser:browser.version(),pages:[],errors:[]};page.on('pageerror',e=>report.errors.push(e.message));page.on('console',m=>{if(m.type()==='error')report.errors.push(m.text());});
- const counts={'date-picker':11,'inline-date-time-picker':6,'date-input':5,'month-picker':4,'year-picker':4,'time-input':5,'time-picker':15,'time-value':3,calendar:5};
+ const counts={'date-picker':27,'inline-date-time-picker':6,'date-input':9,'month-picker':11,'year-picker':10,'time-input':7,'time-picker':33,'time-value':4,calendar:5};
  const tick=()=>page.evaluate(()=>new Promise(resolve=>{let n=0;const f=()=>++n===6?resolve():requestAnimationFrame(f);requestAnimationFrame(f);}));
  const visit=async url=>{for(let attempt=0;;attempt++){try{await page.goto(url);return;}catch(error){if(attempt>=2||!String(error).includes('ERR_NO_BUFFER_SPACE'))throw error;(report.navigationRetries??=[]).push({url,attempt:attempt+1,error:String(error)});await page.waitForTimeout(250*(attempt+1));}}};
  const detail=id=>page.locator('.site-component-detail').filter({has:page.locator(`#${id}`)}).locator('.site-demo').first();

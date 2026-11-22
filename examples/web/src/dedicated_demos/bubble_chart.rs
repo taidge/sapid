@@ -37,8 +37,19 @@ fn sample_data() -> PlotData {
 }
 
 pub fn demo(theme: sapid::Theme) -> impl Widget {
+    let palette = controls::chart_palette(&theme);
     bubble_chart("bubble-chart-overview")
-        .name("Three independent dimensions")
         .theme(theme)
+        .name("Bubble chart")
+        .chart_theme(palette)
         .data(sample_data())
+        .frame(ChartFrame {
+            width: 640.,
+            height: 180.,
+        })
+        .default_options(PlotOptions::default())
+        .style(Style::new().width(Length::Percent(100.)))
+        .legend(false)
+        .navigation(false)
+        .data_table(false)
 }

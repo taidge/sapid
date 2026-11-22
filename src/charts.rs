@@ -1,14 +1,16 @@
 //! Optional finite charts. Data, scales and geometry remain host independent;
 //! drawing uses Glory's existing portable vector protocol.
 pub use crate::chart_aux::{Legend, LegendItem, Tooltip, legend, tooltip};
+pub use crate::chart_curve::ChartCurve;
 pub use crate::chart_model::{
     ChartBrush, ChartCategory, ChartData, ChartDomain, ChartError, ChartSeries, ChartSeriesKind,
     MAX_CHART_POINTS, MAX_CHART_SERIES, MAX_CHART_TEXT_BYTES, MAX_CHART_VALUE,
 };
 pub use crate::chart_scene::{
-    CartesianKind, CartesianOptions, CartesianScene, ChartFrame, ChartLabel, ChartLocation,
-    ChartPath, ChartReferenceArea, ChartReferenceAxis, ChartReferenceDot, ChartReferenceLabel,
-    ChartReferenceLine, ChartTheme, ChartTick, MAX_CHART_REFERENCES,
+    CartesianKind, CartesianOptions, CartesianScene, ChartAxes, ChartFrame, ChartLabel,
+    ChartLocation, ChartPath, ChartPresentation, ChartReferenceArea, ChartReferenceAxis,
+    ChartReferenceDot, ChartReferenceLabel, ChartReferenceLine, ChartTheme, ChartTick,
+    MAX_CHART_REFERENCES,
 };
 pub use crate::chart_widget::{
     Chart, ChartPointDetails, ChartSelection, area_chart, bar_chart, chart, composite_chart,
@@ -27,8 +29,9 @@ pub use crate::plot_model::{
     PointDatum, TargetDatum, ValueDatum,
 };
 pub use crate::plot_scene::{
-    BubbleRadius, PlotAngles, PlotLabel, PlotMark, PlotOptions, PlotRange, PlotScaleStop,
-    PlotScene, WaffleGrid,
+    BubbleRadius, BulletTrack, CandleAxes, MatrixTiles, PlotAngles, PlotLabel, PlotMark,
+    PlotOptions, PlotRange, PlotScaleStop, PlotScene, RadarParts, SegmentLabelPosition,
+    SegmentLabelValue, SegmentLabels, SparklineStyle, WaffleDirection, WaffleGrid,
 };
 pub use crate::plot_widget::{
     MAX_PLOT_KEY_BYTES, Plot, bars_list, bubble_chart, bullet_chart, candlestick_chart,

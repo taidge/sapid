@@ -47,7 +47,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
         let palette = theme.clone();
         let gradient_theme = theme.clone();
         view()
-            .class("site-configurator")
+            .class("site-configurator site-display-configurator")
             .fill(controls::playground(
                 Box::new(badge),
                 vec![

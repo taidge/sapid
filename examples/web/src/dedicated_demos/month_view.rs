@@ -27,19 +27,22 @@ fn sample(view: ScheduleView) -> ScheduleData {
                 "Project planning",
                 ScheduleInterval::new(dt("2026-11-04T09:00"), dt("2026-11-04T10:30")).unwrap(),
             )
-            .unwrap(),
+            .unwrap()
+            .color(glory::style::Color(34, 139, 230, 255)),
             ScheduleEvent::new(
                 ScheduleKey::new("review").unwrap(),
                 "Design review",
                 ScheduleInterval::new(dt("2026-11-04T09:30"), dt("2026-11-04T11:00")).unwrap(),
             )
-            .unwrap(),
+            .unwrap()
+            .color(glory::style::Color(121, 80, 242, 255)),
             ScheduleEvent::new(
                 ScheduleKey::new("standup").unwrap(),
                 "Daily standup",
                 ScheduleInterval::new(dt("2026-11-02T11:30"), dt("2026-11-02T12:00")).unwrap(),
             )
             .unwrap()
+            .color(glory::style::Color(64, 192, 87, 255))
             .recurring(
                 ScheduleRecurrence::new(RecurrenceFrequency::Daily, 1, RecurrenceEnd::Count(7))
                     .unwrap(),
@@ -53,6 +56,7 @@ fn sample(view: ScheduleView) -> ScheduleData {
                 ScheduleInterval::all_day(day("2026-11-04"), day("2026-11-05")).unwrap(),
             )
             .unwrap()
+            .color(glory::style::Color(250, 82, 82, 255))
             .all_day()
             .unwrap(),
         ],

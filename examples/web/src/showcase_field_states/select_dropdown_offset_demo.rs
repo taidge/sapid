@@ -1,0 +1,36 @@
+use glory::prelude::*;
+
+pub fn demo(theme: sapid::Theme) -> impl Widget {
+    sapid::stack()
+        .theme(theme.clone())
+        .class("site-field-state-example")
+        .gap(16.)
+        .style(
+            Style::new()
+                .width(Length::Percent(100.))
+                .max_width(Limit::Px(340.)),
+        )
+        .fill(
+            view().class("site-dd-offset").fill(
+                sapid::field("select-offset-field")
+                    .theme(theme.clone())
+                    .label("Your favorite library")
+                    .control(move |field| {
+                        sapid::select("select-offset")
+                            .placeholder("Pick value")
+                            .options(
+                                ["React", "Angular", "Vue", "Svelte"]
+                                    .map(|label| sapid::select_option(label, label)),
+                            )
+                            .popup_placement(
+                                glory::render::AnchorPlacement::new(
+                                    glory::render::AnchorSide::Bottom,
+                                    glory::render::AnchorAlign::Start,
+                                )
+                                .gap(0.),
+                            )
+                            .field(field)
+                    }),
+            ),
+        )
+}

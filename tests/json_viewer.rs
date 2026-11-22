@@ -459,3 +459,28 @@ fn tree_mode_full_leaf_and_finite_depth_reject_atomically_without_changing_copy(
     assert!(html.contains("role=\"treeitem\""));
     assert!(html.contains("aria-level=\"2\""));
 }
+
+#[test]
+fn sorted_objects_keep_array_order_and_retain_keys_across_updates() {
+    let app = App::memory();
+    let data = app
+        .scope()
+        .cage(String::from(r#"{"z":[9,1],"a":{"y":4,"x":2}}"#));
+    app.mount(
+        json_viewer("sorted")
+            .source(data)
+            .sort_keys(true)
+            .root_name("response")
+            .default_expand_depth(3),
+    )
+    .unwrap();
+    assert_eq!(values(&app), ["x: 2", "y: 4", "0: 9", "1: 1"]);
+    let old = ids(&app, "sapid-json-value");
+    data.revise(|value| *value = r#"{"z":[7,5],"a":{"y":4,"x":3}}"#.into());
+    app.flush().unwrap();
+    assert_eq!(ids(&app, "sapid-json-value"), old);
+    assert_eq!(values(&app), ["x: 3", "y: 4", "0: 7", "1: 5"]);
+    app.dispatch(trigger(&app, "response: Object 2"), Event::Activate)
+        .unwrap();
+    assert!(values(&app).is_empty());
+}

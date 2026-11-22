@@ -1,48 +1,61 @@
 use glory::prelude::*;
-use sapid::{TransitionEffect as Effect, TransitionTiming as Timing};
+use sapid::TransitionEffect as Effect;
+
 pub fn demo(theme: sapid::Theme) -> impl Widget {
     widget(move |scope| {
-        let mounted = scope.cage(true);
-        let effect = scope.cage(Effect::Fade);
-        let content_theme = theme.clone();
-        let choices = [
-            ("Fade", Effect::Fade),
-            ("Scale", Effect::Scale),
-            ("Slide left", Effect::SlideLeft),
+        let effects = [
+            Effect::Fade,
+            Effect::FadeUp,
+            Effect::FadeDown,
+            Effect::FadeLeft,
+            Effect::FadeRight,
+            Effect::Scale,
+            Effect::ScaleY,
+            Effect::ScaleX,
+            Effect::SkewUp,
+            Effect::SkewDown,
+            Effect::RotateLeft,
+            Effect::RotateRight,
+            Effect::SlideDown,
+            Effect::SlideUp,
+            Effect::SlideLeft,
+            Effect::SlideRight,
+            Effect::Pop,
+            Effect::PopBottomLeft,
+            Effect::PopBottomRight,
+            Effect::PopTopLeft,
+            Effect::PopTopRight,
         ];
-        sapid::stack()
+        sapid::group()
             .theme(theme.clone())
-            .gap(12.)
-            .fill((
-                sapid::group().theme(theme.clone()).fill(
-                    choices
-                        .into_iter()
-                        .map(|(label, value)| {
-                            sapid::button()
-                                .theme(theme.clone())
-                                .label(label)
-                                .on_press(move || effect.revise(|old| *old = value))
-                        })
-                        .collect::<Vec<_>>(),
-                ),
-                sapid::button()
-                    .theme(theme.clone())
-                    .label("Toggle effect example")
-                    .on_press(move || mounted.revise(|v| *v = !*v)),
-                sapid::transition()
-                    .mounted(mounted)
-                    .effect(effect)
-                    .duration(450)
-                    .timing(Timing::EaseOut)
-                    .distance(24)
-                    .content(move || {
-                        sapid::paper().theme(content_theme.clone()).fill(
-                            sapid::text()
-                                .theme(content_theme.clone())
-                                .content("Fade, scale and slide content"),
-                        )
-                    }),
-            ))
+            .justify(Justify::Center)
+            .gap(8.)
+            .fill(
+                effects
+                    .into_iter()
+                    .map(|effect| {
+                        let open = scope.cage(true);
+                        let palette = theme.clone();
+                        sapid::transition()
+                            .theme(theme.clone())
+                            .effect(effect)
+                            .mounted(open)
+                            .duration(280)
+                            .exit_duration(260)
+                            .on_exited(move || open.revise(|v| *v = true))
+                            .content(move || {
+                                sapid::button()
+                                    .theme(palette.clone())
+                                    .class("sapid-demo-effect-pill")
+                                    .variant(sapid::ButtonVariant::Light)
+                                    .compact(true)
+                                    .name(effect.as_str())
+                                    .label(effect.as_str().to_uppercase())
+                                    .on_press(move || open.revise(|v| *v = false))
+                            })
+                    })
+                    .collect::<Vec<_>>(),
+            )
             .show_in(scope)
     })
 }

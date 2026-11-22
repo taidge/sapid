@@ -87,7 +87,7 @@ fn measured_local_expansion_preserves_text_and_runs_typed_before_observer() {
     let trigger = find(&app, "sapid-spoiler-trigger");
     measure(&app, 300.0);
     assert!(!hidden_actions(&app));
-    for (open, cap) in [(true, Limit::None), (false, Limit::Px(60.0))] {
+    for (open, cap) in [(true, Limit::Px(300.0)), (false, Limit::Px(60.0))] {
         app.dispatch(trigger, Event::Activate).unwrap();
         assert_eq!(expanded(&app), open);
         assert_eq!(

@@ -1,6 +1,7 @@
 use glory::prelude::*;
 pub fn demo(theme: sapid::Theme) -> impl Widget {
     sapid::field("primary-combobox")
+        .class("site-field-example")
         .theme(theme.clone())
         .label("Framework")
         .control(move |field| {

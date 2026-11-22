@@ -23,6 +23,7 @@ pub struct Button {
     auto_contrast: bool,
     compact: Vary<bool>,
     loading: Vary<bool>,
+    loader_type: crate::LoaderType,
     pressed: Option<Vary<bool>>,
     toolbar: Option<Box<dyn ToolbarHooks>>,
     label: Vary<String>,
@@ -59,6 +60,7 @@ pub fn button() -> Button {
         auto_contrast: false,
         compact: false.into(),
         loading: false.into(),
+        loader_type: crate::LoaderType::Oval,
         pressed: None,
         toolbar: None,
         label: "".into(),
@@ -167,6 +169,10 @@ impl Button {
 
     /// Loading shows a decorative indicator and disables native activation.
     /// The label and accessible name stay available; no timer is implied.
+    pub fn loader_type(mut self, kind: crate::LoaderType) -> Self {
+        self.loader_type = kind;
+        self
+    }
     pub fn loading(mut self, value: impl Into<Vary<bool>>) -> Self {
         self.loading = value.into();
         self
@@ -184,10 +190,12 @@ impl Widget for Button {
         let has_sections = self.left.is_some() || self.right.is_some();
         let has_loading = self.loading.is_reactive() || self.loading.try_get()?;
         let loader = if has_loading {
-            crate::actions::loading_indicator(
+            crate::actions::inline_loader(
                 scope,
                 self.loading.clone(),
                 self.common.theme.disabled_text,
+                self.loader_type,
+                "sapid-button-loader",
             )
             .into_children()
         } else {

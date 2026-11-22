@@ -32,7 +32,7 @@ pub struct Plot {
     options: Option<Vary<PlotOptions>>,
     default_options: PlotOptions,
     frame: ChartFrame,
-    palette: Option<ChartTheme>,
+    palette: Option<Vary<ChartTheme>>,
     selection: Option<Vary<Option<String>>>,
     changed: Option<Box<dyn FnMut(PlotOptions)>>,
     selected: Option<Box<dyn FnMut(Option<String>)>>,
@@ -94,8 +94,8 @@ impl Plot {
         self.frame = value;
         self
     }
-    pub fn chart_theme(mut self, value: ChartTheme) -> Self {
-        self.palette = Some(value);
+    pub fn chart_theme(mut self, value: impl Into<Vary<ChartTheme>>) -> Self {
+        self.palette = Some(value.into());
         self
     }
     pub fn selection(mut self, value: impl Into<Vary<Option<String>>>) -> Self {
@@ -266,10 +266,11 @@ impl Widget for Plot {
         let palette = self
             .palette
             .clone()
-            .unwrap_or_else(|| ChartTheme::from_theme(&self.common.theme));
+            .unwrap_or_else(|| ChartTheme::from_theme(&self.common.theme).into());
         let show_table = self.show_table;
         let label_surface = self.common.theme.surface;
         let read = move || -> Result<Rc<Model>> {
+            let palette = palette.try_get()?;
             let options = options.try_with(bounded_options)??;
             data.try_with(|data| {
                 let scene =
@@ -430,6 +431,7 @@ impl Widget for Plot {
         if self.show_legend {
             build_legend(
                 &area,
+                self.show_navigation,
                 &state,
                 self.common.theme.clone(),
                 self.common.unstyled,
@@ -588,8 +590,20 @@ fn build_drawing(
             let key = key.get_untracked();
             glory::ui::widget(move |scope| {
                 let key = key.clone();
+                let kind_key = key.clone();
                 glory::ui::graphic()
-                    .class("sapid-plot-layer")
+                    .class(scope.bond(move || {
+                        model.with(|m| {
+                            if kind_key.starts_with("spark-fill-")
+                                && m.options.sparkline.is_some_and(|s| s.gradient)
+                            {
+                                "sapid-plot-layer sapid-chart-area-gradient"
+                            } else {
+                                "sapid-plot-layer"
+                            }
+                            .to_owned()
+                        })
+                    }))
                     .drawing(
                         scope.bond(move || {
                             model.with(|m| m.scene.paths[m.paths[&key]].drawing.clone())
@@ -635,6 +649,17 @@ fn build_drawing(
                                         .overflow_y(Overflow::Hidden)
                                 };
                             }
+                            if let Some(tiles) = m.options.matrix_tiles {
+                                let row_label = tiles.y_labels && matches!(&m.data, PlotData::Matrix(data) if i < data.rows.len());
+                                return Style {
+                                    font_size: Some(11.),
+                                    pointer_events: Some(glory::style::PointerEvents::None),
+                                    ..Style::new().position(Position::Absolute)
+                                        .left(Length::Percent(label.x / frame.width * 100.))
+                                        .top(Length::Percent((label.y - if row_label {6.} else {0.}) / frame.height * 100.))
+                                        .white_space(glory::style::WhiteSpace::NoWrap)
+                                };
+                            }
                             if let PlotData::Matrix(data) = &m.data {
                                 let row = i < data.rows.len();
                                 let column = i >= data.rows.len()
@@ -674,7 +699,7 @@ fn build_drawing(
                                 }
                                 return style;
                             }
-                            if m.options.center_label.is_some() {
+                            if i == 0 && m.kind == PlotKind::Donut && m.options.center_label.is_some() {
                                 let diameter = (frame.width.min(frame.height) - 40.)
                                     * m.options.donut_inner_ratio.unwrap_or(0.62);
                                 let width = diameter * 0.85 / frame.width * 100.;
@@ -692,6 +717,30 @@ fn build_drawing(
                                         .height(Length::Px(20.))
                                         .overflow_x(Overflow::Hidden)
                                         .overflow_y(Overflow::Hidden)
+                                };
+                            }
+                            if m.options.segment_labels.is_some() || m.options.hierarchy_labels || m.kind == PlotKind::Treemap || m.options.gauge_value_label || m.options.bullet_track.is_some() {
+                                let center = label.x / frame.width * 100.;
+                                let (left, justify) = if m.options.bullet_track.is_some() && center > 90. {
+                                    (80., glory::style::Justify::End)
+                                } else if m.options.bullet_track.is_some() && center < 10. {
+                                    (0., glory::style::Justify::Start)
+                                } else {
+                                    (center - 10., glory::style::Justify::Center)
+                                };
+                                return Style {
+                                    pointer_events: Some(glory::style::PointerEvents::None),
+                                    font_size: Some(if m.options.gauge_value_label { 20. } else { 12. }),
+                                    font_weight: if m.options.gauge_value_label { Some(700.) } else { None },
+                                    display: Some(Display::Flex),
+                                    align: Some(glory::style::Align::Center),
+                                    justify: Some(justify),
+                                    ..Style::new()
+                                        .position(Position::Absolute)
+                                        .left(Length::Percent(left))
+                                        .top(Length::Percent(label.y / frame.height * 100. - 3.))
+                                        .width(Length::Percent(20.))
+                                        .height(Length::Percent(6.))
                                 };
                             }
                             Style {
@@ -758,6 +807,7 @@ fn build_drawing(
                 .collect::<Vec<_>>()
         })
     });
+    let hint = area.cage(None::<String>);
     let state = state.clone();
     glory::ui::each(keys)
         .key(|key| key.clone())
@@ -787,7 +837,25 @@ fn build_drawing(
                         model.with(|m| {
                             let mark = &m.scene.marks[m.marks[&style_key]];
                             Style {
-                                background: Some(mark.color),
+                                background: Some(
+                                    if m.options.sparkline.is_some()
+                                        || m.options.radar_parts.is_some_and(|p| !p.dots)
+                                        || m.options.candle_axes.is_some()
+                                        || m.options.matrix_tiles.is_some()
+                                        || m.options.bullet_track.is_some()
+                                        || m.options.gauge_value_label
+                                        || matches!(
+                                            m.kind,
+                                            PlotKind::Treemap
+                                                | PlotKind::Sunburst
+                                                | PlotKind::Sankey
+                                        )
+                                    {
+                                        glory::style::Color(0, 0, 0, 0)
+                                    } else {
+                                        mark.color
+                                    },
+                                ),
                                 position: Some(Position::Absolute),
                                 left: Some(Length::Percent(mark.x / frame.width * 100.)),
                                 top: Some(Length::Percent(mark.y / frame.height * 100.)),
@@ -810,27 +878,87 @@ fn build_drawing(
                     .on(EventKind::Activate, move |_| {
                         pressed.choose(Some(activate.clone()))
                     });
-                if pointer_selection {
-                    button = button.on(EventKind::Pointer, move |event| {
-                        if matches!(
-                            event,
-                            Event::Pointer {
-                                phase: PointerPhase::Enter,
-                                ..
-                            }
-                        ) {
+                button = button.on(EventKind::Pointer, move |event| match event {
+                    Event::Pointer {
+                        phase: PointerPhase::Enter,
+                        ..
+                    } => {
+                        if model.with(|m| m.options.tooltip) {
+                            hint.revise(|current| *current = Some(hover.clone()));
+                        }
+                        if pointer_selection {
                             hovered.choose(Some(hover.clone()));
                         }
-                    });
-                }
+                    }
+                    Event::Pointer {
+                        phase: PointerPhase::Leave,
+                        ..
+                    } => {
+                        hint.revise(|current| *current = None);
+                    }
+                    _ => {}
+                });
                 button.show_in(scope)
             })
         })
         .show_in(&area)?;
+    let tooltip = area.bond(move || {
+        model.with(|m| {
+            if !m.options.tooltip {
+                return None;
+            }
+            let key = hint.get()?;
+            let index = m.marks.get(&key)?;
+            let point = &m.scene.marks[*index];
+            let label = if m.options.tooltip_all_segments {
+                m.scene
+                    .marks
+                    .iter()
+                    .map(|mark| format!("{}: {}", mark.label, mark.value_text))
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            } else {
+                format!("{}: {}", point.label, point.value_text)
+            };
+            Some((label, point.x, point.y))
+        })
+    });
+    glory::ui::when(
+        area.bond(move || tooltip.with(|value| value.is_some())),
+        move || {
+            glory::ui::widget(move |scope| {
+                glory::ui::text()
+                    .class("sapid-plot-tooltip")
+                    .content(scope.bond(move || {
+                        tooltip.with(|v| v.as_ref().map_or_else(String::new, |v| v.0.clone()))
+                    }))
+                    .style(scope.bond(move || {
+                        tooltip.with(|v| {
+                            let (_, x, y) = v.as_ref().cloned().unwrap_or_default();
+                            Style {
+                                pointer_events: Some(glory::style::PointerEvents::None),
+                                ..Style::new()
+                                    .position(Position::Absolute)
+                                    .left(Length::Percent((x / frame.width * 100.).clamp(0., 58.)))
+                                    .top(Length::Percent((y / frame.height * 100. - 10.).max(0.)))
+                            }
+                        })
+                    }))
+                    .show_in(scope)
+            })
+        },
+    )
+    .show_in(&area)?;
     scope.retain(area)?;
     Ok(())
 }
-fn build_legend(scope: &Scope, state: &State, theme: crate::Theme, unstyled: bool) -> Result {
+fn build_legend(
+    scope: &Scope,
+    show_action_labels: bool,
+    state: &State,
+    theme: crate::Theme,
+    unstyled: bool,
+) -> Result {
     let model = state.model;
     let keys = scope.bond(move || {
         model.with(|m| {
@@ -902,10 +1030,24 @@ fn build_legend(scope: &Scope, state: &State, theme: crate::Theme, unstyled: boo
                                 })
                             }))
                             .style(Style::new().width(Length::Px(12.)).height(Length::Px(12.)));
+                        let text_key = key.clone();
+                        let visible_label = scope.bond(move || {
+                            if show_action_labels {
+                                return label.get();
+                            }
+                            model.with(|m| {
+                                m.scene
+                                    .legend
+                                    .iter()
+                                    .find(|item| item.key == text_key)
+                                    .map_or_else(String::new, |item| item.label.clone())
+                            })
+                        });
                         let mut button = crate::button()
                             .class("sapid-plot-legend-item")
                             .pressed(pressed)
-                            .label(label)
+                            .name(label)
+                            .label(visible_label)
                             .left_section(swatch)
                             .theme(theme.clone())
                             .variant(crate::ButtonVariant::Subtle)

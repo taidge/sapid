@@ -177,7 +177,7 @@ fn presentation_rejects_nonfinite_out_of_range_wrong_kind_and_multiline_configur
         (
             PlotKind::Donut,
             PlotOptions {
-                donut_inner_ratio: Some(0.96),
+                donut_inner_ratio: Some(1.0),
                 ..Default::default()
             },
         ),
@@ -501,5 +501,56 @@ fn matrix_scene_labels_each_axis_and_keeps_absent_cells_distinct_from_zero() {
         result.paths.len(),
         1,
         "zero has a reading but no invented area; absent cells have no reading"
+    );
+}
+
+#[test]
+fn label_modes_and_waffle_fill_direction_update_geometry_and_hit_targets() {
+    let donut = scene(
+        &values(),
+        PlotKind::Donut,
+        PlotOptions {
+            padding_angle: Some(2.),
+            segment_stroke: Some(4.),
+            segment_labels: Some(SegmentLabels {
+                value: SegmentLabelValue::Percent,
+                position: SegmentLabelPosition::Outside,
+                leader: true,
+            }),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    assert_eq!(
+        donut
+            .labels
+            .iter()
+            .map(|l| l.text.as_str())
+            .collect::<Vec<_>>(),
+        ["25%", "75%"]
+    );
+    assert_eq!(
+        donut
+            .paths
+            .iter()
+            .filter(|p| p.drawing.fill.is_none())
+            .count(),
+        2
+    );
+    let normal = scene(&values(), PlotKind::Waffle, PlotOptions::default()).unwrap();
+    let reversed = scene(
+        &values(),
+        PlotKind::Waffle,
+        PlotOptions {
+            waffle_direction: WaffleDirection::RightToLeft,
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    assert!(normal.marks[0].x < reversed.marks[0].x);
+    assert_eq!(normal.marks[0].y, reversed.marks[0].y);
+    assert_ne!(
+        normal.paths[0].drawing.commands,
+        reversed.paths[0].drawing.commands
     );
 }

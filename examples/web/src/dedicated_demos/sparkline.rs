@@ -21,27 +21,63 @@ fn sample_data() -> PlotData {
 }
 
 pub fn demo(theme: sapid::Theme) -> impl Widget {
-    sapid::stack().theme(theme.clone()).fill((
-        sapid::text()
-            .theme(theme.clone())
-            .content("Active subscriptions: 15 · seven-week trend"),
-        sparkline("sparkline-overview")
+    widget(move |scope| {
+        let curve = scope.cage(Some("linear".to_owned()));
+        let color = scope.cage("Blue".to_owned());
+        let opacity = scope.cage(0.6);
+        let gradient = scope.cage(true);
+        let width = scope.cage(2.);
+        let base = theme.clone();
+        let palette = scope.bond(move || {
+            let mut p = controls::chart_palette(&base);
+            p.series[0] = controls::accent(base.clone(), &color.get()).accent;
+            p
+        });
+        let options = scope.bond(move || PlotOptions {
+            sparkline: Some(SparklineStyle {
+                curve: controls::chart_curve(curve.get().as_deref().unwrap_or("linear")),
+                stroke_width: width.get(),
+                fill_opacity: opacity.get(),
+                gradient: gradient.get(),
+            }),
+            ..Default::default()
+        });
+        let preview = sparkline("sparkline-overview")
+            .name("Weekly values: 4, 7, 5, 9, 8, 12, 15")
             .theme(theme.clone())
             .data(sample_data())
-            .style(
-                Style::new()
-                    .width(Length::Px(320.))
-                    .max_width(Limit::Percent(100.)),
-            )
+            .chart_theme(palette)
+            .options(options)
             .legend(false)
             .navigation(false)
             .data_table(false)
             .frame(ChartFrame {
                 width: 640.,
                 height: 160.,
-            }),
-        sapid::text()
-            .theme(theme.clone())
-            .content("Weekly values: 4, 7, 5, 9, 8, 12, 15"),
-    ))
+            })
+            .style(
+                Style::new()
+                    .width(Length::Px(200.))
+                    .max_width(Limit::Percent(100.)),
+            );
+        let settings = vec![
+            controls::chart_curve_control("spark-curve", curve, &theme),
+            controls::color_choices(color, &theme),
+            controls::range(
+                "spark-opacity",
+                "Fill opacity",
+                opacity,
+                0.,
+                1.,
+                0.01,
+                &theme,
+            ),
+            controls::switch("With gradient", gradient, &theme),
+            controls::range("spark-width", "Stroke width", width, 0.5, 5., 0.1, &theme),
+        ];
+        view()
+            .class("site-configurator site-chart-configurator site-compact-plot")
+            .fill(controls::playground(Box::new(preview), settings))
+            .show_in(scope)
+    })
 }

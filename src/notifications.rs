@@ -50,7 +50,7 @@ pub struct Notification {
 }
 pub fn notification(key: impl Into<String>) -> Notification {
     Notification {
-        inner: crate::alert(key).closable(true),
+        inner: crate::alert(key).notification_surface(true).closable(true),
         theme: Theme::default(),
         unstyled: false,
         class: "".into(),
@@ -69,7 +69,7 @@ impl Notification {
         self
     }
     pub fn variant(mut self, value: crate::AlertVariant) -> Self {
-        self.inner = self.inner.variant(value);
+        self.inner = self.inner.notification_surface(false).variant(value);
         self
     }
     pub fn color(mut self, value: glory::style::Color) -> Self {
@@ -82,6 +82,10 @@ impl Notification {
     }
     pub fn content(mut self, value: impl Into<glory::Vary<String>>) -> Self {
         self.inner = self.inner.content(value);
+        self
+    }
+    pub fn optional_content(mut self, value: impl Into<glory::Vary<String>>) -> Self {
+        self.inner = self.inner.optional_content(value);
         self
     }
     pub fn visible(mut self, value: impl Into<glory::Vary<bool>>) -> Self {
@@ -202,7 +206,18 @@ impl Widget for Notification {
         inner.build(scope)
     }
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum NotificationProgressPosition {
+    Top,
+    Bottom,
+}
+type CustomNotification = Rc<
+    std::cell::RefCell<Box<dyn FnMut(NotificationToken, NotificationsHandle) -> Box<dyn Widget>>>,
+>;
 pub struct NotificationRequest {
+    progress: Option<NotificationProgressPosition>,
+    render: Option<CustomNotification>,
+    priority: i32,
     key: String,
     title: String,
     message: String,
@@ -218,6 +233,9 @@ pub fn notification_request(
     message: impl Into<String>,
 ) -> NotificationRequest {
     NotificationRequest {
+        progress: None,
+        render: None,
+        priority: 0,
         key: key.into(),
         title: title.into(),
         message: message.into(),
@@ -229,6 +247,26 @@ pub fn notification_request(
     }
 }
 impl NotificationRequest {
+    /// Show the remaining visible lifetime at the requested edge for a timed entry.
+    pub fn auto_close_progress(mut self, position: NotificationProgressPosition) -> Self {
+        self.progress = Some(position);
+        self
+    }
+    /// Supply the contents of this row. The token targets this exact notification.
+    pub fn render<W: Widget>(
+        mut self,
+        mut factory: impl FnMut(NotificationToken, NotificationsHandle) -> W + 'static,
+    ) -> Self {
+        self.render = Some(Rc::new(std::cell::RefCell::new(Box::new(
+            move |token, handle| Box::new(factory(token, handle)),
+        ))));
+        self
+    }
+    /// Higher-priority requests occupy visible slots before lower-priority requests.
+    pub fn priority(mut self, value: i32) -> Self {
+        self.priority = value;
+        self
+    }
     pub fn severity(mut self, value: AlertSeverity) -> Self {
         self.severity = value;
         self
@@ -252,7 +290,11 @@ impl NotificationRequest {
 }
 #[derive(Clone)]
 struct Entry {
+    progress: Option<NotificationProgressPosition>,
+    duration: Option<Duration>,
+    render: Option<CustomNotification>,
     id: u64,
+    priority: i32,
     key: String,
     title: String,
     message: String,
@@ -286,6 +328,7 @@ struct Controller {
     delay: Rc<OwnerDelay>,
     scheduled: Cell<Option<Stamp>>,
     last_now: Cell<Duration>,
+    frame_now: Cage<Duration>,
     hover: Cell<Option<u64>>,
     focus: Cell<Option<u64>>,
 }
@@ -326,7 +369,7 @@ impl NotificationsHandle {
             .queue
             .try_with_untracked(|q| q.entries.iter().position(|e| e.id == token.id))?)
     }
-    /// Replaces an existing complete key at its FIFO position, revoking its old token.
+    /// A repeated key replaces the earlier request and revokes its token. Equal priorities retain FIFO order.
     pub fn show(&self, request: NotificationRequest) -> Result<NotificationToken> {
         self.ensure()?;
         text(&request.key, 64)?;
@@ -361,7 +404,11 @@ impl NotificationsHandle {
             (label, Callback::new(Some(Box::new(move |()| callback()))))
         });
         let entry = Entry {
+            progress: request.progress,
+            duration: request.timeout,
+            render: request.render,
             id,
+            priority: request.priority,
             key: request.key,
             title: request.title,
             message: request.message,
@@ -373,12 +420,15 @@ impl NotificationsHandle {
             close: Callback::new(request.close),
         };
         let old = self.0.queue.try_revise(move |q| {
-            if let Some(index) = existing {
+            let old = if let Some(index) = existing {
                 Some(std::mem::replace(&mut q.entries[index], entry))
             } else {
                 q.entries.push(entry);
                 None
-            }
+            };
+            q.entries
+                .sort_by_key(|item| std::cmp::Reverse(item.priority));
+            old
         })?;
         self.0.next.set(id);
         if existing.is_some_and(|index| index < self.0.visible) {
@@ -451,6 +501,17 @@ impl NotificationsHandle {
     pub fn pending(&self) -> Result<usize> {
         self.ensure()?;
         Ok(self.0.queue.try_with_untracked(|q| q.entries.len())?)
+    }
+    /// Read visible and queued request keys. A reactive caller tracks subsequent queue changes.
+    pub fn visible_and_queued(&self) -> Result<(Vec<String>, Vec<String>)> {
+        self.ensure()?;
+        Ok(self.0.queue.try_with(|q| {
+            let (visible, queued) = q.entries.split_at(q.entries.len().min(self.0.visible));
+            (
+                visible.iter().map(|entry| entry.key.clone()).collect(),
+                queued.iter().map(|entry| entry.key.clone()).collect(),
+            )
+        })?)
     }
     /// Pauses remaining visible lifetimes at the next flush/host boundary.
     pub fn pause(&self, paused: bool) -> Result {
@@ -546,8 +607,12 @@ impl Controller {
                 q.paused != 0,
                 q.entries
                     .iter()
-                    .take(self.visible)
-                    .filter_map(|e| e.remaining.map(|remaining| (e.id, remaining, e.deadline)))
+                    .enumerate()
+                    .filter(|(index, e)| *index < self.visible || e.deadline.is_some())
+                    .filter_map(|(index, e)| {
+                        e.remaining
+                            .map(|remaining| (e.id, remaining, e.deadline, index >= self.visible))
+                    })
                     .collect::<Vec<_>>(),
             )
         })?;
@@ -560,8 +625,8 @@ impl Controller {
             return Ok(());
         }
         let mut changes = Vec::new();
-        for &(id, remaining, deadline) in &times {
-            match (paused, deadline) {
+        for &(id, remaining, deadline, queued) in &times {
+            match (paused || queued, deadline) {
                 (true, Some(deadline)) => changes.push((id, deadline.saturating_sub(now), None)),
                 (false, None) => changes.push((
                     id,
@@ -577,7 +642,7 @@ impl Controller {
         if !changes.is_empty() {
             self.queue.try_revise(|q| {
                 for (id, remaining, deadline) in changes {
-                    if let Some(e) = q.entries.iter_mut().take(self.visible).find(|e| e.id == id) {
+                    if let Some(e) = q.entries.iter_mut().find(|e| e.id == id) {
                         e.remaining = Some(remaining);
                         e.deadline = deadline;
                     }
@@ -590,10 +655,27 @@ impl Controller {
             self.cancel_timer();
             return Ok(());
         }
+        let progress = self.queue.try_with_untracked(|q| {
+            q.entries
+                .iter()
+                .take(self.visible)
+                .any(|e| e.progress.is_some() && e.deadline.is_some())
+        })?;
+        if progress && self.frame_now.get_untracked() != now {
+            self.frame_now.try_revise(|frame| *frame = now)?;
+        }
         let stamp = times
             .iter()
-            .filter_map(|&(id, _, deadline)| deadline.map(|deadline| Stamp { id, deadline }))
-            .min_by_key(|stamp| stamp.deadline);
+            .filter_map(|&(id, _, deadline, _)| deadline.map(|deadline| Stamp { id, deadline }))
+            .min_by_key(|stamp| stamp.deadline)
+            .map(|mut stamp| {
+                if progress {
+                    stamp.deadline = stamp
+                        .deadline
+                        .min(now.saturating_add(Duration::from_millis(100)));
+                }
+                stamp
+            });
         if self.scheduled.get() == stamp {
             return Ok(());
         }
@@ -744,6 +826,7 @@ impl Widget for Toaster {
             delay,
             scheduled: Cell::new(None),
             last_now: Cell::new(Duration::ZERO),
+            frame_now: scope.cage(Duration::ZERO),
             hover: Cell::new(None),
             focus: Cell::new(None),
         });
@@ -868,7 +951,38 @@ impl Widget for Toaster {
                                 }
                             });
                         }
-                        wrapper.fill(row).show_in(scope)
+                        let body: Box<dyn Widget> = if let Some(render) = &entry.render {
+                            (render.borrow_mut())(token.clone(), command.clone())
+                        } else {
+                            Box::new(row)
+                        };
+                        let progress = entry.progress.zip(entry.duration);
+                        if let Some((edge, total)) = progress {
+                            let clock = command.0.frame_now;
+                            let level = scope.bond(move || {
+                                item.with(|e| {
+                                    let left = e
+                                        .deadline
+                                        .map(|deadline| deadline.saturating_sub(clock.get()))
+                                        .or(e.remaining)
+                                        .unwrap_or_default();
+                                    (100. * left.as_secs_f64() / total.as_secs_f64())
+                                        .clamp(0., 100.)
+                                })
+                            });
+                            let bar = crate::progress(level)
+                                .theme(theme.clone())
+                                .name("Time remaining")
+                                .thickness(3.)
+                                .class("sapid-notification-progress");
+                            wrapper = match edge {
+                                NotificationProgressPosition::Top => wrapper.fill((bar, body)),
+                                NotificationProgressPosition::Bottom => wrapper.fill((body, bar)),
+                            };
+                        } else {
+                            wrapper = wrapper.fill(body);
+                        }
+                        wrapper.show_in(scope)
                     })
                 }),
         )

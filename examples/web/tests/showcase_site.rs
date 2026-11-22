@@ -474,58 +474,58 @@ fn focused_guides_render_their_own_widget_content() {
     let cases = [
         ("P1-01", "Email address"),
         ("P1-03", "Personal information"),
-        ("P1-04", "Tell us a little about yourself."),
-        ("P1-05", "Use at least 12 characters"),
-        ("P2-02", "Notifications"),
-        ("P2-03", "Delivery"),
-        ("P2-05", "Billing interval"),
-        ("P2-06", "Languages"),
-        ("P3-02", "Centered in both directions"),
-        ("P3-03", "Project overview occupies two columns."),
-        ("P3-07", "Review the project brief"),
+        ("P1-04", "sapid-textarea"),
+        ("P1-05", "Input placeholder"),
+        ("P2-02", "I agree to sell my privacy"),
+        ("P2-03", "I cannot be unchecked"),
+        ("P2-05", "Framework"),
+        ("P2-06", "Awesome chip"),
+        ("P3-02", "All elements inside Center are centered"),
+        ("P3-03", ">1</span>"),
+        ("P3-07", "Clone or download the repository from GitHub"),
         ("P3-08", "Good design gives people"),
         ("P3-09", "count.get()"),
-        ("P3-09-highlight", "important"),
-        ("P3-09-mark", "important details"),
+        ("P3-09-highlight", "definitely"),
+        ("P3-09-mark", "this chunk"),
         ("P3-11", "A lakeside weekend"),
         ("P3-12", "or continue with email"),
         ("P3-16", "Open search"),
         ("P3-18", "Project facts"),
         ("P3-19", "Map release history"),
-        ("P3-20", "$12,500.50"),
+        ("P3-20", "$ 1,000,000"),
         ("P5-03", "Save draft"),
         ("P5-04", "About Ada"),
-        ("P5-05", "Your storage is nearly full"),
+        ("P5-05", "Alert title"),
         ("P5-10", "sapid-skeleton"),
         ("P5-12", "Background sync"),
-        ("P7-01", "Quantity"),
+        ("P7-01", "sapid-number-input"),
         ("P7-02", "Volume"),
-        ("P7-03", "Price range"),
+        ("P7-03", "sapid-range-slider-lower"),
         ("P7-05", "Product rating"),
-        ("P10-01", "Choose files"),
-        ("P10-03", "Copy invite link"),
+        ("P10-01", "sapid-file-input"),
+        ("P10-03", "Copy url"),
         ("P5-08", "Project upload"),
-        ("P6-01", "Semantic widgets"),
+        ("P6-01", "Components"),
         ("P6-02", "Example pages"),
         ("P6-10", "Archive selected"),
         ("P6-10-toolbar", "Document formatting"),
-        ("P11-02", "Revenue"),
-        ("P11-02-barchart", "Revenue"),
-        ("P11-02-linechart", "Revenue"),
-        ("P11-02-compositechart", "Revenue"),
-        ("P11-03", "72%"),
-        ("P11-03-piechart", "Product A"),
-        ("P11-04", "OHLC per trading day"),
-        ("P11-04-scatterchart", "Coordinates, series and units"),
-        ("P11-05", "Visitors"),
-        ("P11-05-radarchart", "Reliability"),
+        ("P11-02", "Apples"),
+        ("P11-02-barchart", "Smartphones"),
+        ("P11-02-linechart", "Apples"),
+        ("P11-02-compositechart", "Apples"),
+        ("P11-03", "USA"),
+        ("P11-03-piechart", "USA"),
+        ("P11-04", "Monday"),
+        ("P11-04-scatterchart", "Scatter chart"),
+        ("P11-05", "USA"),
+        ("P11-05-radarchart", "Tomatoes"),
         ("P11-06", "Project contributions"),
-        ("P11-06-matrixchart", "Product A"),
-        ("P11-06-wafflechart", "Product A"),
-        ("P11-07", "Returns"),
-        ("P11-07-bulletchart", "Capacity"),
-        ("P11-08", "Regions"),
-        ("P11-08-sankeychart", "Source"),
+        ("P11-06-matrixchart", "James"),
+        ("P11-06-wafflechart", "Chrome"),
+        ("P11-07", "React"),
+        ("P11-07-bulletchart", "Revenue"),
+        ("P11-08", "USA"),
+        ("P11-08-sankeychart", "Visit"),
     ];
     for (id, expected) in cases {
         let entry = sapid_web_example::showcase_catalog::find_by_id(id).unwrap();
@@ -533,11 +533,14 @@ fn focused_guides_render_their_own_widget_content() {
             .unwrap_or_else(|error| panic!("{id}: {error}"))
             .html;
         assert!(html.contains(expected), "{id} must render {expected:?}");
+        if id == "P3-03" {
+            assert!(html.contains(">2</span>") && html.contains(">3</span>"));
+        }
         if id == "P1-05" {
             assert_eq!(html.matches("type=\"password\"").count(), 1);
             assert_eq!(html.matches("sapid-password-toggle").count(), 1);
             assert!(html.contains("Show password") && html.contains("<svg"));
-            assert!(!html.contains("site-button-playground"));
+            assert!(html.contains("site-field-configurator"));
         }
     }
 }
@@ -559,7 +562,7 @@ fn chart_guides_do_not_mount_the_shared_acceptance_workbench() {
         assert!(!html.contains("plot-secondary"), "{id}");
         if entry.name == "Heatmap" {
             assert_eq!(html.matches("sapid-heatmap-grid").count(), 1);
-            assert_eq!(html.matches("role=\"gridcell\"").count(), 91);
+            assert_eq!(html.matches("role=\"gridcell\"").count(), 366);
             assert_eq!(html.matches("site-chart-card").count(), 0);
         } else {
             assert_eq!(html.matches("site-chart-card").count(), 0, "{id}");
@@ -572,10 +575,13 @@ fn chart_guides_do_not_mount_the_shared_acceptance_workbench() {
             if entry.name == "Sparkline" {
                 assert!(html.contains("Weekly values: 4, 7, 5, 9, 8, 12, 15"));
                 assert!(!html.contains("sapid-plot-controls"));
-            } else {
-                assert!(html.contains("<table"), "{id}");
-                assert!(html.contains("Next data point"), "{id}");
             }
+            assert!(!html.contains("<table"), "{id}");
+            assert!(!html.contains("Next data point"), "{id}");
+            assert!(
+                html.contains("sapid-chart-point") || html.contains("sapid-plot-point"),
+                "{id}"
+            );
         }
     }
 }
@@ -589,12 +595,12 @@ fn playground_helpers_are_embedded_only_when_the_preview_uses_them() {
         ("P3-01-stack", true),
         ("P0-05", true),
         ("P3-10-badge", true),
-        ("P0-02", false),
+        ("P0-02", true),
         ("P0-03", true),
         ("P0-07", false),
         ("P2-08", true),
-        ("P3-07", false),
-        ("P7-05", false),
+        ("P3-07", true),
+        ("P7-05", true),
     ] {
         let entry = sapid_web_example::showcase_catalog::find_by_id(id).unwrap();
         assert_eq!(entry.code.contains("mod controls {"), expected, "{id}");
@@ -808,12 +814,12 @@ fn button_pages_have_independent_compiled_examples_and_matching_navigation() {
         Theme::green_dark(),
     ] {
         for (slug, count) in [
-            ("action-icon", 4),
-            ("button", 5),
+            ("action-icon", 16),
+            ("button", 21),
             ("close-button", 3),
             ("copy-button", 4),
             ("file-button", 3),
-            ("toggle", 3),
+            ("toggle", 5),
             ("unstyled-button", 3),
         ] {
             let sections =
@@ -852,15 +858,15 @@ fn combobox_guides_have_full_compiled_sources_matching_their_navigation_and_publ
         Theme::green_dark(),
     ] {
         for (slug, count) in [
-            ("autocomplete", 6),
-            ("combobox", 4),
-            ("combobox-popover", 4),
-            ("multi-select", 5),
-            ("pill", 4),
-            ("pills-input", 5),
-            ("tags-input", 6),
-            ("tree-select", 9),
-            ("cascader", 5),
+            ("autocomplete", 22),
+            ("combobox", 15),
+            ("combobox-popover", 18),
+            ("multi-select", 28),
+            ("pill", 5),
+            ("pills-input", 6),
+            ("tags-input", 29),
+            ("tree-select", 23),
+            ("cascader", 30),
         ] {
             let sections =
                 sapid_web_example::showcase_examples::detail_sections(slug, theme.clone());
@@ -927,7 +933,7 @@ fn remaining_navigation_guides_compile_every_source_and_retire_registered_headin
         Theme::green_light(),
         Theme::green_dark(),
     ] {
-        for (slug, count) in [("stepper", 4), ("table-of-contents", 3), ("tree", 8)] {
+        for (slug, count) in [("stepper", 13), ("table-of-contents", 5), ("tree", 14)] {
             let sections =
                 sapid_web_example::showcase_examples::detail_sections(slug, theme.clone());
             let navigation = sapid_web_example::showcase_examples::detail_navigation(slug);
@@ -965,14 +971,14 @@ fn feedback_guides_compile_full_sources_and_match_their_navigation() {
         Theme::green_dark(),
     ] {
         for (slug, count) in [
-            ("alert", 4),
-            ("empty-state", 3),
-            ("loader", 4),
-            ("notification", 3),
+            ("alert", 5),
+            ("empty-state", 6),
+            ("loader", 6),
+            ("notification", 4),
             ("skeleton", 3),
-            ("progress", 9),
-            ("ring-progress", 9),
-            ("semi-circle-progress", 9),
+            ("progress", 13),
+            ("ring-progress", 13),
+            ("semi-circle-progress", 11),
         ] {
             let sections =
                 sapid_web_example::showcase_examples::detail_sections(slug, theme.clone());
@@ -1013,17 +1019,17 @@ fn overlay_guides_compile_complete_sources_match_navigation_and_release_state() 
         Theme::green_dark(),
     ] {
         for (slug, count) in [
-            ("modal", 6),
-            ("drawer", 5),
-            ("popover", 5),
+            ("modal", 15),
+            ("drawer", 13),
+            ("popover", 14),
             ("dialog", 3),
-            ("loading-overlay", 3),
-            ("overlay", 3),
-            ("tooltip", 5),
-            ("hover-card", 4),
-            ("action-bar", 3),
-            ("floating-indicator", 3),
-            ("tour", 3),
+            ("loading-overlay", 4),
+            ("overlay", 5),
+            ("tooltip", 16),
+            ("hover-card", 6),
+            ("action-bar", 4),
+            ("floating-indicator", 4),
+            ("tour", 10),
         ] {
             let sections =
                 sapid_web_example::showcase_examples::detail_sections(slug, theme.clone());
@@ -1064,19 +1070,19 @@ fn data_display_guides_mount_complete_public_examples_in_four_themes_and_release
         Theme::green_dark(),
     ] {
         for (slug, count) in [
-            ("avatar", 4),
-            ("badge", 4),
-            ("card", 3),
-            ("color-swatch", 3),
-            ("data-list", 3),
+            ("avatar", 11),
+            ("badge", 9),
+            ("card", 6),
+            ("color-swatch", 4),
+            ("data-list", 4),
             ("image", 4),
-            ("indicator", 3),
-            ("kbd", 3),
+            ("indicator", 8),
+            ("kbd", 4),
             ("number-formatter", 3),
-            ("overflow-list", 3),
+            ("overflow-list", 6),
             ("rolling-number", 3),
-            ("spoiler", 3),
-            ("theme-icon", 4),
+            ("spoiler", 4),
+            ("theme-icon", 5),
         ] {
             let sections =
                 sapid_web_example::showcase_examples::detail_sections(slug, theme.clone());
@@ -1119,13 +1125,13 @@ fn typography_guides_mount_complete_document_examples_match_navigation_and_retir
         for (slug, count) in [
             ("blockquote", 3),
             ("code", 3),
-            ("highlight", 4),
-            ("list", 4),
+            ("highlight", 9),
+            ("list", 7),
             ("mark", 3),
-            ("table", 6),
-            ("text", 4),
-            ("title", 3),
-            ("typography", 3),
+            ("table", 14),
+            ("text", 8),
+            ("title", 5),
+            ("typography", 4),
         ] {
             let sections =
                 sapid_web_example::showcase_examples::detail_sections(slug, theme.clone());
@@ -1167,14 +1173,14 @@ fn miscellaneous_guides_mount_complete_document_examples_match_navigation_and_re
     ] {
         for (slug, count) in [
             ("box", 3),
-            ("collapse", 4),
-            ("divider", 4),
+            ("collapse", 6),
+            ("divider", 5),
             ("focus-trap", 3),
-            ("marquee", 3),
+            ("marquee", 8),
             ("paper", 3),
             ("portal", 3),
-            ("scroll-area", 4),
-            ("toolbar", 4),
+            ("scroll-area", 13),
+            ("toolbar", 8),
             ("visually-hidden", 3),
         ] {
             let sections =
@@ -1216,14 +1222,14 @@ fn date_guides_mount_complete_document_examples_match_navigation_and_retire() {
         Theme::green_dark(),
     ] {
         for (slug, count) in [
-            ("date-picker", 11),
+            ("date-picker", 29),
             ("inline-date-time-picker", 6),
-            ("date-input", 5),
-            ("month-picker", 4),
-            ("year-picker", 4),
-            ("time-input", 5),
-            ("time-picker", 15),
-            ("time-value", 3),
+            ("date-input", 9),
+            ("month-picker", 13),
+            ("year-picker", 12),
+            ("time-input", 7),
+            ("time-picker", 33),
+            ("time-value", 4),
             ("calendar", 5),
         ] {
             let sections =

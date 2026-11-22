@@ -69,6 +69,31 @@ pub struct JsonTree {
     nodes: Vec<JsonViewNode>,
 }
 impl JsonTree {
+    pub(crate) fn label_root(&mut self, name: &str) {
+        self.nodes[0].label = name.to_owned();
+    }
+    /// Container pointers expanded at the requested initial depth, in source order.
+    pub fn expanded_at_depth(&self, depth: usize) -> Vec<String> {
+        self.nodes
+            .iter()
+            .filter(|node| {
+                node.depth < depth && matches!(node.kind, JsonKind::Object | JsonKind::Array)
+            })
+            .map(|node| node.path.clone())
+            .collect()
+    }
+
+    pub(crate) fn sort_keys(&mut self) {
+        for index in 0..self.nodes.len() {
+            if self.nodes[index].kind == JsonKind::Object {
+                let mut children = std::mem::take(&mut self.nodes[index].children);
+                children
+                    .sort_by(|left, right| self.nodes[*left].label.cmp(&self.nodes[*right].label));
+                self.nodes[index].children = children;
+            }
+        }
+    }
+
     pub fn source(&self) -> &str {
         &self.source
     }

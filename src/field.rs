@@ -151,6 +151,7 @@ pub struct Field {
     description: Option<Vary<String>>,
     error: Option<Vary<String>>,
     required: Vary<bool>,
+    with_asterisk: Option<Vary<bool>>,
     readonly: Vary<bool>,
     invalid: Vary<bool>,
     success: Vary<bool>,
@@ -167,6 +168,7 @@ pub fn field(key: impl Into<String>) -> Field {
         description: None,
         error: None,
         required: false.into(),
+        with_asterisk: None,
         readonly: false.into(),
         invalid: false.into(),
         success: false.into(),
@@ -205,6 +207,11 @@ impl Field {
     }
     pub fn required(mut self, value: impl Into<Vary<bool>>) -> Self {
         self.required = value.into();
+        self
+    }
+    /// Override the label marker independently of required form validation.
+    pub fn with_asterisk(mut self, value: impl Into<Vary<bool>>) -> Self {
+        self.with_asterisk = Some(value.into());
         self
     }
     pub fn readonly(mut self, value: impl Into<Vary<bool>>) -> Self {
@@ -288,7 +295,10 @@ impl Widget for Field {
         let theme = self.common.theme.clone();
         let size = self.common.size;
         let unstyled = self.common.unstyled;
-        let required = self.required.clone();
+        let with_asterisk = self
+            .with_asterisk
+            .take()
+            .unwrap_or_else(|| self.required.clone());
         let order = self.order;
         let mut root = configure!(
             self.common,
@@ -306,7 +316,7 @@ impl Widget for Field {
                                 .content(content)
                                 .theme(theme.clone())
                                 .size(size)
-                                .required(required.clone());
+                                .required(with_asterisk.clone());
                             if unstyled {
                                 part = part.unstyled();
                             }

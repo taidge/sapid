@@ -239,3 +239,52 @@ fn lazy_requests_are_explicit_and_source_publication_mounts_only_current_column(
     app.clear().unwrap();
     assert_eq!(app.stats().nodes, 0);
 }
+
+#[test]
+fn selected_leaf_can_remain_open_and_be_deselected() {
+    let app = App::memory();
+    let changes = Rc::new(RefCell::new(Vec::new()));
+    let observe = changes.clone();
+    app.mount(
+        cascader("repeat-choice")
+            .nodes(nodes())
+            .default_open(true)
+            .default_expanded(BTreeSet::from(["one".into(), "a".into()]))
+            .close_on_select(false)
+            .allow_deselect(true)
+            .path_separator(" › ")
+            .on_value_change(move |next| observe.borrow_mut().push(next)),
+    )
+    .unwrap();
+    app.dispatch(named(&app, "Leaf"), Event::Activate).unwrap();
+    app.flush().unwrap();
+    assert_eq!(changes.borrow()[0].paths()[0].keys(), ["one", "a", "leaf"]);
+    app.dispatch(named(&app, "Leaf"), Event::Activate).unwrap();
+    app.flush().unwrap();
+    assert!(changes.borrow()[1].paths().is_empty());
+    let trigger = all(&app)
+        .into_iter()
+        .find(|id| {
+            app.tree()
+                .node(*id)
+                .unwrap()
+                .descriptor
+                .view()
+                .semantics
+                .as_ref()
+                .is_some_and(|s| s.combobox.is_some())
+        })
+        .unwrap();
+    assert_eq!(
+        app.tree()
+            .node(trigger)
+            .unwrap()
+            .descriptor
+            .view()
+            .semantics
+            .as_ref()
+            .unwrap()
+            .expanded,
+        Some(true)
+    );
+}

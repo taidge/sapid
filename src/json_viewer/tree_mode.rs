@@ -1,8 +1,8 @@
 //! Projection retains only current paths and numeric live keys, never visited JSON.
 use super::State;
 use crate::{JsonKind, JsonTree, TreeKind, TreeNode};
-use glory::render::TextKind;
-use glory::style::{Length, Overflow, Style, WhiteSpace};
+
+use glory::style::{Length, Overflow, Style};
 use glory::ui::{Result, Widget};
 use glory::{Cage, Scope};
 use std::{
@@ -16,7 +16,7 @@ pub(super) struct Projection {
     keys: BTreeMap<String, usize>,
     next: u64,
 }
-fn kind(kind: JsonKind) -> &'static str {
+pub(super) fn kind(kind: JsonKind) -> &'static str {
     match kind {
         JsonKind::Object => "Object",
         JsonKind::Array => "Array",
@@ -52,7 +52,10 @@ impl Projection {
         }
         let mut keys = BTreeMap::new();
         let mut nodes = Vec::with_capacity(tree.nodes().len());
-        for (index, node) in tree.nodes().iter().enumerate() {
+        let mut pending = vec![0];
+        while let Some(index) = pending.pop() {
+            let node = &tree.nodes()[index];
+            pending.extend(node.children.iter().rev().copied());
             let key = paths[&node.path].clone();
             keys.insert(key.clone(), index);
             let label = glory::render::normalize_text(
@@ -163,55 +166,24 @@ pub(super) fn show(state: Rc<State>, projection: Cage<Rc<Projection>>, scope: &S
             let state = label_state.clone();
             glory::ui::widget(move |scope| {
                 let node = node.clone();
-                let mark_node = node.clone();
-                let marked_state = state.clone();
-                let marked = scope.bond(move || {
-                    projection.with(|value| {
-                        value.keys.get(&mark_node.get().key).is_some_and(|index| {
-                            marked_state.matching(&value.tree.nodes()[*index].path)
-                        })
-                    })
-                });
-                let text = scope.bond(move || {
-                    projection.with(|value| {
-                        let Some(index) = value.keys.get(&node.get().key).copied() else {
-                            return String::new();
-                        };
-                        let item = &value.tree.nodes()[index];
-                        if matches!(item.kind, JsonKind::Array | JsonKind::Object) {
-                            format!(
-                                "{}: {} {}",
-                                item.label,
-                                kind(item.kind),
-                                item.children.len()
-                            )
-                        } else {
-                            format!("{}: {}", item.label, value.tree.value(index).unwrap_or(""))
-                        }
+                let row = scope.bond(move || {
+                    projection.with(|p| {
+                        p.keys
+                            .get(&node.get().key)
+                            .map(|index| (p.tree.clone(), *index))
                     })
                 });
                 let mut style = Style::new()
                     .min_width(Length::Px(0.))
                     .overflow_x(Overflow::Auto);
                 style.grow = Some(1.);
-                let theme = state.theme.clone();
-                let unstyled = state.unstyled;
+                let label_state = state.clone();
                 glory::ui::view()
                     .class("sapid-json-tree-label")
                     .style(style)
-                    .fill(
-                        glory::ui::text()
-                            .kind(TextKind::Code)
-                            .class("sapid-json-tree-value")
-                            .content(text)
-                            .selectable(true)
-                            .style(scope.bond(move || Style {
-                                white_space: Some(WhiteSpace::Pre),
-                                background:
-                                    (!unstyled && marked.get()).then_some(theme.accent_soft),
-                                ..Style::new()
-                            })),
-                    )
+                    .fill(glory::ui::widget(move |owner| {
+                        super::show_row(label_state.clone(), row, "sapid-json-tree-value", owner)
+                    }))
                     .show_in(scope)
             })
         });

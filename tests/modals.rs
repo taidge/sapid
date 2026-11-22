@@ -36,7 +36,8 @@ fn button(app: &App, label: &str) -> NodeId {
     let mut pending = tree.roots().to_vec();
     while let Some(id) = pending.pop() {
         let n = tree.node(id).unwrap();
-        if matches!(n.descriptor.view().props,glory::render::Props::Button(p) if p.label==label) {
+        if matches!(n.descriptor.view().props,glory::render::Props::Button(p) if p.label==label || n.descriptor.view().name.as_deref()==Some(label))
+        {
             return id;
         }
         pending.extend(&n.children)
@@ -294,4 +295,31 @@ fn triggerless_dialog_requires_an_independent_name_and_retains_valid_reactive_ti
         );
         pending.extend(&node.children)
     }
+}
+
+#[test]
+fn stacked_requests_mount_both_panels_and_dismiss_only_the_requested_layer() {
+    let app = App::memory();
+    let handle = app.scope().cage(None::<ModalsHandle>);
+    app.mount(
+        modals_manager("steps")
+            .stacked(true)
+            .on_ready(move |h| handle.revise(|value| *value = Some(h))),
+    )
+    .unwrap();
+    let h = handle.get().unwrap();
+    let first = h
+        .open(modal_request("First", "First step").close_label("Close first"))
+        .unwrap();
+    let second = h
+        .open(modal_request("Second", "Second step").close_label("Close second"))
+        .unwrap();
+    app.flush().unwrap();
+    let first_close = button(&app, "Close first");
+    button(&app, "Close second");
+    h.close(&second).unwrap();
+    app.flush().unwrap();
+    assert_eq!(button(&app, "Close first"), first_close);
+    h.close(&first).unwrap();
+    assert_eq!(h.pending().unwrap(), 0);
 }

@@ -36,21 +36,68 @@ pub fn capacity(
     for width in widths {
         extent(*width)?;
     }
-    let all = widths.iter().sum::<f64>() + gap * widths.len().saturating_sub(1) as f64;
-    if !keep_trigger && all <= available + 0.25 {
-        return Ok(widths.len());
-    }
-    let mut used = trigger;
-    let mut count = 0;
-    for width in widths {
-        let next = used + gap + width;
-        if next > available + 0.25 {
-            break;
+    Ok(pack(
+        widths,
+        available,
+        trigger,
+        gap,
+        keep_trigger,
+        1,
+        false,
+    ))
+}
+
+/// Pack in display order, placing the overflow trigger at the edge it replaces.
+pub(super) fn pack(
+    widths: &[f64],
+    available: f64,
+    trigger: f64,
+    gap: f64,
+    keep_trigger: bool,
+    max_rows: usize,
+    from_start: bool,
+) -> usize {
+    let fits = |items: &[f64], with_trigger: bool| {
+        let mut row = 1;
+        let mut used = None;
+        let first = (with_trigger && from_start).then_some(trigger);
+        let last = (with_trigger && !from_start).then_some(trigger);
+        for width in first.into_iter().chain(items.iter().copied()).chain(last) {
+            if width > available + 0.25 {
+                return false;
+            }
+            let next = used.map_or(width, |used: f64| used + gap + width);
+            if next > available + 0.25 {
+                row += 1;
+                if row > max_rows {
+                    return false;
+                }
+                used = Some(width);
+            } else {
+                used = Some(next);
+            }
         }
-        used = next;
-        count += 1;
+        true
+    };
+    if !keep_trigger && fits(widths, false) {
+        return widths.len();
     }
-    Ok(count)
+    let mut low = 0;
+    let mut high = widths.len();
+    while low < high {
+        let count = low + (high - low).div_ceil(2);
+        let items = if from_start {
+            &widths[widths.len() - count..]
+        } else {
+            &widths[..count]
+        };
+        if fits(items, true) {
+            low = count;
+        } else {
+            high = count - 1;
+        }
+    }
+    low
 }
 
 #[cfg(test)]
@@ -65,6 +112,20 @@ mod tests {
         assert_eq!(capacity(&[], 0., 40., 8., false).unwrap(), 0);
         assert_eq!(capacity(&[60., 70., 80.], 226., 40., 8., true).unwrap(), 2);
     }
+    #[test]
+    fn wrapping_reserves_the_trigger_on_the_last_row_and_preserves_the_requested_edge() {
+        assert_eq!(
+            pack(&[40., 40., 40., 40., 40.], 100., 20., 4., false, 2, false),
+            3
+        );
+        assert_eq!(
+            pack(&[40., 40., 40., 40.], 100., 20., 4., false, 2, false),
+            4
+        );
+        assert_eq!(pack(&[80., 15., 15.], 75., 20., 4., false, 1, true), 2);
+        assert_eq!(pack(&[80., 15., 15.], 75., 20., 4., false, 1, false), 0);
+    }
+
     #[test]
     fn every_dimension_and_current_membership_is_bounded() {
         for bad in [f64::NAN, f64::INFINITY, -1., MAX_OVERFLOW_EXTENT + 1.] {

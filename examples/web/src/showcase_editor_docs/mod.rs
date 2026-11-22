@@ -1,3 +1,13 @@
+mod editor_bubble;
+mod editor_floating;
+mod editor_icons;
+mod editor_insert_star;
+mod editor_invisibles;
+mod editor_placeholder;
+mod editor_source;
+mod editor_sticky;
+mod editor_subtle;
+mod editor_typography;
 use super::showcase_examples::DetailSection;
 mod controlled;
 mod links;
@@ -5,6 +15,76 @@ mod states;
 mod toolbar;
 pub fn sections(theme: sapid::Theme) -> Vec<DetailSection> {
     vec![
+        DetailSection {
+            id: "editor-invisibles",
+            title: "Invisible characters",
+            note: "Try the component in the preview.",
+            example: Box::new(editor_invisibles::demo(theme.clone())),
+            source: include_str!("editor_invisibles.rs"),
+        },
+        DetailSection {
+            id: "editor-source",
+            title: "Source code mode",
+            note: "Try the component in the preview.",
+            example: Box::new(editor_source::demo(theme.clone())),
+            source: include_str!("editor_source.rs"),
+        },
+        DetailSection {
+            id: "editor-typography",
+            title: "Typography styles",
+            note: "Try the component in the preview.",
+            example: Box::new(editor_typography::demo(theme.clone())),
+            source: include_str!("editor_typography.rs"),
+        },
+        DetailSection {
+            id: "editor-icons",
+            title: "Change icons",
+            note: "Try the component in the preview.",
+            example: Box::new(editor_icons::demo(theme.clone())),
+            source: include_str!("editor_icons.rs"),
+        },
+        DetailSection {
+            id: "editor-insert-star",
+            title: "Custom controls",
+            note: "Try the component in the preview.",
+            example: Box::new(editor_insert_star::demo(theme.clone())),
+            source: include_str!("editor_insert_star.rs"),
+        },
+        DetailSection {
+            id: "editor-bubble",
+            title: "Bubble menu",
+            note: "Try the component in the preview.",
+            example: Box::new(editor_bubble::demo(theme.clone())),
+            source: include_str!("editor_bubble.rs"),
+        },
+        DetailSection {
+            id: "editor-floating",
+            title: "Floating menu",
+            note: "Try the component in the preview.",
+            example: Box::new(editor_floating::demo(theme.clone())),
+            source: include_str!("editor_floating.rs"),
+        },
+        DetailSection {
+            id: "editor-subtle",
+            title: "Subtle variant",
+            note: "Try the component in the preview.",
+            example: Box::new(editor_subtle::demo(theme.clone())),
+            source: include_str!("editor_subtle.rs"),
+        },
+        DetailSection {
+            id: "editor-placeholder",
+            title: "Placeholder",
+            note: "Try the component in the preview.",
+            example: Box::new(editor_placeholder::demo(theme.clone())),
+            source: include_str!("editor_placeholder.rs"),
+        },
+        DetailSection {
+            id: "editor-sticky",
+            title: "Sticky toolbar",
+            note: "Try the component in the preview.",
+            example: Box::new(editor_sticky::demo(theme.clone())),
+            source: include_str!("editor_sticky.rs"),
+        },
         DetailSection {
             id: "editor-toolbar",
             title: "Toolbar configuration and selection state",
@@ -37,6 +117,16 @@ pub fn sections(theme: sapid::Theme) -> Vec<DetailSection> {
 }
 pub fn navigation() -> Vec<(&'static str, &'static str)> {
     vec![
+        ("Invisible characters", "#editor-invisibles"),
+        ("Source code mode", "#editor-source"),
+        ("Typography styles", "#editor-typography"),
+        ("Change icons", "#editor-icons"),
+        ("Custom controls", "#editor-insert-star"),
+        ("Bubble menu", "#editor-bubble"),
+        ("Floating menu", "#editor-floating"),
+        ("Subtle variant", "#editor-subtle"),
+        ("Placeholder", "#editor-placeholder"),
+        ("Sticky toolbar", "#editor-sticky"),
         ("Toolbar and selection", "#editor-toolbar"),
         ("Controlled document", "#editor-controlled"),
         ("Links and controller", "#editor-links"),

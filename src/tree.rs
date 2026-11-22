@@ -297,6 +297,7 @@ impl SetControl {
 struct Mounted {
     keys: BTreeMap<String, NodeId>,
     nodes: BTreeMap<NodeId, String>,
+    handles: BTreeMap<NodeId, String>,
 }
 struct Search {
     text: String,
@@ -351,7 +352,7 @@ impl State {
             && self.model.try_version().ok() == Some(model_version)
             && self.usable(dragged)
             && self.usable(target)
-            && self.mounted.borrow().nodes.get(&from).is_some_and(|key| key == dragged)
+            && { let mounted=self.mounted.borrow();mounted.handles.get(&from).or_else(||mounted.nodes.get(&from)).is_some_and(|key|key==dragged) }
             && self.mounted.borrow().nodes.get(&target_node).is_some_and(|key| key == target)
             // User allow_drop callbacks can revise the raw source before the
             // accepted model's structural observer has had a chance to run.
@@ -635,6 +636,8 @@ pub struct Tree {
     columns: bool,
     columns_select_branches: bool,
     with_lines: bool,
+    drag_handle: bool,
+    virtual_rows: Option<(f64, usize)>,
     empty_message: Option<String>,
     drag_drop: Option<DropCallback>,
     allow_drop: Option<AllowDrop>,
@@ -669,6 +672,8 @@ pub fn tree(key: impl Into<String>) -> Tree {
         columns: false,
         columns_select_branches: false,
         with_lines: true,
+        drag_handle: false,
+        virtual_rows: None,
         empty_message: None,
         drag_drop: None,
         allow_drop: None,
@@ -765,6 +770,16 @@ impl Tree {
         self.height = Some(value);
         self
     }
+    /// Limit drag initiation to the visible grab handle inside each row.
+    pub fn drag_handle(mut self, value: bool) -> Self {
+        self.drag_handle = value;
+        self
+    }
+    /// Mount fixed-height rows surrounding the viewport. Requires a bounded height.
+    pub fn virtual_rows(mut self, row_height: f64, overscan: usize) -> Self {
+        self.virtual_rows = Some((row_height, overscan));
+        self
+    }
     pub fn with_lines(mut self, value: bool) -> Self {
         self.with_lines = value;
         self
@@ -826,7 +841,14 @@ impl Widget for Tree {
                 })
             })
             .transpose()?;
-        if self.allow_drop.is_some() && self.drag_drop.is_none()
+        if (self.allow_drop.is_some() || self.drag_handle) && self.drag_drop.is_none()
+            || self.virtual_rows.is_some_and(|(size, extra)| {
+                self.columns
+                    || self.height.is_none()
+                    || !size.is_finite()
+                    || !(8. ..=512.).contains(&size)
+                    || extra > 128
+            })
             || self
                 .height
                 .is_some_and(|height| !height.is_finite() || height <= 0. || height > 16384.)
@@ -963,6 +985,9 @@ impl Widget for Tree {
             })();
             state.report(result);
         });
+        let reference = self.common.node_ref.unwrap_or_else(|| scope.cage(None));
+        let scroll_y = scope.cage(0.0_f64);
+        let virtual_height = self.virtual_rows.map(|v| v.0);
         let weak = Rc::downgrade(&state);
         scope.effect(move || {
             if !dirty.take() {
@@ -978,6 +1003,26 @@ impl Widget for Tree {
             {
                 let node = state.mounted.borrow().keys.get(&key).copied();
                 if state.usable(&key) {
+                    if node.is_none()
+                        && let (Some(height), Some(root)) = (virtual_height, reference.get())
+                        && let Some(index) =
+                            rows.with(|items| items.iter().position(|row| row.key == key))
+                    {
+                        let y = index as f64 * height;
+                        if y != scroll_y.get_untracked() {
+                            scroll_y.revise(|v| *v = y);
+                            if scope.capabilities().is_ok_and(|cap| cap.scroll) {
+                                state.report(scope.action(glory::render::Action::ScrollTo {
+                                    node: root,
+                                    x: 0.,
+                                    y,
+                                }));
+                            }
+                            state.focus.replace(Some(key));
+                            state.report(state.dirty.touch());
+                        }
+                        return;
+                    }
                     state.report(composite::focus_node(&scope, node));
                     if let Some(node) = node
                         && scope
@@ -1008,7 +1053,6 @@ impl Widget for Tree {
                 state.search.take();
             }
         })?;
-        let reference = self.common.node_ref.unwrap_or_else(|| scope.cage(None));
         // Branch and ancestor guides span consecutive rows, including in Tree.
         let mut base = composite::column(0.)
             .padding(Edges::all(4.))
@@ -1096,6 +1140,16 @@ impl Widget for Tree {
                     observers.emit(s.owner, event);
                 }
             });
+        if self.virtual_rows.is_some() {
+            root = root.on(EventKind::Scroll, move |event| {
+                if let Event::Scroll { y, .. } = event {
+                    let y = y.max(0.);
+                    if y != scroll_y.get_untracked() {
+                        scroll_y.revise(|v| *v = y);
+                    }
+                }
+            });
+        }
         if let Some(name) = self.common.name.take() {
             root = root.name(name);
         } else {
@@ -1166,11 +1220,52 @@ impl Widget for Tree {
         let theme = self.common.theme.clone();
         let unstyled = self.common.unstyled;
         let with_lines = self.with_lines;
+        let drag_handle = self.drag_handle;
         let renderer = self.label.clone();
         let icons = self.file_icons;
         let drag_drop = self.drag_drop.take();
         let allow_drop = self.allow_drop.take();
-        glory::ui::each(rows)
+        let height = self.height.unwrap_or(0.);
+        let virtualization = self.virtual_rows;
+        let range = scope.bond(move || {
+            let len = rows.with(Vec::len);
+            if let Some((size, extra)) = virtualization {
+                let offset = scroll_y.get().min((len as f64 * size - height).max(0.));
+                ((offset / size).floor() as usize).saturating_sub(extra)
+                    ..(((offset + height) / size).ceil() as usize + extra).min(len)
+            } else {
+                0..len
+            }
+        });
+        let visible: Vary<Vec<TreeRow>> = if virtualization.is_some() {
+            scope
+                .bond(move || rows.with(|items| items[range.get()].to_vec()))
+                .into()
+        } else {
+            rows.into()
+        };
+        let spacer = |before: bool| {
+            glory::ui::view()
+                .class("sapid-tree-spacer")
+                .style(scope.bond(move || {
+                    let r = range.get();
+                    let count = if before {
+                        r.start
+                    } else {
+                        rows.with(Vec::len) - r.end
+                    };
+                    Style {
+                        shrink: Some(0.),
+                        ..Style::new().height(Length::Px(
+                            count as f64 * virtualization.map_or(0., |v| v.0),
+                        ))
+                    }
+                }))
+        };
+        if virtualization.is_some() {
+            spacer(true).show_in(&area)?;
+        }
+        glory::ui::each(visible)
             .key(|row| row.key.clone())
             .children(move |entry| {
                 let (row, _index) = (entry.value, entry.index);
@@ -1277,7 +1372,7 @@ impl Widget for Tree {
                             .display(Display::Flex)
                             .flex_direction(FlexDirection::Row)
                             .gap(6.)
-                            .min_height(Length::Px(32.))
+                            .min_height(Length::Px(virtualization.map_or(32., |v| v.0)))
                             .min_width(Length::Px(0.))
                             .padding(if direction == Direction::Rtl {
                                 Edges {
@@ -1368,7 +1463,16 @@ impl Widget for Tree {
                                 return;
                             };
                             let Some(scope) = weak.upgrade() else { return };
-                            let Some(dragged) = s.mounted.borrow().nodes.get(&from).cloned() else {
+                            let dragged = {
+                                let mounted = s.mounted.borrow();
+                                if drag_handle {
+                                    mounted.handles.get(&from)
+                                } else {
+                                    mounted.nodes.get(&from)
+                                }
+                                .cloned()
+                            };
+                            let Some(dragged) = dragged else {
                                 return;
                             };
                             if !s.usable(&dragged) || !s.usable(&target_key) {
@@ -1475,6 +1579,28 @@ impl Widget for Tree {
                         }
                     })?;
                     let content = scope.child_in(node)?;
+                    if drag_handle {
+                        let handle = scope.cage(None);
+                        glory::ui::view()
+                            .class("sapid-tree-drag-handle")
+                            .name("Drag node")
+                            .node_ref(handle)
+                            .on(EventKind::Drag, |_| {})
+                            .fill(glory::ui::text().content("⠿"))
+                            .show_in(&content)?;
+                        let handle = handle.get().ok_or(glory::ui::Error::Gone)?;
+                        state
+                            .mounted
+                            .borrow_mut()
+                            .handles
+                            .insert(handle, key.clone());
+                        let weak = Rc::downgrade(&state);
+                        scope.on_cleanup(move || {
+                            if let Some(state) = weak.upgrade() {
+                                state.mounted.borrow_mut().handles.remove(&handle);
+                            }
+                        })?;
+                    }
                     for guide in guide {
                         guide.show_in(&content)?;
                     }
@@ -1611,6 +1737,9 @@ impl Widget for Tree {
                 })
             })
             .show_in(&area)?;
+        if virtualization.is_some() {
+            spacer(false).show_in(&area)?;
+        }
         scope.retain(area)?;
         scope.retain(fields)?;
         Ok(())

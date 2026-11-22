@@ -224,12 +224,16 @@ impl Widget for Kbd {
 pub struct TextList {
     common: Common,
     ordered: bool,
+    start: Option<i32>,
+    reversed: bool,
     items: Vec<TextListItem>,
 }
 pub fn text_list() -> TextList {
     TextList {
         common: Common::default(),
         ordered: false,
+        start: None,
+        reversed: false,
         items: Vec::new(),
     }
 }
@@ -237,6 +241,14 @@ impl TextList {
     document_methods!();
     pub fn ordered(mut self, ordered: bool) -> Self {
         self.ordered = ordered;
+        self
+    }
+    pub fn start(mut self, value: i32) -> Self {
+        self.start = Some(value);
+        self
+    }
+    pub fn reversed(mut self, value: bool) -> Self {
+        self.reversed = value;
         self
     }
     pub fn name(mut self, name: impl Into<Vary<String>>) -> Self {
@@ -273,7 +285,28 @@ impl Widget for TextList {
         } else {
             DocumentPart::UnorderedList
         };
+        let explicit_ordinals = self.start.is_some()
+            || self.reversed
+            || self.items.iter().any(|item| item.value.is_some());
+        if explicit_ordinals && !self.ordered {
+            return Err(glory::render::Error::InvalidProps(
+                "list numbering requires an ordered list",
+            )
+            .into());
+        }
+        let mut ordinal = self.start.map(i64::from).unwrap_or(if self.reversed {
+            self.items.len() as i64
+        } else {
+            1
+        });
         for item in &mut self.items {
+            if explicit_ordinals {
+                if let Some(reset) = item.value {
+                    ordinal = i64::from(reset);
+                }
+                item.ordinal = Some(ordinal);
+                ordinal += if self.reversed { -1 } else { 1 };
+            }
             item.common.theme = item
                 .theme_override
                 .as_ref()
@@ -296,6 +329,8 @@ impl Widget for TextList {
 }
 pub struct TextListItem {
     common: Common,
+    value: Option<i32>,
+    ordinal: Option<i64>,
     theme_override: Option<crate::Theme>,
     size_override: Option<crate::Size>,
     children: Children,
@@ -303,6 +338,8 @@ pub struct TextListItem {
 pub fn text_list_item() -> TextListItem {
     TextListItem {
         common: Common::default(),
+        value: None,
+        ordinal: None,
         theme_override: None,
         size_override: None,
         children: ().into_children(),
@@ -310,6 +347,10 @@ pub fn text_list_item() -> TextListItem {
 }
 impl TextListItem {
     document_methods!(theme_override, size_override);
+    pub fn value(mut self, value: i32) -> Self {
+        self.value = Some(value);
+        self
+    }
     pub fn fill(mut self, children: impl IntoChildren) -> Self {
         self.children = children.into_children();
         self
@@ -324,16 +365,22 @@ impl Widget for TextListItem {
         } else {
             Style::new()
         };
-        configure!(
+        let mut root = configure!(
             self.common,
             glory::ui::view(),
             scope,
             "sapid-text-list-item",
             base
         )
-        .document_part(DocumentPart::ListItem)
-        .fill(take(&mut self.children))
-        .show_in(scope)
+        .document_part(DocumentPart::ListItem);
+        if let Some(ordinal) = self.ordinal {
+            root = root.fill(
+                glory::ui::text()
+                    .class("sapid-list-ordinal")
+                    .content(format!("{ordinal}. ")),
+            );
+        }
+        root.fill(take(&mut self.children)).show_in(scope)
     }
 }
 
@@ -486,6 +533,7 @@ pub struct DataList {
     orientation: DataListOrientation,
     label_width: f64,
     gap: f64,
+    divider: Option<Vary<bool>>,
 }
 pub fn data_list() -> DataList {
     DataList {
@@ -494,10 +542,15 @@ pub fn data_list() -> DataList {
         orientation: DataListOrientation::Horizontal,
         label_width: 120.,
         gap: 12.,
+        divider: None,
     }
 }
 impl DataList {
     document_methods!();
+    pub fn with_divider(mut self, divider: impl Into<Vary<bool>>) -> Self {
+        self.divider = Some(divider.into());
+        self
+    }
     pub fn orientation(mut self, orientation: DataListOrientation) -> Self {
         self.orientation = orientation;
         self
@@ -567,13 +620,20 @@ impl Widget for DataList {
             crate::appearance::merge(structural, custom.get()).into()
         };
         let base = Style::new();
-        for item in &mut self.items {
+        let row_count = self.items.len();
+        for (index, item) in self.items.iter_mut().enumerate() {
             item.common.theme = item
                 .theme_override
                 .take()
                 .unwrap_or_else(|| self.common.theme.clone());
             item.common.size = item.size_override.unwrap_or(self.common.size);
             item.common.unstyled |= self.common.unstyled;
+            if index + 1 < row_count && !item.common.unstyled {
+                item.divider = self
+                    .divider
+                    .clone()
+                    .map(|enabled| (enabled, self.orientation));
+            }
         }
         configure!(
             self.common,
@@ -592,6 +652,7 @@ pub struct DataListItem {
     theme_override: Option<crate::Theme>,
     size_override: Option<crate::Size>,
     term: Vary<String>,
+    divider: Option<(Vary<bool>, DataListOrientation)>,
     children: Children,
 }
 pub fn data_list_item() -> DataListItem {
@@ -600,6 +661,7 @@ pub fn data_list_item() -> DataListItem {
         theme_override: None,
         size_override: None,
         term: "".into(),
+        divider: None,
         children: ().into_children(),
     }
 }
@@ -640,9 +702,42 @@ impl Widget for DataListItem {
                 .label(self.common.size)
                 .min_width(glory::style::Length::Px(0.)),
         );
+        let divider_style = |style: Vary<Style>, is_term: bool| -> Vary<Style> {
+            let Some((enabled, orientation)) = self.divider.clone() else {
+                return style;
+            };
+            if is_term && orientation == DataListOrientation::Vertical {
+                return style;
+            }
+            let border = self.common.theme.border;
+            scope
+                .bond(move || {
+                    let base = if enabled.get() {
+                        Style::new()
+                            .border_color(border)
+                            .border_style(BorderStyle::Solid)
+                            .border_width(Edges {
+                                bottom: 1.,
+                                ..Edges::all(0.)
+                            })
+                            .padding(Edges {
+                                bottom: 6.,
+                                ..Edges::all(0.)
+                            })
+                    } else {
+                        Style::new()
+                    };
+                    crate::appearance::merge(base, style.get())
+                })
+                .into()
+        };
         glory::ui::view()
             .class(classes)
-            .style(description_cell_style(scope, style, false))
+            .style(description_cell_style(
+                scope,
+                divider_style(style, true),
+                false,
+            ))
             .document_part(DocumentPart::Term)
             .fill(glory::ui::text().content(self.term.clone()))
             .show_in(&content)?;
@@ -655,7 +750,11 @@ impl Widget for DataListItem {
             .appearance(scope, "sapid-data-list-definition", base);
         glory::ui::view()
             .class(classes)
-            .style(description_cell_style(scope, style, true))
+            .style(description_cell_style(
+                scope,
+                divider_style(style, false),
+                true,
+            ))
             .document_part(DocumentPart::Definition)
             .fill(take(&mut self.children))
             .show_in(&content)?;
@@ -687,6 +786,8 @@ pub struct Highlight {
     content: String,
     queries: Vec<String>,
     ignore_ascii_case: bool,
+    #[cfg(feature = "accent-matching")]
+    ignore_accents: bool,
     whole_words: bool,
 }
 pub fn highlight() -> Highlight {
@@ -695,6 +796,8 @@ pub fn highlight() -> Highlight {
         content: String::new(),
         queries: Vec::new(),
         ignore_ascii_case: false,
+        #[cfg(feature = "accent-matching")]
+        ignore_accents: false,
         whole_words: false,
     }
 }
@@ -713,6 +816,12 @@ impl Highlight {
     /// Match ASCII letters in either case while preserving the original spelling.
     pub fn ignore_ascii_case(mut self, value: bool) -> Self {
         self.ignore_ascii_case = value;
+        self
+    }
+    /// Compare letters without canonical combining marks while preserving the original text.
+    #[cfg(feature = "accent-matching")]
+    pub fn ignore_accents(mut self, value: bool) -> Self {
+        self.ignore_accents = value;
         self
     }
     /// Require boundaries on both sides. Letters, numbers and underscores are word characters.
@@ -753,6 +862,34 @@ impl Widget for Highlight {
         } else {
             (std::borrow::Cow::Borrowed(content.as_ref()), queries)
         };
+        #[cfg(feature = "accent-matching")]
+        let ranges = if self.ignore_accents {
+            let fold = |text: &str| {
+                let (mut folded, offsets) = fold_accents(text);
+                if self.ignore_ascii_case {
+                    folded.make_ascii_lowercase();
+                }
+                (folded, offsets)
+            };
+            let (folded, offsets) = fold(&search);
+            if folded.is_empty() {
+                vec![(0, content.len(), false)]
+            } else {
+                let queries = queries
+                    .iter()
+                    .map(|query| fold(query).0)
+                    .filter(|query| !query.is_empty())
+                    .map(std::borrow::Cow::Owned)
+                    .collect::<Vec<_>>();
+                highlight_ranges(&folded, &queries, self.whole_words)?
+                    .into_iter()
+                    .map(|(start, end, marked)| (offsets[start], offsets[end], marked))
+                    .collect()
+            }
+        } else {
+            highlight_ranges(&search, &queries, self.whole_words)?
+        };
+        #[cfg(not(feature = "accent-matching"))]
         let ranges = highlight_ranges(&search, &queries, self.whole_words)?;
         let root = scope.create(Descriptor::new(Props::Group))?;
         let children = scope.child_in(root)?;
@@ -784,6 +921,38 @@ impl Widget for Highlight {
         publish_reference(scope, self.common.node_ref, root)
     }
 }
+#[cfg(feature = "accent-matching")]
+fn fold_accents(text: &str) -> (String, Vec<usize>) {
+    use unicode_normalization::char::{decompose_canonical, is_combining_mark};
+    let mut result = String::with_capacity(text.len());
+    let mut offsets = vec![0];
+    for (start, original) in text.char_indices() {
+        let end = start + original.len_utf8();
+        if is_combining_mark(original) {
+            if offsets.len() > 1 {
+                *offsets.last_mut().unwrap() = end;
+            }
+            continue;
+        }
+        let before = result.len();
+        let mut had_mark = false;
+        decompose_canonical(original, |c| {
+            if is_combining_mark(c) {
+                had_mark = true;
+            } else {
+                result.push(c);
+            }
+        });
+        // Keep other decompositions, including Hangul syllables, as single original scalars.
+        if !had_mark {
+            result.truncate(before);
+            result.push(original);
+        }
+        offsets.resize(result.len() + 1, end);
+    }
+    (result, offsets)
+}
+
 fn highlight_ranges(
     content: &str,
     queries: &[std::borrow::Cow<'_, str>],

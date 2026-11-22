@@ -33,7 +33,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                 .style(radius.map(|r| Style::new().radius(*r)))
         });
         view()
-            .class("site-configurator")
+            .class("site-configurator site-display-configurator")
             .fill(controls::playground(
                 Box::new(preview),
                 vec![

@@ -16,7 +16,9 @@ pub struct JsonInput {
     required: Vary<bool>,
     readonly: Vary<bool>,
     invalid: Vary<bool>,
+    loading: Vary<bool>,
     rows: u16,
+    autosize: bool,
     limits: JsonLimits,
     format: JsonFormat,
     formatter: bool,
@@ -39,7 +41,9 @@ pub fn json_input(key: impl Into<String>) -> JsonInput {
         required: false.into(),
         readonly: false.into(),
         invalid: false.into(),
-        rows: 6,
+        loading: false.into(),
+        rows: 2,
+        autosize: false,
         limits: JsonLimits::default(),
         format: JsonFormat::default(),
         formatter: true,
@@ -55,6 +59,10 @@ pub fn json_input(key: impl Into<String>) -> JsonInput {
     }
 }
 impl JsonInput {
+    pub fn loading(mut self, value: impl Into<Vary<bool>>) -> Self {
+        self.loading = value.into();
+        self
+    }
     pub fn placeholder(mut self, value: impl Into<Vary<String>>) -> Self {
         self.placeholder = Some(value.into());
         self
@@ -116,6 +124,11 @@ impl JsonInput {
     }
     pub fn rows(mut self, value: u16) -> Self {
         self.rows = value;
+        self
+    }
+    /// Grow the editor to fit the draft while retaining the minimum row count.
+    pub fn autosize(mut self, value: bool) -> Self {
+        self.autosize = value;
         self
     }
     pub fn limits(mut self, value: JsonLimits) -> Self {
@@ -322,17 +335,49 @@ impl Widget for JsonInput {
             scope.bond(move || invalid.get() || matches!(status.get(), JsonValidity::Invalid(_)));
         let custom = self.common.style.clone();
         let unstyled = self.common.unstyled;
+        let reference = self.common.theme.control(self.common.size);
+        let rows = self.rows;
+        let autosize = self.autosize;
         let style = scope.bond(move || {
             let mut style = custom.get();
-            if !unstyled && style.font_family.is_none() {
-                style.font_family = Some(vec![Family::Mono])
+            if !unstyled {
+                let font_size = *style
+                    .font_size
+                    .get_or_insert_with(|| (reference.font_size.unwrap_or(14.) - 2.).max(1.));
+                let line_height = *style.line_height.get_or_insert(font_size * 1.55);
+                let padding = *style.padding.get_or_insert_with(|| {
+                    let mut pad = reference.padding.unwrap_or_default();
+                    pad.top = (pad.top - 0.5).max(0.);
+                    pad.bottom = (pad.bottom - 0.5).max(0.);
+                    pad
+                });
+                style.font_family.get_or_insert_with(|| vec![Family::Mono]);
+                if autosize {
+                    let border = reference
+                        .border_width
+                        .map_or(0., |edge| edge.top + edge.bottom);
+                    let floor = reference.min_height.unwrap_or(glory::style::Length::Px(0.));
+                    let minimum = (f64::from(rows) * line_height.ceil()
+                        + padding.top
+                        + padding.bottom
+                        + border)
+                        .max(match floor {
+                            glory::style::Length::Px(value) => value,
+                            _ => 0.,
+                        });
+                    style
+                        .min_height
+                        .get_or_insert(glory::style::Length::Px(minimum));
+                }
             }
             style
         });
         let mut input = crate::textarea()
             .theme(self.common.theme.clone())
             .size(self.common.size)
+            .loading(self.loading.clone())
             .rows(self.rows)
+            .autosize(self.autosize)
             .value(accepted)
             .enabled(enabled.clone())
             .readonly(self.readonly.clone())

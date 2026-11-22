@@ -26,6 +26,7 @@ pub struct Switch {
     invalid: Vary<bool>,
     label_position: SwitchLabelPosition,
     marks: bool,
+    thumb_indicator: bool,
 }
 
 pub fn switch() -> Switch {
@@ -40,6 +41,7 @@ pub fn switch() -> Switch {
         invalid: false.into(),
         label_position: SwitchLabelPosition::After,
         marks: false,
+        thumb_indicator: false,
     }
 }
 
@@ -47,6 +49,11 @@ impl Switch {
     common_methods!();
     pub fn label_position(mut self, value: SwitchLabelPosition) -> Self {
         self.label_position = value;
+        self
+    }
+    /// Draw a small track-colored dot in the moving thumb.
+    pub fn with_thumb_indicator(mut self, value: bool) -> Self {
+        self.thumb_indicator = value;
         self
     }
     /// Show passive check/cross marks within the same track.

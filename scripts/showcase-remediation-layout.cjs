@@ -5,11 +5,12 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
 (async()=>{
   const browser=await chromium.launch();const page=await browser.newPage();
   const report={browser:browser.version(),pages:[],errors:[]};
-  page.on('pageerror',e=>report.errors.push(e.message));page.on('console',m=>{if(m.type()==='error')report.errors.push(m.text());});
+  page.on('pageerror',e=>report.errors.push({page:page.url(),message:e.message}));
+  page.on('console',m=>{if(m.type()==='error')report.errors.push({page:page.url(),message:m.text()});});
   const tick=()=>page.evaluate(()=>new Promise(resolve=>{let n=0;const step=()=>++n===6?resolve():requestAnimationFrame(step);requestAnimationFrame(step);}));
   const detail=title=>page.locator('.site-component-detail').filter({has:page.getByRole('heading',{name:title,exact:true})});
   const box=l=>l.boundingBox();const near=(a,b)=>assert(Math.abs(a-b)<1,`${a} != ${b}`);
-  const counts={'aspect-ratio':2,center:1,container:1,flex:2,grid:2,group:2,'simple-grid':2,space:1,stack:1,splitter:3};
+  const counts={'aspect-ratio':5,center:2,container:4,flex:2,grid:13,group:2,'simple-grid':5,space:2,stack:1,splitter:7};
   const capture=async(l,key)=>{await l.evaluate(e=>e.scrollIntoView({block:'center'}));await l.screenshot({path:outputPath(`layout-remediation/${key}.png`)});};
   const reflow=async(root,first,second,width,kind)=>{
     await first.fill('Keep this project draft');await first.evaluate(e=>{window.layoutEditor=e;});
@@ -34,9 +35,10 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
       const primary=page.locator('.site-preview .site-demo').first();
       try {
       if(slug==='aspect-ratio'){
-        const frame=primary.locator('.docs-aspect-frame'),image=frame.getByRole('img');let rect=await box(frame);assert(Math.abs(rect.width/rect.height-16/9)<.005);
-        assert((await image.getAttribute('src')).includes('mountain-evening.svg'));assert.equal(await image.evaluate(e=>getComputedStyle(e).objectFit),'cover');await image.evaluate(e=>{window.ratioImage=e;});
-        await primary.getByRole('checkbox',{name:'Portrait frame',exact:true}).check();await tick();rect=await box(frame);assert(Math.abs(rect.width/rect.height-.8)<.005);assert(await image.evaluate(e=>e===window.ratioImage));
+        const frame=primary.locator('.site-ref-ratio-image'),image=frame.getByRole('img',{name:'Panda'});
+        const rect=await box(frame);assert(Math.abs(rect.width/rect.height-1.5)<.005);assert(rect.width<=300);
+        assert((await image.getAttribute('src')).endsWith('/reference-ratio-panda.png'));
+        assert(await image.evaluate(e=>e.complete&&e.naturalWidth>0&&getComputedStyle(e).objectFit==='cover'));
         const fit=detail('Image fitting and cropping');assert.equal(await fit.getByRole('img',{name:'Complete mountains and cabin'}).evaluate(e=>getComputedStyle(e).objectFit),'contain');
         near((await box(detail('Flex constraints and frame dimensions').locator('.sapid-aspect-ratio'))).width,96);
       }else if(slug==='center'){
@@ -73,6 +75,15 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
         const columns=detail('Column count, gaps and unequal content');for(const count of [2,3]){const cells=columns.locator(`.docs-simple-columns-${count} > .sapid-grid-item`);near((await box(cells.nth(0))).width,(await box(cells.nth(1))).width);}
         const responsive=detail('Measured columns without remounting');await reflow(responsive,responsive.getByLabel('Simple grid note 1',{exact:true}),responsive.getByLabel('Simple grid note 2',{exact:true}),width,'simple grid');
       }else if(slug==='splitter'){
+        const units=detail('CSS units');
+        const sidebar=units.getByRole('separator',{name:'Sidebar width',exact:true});
+        const unitsWidth=(await box(units.locator('.site-ref-css-splitter'))).width;
+        const fixed=unitsWidth<=320;
+        assert.equal((await sidebar.getAttribute('aria-disabled'))==='true',fixed);
+        const initial=Number(await sidebar.getAttribute('aria-valuenow'));
+        await sidebar.focus();await sidebar.press('Home');await tick();
+        near(Number(await sidebar.getAttribute('aria-valuenow')),fixed?initial:160/unitsWidth*100);
+        await sidebar.press('End');await tick();near(Number(await sidebar.getAttribute('aria-valuenow')),50);
         const editor=primary.getByLabel('Editor draft',{exact:true}),handle=primary.getByRole('separator',{name:'Resize editor and preview',exact:true});await editor.fill('Stable split draft');await editor.evaluate(e=>{window.splitEditor=e;});
         await handle.focus();await handle.press('Home');await tick();near(Number(await handle.getAttribute('aria-valuenow')),20);await handle.press('End');await tick();near(Number(await handle.getAttribute('aria-valuenow')),80);assert(await editor.evaluate(e=>e===window.splitEditor));assert.equal(await editor.inputValue(),'Stable split draft');
         const controlled=detail('Controlled sizes, limits and keyboard input'),h=controlled.getByRole('separator',{name:'Resize controlled panels',exact:true});

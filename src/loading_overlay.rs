@@ -15,6 +15,7 @@ struct Shade {
     children: Children,
     mask_ref: Option<Cage<Option<NodeId>>>,
     content_ref: Option<Cage<Option<NodeId>>>,
+    loader_content: Option<Children>,
     loader_type: crate::LoaderType,
     loader_size: crate::Size,
     loader_color: Option<Color>,
@@ -32,6 +33,7 @@ impl Shade {
             children: ().into_children(),
             mask_ref: None,
             content_ref: None,
+            loader_content: None,
             loader_type: crate::LoaderType::Oval,
             loader_size: crate::Size::Medium,
             loader_color: None,
@@ -115,6 +117,12 @@ impl Overlay {
     }
 }
 impl LoadingOverlay {
+    /// Replace the spinner with custom content inside the loading mask.
+    pub fn loader_content(mut self, content: impl IntoChildren) -> Self {
+        self.0.loader_content = Some(content.into_children());
+        self
+    }
+
     /// Select a finite host-driven loader without changing the inert region.
     pub fn loader_type(mut self, kind: crate::LoaderType) -> Self {
         self.0.loader_type = kind;
@@ -245,7 +253,9 @@ impl Widget for Shade {
         if let Some(reference) = self.mask_ref {
             mask = mask.node_ref(reference);
         }
-        if loading {
+        if let Some(loader) = self.loader_content.take() {
+            mask = mask.fill(loader);
+        } else if loading {
             let mut spinner = crate::spinner()
                 .theme(self.common.theme.clone())
                 .kind(self.loader_type)

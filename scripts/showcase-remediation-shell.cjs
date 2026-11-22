@@ -19,7 +19,7 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
       await page.goto(`${base}/showcase.html?widget=app-shell&theme=${theme}&scheme=${scheme}`);
       await page.waitForFunction(() => window.ready===true && document.documentElement.getAttribute('data-sapid-widget')==='app-shell'); await tick();
       report.asset = await page.evaluate(() => document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]); assert(report.asset);
-      assert.equal(await page.locator('.site-component-detail').count(),7);
+      assert.equal(await page.locator('.site-component-detail').count(),10);
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth+1));
       const primary = page.locator('.site-preview .site-demo').first();
       const note = primary.getByLabel('Workspace note',{exact:true}); await note.fill('Persistent project draft');

@@ -15,7 +15,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                 .citation(sapid::text().theme(theme).variant(sapid::TextVariant::Small).content("— Ava Patel, Mountain studio design notes"))
         });
         view()
-            .class("site-configurator")
+            .class("site-configurator site-display-configurator")
             .fill(controls::playground(
                 Box::new(preview),
                 vec![
