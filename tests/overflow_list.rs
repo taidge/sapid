@@ -457,6 +457,27 @@ fn rejected_dimensions_and_memberships_retain_the_accepted_widget_without_rewrit
 #[path = "../examples/web/src/overflow_list_form.rs"]
 mod fixture_page;
 #[test]
+fn maximum_inline_items_applies_before_measurement_and_to_controlled_counts() {
+    for cap in [0, 1, 2] {
+        let list = overflow_list("limited")
+            .initial_visible(3)
+            .visible_count(3usize)
+            .max_visible_items(cap)
+            .overflow_count_label(|count| format!("+{count} more"))
+            .items(entries().iter().map(|key| item(key)));
+        let snapshot = glory::ssr::snapshot(list).unwrap();
+        assert!(snapshot.html.contains(&format!("+{} more", 3 - cap)));
+        assert_eq!(
+            snapshot
+                .html
+                .matches("class=\"sapid-overflow-item\"")
+                .count(),
+            3
+        );
+    }
+}
+
+#[test]
 fn deterministic_four_theme_ssr_starts_at_the_same_explicit_prefix_without_physical_queries() {
     for theme in [
         sapid::Theme::blue_light(),

@@ -22,6 +22,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
         .children(move |_| {
             let mut accordion = sapid::accordion("showcase-faq")
                 .theme(palette.clone())
+                .class(if fixed.get() { "site-fruit-fixed-chevron" } else { "site-fruit-rotating-chevron" })
                 .open(open)
                 .on_open_change(move |next| open.revise(|v| *v = next))
                 .item_radius(radius.get())
@@ -53,7 +54,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                 .on_value_change(move |next| position.revise(|v| *v = next)),
         ));
         view()
-            .class("site-configurator site-display-configurator")
+            .class("site-configurator site-display-configurator site-accordion-usage")
             .fill(controls::playground(
                 Box::new(preview),
                 vec![

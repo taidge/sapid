@@ -1,40 +1,40 @@
 use glory::prelude::*;
+
 pub fn demo(theme: sapid::Theme) -> impl Widget {
-    widget(move |scope| {
-        let selected = scope.cage("Overview".to_owned());
-        sapid::stack()
+    let fruits = [
+        "Apple",
+        "Banana",
+        "Cherry",
+        "Date",
+        "Elderberry",
+        "Fig",
+        "Grape",
+        "Honeydew",
+        "Indian Fig",
+        "Jackfruit",
+        "Kiwi",
+        "Lemon",
+        "Mango",
+        "Nectarine",
+        "Orange",
+        "Papaya",
+    ];
+    // The example stylesheet enables horizontal resizing on the outer container.
+    view().class("site-overflow-resizer").fill(
+        sapid::overflow_list("fruit-badges")
             .theme(theme.clone())
-            .gap(12.)
-            .fill((
-                sapid::overflow_list("project-navigation")
-                    .theme(theme.clone())
-                    .overflow_label("More")
-                    .style(Style::new().width(Length::Percent(100.)))
-                    .items(
-                        [
-                            "Overview",
-                            "Activity",
-                            "Members",
-                            "Documents",
-                            "Settings",
-                            "Archive",
-                        ]
-                        .into_iter()
-                        .map(|name| {
-                            let t = theme.clone();
-                            sapid::overflow_item(name).content(move || {
-                                sapid::button()
-                                    .theme(t.clone())
-                                    .variant(sapid::ButtonVariant::Outline)
-                                    .label(name)
-                                    .on_press(move || selected.revise(|s| *s = name.to_owned()))
-                            })
-                        }),
-                    ),
-                sapid::text()
-                    .theme(theme.clone())
-                    .content(selected.map(|s| format!("Current project page: {s}"))),
-            ))
-            .show_in(scope)
-    })
+            .gap(4.)
+            .overflow_count_label(|hidden| format!("+{hidden} more"))
+            .items(fruits.into_iter().map(move |name| {
+                let theme = theme.clone();
+                sapid::overflow_item(name.to_ascii_lowercase().replace(' ', "-")).content(
+                    move || {
+                        sapid::badge()
+                            .theme(theme.clone())
+                            .variant(sapid::BadgeVariant::Solid)
+                            .content(name)
+                    },
+                )
+            })),
+    )
 }

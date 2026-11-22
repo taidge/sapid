@@ -5,7 +5,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
         let size = scope.cage(Some("md".to_owned()));
         let radius = scope.cage(6.);
         let color = scope.cage("Blue".to_owned());
-        let contrast = scope.cage(true);
+        let contrast = scope.cage(false);
         let palette = theme.clone();
         let preview = each(
             scope.bond(move || vec![(variant.get(), size.get(), color.get(), contrast.get())]),
@@ -17,10 +17,19 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
             let mut theme = controls::accent(palette.clone(), &name);
             let c = theme.accent;
             theme.accent_soft = glory::style::Color(c.0, c.1, c.2, 32);
-            sapid::theme_icon(sapid::Icon::Check)
-                .name("Project complete")
+            let size = controls::size_value(size.as_deref().unwrap_or("md"));
+            let side = match size {
+                sapid::Size::ExtraSmall => 18.,
+                sapid::Size::Small => 22.,
+                sapid::Size::Medium => 28.,
+                sapid::Size::Large => 34.,
+                sapid::Size::ExtraLarge => 44.,
+            };
+            sapid::theme_icon(sapid::Icon::Calendar)
+                .name("Calendar")
                 .theme(theme)
-                .size(controls::size_value(size.as_deref().unwrap_or("md")))
+                .size(size)
+                .icon_size((side - 2.) * 0.7)
                 .variant(match variant.as_deref() {
                     Some("soft") => sapid::ThemeIconVariant::Soft,
                     Some("outline") => sapid::ThemeIconVariant::Outline,
@@ -30,7 +39,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                     _ => sapid::ThemeIconVariant::Solid,
                 })
                 .auto_contrast(contrast)
-                .style(radius.map(|r| Style::new().radius(*r)))
+                .style(radius.map(move |r| Style::new().width(Length::Px(side)).height(Length::Px(side)).radius(*r)))
         });
         view()
             .class("site-configurator site-display-configurator")

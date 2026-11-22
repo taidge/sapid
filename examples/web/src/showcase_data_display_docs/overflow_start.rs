@@ -1,7 +1,7 @@
 use glory::prelude::*;
 
 pub fn demo(theme: sapid::Theme) -> impl Widget {
-    let fruit = [
+    let fruits = [
         "Apple",
         "Banana",
         "Cherry",
@@ -19,15 +19,23 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
         "Orange",
         "Papaya",
     ];
-    sapid::overflow_list("overflow-start")
-        .theme(theme.clone())
-        .class("showcase-fruit-overflow")
-        .collapse_from_start(true)
-        .gap(4.)
-        .overflow_label("More")
-        .items(fruit.into_iter().map(move |name| {
-            let theme = theme.clone();
-            sapid::overflow_item(name.to_ascii_lowercase().replace(' ', "-"))
-                .content(move || sapid::badge().theme(theme.clone()).content(name))
-        }))
+    // Add `.site-overflow-resizer { resize: horizontal; overflow: auto; max-width: 100%; }` to your stylesheet.
+    view().class("site-overflow-resizer").fill(
+        sapid::overflow_list("overflow-start")
+            .theme(theme.clone())
+            .collapse_from_start(true)
+            .gap(4.)
+            .overflow_count_label(|hidden| format!("+{hidden} more"))
+            .items(fruits.into_iter().map(move |name| {
+                let theme = theme.clone();
+                sapid::overflow_item(name.to_ascii_lowercase().replace(' ', "-")).content(
+                    move || {
+                        sapid::badge()
+                            .theme(theme.clone())
+                            .variant(sapid::BadgeVariant::Solid)
+                            .content(name)
+                    },
+                )
+            })),
+    )
 }
