@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-browser-env.cjs');
+const {assertPlaygroundLayout,matrix, chromium, base, outputPath, writeReport } = require('./showcase-browser-env.cjs');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -24,6 +24,7 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
         assert(geometry.previewOverflow <= 1 && geometry.documentOverflow <= 1, `${key}: overflow ${JSON.stringify(geometry)}`);
         await primary.screenshot({ path: outputPath(`composite-remediation/${key}.png`), animations: 'disabled' });
         if (slug === 'accordion') {
+          await assertPlaygroundLayout(primary, width);
           const trigger = primary.getByRole('button', { name: 'How long does shipping take?', exact: true });
           const triggerBox = await trigger.boundingBox();
           const rootBox = await primary.locator('.sapid-accordion').boundingBox();
@@ -33,6 +34,26 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
           await trigger.click(); await tick(); assert.equal(await trigger.getAttribute('aria-expanded'), 'true');
           await trigger.focus(); await page.keyboard.press('End'); await tick();
           assert(await primary.getByRole('button', { name: 'How can I contact support?', exact: true }).evaluate(element => element === document.activeElement));
+          const returns = primary.getByRole('button', {name: 'What is your return policy?'});
+          await returns.click(); await tick();
+          const arrow = returns.locator('.sapid-disclosure-chevron');
+          const beforeMove = await arrow.boundingBox();
+          await primary.getByRole('radio', {name: 'Left',exact:true}).check(); await tick();
+          assert((await arrow.boundingBox()).x < beforeMove.x - 30);
+          await primary.getByRole('slider', {name: 'Chevron icon size'}).press('End'); await tick();
+          assert.equal((await arrow.boundingBox()).width,25);
+          const variant=primary.getByRole('combobox',{name:'Variant'});
+          for (const choice of ['unstyled','filled','separated','contained']) {
+            await variant.selectOption(choice); await tick();
+            assert.equal(await returns.getAttribute('aria-expanded'),'true');
+          }
+          await primary.getByRole('slider',{name:'Radius',exact:true}).press('End'); await tick();
+          assert.equal(await primary.locator('.sapid-accordion-item').first().evaluate(e=>getComputedStyle(e).borderTopLeftRadius),'12px');
+          const path=arrow.locator('path').first(), expandedPath=await path.getAttribute('d');
+          await primary.getByRole('switch',{name:'Disable chevron rotation'}).check(); await tick();
+          const fixedPath=await path.getAttribute('d');assert.notEqual(fixedPath,expandedPath);
+          await returns.click(); await tick();
+          assert.equal(await path.getAttribute('d'),fixedPath);
           const multiple = detail('Multiple sections and controlled state');
           await multiple.getByRole('button', { name: 'Payment methods', exact: true }).click(); await tick();
           for (const name of ['Delivery options', 'Payment methods']) assert.equal(await multiple.getByRole('button', { name, exact: true }).getAttribute('aria-expanded'), 'true');

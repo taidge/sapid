@@ -104,6 +104,15 @@ pub fn text_field(label: &str, value: Cage<String>, theme: &Theme) -> Box<dyn Wi
 }
 
 pub fn size_slider(value: Cage<Option<String>>, theme: &Theme) -> Box<dyn Widget> {
+    scale_slider("control-size", "Size", value, theme)
+}
+
+pub fn scale_slider(
+    key: &'static str,
+    label: &'static str,
+    value: Cage<Option<String>>,
+    theme: &Theme,
+) -> Box<dyn Widget> {
     let current = value.map(|current| match current.as_deref() {
         Some("xs") => 0.0,
         Some("sm") => 1.0,
@@ -128,10 +137,10 @@ pub fn size_slider(value: Cage<Option<String>>, theme: &Theme) -> Box<dyn Widget
             sapid::text()
                 .theme(theme.clone())
                 .class("site-control-label")
-                .content("Size"),
-            sapid::slider("control-size")
+                .content(label),
+            sapid::slider(key)
                 .theme(theme.clone())
-                .name("Size")
+                .name(label)
                 .min(0.0)
                 .max(4.0)
                 .step(1.0)
@@ -325,4 +334,47 @@ pub fn color_choices(selected: Cage<String>, theme: &Theme) -> Box<dyn Widget> {
                 }),
         )),
     )
+}
+
+pub fn gradient_style(
+    from: Option<&str>,
+    to: Option<&str>,
+    angle: f64,
+) -> glory::style::LinearGradient {
+    let stop = |name: Option<&str>| {
+        choice_color(name.unwrap_or("Blue")).unwrap_or(Color(34, 139, 230, 255))
+    };
+    glory::style::LinearGradient {
+        angle,
+        stops: vec![stop(from), stop(to)],
+    }
+}
+
+pub fn gradient_controls(
+    from: Cage<Option<String>>,
+    to: Cage<Option<String>>,
+    angle: Cage<f64>,
+    theme: &Theme,
+) -> Box<dyn Widget> {
+    const STOPS: &[(&str, &str)] = &[
+        ("Blue", "Blue"),
+        ("Grape", "Grape"),
+        ("Orange", "Orange"),
+        ("Green", "Green"),
+        ("Pink", "Pink"),
+        ("Teal", "Teal"),
+    ];
+    Box::new(sapid::stack().theme(theme.clone()).gap(12.).fill((
+        select("gradient-start", "Gradient from", from, STOPS, theme),
+        select("gradient-end", "Gradient to", to, STOPS, theme),
+        range(
+            "gradient-angle",
+            "Gradient angle",
+            angle,
+            0.,
+            360.,
+            5.,
+            theme,
+        ),
+    )))
 }

@@ -897,6 +897,14 @@ mod tests {
 """
 
 
+# Read the maintained source for replaced core demos so generation never depends
+# on a previously emitted file that may already have been retired.
+MAINTAINED_CORE_DEMOS = {
+    "P0-01": "button", "P0-02": "text_input", "P0-03": "checkbox",
+    "P0-04": "collapse", "P0-05": "accordion", "P0-07": "modal",
+    "P0-08": "drawer", "P0-09": "popover", "P2-08": "action_icon",
+    "P3-10": "pill", "P4-08": "multi_select", "P4-09": "pills_input",
+}
 pages = {}
 entries = []
 outputs = {}
@@ -909,10 +917,8 @@ for task in tasks:
     if not page: raise SystemExit(f"missing explicit demo for {identity}")
     shared_code = None
     if identity not in NAMED_DEMO_TASKS or identity in PRESERVE_PRIMARY:
-        if identity in {"P0-01", "P0-02", "P0-03", "P0-04", "P0-07", "P0-08", "P0-09", "P2-08", "P3-10", "P4-08", "P4-09"}:
-            # A replaced core demo is no longer emitted. Read its maintained
-            # source so the next generation does not depend on a deleted output.
-            maintained = {"P0-01": "button", "P0-02": "text_input", "P0-03": "checkbox", "P0-04": "collapse", "P0-07": "modal", "P0-08": "drawer", "P0-09": "popover", "P2-08": "action_icon", "P3-10": "pill", "P4-08": "multi_select", "P4-09": "pills_input"}[identity]
+        if identity in MAINTAINED_CORE_DEMOS:
+            maintained = MAINTAINED_CORE_DEMOS[identity]
             shared_code = (maintained + "_usage", dedicated_source(maintained))
         elif identity in CORE:
             key = 'core_' + CORE[identity]

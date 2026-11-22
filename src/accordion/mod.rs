@@ -31,6 +31,46 @@ impl AccordionItem {
     }
 }
 
+#[derive(Clone, Copy)]
+struct Chevron {
+    visible: bool,
+    at_start: bool,
+    size: f64,
+    rotate: bool,
+}
+impl Chevron {
+    fn fill(
+        self,
+        scope: &Scope,
+        mut trigger: glory::ui::Button,
+        label: Vary<String>,
+        content: Option<composite::Factory>,
+        open: Vary<bool>,
+        color: glory::style::Color,
+    ) -> glory::ui::Button {
+        let leading = self.visible && self.at_start;
+        let icon = || skin::chevron(scope, open.clone(), color, self.size, self.rotate);
+        if leading {
+            trigger = trigger.fill(icon());
+        }
+        if let Some(mut factory) = content {
+            trigger = trigger
+                .label("")
+                .name(label)
+                .fill(glory::ui::widget(move |scope| factory().show_in(scope)));
+        } else if leading {
+            trigger = trigger
+                .label("")
+                .name(label.clone())
+                .fill(glory::ui::text().content(label));
+        }
+        if self.visible && !leading {
+            trigger = trigger.fill(icon());
+        }
+        trigger
+    }
+}
+
 pub struct Accordion {
     common: Common,
     key: String,
@@ -46,7 +86,8 @@ pub struct Accordion {
     policy: ContentPolicy,
     direction: Direction,
     variant: AccordionVariant,
-    chevron: bool,
+    chevron: Chevron,
+    item_radius: Option<f64>,
 }
 pub fn accordion(key: impl Into<String>) -> Accordion {
     Accordion {
@@ -64,7 +105,13 @@ pub fn accordion(key: impl Into<String>) -> Accordion {
         policy: ContentPolicy::Unmount,
         direction: Direction::Ltr,
         variant: AccordionVariant::Default,
-        chevron: true,
+        chevron: Chevron {
+            visible: true,
+            at_start: false,
+            size: 16.,
+            rotate: true,
+        },
+        item_radius: None,
     }
 }
 impl Accordion {
@@ -74,7 +121,23 @@ impl Accordion {
         self
     }
     pub fn with_chevron(mut self, value: bool) -> Self {
-        self.chevron = value;
+        self.chevron.visible = value;
+        self
+    }
+    pub fn chevron_at_start(mut self, start: bool) -> Self {
+        self.chevron.at_start = start;
+        self
+    }
+    pub fn chevron_size(mut self, size: f64) -> Self {
+        self.chevron.size = size;
+        self
+    }
+    pub fn rotate_chevron(mut self, rotate: bool) -> Self {
+        self.chevron.rotate = rotate;
+        self
+    }
+    pub fn item_radius(mut self, radius: f64) -> Self {
+        self.item_radius = Some(radius);
         self
     }
     pub fn item(mut self, item: AccordionItem) -> Self {
@@ -162,6 +225,15 @@ fn valid_open(
 
 impl Widget for Accordion {
     fn build(&mut self, scope: &Scope) -> Result {
+        if !self.chevron.size.is_finite()
+            || self.chevron.size <= 0.
+            || self.item_radius.is_some_and(|r| !r.is_finite() || r < 0.)
+        {
+            return Err(glory::render::Error::InvalidProps(
+                "accordion chevron size must be positive and item radius nonnegative and finite",
+            )
+            .into());
+        }
         if let Some(input) = self.dynamic.take() {
             return dynamic::build(self, scope, input);
         }
@@ -229,25 +301,21 @@ impl Widget for Accordion {
                         ..Default::default()
                     })
                 }));
-            if let Some(mut factory) = item.trigger_content.take() {
-                trigger = trigger
-                    .label("")
-                    .name(item.label)
-                    .fill(glory::ui::widget(move |scope| factory().show_in(scope)));
-            }
             if !self.common.unstyled {
                 trigger = trigger.style(skin::accordion_trigger(
                     &self.common.theme,
                     self.common.size,
+                    self.chevron.visible && self.chevron.at_start,
                 ));
             }
-            if self.chevron {
-                trigger = trigger.fill(skin::chevron(
-                    scope,
-                    open.into(),
-                    self.common.theme.foreground,
-                ));
-            }
+            trigger = self.chevron.fill(
+                scope,
+                trigger,
+                item.label,
+                item.trigger_content.take(),
+                open.into(),
+                self.common.theme.foreground,
+            );
             let state = control.clone();
             let callback = callback.clone();
             let known = known.clone();
@@ -299,8 +367,10 @@ impl Widget for Accordion {
             if !self.common.unstyled {
                 let theme = self.common.theme.clone();
                 let variant = self.variant;
-                row = row
-                    .style(scope.bond(move || skin::accordion_item(&theme, variant, open.get())));
+                let radius = self.item_radius;
+                row = row.style(
+                    scope.bond(move || skin::accordion_item(&theme, variant, open.get(), radius)),
+                );
             }
             children.push(Box::new(row.fill((header, panel))));
         }

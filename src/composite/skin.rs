@@ -15,11 +15,15 @@ pub enum AccordionVariant {
     Separated,
 }
 
-pub(crate) fn accordion_trigger(theme: &Theme, size: Size) -> Style {
+pub(crate) fn accordion_trigger(theme: &Theme, size: Size, leading: bool) -> Style {
     let mut style = theme.control(size);
     style.display = Some(Display::Flex);
     style.align = Some(Align::Center);
-    style.justify = Some(Justify::Between);
+    style.justify = Some(if leading {
+        Justify::Start
+    } else {
+        Justify::Between
+    });
     style.gap = Some(12.);
     style.background = Some(Color(0, 0, 0, 0));
     style.border_width = Some(Edges::all(0.));
@@ -29,7 +33,12 @@ pub(crate) fn accordion_trigger(theme: &Theme, size: Size) -> Style {
     style
 }
 
-pub(crate) fn accordion_item(theme: &Theme, variant: AccordionVariant, open: bool) -> Style {
+pub(crate) fn accordion_item(
+    theme: &Theme,
+    variant: AccordionVariant,
+    open: bool,
+    radius: Option<f64>,
+) -> Style {
     let mut style = Style::new()
         .border_style(BorderStyle::Solid)
         .border_color(theme.border);
@@ -43,8 +52,8 @@ pub(crate) fn accordion_item(theme: &Theme, variant: AccordionVariant, open: boo
         AccordionVariant::Filled => Edges::all(0.),
         _ => Edges::all(1.),
     });
-    if variant != AccordionVariant::Default {
-        style.radius = Some(theme.radius);
+    if radius.is_some() || variant != AccordionVariant::Default {
+        style.radius = Some(radius.unwrap_or(theme.radius));
     }
     if variant == AccordionVariant::Filled || variant == AccordionVariant::Separated && open {
         style.background = Some(theme.surface);
@@ -64,12 +73,14 @@ pub(crate) fn chevron(
     scope: &glory::Scope,
     open: glory::Vary<bool>,
     color: Color,
+    size: f64,
+    rotate: bool,
 ) -> glory::ui::Graphic {
     use glory::render::{GraphicPoint as P, PathCommand as C};
     glory::ui::graphic()
         .class("sapid-disclosure-chevron")
         .drawing(scope.bond(move || {
-            let points = if open.get() {
+            let points = if rotate && open.get() {
                 [(5., 8.), (12., 15.), (19., 8.)]
             } else {
                 [(8., 5.), (15., 12.), (8., 19.)]
@@ -90,7 +101,9 @@ pub(crate) fn chevron(
         }))
         .style(Style {
             shrink: Some(0.),
-            ..Style::new().width(Length::Px(16.)).height(Length::Px(16.))
+            ..Style::new()
+                .width(Length::Px(size))
+                .height(Length::Px(size))
         })
 }
 

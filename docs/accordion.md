@@ -5,7 +5,10 @@
 `variant(AccordionVariant::{Default,Contained,Filled,Separated})` configures the
 default item surface. Headings fill the available width, panel padding belongs
 to the panel, and each heading includes a passive chevron that follows accepted
-open state. `with_chevron(false)` omits it. Custom trigger content retains the
+open state. Use `chevron_at_start(true)` to put it before the label,
+`chevron_size(px)` to size it, or `rotate_chevron(false)` to keep its direction
+fixed when the panel opens. `item_radius(px)` sets the corner radius on each
+item. These options support both declared and keyed items. `with_chevron(false)` omits it. Custom trigger content retains the
 same named native button. Static and keyed collections share this presentation;
 `unstyled()` removes theme paint while retaining the component contract.
 
