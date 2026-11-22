@@ -429,7 +429,11 @@ impl Index {
             }
             // A visible heading near either end may never reach the reading line. Retain the
             // explicitly requested section only while the viewport remains at that limit.
-            if (requested_y - y).abs() > f64::EPSILON && (requested || (metrics.y - y).abs() <= 1.)
+            let top_at_limit = heading.y + metrics.y - y;
+            if requested_y != y
+                && top_at_limit < viewport.y + viewport.height
+                && top_at_limit + heading.height > viewport.y
+                && (requested || (metrics.y - y).abs() <= 1.)
             {
                 *self.reveal.borrow_mut() = Some(Reveal::AtScrollLimit(id.clone()));
                 active = Some(id.clone());
