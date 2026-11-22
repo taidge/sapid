@@ -9,9 +9,9 @@ from pathlib import Path
 
 # Release acceptance also audits registry consumers against these published sources.
 PUBLISHED_TAGS = {
-    "apace": "apace-v0.3.0",
-    "takia": "takia-v0.15.1",
-    "wingy": "wingy-v0.31.1",
+    "apace": "apace-v0.4.0",
+    "takia": "takia-v0.16.0",
+    "wingy": "wingy-v0.31.2",
 }
 
 

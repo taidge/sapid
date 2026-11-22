@@ -1,7 +1,6 @@
 # Releases
 
-Sapid 0.7.1 uses the published Glory 0.7.0 and its exact engine prerequisites.
-Do not republish Glory for this Sapid patch.
+Sapid 0.9.0 requires the published Glory 0.9.0 and its coordinated native engines.
 Library, example and benchmark locks remain local and ignored; generate and
 validate them without adding them to Git.
 

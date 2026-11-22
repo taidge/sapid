@@ -1,11 +1,11 @@
 {
   "glory": {
     "repository": "glory-rs/glory",
-    "revision": "3d459530336ed725db22058aee6544e3cfbce7dc"
+    "revision": "b082a0a9d5f58d8d90802dd42ad993087af2f185"
   },
   "engines": {
-    "apace": "7db3ab0e4a46e6a6be95faa3b1ac270632d6bad9",
-    "takia": "bad353c780cef9caf002eeee2ead432ee91e80f4",
-    "wingy": "ba2e202cbdddbc6e1bab11421b500c4a9f08d621"
+    "apace": "38de803919aab577edaf04bb3126236718685d1c",
+    "takia": "237b1174e1668998df1afde187ac74c82ae909ae",
+    "wingy": "e3570d50929af1a087e77146aa213fdfcbd9d5de"
   }
 }

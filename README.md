@@ -29,7 +29,7 @@ Glory's optional `view!` syntax, while your application chooses its rendering ho
 - **Documented capabilities.** Each catalog item records implementation scope,
   tests and host boundaries instead of promising uniform platform support.
 
-> **Sapid 0.8.0 targets Glory 0.8.1 and compatible 0.8 patches.**
+> **Sapid 0.9.0 targets Glory 0.9.0 and compatible 0.9 patches.**
 > Rust **1.95+** is required. For source development, keep `sapid`, `glory`,
 > `apace`, `takia` and `wingy` as sibling repositories. See [development versions](docs/development-versions.md).
 
@@ -39,8 +39,8 @@ Add Sapid and Glory to your application:
 
 ```toml
 [dependencies]
-sapid = "0.8.0"
-glory = { version = "0.8.1", default-features = false }
+sapid = "0.9.0"
+glory = { version = "0.9.0", default-features = false }
 ```
 
 A Git or path dependency on Sapid uses the same registry Glory. To test edits to a
