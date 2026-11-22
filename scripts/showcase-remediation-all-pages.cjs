@@ -1,10 +1,8 @@
 // Render every registered widget, including additions after the original audit.
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
-const {chromium,base,writeReport}=require('./showcase-browser-env.cjs');
+const {chromium,base,writeReport,showcaseSlugs}=require('./showcase-browser-env.cjs');
 (async()=>{
- const catalogue=fs.readFileSync(path.join(__dirname,'../examples/web/src/showcase_catalog.rs'),'utf8');
- const slugs=Array.from(catalogue.matchAll(/\bslug: "([^"]+)"/g),m=>m[1]);
- assert(slugs.length>0);assert.equal(new Set(slugs).size,slugs.length);
+ const slugs=showcaseSlugs();
  const original=JSON.parse(fs.readFileSync(path.join(__dirname,'../docs/shared-page-remediation.json'),'utf8'));
  for(const {slug} of original.pages)assert(slugs.includes(slug),slug);
  const browser=await chromium.launch(),page=await browser.newPage(),report={browser:browser.version(),cases:[],errors:[]};let current;

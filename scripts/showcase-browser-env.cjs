@@ -26,6 +26,15 @@ if (!['quick', 'full'].includes(acceptanceMode)) throw Error(`Unknown showcase m
 const matrix = { themes: acceptanceMode === 'quick' ? ['blue'] : ['blue', 'green'],
   schemes: acceptanceMode === 'quick' ? ['light'] : ['light', 'dark'] };
 
+function showcaseSlugs() {
+  const source = fs.readFileSync(path.join(__dirname, '../examples/web/src/showcase_catalog.rs'), 'utf8');
+  const slugs = Array.from(source.matchAll(/\bslug: "([^"]+)"/g), match => match[1]);
+  if (!slugs.length || new Set(slugs).size !== slugs.length) {
+    throw new Error('The generated showcase catalogue must contain unique widget slugs');
+  }
+  return slugs;
+}
+
 function outputPath(name) {
   const resolved = path.resolve(outputRoot, name);
   const relative = path.relative(outputRoot, resolved);
@@ -51,5 +60,5 @@ async function assertPlaygroundLayout(primary, width) {
   }
 }
 
-module.exports = { assertPlaygroundLayout, base, buildRoot, outputPath, outputRoot, tempDir, writeReport, matrix,
+module.exports = { showcaseSlugs, assertPlaygroundLayout, base, buildRoot, outputPath, outputRoot, tempDir, writeReport, matrix,
   get chromium() { return require(process.env.SAPID_PLAYWRIGHT || 'playwright').chromium; } };
