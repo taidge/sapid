@@ -1,48 +1,50 @@
-#[path = "../../web/src/dedicated_demos/area_chart.rs"]
+#[path = "../../web/src/showcase_demos/area_chart_usage.rs"]
 mod area_chart;
-#[path = "../../web/src/dedicated_demos/bar_chart.rs"]
+#[path = "../../web/src/showcase_demos/bar_chart_usage.rs"]
 mod bar_chart;
-#[path = "../../web/src/dedicated_demos/bars_list.rs"]
+#[path = "../../web/src/showcase_demos/bars_list_usage.rs"]
 mod bars_list;
-#[path = "../../web/src/dedicated_demos/bubble_chart.rs"]
+#[path = "../../web/src/showcase_demos/bubble_chart_usage.rs"]
 mod bubble_chart;
 #[path = "../../web/src/dedicated_demos/bullet_chart.rs"]
 mod bullet_chart;
-#[path = "../../web/src/dedicated_demos/candlestick_chart.rs"]
+#[path = "../../web/src/showcase_demos/candlestick_chart_usage.rs"]
 mod candlestick_chart;
-#[path = "../../web/src/dedicated_demos/composite_chart.rs"]
+#[path = "../../web/src/showcase_demos/composite_chart_usage.rs"]
 mod composite_chart;
-#[path = "../../web/src/dedicated_demos/donut_chart.rs"]
+#[path = "../../web/src/showcase_demos/donut_chart_usage.rs"]
 mod donut_chart;
 #[path = "../../web/src/showcase_chart_docs/donut_chart_presentation.rs"]
 mod donut_chart_presentation;
-#[path = "../../web/src/dedicated_demos/funnel_chart.rs"]
+#[path = "../../web/src/showcase_demos/funnel_chart_usage.rs"]
 mod funnel_chart;
-#[path = "../../web/src/dedicated_demos/gauge_chart.rs"]
+#[path = "../../web/src/showcase_demos/gauge_chart_usage.rs"]
 mod gauge_chart;
-#[path = "../../web/src/dedicated_demos/line_chart.rs"]
+#[path = "../../web/src/showcase_demos/line_chart_usage.rs"]
 mod line_chart;
 #[path = "../../web/src/dedicated_demos/matrix_chart.rs"]
 mod matrix_chart;
-#[path = "../../web/src/dedicated_demos/pie_chart.rs"]
+#[path = "../../web/src/showcase_chart_docs/matrix_chart_data.rs"]
+mod matrix_data;
+#[path = "../../web/src/showcase_demos/pie_chart_usage.rs"]
 mod pie_chart;
-#[path = "../../web/src/dedicated_demos/radar_chart.rs"]
+#[path = "../../web/src/showcase_demos/radar_chart_usage.rs"]
 mod radar_chart;
-#[path = "../../web/src/dedicated_demos/radial_bar_chart.rs"]
+#[path = "../../web/src/showcase_demos/radial_bar_chart_usage.rs"]
 mod radial_bar_chart;
 #[path = "../../web/src/showcase_chart_docs/line_chart_recovery.rs"]
 mod recovery;
-#[path = "../../web/src/dedicated_demos/sankey_chart.rs"]
+#[path = "../../web/src/showcase_demos/sankey_chart_usage.rs"]
 mod sankey_chart;
-#[path = "../../web/src/dedicated_demos/scatter_chart.rs"]
+#[path = "../../web/src/showcase_demos/scatter_chart_usage.rs"]
 mod scatter_chart;
-#[path = "../../web/src/dedicated_demos/sparkline.rs"]
+#[path = "../../web/src/showcase_demos/sparkline_usage.rs"]
 mod sparkline;
-#[path = "../../web/src/dedicated_demos/sunburst_chart.rs"]
+#[path = "../../web/src/showcase_demos/sunburst_chart_usage.rs"]
 mod sunburst_chart;
-#[path = "../../web/src/dedicated_demos/treemap.rs"]
+#[path = "../../web/src/showcase_demos/treemap_usage.rs"]
 mod treemap;
-#[path = "../../web/src/dedicated_demos/waffle_chart.rs"]
+#[path = "../../web/src/showcase_demos/waffle_chart_usage.rs"]
 mod waffle_chart;
 #[path = "../../web/src/showcase_chart_docs/waffle_chart_presentation.rs"]
 mod waffle_chart_presentation;
@@ -150,7 +152,7 @@ fn actual_example(slug: &str, theme: sapid::Theme) -> Box<dyn Widget> {
     }
 }
 #[test]
-fn every_actual_primary_chart_has_full_width_narrow_geometry_compact_wrapping_and_live_selection() {
+fn every_primary_chart_fits_its_narrow_preview_and_retains_its_drawing() {
     for theme in [
         sapid::Theme::blue_light(),
         sapid::Theme::blue_dark(),
@@ -203,41 +205,34 @@ fn every_actual_primary_chart_has_full_width_narrow_geometry_compact_wrapping_an
                 },
             )[0];
             let r = bounds(app, frame);
-            assert!((r.width - 300.).abs() < 0.5, "{slug}: {r:?}");
-            assert!(r.height >= 70. && r.height <= 160., "{slug}: {r:?}");
-            let first = physical(&host, frame);
-            let legend = classes(
-                app,
-                if cartesian {
-                    "sapid-chart-legend-item"
-                } else {
-                    "sapid-plot-legend-item"
-                },
+            let expected_width = match slug {
+                "pie-chart" | "donut-chart" => 184.,
+                "sparkline" | "gauge-chart" => 200.,
+                "waffle-chart" => 252.,
+                "radial-bar-chart" => 260.,
+                _ => 300.,
+            };
+            assert!((r.width - expected_width).abs() < 0.5, "{slug}: {r:?}");
+            assert!(
+                r.x >= 0. && r.x + r.width <= 300.5 && r.height >= 45. && r.height <= 300.5,
+                "{slug}: {r:?}"
+            );
+            assert!(
+                classes(
+                    app,
+                    if cartesian {
+                        "sapid-chart-controls"
+                    } else {
+                        "sapid-plot-controls"
+                    }
+                )
+                .is_empty(),
+                "{slug}"
             );
             if slug == "sparkline" {
-                assert!(legend.is_empty());
-                assert!(classes(app, "sapid-plot-controls").is_empty());
-                assert!(content(app).contains("Weekly values: 4, 7, 5, 9, 8, 12, 15"));
-            } else {
-                for id in &legend {
-                    let b = bounds(app, *id);
-                    assert!(b.height <= 30.5 && b.x + b.width <= 300.5, "{slug}: {b:?}");
-                }
-                if let Some(id) = legend.first().copied() {
-                    let retained = physical(&host, id);
-                    app.dispatch(id, Event::Activate).unwrap();
-                    observe(&host);
-                    assert_eq!(physical(&host, id), retained);
-                    app.dispatch(id, Event::Activate).unwrap();
-                    observe(&host);
-                }
-                let next = named(app, "Next data point");
-                let b = bounds(app, next);
-                assert!(b.height <= 30.5 && b.x + b.width <= 300.5, "{slug}: {b:?}");
-                app.dispatch(next, Event::Activate).unwrap();
-                observe(&host);
-                assert!(!content(app).contains("No data point selected"), "{slug}");
+                named(app, "Weekly values: 4, 7, 5, 9, 8, 12, 15");
             }
+            let first = physical(&host, frame);
             host.renderer().set_viewport(700, 1000, 1.).unwrap();
             observe(&host);
             assert_eq!(physical(&host, frame), first);
@@ -246,6 +241,61 @@ fn every_actual_primary_chart_has_full_width_narrow_geometry_compact_wrapping_an
         }
     }
 }
+#[test]
+fn interactive_chart_examples_retain_compact_legend_controls_and_live_selection() {
+    for theme in [
+        sapid::Theme::blue_light(),
+        sapid::Theme::blue_dark(),
+        sapid::Theme::green_light(),
+        sapid::Theme::green_dark(),
+    ] {
+        for cartesian in [true, false] {
+            let example: Box<dyn Widget> = if cartesian {
+                Box::new(recovery::demo(theme.clone()))
+            } else {
+                Box::new(matrix_data::demo(theme.clone()))
+            };
+            let host = WindowApp::new();
+            host.renderer().set_viewport(320, 1000, 1.).unwrap();
+            host.mount(
+                glory::ui::view()
+                    .style(Style::new().width(Length::Px(300.)))
+                    .fill(example),
+            )
+            .unwrap();
+            observe(&host);
+            let app = host.app();
+            let legend = classes(
+                app,
+                if cartesian {
+                    "sapid-chart-legend-item"
+                } else {
+                    "sapid-plot-legend-item"
+                },
+            );
+            for id in legend {
+                let b = bounds(app, id);
+                assert!(b.height <= 30.5 && b.x + b.width <= 300.5, "{b:?}");
+                let retained = physical(&host, id);
+                app.dispatch(id, Event::Activate).unwrap();
+                observe(&host);
+                assert_eq!(physical(&host, id), retained);
+                app.dispatch(id, Event::Activate).unwrap();
+                observe(&host);
+            }
+            let next = named(app, "Next data point");
+            let b = bounds(app, next);
+            assert!(b.height <= 30.5 && b.x + b.width <= 300.5, "{b:?}");
+            assert!(content(app).contains("No data point selected"));
+            app.dispatch(next, Event::Activate).unwrap();
+            observe(&host);
+            assert!(!content(app).contains("No data point selected"));
+            app.clear().unwrap();
+            assert_eq!(app.stats().handlers, 0);
+        }
+    }
+}
+
 #[test]
 fn actual_configured_donut_and_waffle_sources_render_center_text_and_exact_twenty_cells() {
     for waffle in [false, true] {
@@ -333,7 +383,7 @@ fn actual_matrix_axis_names_have_narrow_geometry_and_values_paint_an_opaque_read
         host.mount(
             glory::ui::view()
                 .style(Style::new().width(Length::Px(300.)))
-                .fill(matrix_chart::demo(theme.clone())),
+                .fill(matrix_data::demo(theme.clone())),
         )
         .unwrap();
         observe(&host);

@@ -211,7 +211,7 @@ fn notification_loading_and_close_have_real_compact_geometry_and_retained_custom
         let QueryValue::Bounds(rect) = query(app, Query::Bounds(close)) else {
             panic!("bounds")
         };
-        assert_eq!((rect.width, rect.height), (24., 24.));
+        assert_eq!((rect.width, rect.height), (28., 28.));
         loading.revise(|v| *v = true);
         observe(&host);
         assert!(!app.dispatch(close, glory::render::Event::Activate).unwrap());

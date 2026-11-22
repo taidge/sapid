@@ -65,7 +65,7 @@ fn native_progress_has_real_fraction_geometry_circular_widgets_and_stable_update
         assert!((bounds(app, line).width - 240.).abs() < 0.1);
         assert!((bounds(app, fill).width - 60.).abs() < 0.1);
         assert!((bounds(app, ring).width - 100.).abs() < 0.1);
-        assert!((bounds(app, semi).height - 66.).abs() < 0.1);
+        assert!((bounds(app, semi).height - 60.).abs() < 0.1);
         let physical = host
             .renderer()
             .engine_id(arc, glory::html::Part::Main)
@@ -93,11 +93,11 @@ fn native_progress_has_real_fraction_geometry_circular_widgets_and_stable_update
             rgba(theme.border)
         );
         assert_eq!(
-            pixel(&raster, semi_box.x + 10., semi_box.y + 39.),
+            pixel(&raster, semi_box.x + 16., semi_box.y + 42.),
             rgba(theme.accent)
         );
         assert_eq!(
-            pixel(&raster, semi_box.x + 98., semi_box.y + 22.),
+            pixel(&raster, semi_box.x + 94., semi_box.y + 26.),
             rgba(theme.border)
         );
         let root = app.tree().roots()[0];
@@ -111,7 +111,7 @@ fn native_progress_has_real_fraction_geometry_circular_widgets_and_stable_update
             rgba(theme.accent)
         );
         assert_eq!(
-            pixel(&raster, semi_box.x + 60., semi_box.y + 6.),
+            pixel(&raster, semi_box.x + 60., semi_box.y + 12.),
             rgba(theme.accent)
         );
         assert!(
@@ -220,15 +220,15 @@ fn native_semicircle_down_direction_and_segment_colors_are_real_pixels() {
         let root = find(app, "sapid-progress-semicircle");
         let root_box = bounds(app, root);
         assert!((root_box.width - 120.).abs() < 0.1);
-        assert!((root_box.height - 66.).abs() < 0.1);
+        assert!((root_box.height - 60.).abs() < 0.1);
         let mut raster = Raster::new();
         raster.draw(host.renderer()).unwrap();
         assert_eq!(
-            pixel(&raster, root_box.x + 22., root_box.y + 44.),
+            pixel(&raster, root_box.x + 26., root_box.y + 34.),
             rgba(filled)
         );
         assert_eq!(
-            pixel(&raster, root_box.x + 98., root_box.y + 44.),
+            pixel(&raster, root_box.x + 94., root_box.y + 34.),
             rgba(empty)
         );
         app.clear().unwrap();

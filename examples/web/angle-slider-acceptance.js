@@ -8,7 +8,7 @@ async (hostPage) => {
    await page.goto(`http://127.0.0.1:8794/${hydration?`angle-slider-hydrate-${hue}-${scheme}.html`:`angle-slider.html?theme=${hue}&scheme=${scheme}`}`);await page.waitForFunction(()=>window.ready===true);
    const range=page.getByRole('slider',{name:'Heading',exact:true}),large=page.getByRole('slider',{name:'Large angular step'}),rtl=page.getByRole('slider',{name:'RTL angle'}),draft=page.getByRole('textbox',{name:'Angle draft'});
    assert(await range.getAttribute('aria-valuemin')==='0'&&await range.getAttribute('aria-valuemax')==='360'&&await range.getAttribute('aria-valuetext')==='25 degrees',`${label}: degree domain/text missing`);
-   assert(await range.locator('svg').count()===3,`${label}: actual circular graphics missing`);
+   assert(await range.locator('svg.sapid-angle-slider-ring, .sapid-angle-slider-ring svg').count()===1&&await range.locator('svg.sapid-angle-slider-hand, .sapid-angle-slider-hand svg').count()===1,`${label}: actual circular graphics missing`);
    await draft.fill('Stable angular draft');await draft.evaluate(e=>{window.angleDraft=e;e.setSelectionRange(2,8,'backward')});
    await page.getByText('Heading',{exact:true}).click();await settle(page);assert(await range.evaluate(e=>e===document.activeElement),`${label}: Field label did not focus`);
    await page.keyboard.press('End');await settle(page);assert(await number(range)===360,`${label}: End lost distinct endpoint`);await page.keyboard.press('ArrowRight');await settle(page);assert(await number(range)===1,`${label}: endpoint did not wrap`);await page.keyboard.press('Home');await settle(page);await page.keyboard.press('ArrowLeft');await settle(page);assert(await number(range)===359,`${label}: negative wrap failed`);

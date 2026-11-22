@@ -352,8 +352,15 @@ fn native_picker_four_themes_has_real_plane_pixels_two_axis_mapping_focus_and_st
         host.mount(sapid::color_picker("small").plane_size(128.))
             .unwrap();
         app.settle(16).unwrap();
-        for id in nodes(app, "sapid-slider") {
-            assert!((bounds(app, id).width - 128.).abs() < 1.);
+        let plane = bounds(app, nodes(app, "sapid-color-plane")[0]);
+        let preview = bounds(app, nodes(app, "sapid-color-picker-preview")[0]);
+        assert_eq!(plane.width, 128.);
+        let sliders = nodes(app, "sapid-slider");
+        assert_eq!(sliders.len(), 2);
+        for id in sliders {
+            let slider = bounds(app, id);
+            assert!((slider.width + 10. + preview.width - plane.width).abs() < 1.);
+            assert!((slider.x + slider.width + 10. - preview.x).abs() < 1.);
         }
         app.clear().unwrap();
     }

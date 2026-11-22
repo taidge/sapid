@@ -4,7 +4,7 @@ use glory::{
     render::{NodeId, Props, Query, QueryValue, Role},
 };
 use std::{cell::RefCell, rc::Rc};
-#[path = "../../web/src/dedicated_demos/table_of_contents.rs"]
+#[path = "../../web/src/showcase_demos/table_of_contents_usage.rs"]
 mod article;
 #[path = "../../web/src/dedicated_demos/tree.rs"]
 mod files;
@@ -63,7 +63,7 @@ fn article_links_scroll_the_owned_document_and_retain_live_heading_links_in_four
                     .view()
                     .name
                     .as_deref()
-                    == Some("Getting started article")
+                    == Some("Component documentation")
             })
             .unwrap();
         let links = ids
@@ -76,8 +76,8 @@ fn article_links_scroll_the_owned_document_and_retain_live_heading_links_in_four
             })
             .copied()
             .collect::<Vec<_>>();
-        assert_eq!(links.len(), 4);
-        let link=*links.iter().find(|id|matches!(app.tree().node(**id).unwrap().descriptor.view().props,Props::Link(p) if p.label=="Share with your team")).unwrap();
+        assert_eq!(links.len(), 8);
+        let link=*links.iter().find(|id|matches!(app.tree().node(**id).unwrap().descriptor.view().props,Props::Link(p) if p.label=="Reinitialize")).unwrap();
         let physical = host
             .renderer()
             .engine_id(link, glory::html::Part::Main)
