@@ -2,7 +2,15 @@ async (hostPage) => {
   const browser = hostPage.context().browser();
   const context = await browser.newContext({viewport:{width:1440,height:1000}});
   const base = process.env.SAPID_SHOWCASE_BASE || 'http://127.0.0.1:8795';
+  const expectedSlugs = require('./showcase-browser-env.cjs').showcaseSlugs().sort();
+  const { deepStrictEqual } = require('node:assert/strict');
   const reports = [], errors = [];
+  const catalogRoutes = async page => {
+    const links = await page.locator('.site-nav-link').evaluateAll(elements => elements.map(e => e.getAttribute('href')));
+    const routes = links.map(href => ({ href, id: new URL(href, base).searchParams.get('widget') }));
+    deepStrictEqual(routes.map(route => route.id).sort(), expectedSlugs, 'navigation must match the showcase catalogue');
+    return routes;
+  };
   let activePage;
   const assert = (value, message) => { if (!value) throw Error(message); };
   const setup = page => {
@@ -28,15 +36,13 @@ async (hostPage) => {
     reports.push({suite:'showcase-rust-home',status:'passed'});
 
     await go(p, 'showcase.html?widget=button');
-    const routes = await p.locator('.site-nav-link').evaluateAll(elements => elements.map(e => ({href:e.getAttribute('href'),label:e.textContent.trim()})));
-    assert(routes.length === 181 && new Set(routes.map(r => new URL(r.href, base).searchParams.get('widget'))).size === 181, '181 unique canonical navigation links');
+    const routes = await catalogRoutes(p);
     const smokeRoutes = ['button', 'text-input', 'select', 'accordion', 'dialog', 'date-picker', 'line-chart', 'schedule'];
     const visitedRoutes = process.env.SAPID_SHOWCASE_MODE === 'quick'
-      ? routes.filter(route => smokeRoutes.includes(new URL(route.href, base).searchParams.get('widget'))) : routes;
-    assert(visitedRoutes.length === (process.env.SAPID_SHOWCASE_MODE === 'quick' ? smokeRoutes.length : 181), 'expected navigation coverage');
-    for (const route of visitedRoutes) {
-      const id = new URL(route.href, base).searchParams.get('widget');
-      const anchor = p.locator(`.site-nav-link[href="${route.href}"]`);
+      ? routes.filter(route => smokeRoutes.includes(route.id)) : routes;
+    assert(visitedRoutes.length === (process.env.SAPID_SHOWCASE_MODE === 'quick' ? smokeRoutes.length : expectedSlugs.length), 'expected navigation coverage');
+    for (const { href, id } of visitedRoutes) {
+      const anchor = p.locator(`.site-nav-link[href="${href}"]`);
       await anchor.click();
       await p.waitForFunction(id=>document.documentElement.getAttribute('data-sapid-widget')===id,id);
       await p.locator('h1.site-title').waitFor();
@@ -57,7 +63,8 @@ async (hostPage) => {
     await p.locator('.site-nav-empty').first().waitFor();
     assert(await p.locator('.site-nav-link').count() === 0, 'empty search state');
     await search.fill('');
-    await p.waitForFunction(() => document.querySelectorAll('.site-nav-link').length === 181);
+    await p.waitForFunction(count => document.querySelectorAll('.site-nav-link').length === count, expectedSlugs.length);
+    await catalogRoutes(p);
     reports.push({suite:'showcase-live-search',status:'passed'});
 
     const demo = p.locator('.site-preview .site-demo').first();
@@ -151,7 +158,7 @@ async (hostPage) => {
     for (const hue of ['blue','green']) for (const scheme of ['light','dark']) for (const name of ['home','button','textfield','dates','charts']) {
       await go(p, `ssr-${name}-${hue}-${scheme}.html`);
       assert(await p.locator(`.sapid-site.site-${scheme}`).count() === 1, `SSR ${name}: adopted theme`);
-      if (name !== 'home') assert(await p.locator('.site-nav-link').count() === 181, `SSR ${name}: full navigation`);
+      if (name !== 'home') await catalogRoutes(p);
       reports.push({suite:`showcase-ssr-${name}-${hue}-${scheme}`,status:'passed'});
     }
     await p.goto(`${base}/ssr-textfield-blue-light.html?manual`);
