@@ -20,10 +20,20 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
       await page.waitForFunction(() => window.ready === true && document.documentElement.getAttribute('data-sapid-widget') === 'heatmap'); await tick();
       const primary = page.locator('.site-preview .site-demo').first();
       const grid = primary.getByRole('grid', { name: 'Calendar contributions', exact: true });
-      assert.equal(await grid.getByRole('row').count(), 7); assert.equal(await grid.getByRole('gridcell').count(), 91);
-      assert.equal(await page.locator('.site-component-detail').count(), 4);
+      assert.equal(await grid.getByRole('row').count(), 7); assert.equal(await grid.getByRole('gridcell').count(), 366);
+      assert.equal(await page.locator('.site-component-detail').count(), 11);
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
-      assert(await primary.locator('.sapid-heatmap-scroll').evaluate(e => e.scrollWidth <= e.clientWidth + 1));
+      const scroll = primary.locator('.sapid-heatmap-scroll');
+      assert.equal(await scroll.evaluate(e => getComputedStyle(e).overflowX), 'auto');
+      if (width === 390) {
+        const distance = await scroll.evaluate(e => {
+          e.scrollLeft = e.scrollWidth;
+          const distance = e.scrollLeft;
+          e.scrollLeft = 0;
+          return distance;
+        });
+        assert(distance > 0, 'the full year can be scrolled within the phone preview');
+      }
       assert(await primary.locator('.sapid-heatmap-cell').evaluateAll(cells => cells.every(cell => {
         const button = cell.querySelector('button');
         return !button || Math.abs(button.getBoundingClientRect().top - cell.getBoundingClientRect().top) < 1;

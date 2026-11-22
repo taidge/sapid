@@ -14,7 +14,7 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
   try{
    await page.setViewportSize({width,height:1000});await page.goto(`${base}/showcase.html?widget=${slug}&theme=${theme}&scheme=${scheme}`);await page.waitForFunction(()=>window.ready===true,undefined,{timeout:20000});
    report.asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(report.asset);
-   assert.equal(await page.locator('.site-component-detail').count(),{checkbox:5,radio:5,chip:2,fieldset:2}[slug]);
+   assert.equal(await page.locator('.site-component-detail').count(),{checkbox:22,radio:13,chip:4,fieldset:2}[slug]);
    const primary=page.locator('.site-preview .site-demo').first();
    if(slug==='checkbox'){
     const control=primary.getByRole('checkbox',{name:'I agree to sell my privacy',exact:true});await primary.getByText('I agree to sell my privacy',{exact:true}).click();assert(!(await control.isChecked()));await control.focus();await control.press('Space');assert(await control.isChecked());

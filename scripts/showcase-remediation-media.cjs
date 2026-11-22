@@ -37,7 +37,7 @@ const {matrix, chromium, base, outputPath, writeReport, tempDir } = require('./s
         const primary = page.locator('.site-preview .site-demo').first();
         const overflow = await primary.evaluate(element => ({ local: element.scrollWidth - element.clientWidth, page: document.documentElement.scrollWidth - innerWidth }));
         assert(overflow.local <= 1 && overflow.page <= 1, `${key}: ${JSON.stringify(overflow)}`);
-        assert.equal(await page.locator('.site-component-detail').count(), {'floating-window':4,carousel:18,dropzone:10}[slug]);
+        assert.equal(await page.locator('.site-component-detail').count(), {'floating-window':7,carousel:18,dropzone:10}[slug]);
         if (slug === 'floating-window') {
           assert.equal(await page.getByRole('dialog').count(), 0, 'windows start closed');
           await primary.getByRole('button', { name: 'Open notes', exact: true }).click(); await tick();
@@ -108,7 +108,7 @@ const {matrix, chromium, base, outputPath, writeReport, tempDir } = require('./s
           const inactiveDot = carousel.locator('.sapid-carousel-indicator[aria-pressed="false"] .sapid-carousel-indicator-dot').first();
           assert.equal(await activeDot.evaluate(e=>getComputedStyle(e).opacity), '1');
           assert(Number(await inactiveDot.evaluate(e=>getComputedStyle(e).opacity)) < 1);
-          assert.equal(await activeDot.evaluate(e=>getComputedStyle(e).height), '4px');
+          assert.equal(await activeDot.evaluate(e=>getComputedStyle(e).height), '5px');
           const geometry = detail('Control size, direction and visibility');
           const rtl = geometry.getByRole('group', { name: 'RTL cards', exact: true });
           assert((await rtl.getByRole('button', { name: 'Previous slide', exact: true }).boundingBox()).x > (await rtl.getByRole('button', { name: 'Next slide', exact: true }).boundingBox()).x);

@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict'),fs=require('node:fs');
-const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
+const {assertDocHeadingWeights,matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
 const counts={'code-highlight':12,'json-viewer':14,'notifications-system':13,spotlight:7,lightbox:15,'navigation-progress':4,'modals-manager':8};
 (async()=>{
  const browser=await chromium.launch(),page=await browser.newPage();page.setDefaultTimeout(7000);
@@ -19,7 +19,7 @@ const counts={'code-highlight':12,'json-viewer':14,'notifications-system':13,spo
   try{
    await page.setViewportSize({width,height:1100});await page.goto(base+'/showcase.html?widget='+slug+'&theme='+theme+'&scheme='+scheme);await page.waitForFunction(slug=>window.ready===true&&document.documentElement.getAttribute('data-sapid-widget')===slug,slug,{timeout:30000});await tick();
    const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(report.asset,asset);report.asset=asset;
-   assert.equal(await page.locator('.site-component-detail').count(),counts[slug]);assert(await page.locator('.site-title,.site-section-title').evaluateAll(es=>es.every(e=>getComputedStyle(e).fontWeight==='400')));
+   assert.equal(await page.locator('.site-component-detail').count(),counts[slug]);await assertDocHeadingWeights(page);
    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));const primary=page.locator('.site-preview .site-demo').first();
    if(slug==='code-highlight'){
     assert((await primary.locator('.sapid-code-source').textContent()).includes('pub fn welcome'));

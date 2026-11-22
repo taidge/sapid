@@ -23,7 +23,7 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
         await tick();
         report.asset = await page.locator('link[rel=stylesheet]').evaluateAll(elements => elements.map(element => element.href.split('/').find(part => part.startsWith('assets-'))).find(Boolean));
         const primary = page.locator('.site-preview .site-demo').first();
-        assert.equal(await page.locator('.site-component-detail').count(), slug === 'menu' ? 9 : 10);
+        assert.equal(await page.locator('.site-component-detail').count(), slug === 'menu' ? 17 : 10);
         assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${key}: page overflow`);
         if (slug === 'menu') {
           const trigger = primary.getByRole('button', { name: 'Toggle menu', exact: true });

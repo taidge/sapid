@@ -12,7 +12,7 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
   try{
    await page.setViewportSize({width,height:1000});await page.goto(`${base}/showcase.html?widget=${slug}&theme=${theme}&scheme=${scheme}`);await page.waitForFunction(()=>window.ready===true,undefined,{timeout:20000});await tick();
    const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;
-   assert.equal(await page.locator('.site-component-detail').count(),9);
+   assert.equal(await page.locator('.site-component-detail').count(),slug === 'json-input' ? 9 : 15);
    const primary=page.locator('.site-preview .site-demo').first();
    if(slug==='json-input'){
     const input=primary.getByRole('textbox',{name:'Your package.json',exact:true});await input.evaluate(e=>window.jsonPrimary=e);await input.fill('{"z":2}');await input.press('Tab');await tick();assert.equal(await input.inputValue(),'{\n  "z": 2\n}');assert(await input.evaluate(e=>e===window.jsonPrimary));assert.equal(await primary.getByRole('button',{name:'Format JSON',exact:true}).count(),0);

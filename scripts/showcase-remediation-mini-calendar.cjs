@@ -25,7 +25,7 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
       assert.equal(await grid.getByRole('row').count(), 1);
       assert.equal(await grid.getByRole('gridcell').count(), 6);
       assert.equal(await grid.getByRole('button').count(), 6);
-      assert.equal(await page.locator('.site-component-detail').count(), 4);
+      assert.equal(await page.locator('.site-component-detail').count(), 7);
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
       assert(await strip.evaluate(e => e.scrollWidth <= e.clientWidth + 1), 'six dates fit the preview');
       const dates = grid.getByRole('button');

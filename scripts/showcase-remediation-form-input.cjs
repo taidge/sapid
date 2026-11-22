@@ -13,7 +13,7 @@ async function checkNativeUsage(primary, width, tick, key) {
  const canvas = await preview.boundingBox();
  assert(Math.abs(field.x + field.width / 2 - canvas.x - canvas.width / 2) <= 1);
  assert(Math.abs(field.y + field.height / 2 - canvas.y - canvas.height / 2) <= 1);
- assert(Math.abs(field.width - Math.min(340, canvas.width - 40)) <= 1);
+ assert(Math.abs(field.width - Math.min(340, canvas.width - 32)) <= 1);
  const variants = await panel.locator('.sapid-radio-group-items').boundingBox();
  const labelEditor = await panel.getByRole('textbox', {name:'Label', exact:true}).boundingBox();
  assert(Math.abs(variants.x - labelEditor.x) <= 1 && Math.abs(variants.width - labelEditor.width) <= 1);
@@ -100,7 +100,7 @@ async function checkNativeUsage(primary, width, tick, key) {
   const key=`${slug}-${theme}-${scheme}-${width}`;
   try{
    await page.setViewportSize({width,height:1000});await page.goto(`${base}/showcase.html?widget=${slug}&theme=${theme}&scheme=${scheme}`);await page.waitForFunction(()=>window.ready===true,undefined,{timeout:20000});await tick();
-   const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;assert.equal(await page.locator('.site-component-detail').count(),{'mask-input':7,'native-select':12,'file-input':8}[slug]);
+   const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;assert.equal(await page.locator('.site-component-detail').count(),{'mask-input':10,'native-select':13,'file-input':10}[slug]);
    const primary=page.locator('.site-preview .site-demo').first();let captured=false;
    if(slug==='mask-input'){
     const input=primary.getByRole('textbox',{name:'Input label',exact:true});assert.equal(await input.getAttribute('placeholder'),'(___) ___-____');await input.evaluate(e=>window.maskEditor=e);await input.fill('5551234567');await tick();assert.equal(await input.inputValue(),'(555) 123-4567');assert(await input.evaluate(e=>e===window.maskEditor));

@@ -18,8 +18,8 @@ const {matrix,chromium, base, outputPath, writeReport} = require('./showcase-bro
    await page.goto(`${base}/showcase.html?widget=switch&theme=${theme}&scheme=${scheme}`);
    await page.waitForFunction(()=>window.ready===true,undefined,{timeout:20000});
    report.asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]); assert(report.asset);
-   assert.equal(await page.locator('.site-component-detail').count(),6);
-   const primary=page.locator('.site-preview .site-playground-preview'), control=primary.getByRole('switch',{name:'I agree to sell my privacy',exact:true});
+   assert.equal(await page.locator('.site-component-detail').count(),12);
+   const primary=page.locator('.site-doc-content > .site-preview .site-playground-preview'), control=primary.getByRole('switch',{name:'I agree to sell my privacy',exact:true});
    assert(await control.isChecked()); await control.evaluate(e=>window.switchInput=e);
    const track=primary.locator('.sapid-switch-track'), thumb=primary.locator('.sapid-switch-thumb');
    const tr=await track.boundingBox(), on=await thumb.boundingBox(); assert.equal(tr.width,38); assert.equal(tr.height,20); assert.equal(on.width,14); assert(on.x>tr.x+10);
@@ -59,7 +59,7 @@ const {matrix,chromium, base, outputPath, writeReport} = require('./showcase-bro
   try {
    await mobile.goto(`${base}/showcase.html?widget=switch&theme=${theme}&scheme=${scheme}`);
    await mobile.waitForFunction(()=>window.ready===true,undefined,{timeout:20000});
-   const primary=mobile.locator('.site-preview .site-playground-preview'), input=primary.getByRole('switch',{name:'I agree to sell my privacy',exact:true});
+   const primary=mobile.locator('.site-doc-content > .site-preview .site-playground-preview'), input=primary.getByRole('switch',{name:'I agree to sell my privacy',exact:true});
    await primary.scrollIntoViewIfNeeded(); const r=await primary.locator('.sapid-switch-track').boundingBox(); assert(r);
    await mobile.touchscreen.tap(r.x+r.width-4,r.y+r.height/2); await mobile.waitForTimeout(120); assert(!(await input.isChecked()));
    const label=await primary.locator('.sapid-switch-label').boundingBox(); await mobile.touchscreen.tap(label.x+label.width/2,label.y+label.height/2); await mobile.waitForTimeout(120); assert(await input.isChecked());

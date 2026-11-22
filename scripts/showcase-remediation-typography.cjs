@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict'),fs=require('node:fs');
-const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
+const {assertDocHeadingWeights,matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
 (async()=>{
  const browser=await chromium.launch(),context=await browser.newContext(),page=await context.newPage();page.setDefaultTimeout(9000);
  const report={browser:browser.version(),pages:[],errors:[]};page.on('pageerror',e=>report.errors.push(e.message));page.on('console',m=>{if(m.type()==='error')report.errors.push(m.text());});
@@ -16,7 +16,7 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
   try{
    await page.setViewportSize({width,height:1100});await page.goto(`${base}/showcase.html?widget=${slug}&theme=${theme}&scheme=${scheme}`);await page.waitForFunction(()=>window.ready===true,undefined,{timeout:30000});await tick();
    const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;
-   assert.equal(await page.locator('.site-component-detail').count(),counts[slug]);assert(await page.locator('.site-title,.site-section-title').evaluateAll(es=>es.every(e=>getComputedStyle(e).fontWeight==='400')));
+   assert.equal(await page.locator('.site-component-detail').count(),counts[slug]);await assertDocHeadingWeights(page);
    const primary=page.locator('.site-preview .site-demo').first();
    if(slug==='blockquote'){
     const quote=primary.locator('blockquote'),badge=quote.locator('.sapid-blockquote-icon');
@@ -38,7 +38,12 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
    }else if(slug==='code'){
     assert.equal(await primary.locator('code').count(),1);assert.equal(await primary.locator('code').textContent(),'count.get()');const code=detail('code-block').locator('.code-doc-block');assert((await code.textContent()).includes('\ncount.revise'));assert.equal(await code.evaluate(e=>getComputedStyle(e).whiteSpace),'pre');assert(await code.evaluate(e=>e.scrollWidth>e.clientWidth));await code.evaluate(e=>e.scrollLeft=e.scrollWidth);assert(await code.evaluate(e=>e.scrollLeft>0));assert.equal(await detail('code-colors').getByRole('button').count(),0);assert(await detail('code-colors').getByText('<button>Save & close</button>',{exact:true}).isVisible());assert.equal(await detail('code-colors').getByRole('link',{name:'Explore CodeHighlight',exact:true}).getAttribute('href'),'?widget=code-highlight');await shot(detail('code-block'),`block-${key}`);
    }else if(slug==='highlight'){
-    assert.deepEqual(await primary.locator('mark').allTextContents(),['design','important','design','design']);assert.deepEqual(await detail('highlight-multiple').locator('mark').allTextContents(),['system','design work','design','system']);assert.deepEqual(await detail('highlight-case').locator('mark').allTextContents(),['This','THIS','this','this']);assert.deepEqual(await detail('highlight-literals').locator('mark').allTextContents(),['<Button>','.*','[label]']);assert.equal(await detail('highlight-literals').getByRole('button').count(),0);assert.equal(await detail('highlight-empty').locator('.sapid-stack > div').first().locator('mark').count(),0);
+    const marks = primary.locator('mark');
+    assert.deepEqual(await marks.allTextContents(), ['This', 'THIS', 'this']);
+    await primary.getByRole('switch', {name:'Ignore ASCII case', exact:true}).uncheck();
+    await tick();
+    assert.deepEqual(await marks.allTextContents(), ['this']);
+    assert.deepEqual(await detail('highlight-multiple').locator('mark').allTextContents(),['system','design work','design','system']);assert.deepEqual(await detail('highlight-case').locator('mark').allTextContents(),['This','THIS','this','this']);assert.deepEqual(await detail('highlight-literals').locator('mark').allTextContents(),['<Button>','.*','[label]']);assert.equal(await detail('highlight-literals').getByRole('button').count(),0);assert.equal(await detail('highlight-empty').locator('.sapid-stack > div').first().locator('mark').count(),0);
    }else if(slug==='list'){
     assert.equal(await primary.locator('.site-playground-preview ul > li').count(),5);assert.equal(await primary.locator('.site-playground-preview').getByRole('checkbox').count(),0);assert.equal(await primary.getByRole('grid').count(),0);const order=detail('list-order');assert.equal(await order.locator('ul > li').count(),3);assert.equal(await order.locator('ol > li').count(),3);const nested=detail('list-nested');assert.equal(await nested.locator('ol > li').count(),3);assert.equal(await nested.locator('ol > li > ul > li').count(),3);assert.equal(await detail('list-icons').locator('li svg').count(),3);assert.equal(await detail('list-icons').getByRole('button').count(),0);await shot(detail('list-nested'),`nested-${key}`);
    }else if(slug==='mark'){

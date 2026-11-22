@@ -35,9 +35,9 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
         if (slug === 'pin-input') {
           const editor = primary.getByRole('textbox', { name: 'Verification code', exact: true });
           await editor.evaluate(element => { window.pinIdentity = element; });
-          await editor.fill('123456'); await tick();
+          await editor.fill('a234'); await tick();
           assert.equal(await editor.evaluate(element => getComputedStyle(element).outlineStyle), 'none');
-          assert(await primary.getByText('Code ready to verify', { exact: true }).isVisible());
+          assert((await primary.ariaSnapshot()).includes('text: Code ready to verify'));
           const aligned = await editor.evaluate(element => {
             const cells = [...element.parentElement.querySelectorAll('.sapid-pin-cell')].map(cell => cell.getBoundingClientRect());
             const style = getComputedStyle(element), probe = document.createElement('span');
@@ -45,10 +45,10 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
             probe.textContent = '0'; document.body.append(probe);
             const glyph = probe.getBoundingClientRect().width; probe.remove();
             const pitch = glyph + parseFloat(style.letterSpacing);
-            return cells.length === 6 && cells.every((cell, index) => index === 0 || Math.abs(cell.x - cells[0].x - pitch * index) < 0.2) && Math.abs(element.scrollLeft) < 1;
+            return cells.length === 4 && cells.every((cell, index) => index === 0 || Math.abs(cell.x - cells[0].x - pitch * index) < 0.2) && Math.abs(element.scrollLeft) < 1;
           });
           assert(aligned, `${key}: glyph/cell pitch and final native caret space`);
-          await editor.fill('12x'); await tick(); assert.equal(await editor.inputValue(), '123456');
+          await editor.fill('12!'); await tick(); assert.equal(await editor.inputValue(), 'a234');
           assert(await editor.evaluate(element => element === window.pinIdentity));
           const masking = detail('Alphanumeric and reactive masking');
           const protectedEditor = masking.locator('.sapid-pin-editor').last();
