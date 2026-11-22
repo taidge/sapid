@@ -383,3 +383,83 @@ fn compact_navigation_can_be_omitted_without_losing_direct_selection_table_or_le
     app.clear().unwrap();
     assert_eq!(app.stats().nodes, 0);
 }
+
+#[test]
+fn configurable_curves_keep_missing_samples_and_support_the_full_point_budget() {
+    use glory::render::PathCommand;
+    let palette = ChartTheme::from_theme(&sapid::Theme::blue_light());
+    let mut data = ChartData {
+        categories: (0..MAX_CHART_POINTS)
+            .map(|i| ChartCategory::new(format!("c{i}"), format!("Sample {i}")))
+            .collect(),
+        series: vec![ChartSeries::new(
+            "sample",
+            "Sample",
+            (0..MAX_CHART_POINTS).map(|i| Some((i % 7) as f64)),
+        )],
+    };
+    data.series[0].values[3] = None;
+    for curve in [
+        ChartCurve::Linear,
+        ChartCurve::Monotone,
+        ChartCurve::Natural,
+        ChartCurve::Bump,
+        ChartCurve::Step,
+        ChartCurve::StepBefore,
+        ChartCurve::StepAfter,
+    ] {
+        for kind in [CartesianKind::Area, CartesianKind::Line] {
+            let mut options = CartesianOptions {
+                kind,
+                presentation: ChartPresentation {
+                    curve,
+                    edge_categories: true,
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+            let scene =
+                CartesianScene::build(&data, ChartFrame::default(), &options, &palette).unwrap();
+            assert_eq!(scene.locations.len(), MAX_CHART_POINTS - 1);
+            assert!(scene.to_svg().unwrap().starts_with("<svg"));
+            assert!(
+                scene
+                    .paths
+                    .iter()
+                    .all(|path| path.drawing.commands.len() <= 256)
+            );
+            let middle = (scene.locations[2].x + scene.locations[3].x) / 2.;
+            let crosses_gap = |scene: &CartesianScene| {
+                scene
+                    .paths
+                    .iter()
+                    .filter(|p| p.series.is_some() && p.drawing.stroke.is_some())
+                    .any(|path| {
+                        let mut previous = None;
+                        for command in &path.drawing.commands {
+                            let next = match command {
+                                PathCommand::Move(p) => {
+                                    previous = Some(p.x);
+                                    continue;
+                                }
+                                PathCommand::Line(p) => p.x,
+                                PathCommand::Cubic { end, .. } => end.x,
+                                PathCommand::Close => continue,
+                            };
+                            if previous.is_some_and(|x| x < middle && next >= middle) {
+                                return true;
+                            }
+                            previous = Some(next);
+                        }
+                        false
+                    })
+            };
+            options.presentation.connect_nulls = true;
+            let joined =
+                CartesianScene::build(&data, ChartFrame::default(), &options, &palette).unwrap();
+            assert!(!crosses_gap(&scene), "{kind:?} {curve:?}");
+            assert!(crosses_gap(&joined), "{kind:?} {curve:?}");
+            assert_eq!(scene.locations, joined.locations);
+        }
+    }
+}

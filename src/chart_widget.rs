@@ -21,6 +21,30 @@ pub struct ChartPointDetails {
     pub category_label: String,
     pub value: f64,
 }
+fn chart_number(value: f64, grouped: bool) -> String {
+    let number = value.to_string();
+    if !grouped {
+        return number;
+    }
+    let unsigned = number.strip_prefix('-').unwrap_or(&number);
+    let (whole, fraction) = unsigned.split_once('.').unwrap_or((unsigned, ""));
+    let mut result = String::new();
+    if number.starts_with('-') {
+        result.push('-');
+    }
+    for (index, digit) in whole.bytes().enumerate() {
+        if index != 0 && (whole.len() - index).is_multiple_of(3) {
+            result.push(',');
+        }
+        result.push(char::from(digit));
+    }
+    if !fraction.is_empty() {
+        result.push('.');
+        result.push_str(fraction);
+    }
+    result
+}
+
 impl ChartPointDetails {
     pub fn text(&self) -> String {
         format!(
@@ -38,6 +62,14 @@ struct Model {
     palette: ChartTheme,
 }
 impl Model {
+    fn point_text(&self, point: &ChartPointDetails) -> String {
+        format!(
+            "{} · {}: {}",
+            point.category_label,
+            point.series_label,
+            chart_number(point.value, self.options.presentation.group_digits)
+        )
+    }
     fn point(&self, key: &ChartSelection) -> Option<ChartPointDetails> {
         let series = self.data.series.iter().position(|s| s.key == key.series)?;
         let category = self
@@ -89,13 +121,14 @@ pub struct Chart {
     default_options: CartesianOptions,
     kind: Option<CartesianKind>,
     frame: ChartFrame,
-    palette: Option<ChartTheme>,
+    palette: Option<Vary<ChartTheme>>,
     selection: Option<Vary<Option<ChartSelection>>>,
     changed: Option<Box<dyn FnMut(CartesianOptions)>>,
     selected: Option<Box<dyn FnMut(Option<ChartSelection>)>>,
     rejected: Option<Box<dyn FnMut(glory::ui::Error)>>,
     show_table: bool,
     show_legend: bool,
+    legend_above_plot: bool,
     show_navigation: bool,
     pointer_selection: bool,
 }
@@ -118,6 +151,7 @@ pub fn chart(key: impl Into<String>) -> Chart {
         rejected: None,
         show_table: true,
         show_legend: true,
+        legend_above_plot: false,
         show_navigation: true,
         pointer_selection: false,
     }
@@ -156,8 +190,8 @@ impl Chart {
         self.frame = value;
         self
     }
-    pub fn chart_theme(mut self, value: ChartTheme) -> Self {
-        self.palette = Some(value);
+    pub fn chart_theme(mut self, value: impl Into<Vary<ChartTheme>>) -> Self {
+        self.palette = Some(value.into());
         self
     }
     pub fn selection(mut self, value: impl Into<Vary<Option<ChartSelection>>>) -> Self {
@@ -194,6 +228,11 @@ impl Chart {
     }
     /// Opt into host pointer boundary observations. Click and keyboard point
     /// controls work independently; native hosts currently reject this interest.
+    /// Place the legend before the plot when it is enabled.
+    pub fn legend_above_plot(mut self, value: bool) -> Self {
+        self.legend_above_plot = value;
+        self
+    }
     /// Show sequential point controls and their current-value readout (default true).
     /// A compact summary may disable this when equivalent values are supplied nearby.
     /// This does not disable plot activation, selection callbacks or the data table.
@@ -311,7 +350,7 @@ impl Widget for Chart {
         let palette = self
             .palette
             .clone()
-            .unwrap_or_else(|| ChartTheme::from_theme(&self.common.theme));
+            .unwrap_or_else(|| ChartTheme::from_theme(&self.common.theme).into());
         let internal_options = scope.cage(bounded_options(&self.default_options)?);
         let source = self
             .options
@@ -323,6 +362,7 @@ impl Widget for Chart {
             let data = self.data.clone();
             let options = source;
             move || -> Result<Rc<Model>> {
+                let palette = palette.try_get()?;
                 let mut options = options.try_with(bounded_options)??;
                 if let Some(kind) = kind {
                     options.kind = kind;
@@ -436,14 +476,20 @@ impl Widget for Chart {
         }
         widget.show_in(scope)?;
         let area = scope.child_in(root.get().ok_or(glory::ui::Error::Gone)?)?;
-        build_plot(&area, &state, frame, self.pointer_selection)?;
-        if self.show_legend {
+        let legend = || {
             build_legend(
                 &area,
                 &state,
                 self.common.theme.clone(),
                 self.common.unstyled,
-            )?;
+            )
+        };
+        if self.show_legend && self.legend_above_plot {
+            legend()?;
+        }
+        build_plot(&area, &state, frame, self.pointer_selection)?;
+        if self.show_legend && !self.legend_above_plot {
+            legend()?;
         }
         if self.show_navigation {
             let controls = area.cage(None);
@@ -493,14 +539,20 @@ impl Widget for Chart {
                 .show_in(&control_scope)?;
             area.retain(control_scope)?;
             let details = area.bond(move || {
-                model.with(|m| selection.with(|s| s.as_ref().and_then(|s| m.point(s))))
+                model.with(|m| {
+                    selection.with(|s| {
+                        s.as_ref()
+                            .and_then(|s| m.point(s))
+                            .map(|p| m.point_text(&p))
+                    })
+                })
             });
             glory::ui::text()
                 .class("sapid-chart-point-detail")
                 .content(area.bond(move || {
                     details
                         .get()
-                        .map_or_else(|| "No data point selected".into(), |p| p.text())
+                        .unwrap_or_else(|| "No data point selected".into())
                 }))
                 .show_in(&area)?;
         }
@@ -559,11 +611,36 @@ fn build_plot(scope: &Scope, state: &State, frame: ChartFrame, pointer_selection
         .show_in(scope)?;
     let plot = scope.child_in(reference.get().ok_or(glory::ui::Error::Gone)?)?;
     let model = state.model;
+    for (horizontal, class) in [
+        (true, "sapid-chart-x-title"),
+        (false, "sapid-chart-y-title"),
+    ] {
+        glory::ui::text()
+            .class(class)
+            .content(plot.bond(move || {
+                model.with(|m| {
+                    if horizontal && m.options.presentation.x_axis {
+                        m.options.x_axis_title.clone().unwrap_or_default()
+                    } else if !horizontal && m.options.presentation.y_axis {
+                        m.options.y_axis_title.clone().unwrap_or_default()
+                    } else {
+                        String::new()
+                    }
+                })
+            }))
+            .show_in(&plot)?;
+    }
     for index in 0..5 {
         let style = plot.bond(move || {
             model.with(|m| {
                 Style {
                     font_size: Some(11.),
+                    color: m.options.presentation.axis_text_color,
+                    display: Some(if m.options.presentation.y_axis {
+                        Display::Block
+                    } else {
+                        Display::None
+                    }),
                     ..Style::new()
                 }
                 .position(Position::Absolute)
@@ -571,7 +648,11 @@ fn build_plot(scope: &Scope, state: &State, frame: ChartFrame, pointer_selection
                 .top(Length::Percent(
                     m.scene.ticks[index].y / frame.height * 100.,
                 ))
-                .width(Length::Px(48.))
+                .width(Length::Percent(m.scene.ticks[index].x / frame.width * 100.))
+                .margin(Edges {
+                    top: -8.,
+                    ..Edges::all(0.)
+                })
                 .height(Length::Px(20.))
                 .overflow_x(Overflow::Hidden)
             })
@@ -579,7 +660,14 @@ fn build_plot(scope: &Scope, state: &State, frame: ChartFrame, pointer_selection
         glory::ui::text()
             .class("sapid-chart-axis-tick")
             .style(style)
-            .content(plot.bond(move || model.with(|m| m.scene.ticks[index].value.to_string())))
+            .content(plot.bond(move || {
+                model.with(|m| {
+                    chart_number(
+                        m.scene.ticks[index].value,
+                        m.options.presentation.group_digits,
+                    )
+                })
+            }))
             .show_in(&plot)?;
     }
     let labels = plot.bond(move || model.with(|m| (0..m.scene.labels.len()).collect::<Vec<_>>()));
@@ -594,6 +682,12 @@ fn build_plot(scope: &Scope, state: &State, frame: ChartFrame, pointer_selection
                         let label = &m.scene.labels[index];
                         Style {
                             font_size: Some(11.),
+                            color: m.options.presentation.axis_text_color,
+                            display: Some(if m.options.presentation.x_axis {
+                                Display::Block
+                            } else {
+                                Display::None
+                            }),
                             ..Style::new()
                         }
                         .position(Position::Absolute)
@@ -691,6 +785,38 @@ fn build_plot(scope: &Scope, state: &State, frame: ChartFrame, pointer_selection
             let key = key.get_untracked();
             glory::ui::widget(move |scope| {
                 let key = key.clone();
+                let class_key = key.clone();
+                let class = scope.bond(move || {
+                    model.with(|m| {
+                        let area = m.options.presentation.area_gradient
+                            && m.scene
+                                .paths
+                                .iter()
+                                .find(|p| p.key == class_key && p.drawing.fill.is_some())
+                                .and_then(|p| p.series)
+                                .is_some_and(|i| {
+                                    m.options.kind == CartesianKind::Area
+                                        || (m.options.kind == CartesianKind::Composite
+                                            && m.data.series[i].kind == ChartSeriesKind::Area)
+                                });
+                        if class_key == "grid" {
+                            "sapid-chart-layer sapid-chart-grid"
+                        } else if area {
+                            "sapid-chart-layer sapid-chart-area-gradient"
+                        } else if m.options.presentation.dashed_series
+                            && m.scene.paths.iter().any(|p| {
+                                p.key == class_key
+                                    && p.series.is_some()
+                                    && p.drawing.stroke.is_some()
+                            })
+                        {
+                            "sapid-chart-layer sapid-chart-dashes"
+                        } else {
+                            "sapid-chart-layer"
+                        }
+                        .to_owned()
+                    })
+                });
                 glory::ui::graphic()
                     .drawing(scope.bond(move || {
                         model.with(|m| {
@@ -703,7 +829,7 @@ fn build_plot(scope: &Scope, state: &State, frame: ChartFrame, pointer_selection
                                 .clone()
                         })
                     }))
-                    .class("sapid-chart-layer")
+                    .class(class)
                     .style(
                         Style::new()
                             .position(Position::Absolute)
@@ -717,6 +843,7 @@ fn build_plot(scope: &Scope, state: &State, frame: ChartFrame, pointer_selection
         })
         .show_in(&plot)?;
     let state = state.clone();
+    let hint = plot.cage(None::<ChartSelection>);
     let keys = plot.bond(move || {
         model.with(|m| {
             m.scene
@@ -747,16 +874,25 @@ fn build_plot(scope: &Scope, state: &State, frame: ChartFrame, pointer_selection
                             .find(|p| m.selection(**p) == location_key)
                             .expect("live chart point");
                         let color = m.palette.series[p.series];
+                        let dot_size = m.options.presentation.dot_size;
                         Style {
                             position: Some(Position::Absolute),
                             left: Some(Length::Percent(p.x / frame.width * 100.)),
                             top: Some(Length::Percent(p.y / frame.height * 100.)),
-                            width: Some(Length::Px(10.)),
-                            height: Some(Length::Px(10.)),
-                            margin: Some(Edges::all(-5.)),
+                            width: Some(Length::Px(dot_size)),
+                            height: Some(Length::Px(dot_size)),
+                            margin: Some(Edges::all(-dot_size / 2.)),
                             padding: Some(Edges::all(0.)),
-                            radius: Some(5.),
-                            background: Some(color),
+                            radius: Some(dot_size / 2.),
+                            background: Some(
+                                if m.options.presentation.dots
+                                    || selected.with(|s| s.as_ref() == Some(&location_key))
+                                {
+                                    color
+                                } else {
+                                    glory::style::Color(0, 0, 0, 0)
+                                },
+                            ),
                             border_width: Some(Edges::all(
                                 if selected.with(|s| s.as_ref() == Some(&location_key)) {
                                     2.
@@ -775,29 +911,110 @@ fn build_plot(scope: &Scope, state: &State, frame: ChartFrame, pointer_selection
                     .focus(FocusMode::Programmatic)
                     .enabled(state.enabled.clone())
                     .name(scope.bond(move || {
-                        model.with(|m| m.point(&label_key).map_or_else(String::new, |p| p.text()))
+                        model.with(|m| {
+                            m.point(&label_key)
+                                .map_or_else(String::new, |p| m.point_text(&p))
+                        })
                     }))
                     .style(style)
                     .on(EventKind::Activate, move |_| {
                         pressed.choose(Some(activate.clone()))
                     });
-                if pointer_selection {
-                    button = button.on(EventKind::Pointer, move |event| {
-                        if matches!(
-                            event,
-                            Event::Pointer {
-                                phase: PointerPhase::Enter,
-                                ..
-                            }
-                        ) {
+                button = button.on(EventKind::Pointer, move |event| match event {
+                    Event::Pointer {
+                        phase: PointerPhase::Enter,
+                        ..
+                    } => {
+                        if model.with(|m| m.options.presentation.tooltip) {
+                            hint.revise(|value| *value = Some(hover_key.clone()));
+                        }
+                        if pointer_selection {
                             hovered.choose(Some(hover_key.clone()));
                         }
-                    });
-                }
-                button.show_in(scope)
+                    }
+                    Event::Pointer {
+                        phase: PointerPhase::Leave,
+                        ..
+                    } => hint.revise(|v| *v = None),
+                    _ => {}
+                });
+                button.show_in(scope)?;
+                let show = scope.bond(move || model.with(|m| m.options.presentation.point_labels));
+                let value_key = key.clone();
+                glory::ui::when(show, move || {
+                    let value_key = value_key.clone();
+                    glory::ui::widget(move |scope| {
+                        let point_key = value_key.clone();
+                        let point = scope.bond(move || {
+                            model.with(|m| {
+                                m.scene
+                                    .locations
+                                    .iter()
+                                    .copied()
+                                    .find(|p| m.selection(*p) == point_key)
+                            })
+                        });
+                        glory::ui::text()
+                            .class("sapid-chart-point-label")
+                            .content(scope.bond(move || {
+                                point.get().map_or_else(String::new, |p| {
+                                    model.with(|m| {
+                                        chart_number(p.value, m.options.presentation.group_digits)
+                                    })
+                                })
+                            }))
+                            .style(scope.bond(move || {
+                                let (x, y) = point.get().map_or((0., 0.), |p| (p.x, p.y));
+                                let mut style = Style::new()
+                                    .position(Position::Absolute)
+                                    .left(Length::Percent(x / frame.width * 100.))
+                                    .top(Length::Percent(y / frame.height * 100. - 6.))
+                                    .pointer_events(glory::style::PointerEvents::None);
+                                style.font_size = Some(11.);
+                                style
+                            }))
+                            .show_in(scope)
+                    })
+                })
+                .show_in(scope)
             })
         })
         .show_in(&plot)?;
+    let tooltip = plot.bond(move || {
+        let key = hint.get()?;
+        model.with(|m| {
+            if !m.options.presentation.tooltip {
+                return None;
+            }
+            let detail = m.point(&key)?;
+            let location = m.scene.locations.iter().find(|p| m.selection(**p) == key)?;
+            Some((m.point_text(&detail), location.x, location.y))
+        })
+    });
+    glory::ui::when(
+        plot.bond(move || tooltip.with(Option::is_some)),
+        move || {
+            glory::ui::widget(move |scope| {
+                glory::ui::text()
+                    .class("sapid-chart-tooltip")
+                    .content(scope.bond(move || {
+                        tooltip.with(|v| v.as_ref().map_or_else(String::new, |v| v.0.clone()))
+                    }))
+                    .style(scope.bond(move || {
+                        tooltip.with(|v| {
+                            let (_, x, y) = v.as_ref().cloned().unwrap_or_default();
+                            Style::new()
+                                .position(Position::Absolute)
+                                .left(Length::Percent((x / frame.width * 100.).clamp(0., 58.)))
+                                .top(Length::Percent((y / frame.height * 100. - 10.).max(0.)))
+                                .pointer_events(glory::style::PointerEvents::None)
+                        })
+                    }))
+                    .show_in(scope)
+            })
+        },
+    )
+    .show_in(&plot)?;
     scope.retain(plot)?;
     Ok(())
 }

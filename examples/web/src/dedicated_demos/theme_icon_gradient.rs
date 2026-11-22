@@ -20,7 +20,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                     ))
             }));
         view()
-            .class("site-configurator")
+            .class("site-configurator site-display-configurator")
             .fill(controls::playground(
                 Box::new(icon),
                 vec![controls::gradient_controls(from, to, angle, &theme)],

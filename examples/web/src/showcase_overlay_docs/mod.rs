@@ -1,11 +1,15 @@
 mod actions_keyboard;
 mod actions_position;
 mod actions_selection;
+mod drawer_backdrop;
+mod drawer_close_icon;
 mod drawer_controlled;
 mod drawer_directions;
 mod drawer_nested;
+mod drawer_offset;
 mod drawer_scroll;
 mod drawer_sizes;
+mod drawer_without_header;
 mod floating_geometry;
 mod floating_layout;
 mod floating_lifetime;
@@ -16,12 +20,15 @@ mod hover_targets;
 mod loading_geometry;
 mod loading_presentation;
 mod loading_retained;
+mod modal_backdrop;
 mod modal_centered;
+mod modal_close_icon;
 mod modal_controlled;
 mod modal_full_screen;
 mod modal_nested;
 mod modal_scroll;
 mod modal_sizes;
+mod modal_without_header;
 mod notice_content;
 mod notice_controlled;
 mod notice_position;
@@ -45,6 +52,27 @@ use super::showcase_examples::DetailSection;
 pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
     match slug {
         "modal" => vec![
+            DetailSection {
+                id: "modal-without-header",
+                title: "Remove header",
+                note: "Open the panel and close it with the action in its body.",
+                example: Box::new(modal_without_header::demo(theme.clone())),
+                source: include_str!("modal_without_header.rs"),
+            },
+            DetailSection {
+                id: "modal-backdrop",
+                title: "Customize overlay",
+                note: "Open the panel to see the tinted, blurred backdrop.",
+                example: Box::new(modal_backdrop::demo(theme.clone())),
+                source: include_str!("modal_backdrop.rs"),
+            },
+            DetailSection {
+                id: "modal-close-icon",
+                title: "Change close icon",
+                note: "The arrow closes the panel and returns focus to the trigger.",
+                example: Box::new(modal_close_icon::demo(theme.clone())),
+                source: include_str!("modal_close_icon.rs"),
+            },
             DetailSection {
                 id: "modal-centered",
                 title: "Centered modal",
@@ -89,6 +117,34 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             },
         ],
         "drawer" => vec![
+            DetailSection {
+                id: "drawer-without-header",
+                title: "Remove header",
+                note: "Open the panel and close it with the action in its body.",
+                example: Box::new(drawer_without_header::demo(theme.clone())),
+                source: include_str!("drawer_without_header.rs"),
+            },
+            DetailSection {
+                id: "drawer-backdrop",
+                title: "Customize overlay",
+                note: "Open the panel to see the tinted, blurred backdrop.",
+                example: Box::new(drawer_backdrop::demo(theme.clone())),
+                source: include_str!("drawer_backdrop.rs"),
+            },
+            DetailSection {
+                id: "drawer-close-icon",
+                title: "Change close icon",
+                note: "The arrow closes the panel and returns focus to the trigger.",
+                example: Box::new(drawer_close_icon::demo(theme.clone())),
+                source: include_str!("drawer_close_icon.rs"),
+            },
+            DetailSection {
+                id: "drawer-offset",
+                title: "Offset",
+                note: "An eight-pixel inset leaves space around the drawer.",
+                example: Box::new(drawer_offset::demo(theme.clone())),
+                source: include_str!("drawer_offset.rs"),
+            },
             DetailSection {
                 id: "drawer-directions",
                 title: "Four physical viewport edges",
@@ -373,6 +429,9 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
 pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
     match slug {
         "modal" => vec![
+            ("Remove header", "#modal-without-header"),
+            ("Customize overlay", "#modal-backdrop"),
+            ("Change close icon", "#modal-close-icon"),
             ("Centered modal", "#modal-centered"),
             ("Full-screen modal", "#modal-full-screen"),
             ("Explicit panel width and longer headings", "#modal-sizes"),
@@ -384,6 +443,10 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ("Nested dialogs and explicit initial focus", "#modal-nested"),
         ],
         "drawer" => vec![
+            ("Remove header", "#drawer-without-header"),
+            ("Customize overlay", "#drawer-backdrop"),
+            ("Change close icon", "#drawer-close-icon"),
+            ("Offset", "#drawer-offset"),
             ("Four physical viewport edges", "#drawer-directions"),
             ("Panel width and a custom close name", "#drawer-sizes"),
             ("Scrolling content", "#drawer-scroll"),

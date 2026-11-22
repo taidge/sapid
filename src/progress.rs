@@ -81,7 +81,9 @@ pub struct Progress {
     ring_root_color: Option<Color>,
     sections: Vec<ProgressSection>,
     section_labels: Vec<(usize, String)>,
+    section_hover: Option<Box<dyn FnMut(Option<usize>)>>,
     animated: Vary<bool>,
+    striped: Vary<bool>,
 }
 fn create(view: View, value: impl Into<Vary<f64>>) -> Progress {
     let common = Common {
@@ -114,7 +116,9 @@ fn create(view: View, value: impl Into<Vary<f64>>) -> Progress {
         ring_root_color: None,
         sections: Vec::new(),
         section_labels: Vec::new(),
+        section_hover: None,
         animated: true.into(),
+        striped: false.into(),
     }
 }
 pub fn progress(value: impl Into<Vary<f64>>) -> Progress {
@@ -127,6 +131,11 @@ pub fn semi_circle_progress(value: impl Into<Vary<f64>>) -> Progress {
     create(View::SemiCircle, value)
 }
 impl Progress {
+    /// Draw stripes across a linear fill. `animated` also moves the stripe pattern.
+    pub fn striped(mut self, value: impl Into<Vary<bool>>) -> Self {
+        self.striped = value.into();
+        self
+    }
     pub fn theme(mut self, theme: crate::Theme) -> Self {
         self.common.theme = theme;
         self
@@ -166,6 +175,11 @@ impl Progress {
     }
     /// Passive text clipped inside one horizontal linear section. Choose a
     /// sufficient thickness and expose a readable breakdown through value_text.
+    /// The compound section currently under the pointer, or None when it leaves.
+    pub fn on_section_hover(mut self, callback: impl FnMut(Option<usize>) + 'static) -> Self {
+        self.section_hover = Some(Box::new(callback));
+        self
+    }
     pub fn section_label(mut self, index: usize, value: impl Into<String>) -> Self {
         if self.section_labels.len() <= 16 {
             self.section_labels.push((index, value.into()));
@@ -389,10 +403,14 @@ fn arc_span(
     fraction: f64,
     color: Color,
 ) -> GraphicProps {
-    let radius = (size - thickness) / 2.0 - geometry.inset;
+    let radius = if geometry.semi {
+        size / 2. - thickness
+    } else {
+        (size - thickness) / 2. - geometry.inset
+    };
     let center_x = size / 2.;
     let center_y = if geometry.semi && geometry.orientation == SemiCircleOrientation::Down {
-        thickness / 2.
+        0.
     } else {
         size / 2.
     };
@@ -449,11 +467,7 @@ fn arc_span(
     }
     GraphicProps {
         width: size,
-        height: if geometry.semi {
-            size / 2. + thickness / 2.
-        } else {
-            size
-        },
+        height: if geometry.semi { size / 2. } else { size },
         commands,
         stroke: Some(GraphicStroke {
             color,
@@ -605,7 +619,7 @@ impl Widget for Progress {
         let height = match self.view {
             View::Line => self.thickness,
             View::Ring => self.size,
-            View::SemiCircle => self.size / 2. + self.thickness / 2.,
+            View::SemiCircle => self.size / 2.,
         };
         let (width, height) = if self.view == View::Line && vertical {
             (
@@ -644,6 +658,21 @@ impl Widget for Progress {
             base.overflow_x = Some(Overflow::Hidden);
             base.overflow_y = Some(Overflow::Hidden);
         }
+        let hover = self
+            .section_hover
+            .take()
+            .map(|callback| crate::composite::Callback::new(Some(callback)));
+        let owner = scope.id();
+        let hover_section = |index, callback: crate::composite::Callback<Option<usize>>| {
+            move |event| {
+                if let glory::render::Event::PointerWithin { phase, .. } = event {
+                    callback.emit(
+                        owner,
+                        (phase != glory::render::PointerPhase::Leave).then_some(index),
+                    );
+                }
+            }
+        };
         let color = self
             .filled_segment_color
             .unwrap_or(if self.common.unstyled {
@@ -673,9 +702,27 @@ impl Widget for Progress {
         if self.sections.is_empty() {
             if self.view == View::Line {
                 let animated = self.animated.clone();
+                let striped = self.striped.clone();
+                let motion = self.animated.clone();
+                let classes = move || {
+                    match (striped.get(), motion.get()) {
+                        (true, true) => {
+                            "sapid-progress-fill sapid-progress-striped sapid-progress-animated"
+                        }
+                        (true, false) => "sapid-progress-fill sapid-progress-striped",
+                        _ => "sapid-progress-fill",
+                    }
+                    .to_owned()
+                };
+                let fill_class: Vary<String> =
+                    if self.striped.is_reactive() || self.animated.is_reactive() {
+                        scope.bond(classes).into()
+                    } else {
+                        classes().into()
+                    };
                 root = root.fill(
                     glory::ui::view()
-                        .class("sapid-progress-fill")
+                        .class(fill_class)
                         .style(value.map(move |value| {
                             let fraction = value.fraction().expect("accepted progress is finite");
                             let mut style = Style::new().position(Position::Absolute);
@@ -875,6 +922,12 @@ impl Widget for Progress {
                             }),
                     );
                 }
+                if let Some(callback) = &hover {
+                    segment = segment.on(
+                        glory::render::EventKind::PointerWithin,
+                        hover_section(index, callback.clone()),
+                    );
+                }
                 root = root.fill(segment);
             }
         } else {
@@ -909,19 +962,28 @@ impl Widget for Progress {
                 let visible_fraction = (fraction - gap).max(0.);
                 let round = self.ring_round_caps
                     && (section_count == 1 || index == 0 || index + 1 == section_count);
-                root = root.fill(
-                    glory::ui::graphic()
-                        .class("sapid-progress-section")
-                        .drawing(arc_span(
-                            self.size,
-                            self.thickness,
-                            ArcGeometry::ring(self.ring_start_angle, round),
-                            offset,
-                            visible_fraction,
-                            section.color,
-                        ))
-                        .style(drawing_style.clone()),
-                );
+                let mut segment = glory::ui::graphic()
+                    .class(if hover.is_some() {
+                        "sapid-progress-section sapid-progress-hit-section"
+                    } else {
+                        "sapid-progress-section"
+                    })
+                    .drawing(arc_span(
+                        self.size,
+                        self.thickness,
+                        ArcGeometry::ring(self.ring_start_angle, round),
+                        offset,
+                        visible_fraction,
+                        section.color,
+                    ))
+                    .style(drawing_style.clone());
+                if let Some(callback) = &hover {
+                    segment = segment.on(
+                        glory::render::EventKind::PointerWithin,
+                        hover_section(index, callback.clone()),
+                    );
+                }
+                root = root.fill(segment);
                 offset += fraction;
             }
             if let Some(label) = label {

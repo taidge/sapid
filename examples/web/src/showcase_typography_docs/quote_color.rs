@@ -19,7 +19,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                 .on_value_change(move |next| wrap.revise(|v| *v = next)),
         ));
         view()
-            .class("site-configurator")
+            .class("site-configurator site-display-configurator")
             .fill(controls::playground(
                 Box::new(quote),
                 vec![Box::new(control)],

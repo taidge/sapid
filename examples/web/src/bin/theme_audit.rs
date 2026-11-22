@@ -1,7 +1,19 @@
 //! Check that a selected theme reaches every themed widget in each compiled demo.
 use glory::ui::App;
 
-fn main() {
+fn main() -> std::process::ExitCode {
+    // Some full showcase demos exceed the 1 MiB Windows main-thread stack in debug builds.
+    // Keep the extra stack local to this tool and run both theme passes on the same thread.
+    std::thread::Builder::new()
+        .name("showcase-theme-audit".into())
+        .stack_size(8 * 1024 * 1024)
+        .spawn(audit)
+        .expect("start showcase theme audit")
+        .join()
+        .unwrap_or_else(|panic| std::panic::resume_unwind(panic))
+}
+
+fn audit() -> std::process::ExitCode {
     let mut failures = Vec::new();
     for theme in [
         sapid::Theme::green_dark(),
@@ -40,7 +52,9 @@ fn main() {
         }
     }
     println!("{}", serde_json::to_string_pretty(&failures).unwrap());
-    if !failures.is_empty() {
-        std::process::exit(1);
+    if failures.is_empty() {
+        std::process::ExitCode::SUCCESS
+    } else {
+        std::process::ExitCode::FAILURE
     }
 }

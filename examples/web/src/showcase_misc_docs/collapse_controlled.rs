@@ -1,36 +1,27 @@
 use glory::prelude::*;
+
 pub fn demo(theme: sapid::Theme) -> impl Widget {
     widget(move |scope| {
         let open = scope.cage(false);
-        let allow = scope.cage(false);
-        sapid::stack()
+        let content = theme.clone();
+        sapid::collapsible("collapse-hook")
             .theme(theme.clone())
-            .gap(12.)
-            .fill((
-                sapid::checkbox()
-                    .theme(theme.clone())
-                    .label("Allow delivery details")
-                    .checked(allow)
-                    .on_checked_change(move |v| allow.revise(|s| *s = v)),
-                sapid::collapsible("controlled-delivery")
-                    .theme(theme.clone())
-                    .label("Review delivery details")
-                    .open(open)
-                    .on_open_change(move |v| {
-                        if allow.get() {
-                            open.revise(|s| *s = v)
-                        }
-                    })
-                    .height_transition(180)
-                    .content({
-                        let theme = theme.clone();
-                        move || {
-                            sapid::text().theme(theme.clone()).content(
-                                "Packages can be left with the reception desk on weekdays.",
-                            )
-                        }
-                    }),
-            ))
+            .class("site-reference-collapse site-collapse-hook")
+            .label(open.map(|v| {
+                if *v {
+                    String::from("Collapse")
+                } else {
+                    String::from("Expand")
+                }
+            }))
+            .open(open)
+            .on_open_change(move |proposed| open.revise(|current| *current = proposed))
+            .height_transition(200)
+            .content(move || collapse_paragraph(content.clone()))
             .show_in(scope)
     })
+}
+
+fn collapse_paragraph(theme: sapid::Theme) -> impl Widget {
+    sapid::text().theme(theme).content("Bulbasaur is a small Pokémon with a plant bulb on its back. The plant grows with its host, storing energy from sunlight. Two slender vines beneath the bulb help it grasp nearby objects.")
 }

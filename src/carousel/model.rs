@@ -84,6 +84,53 @@ impl Page {
             .min(self.count - length);
         (start..start + length).collect()
     }
+    pub(super) fn index_at(self, delta: isize) -> usize {
+        let count = self.count.max(1) as isize;
+        let target = self.current as isize + delta;
+        if self.looping {
+            target.rem_euclid(count) as usize
+        } else {
+            target.clamp(0, count - 1) as usize
+        }
+    }
+    pub(super) fn distance_to(self, index: usize) -> isize {
+        let d = index as isize - self.current as isize;
+        if self.looping && d.unsigned_abs() * 2 > self.count {
+            d - d.signum() * self.count as isize
+        } else {
+            d
+        }
+    }
+    pub(super) fn scroll_offset(
+        self,
+        delta: f64,
+        extent: f64,
+        direction: Direction,
+        origin: f64,
+    ) -> Result<f64, Error> {
+        self.validate()?;
+        if !delta.is_finite() || !extent.is_finite() || extent <= 0. || !origin.is_finite() {
+            return Err(Error::InvalidProps("carousel free scroll geometry"));
+        }
+        if self.count < 2 {
+            return Ok(0.);
+        }
+        let offset = (origin
+            + if direction == Direction::Rtl {
+                delta / extent
+            } else {
+                -delta / extent
+            })
+        .clamp(-(self.overscan as f64), self.overscan as f64);
+        Ok(if self.looping {
+            offset
+        } else {
+            offset.clamp(
+                -(self.current as f64),
+                (self.count - 1 - self.current) as f64,
+            )
+        })
+    }
     pub fn swipe(
         self,
         delta: f64,

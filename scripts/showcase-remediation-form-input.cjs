@@ -1,5 +1,89 @@
 const assert=require('node:assert/strict'),fs=require('node:fs');
-const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-env.cjs');
+const {matrix,chromium,base,outputPath,writeReport,assertPlaygroundLayout}=require('./showcase-browser-env.cjs');
+
+async function checkNativeUsage(primary, width, tick, key) {
+ await assertPlaygroundLayout(primary, width);
+ const preview = primary.locator('.site-playground-preview');
+ const panel = primary.locator('.site-playground-controls');
+ const input = preview.getByRole('combobox');
+ assert.equal(await preview.getByRole('combobox', {name:'Input label', exact:true}).count(), 1);
+ assert.equal(await input.evaluate(el => el.selectedOptions[0].text), 'React');
+ assert.equal(await input.evaluate(el => el.tagName), 'SELECT');
+ const field = await preview.locator('.sapid-field').boundingBox();
+ const canvas = await preview.boundingBox();
+ assert(Math.abs(field.x + field.width / 2 - canvas.x - canvas.width / 2) <= 1);
+ assert(Math.abs(field.y + field.height / 2 - canvas.y - canvas.height / 2) <= 1);
+ assert(Math.abs(field.width - Math.min(340, canvas.width - 40)) <= 1);
+ const variants = await panel.locator('.sapid-radio-group-items').boundingBox();
+ const labelEditor = await panel.getByRole('textbox', {name:'Label', exact:true}).boundingBox();
+ assert(Math.abs(variants.x - labelEditor.x) <= 1 && Math.abs(variants.width - labelEditor.width) <= 1);
+ await primary.screenshot({path:outputPath(`form-input-remediation/${key}.png`)});
+
+ // Inspect the painted end of the select. Both chevrons must be visible,
+ // separated, centered vertically, and inset from the trailing border.
+ const screenshot = await input.screenshot();
+ const ink = await input.evaluate(async (_, encoded) => {
+   const img = new Image();
+   img.src = 'data:image/png;base64,' + encoded;
+   await img.decode();
+   const canvas = document.createElement('canvas');
+   canvas.width = img.width;
+   canvas.height = img.height;
+   const ctx = canvas.getContext('2d');
+   ctx.drawImage(img, 0, 0);
+   const {data} = ctx.getImageData(0, 0, img.width, img.height);
+   const background = (Math.floor(img.height/2)*img.width + img.width-36)*4;
+   const rows = [], offsets = [];
+   for (let y = 4; y < img.height-4; y++) {
+     for (let x = img.width-32; x < img.width-6; x++) {
+       const pixel = (y*img.width+x)*4;
+       if ([0,1,2].some(c => Math.abs(data[pixel+c]-data[background+c]) > 38)) {
+         if (rows.at(-1) !== y) rows.push(y);
+         offsets.push(img.width-x-.5);
+       }
+     }
+   }
+   return {rows, offsets, height:img.height};
+ }, screenshot.toString('base64'));
+ assert(ink.rows.length >= 4 && ink.rows.filter((y,i) => i && y > ink.rows[i-1]+1).length === 1, 'two painted chevrons');
+ assert(Math.abs((ink.rows[0]+ink.rows.at(-1)+1-ink.height)/2) <= 1, 'centered icon');
+ const centerInset = (Math.min(...ink.offsets) + Math.max(...ink.offsets)) / 2;
+ assert(Math.abs(centerInset - 19) <= 2, 'icon center about 19px from trailing border');
+
+ await input.evaluate(el => window.nativeSelect=el);
+ await input.selectOption('vue');
+ await tick();
+ assert(await input.evaluate(el => el===window.nativeSelect));
+ const defaultBackground = await input.evaluate(el => getComputedStyle(el).backgroundColor);
+ await panel.getByRole('radio', {name:'Filled', exact:true}).check();
+ await tick();
+ assert.notEqual(await input.evaluate(el => getComputedStyle(el).backgroundColor), defaultBackground);
+ await panel.getByRole('radio', {name:'Unstyled', exact:true}).check();
+ await tick();
+ assert.equal(await input.evaluate(el => getComputedStyle(el).borderTopColor), 'rgba(0, 0, 0, 0)');
+ const initial = await input.boundingBox();
+ await panel.getByRole('slider', {name:'Size', exact:true}).press('ArrowRight');
+ await tick();
+ assert((await input.boundingBox()).height > initial.height);
+ const radius = () => input.evaluate(el => parseFloat(getComputedStyle(el).borderTopLeftRadius));
+ const before = await radius();
+ await panel.getByRole('slider', {name:'Radius', exact:true}).press('ArrowRight');
+ await tick();
+ assert(await radius() > before);
+ await panel.getByRole('textbox', {name:'Label', exact:true}).fill('Framework');
+ await panel.getByRole('textbox', {name:'Description', exact:true}).fill('Choose a framework');
+ await panel.getByRole('textbox', {name:'Error', exact:true}).fill('Try another option');
+ await panel.getByRole('switch', {name:'With asterisk', exact:true}).click();
+ await tick();
+ assert.equal(await preview.getByRole('combobox', {name:'Framework', exact:true}).count(), 1);
+ assert(await input.evaluate(el => el.getAttribute('aria-describedby').split(/\s+/)
+   .some(id => document.getElementById(id)?.textContent === 'Choose a framework')));
+ assert(await input.evaluate(el => document.getElementById(el.getAttribute('aria-errormessage')).textContent === 'Try another option'));
+ assert.equal(await input.getAttribute('aria-invalid'), 'true');
+ assert(await preview.locator('label').evaluate(el => getComputedStyle(el,'::after').content.includes('*')));
+ assert.equal(await input.evaluate(el => el.required), false);
+ assert.equal(await input.inputValue(), 'vue');
+}
 (async()=>{
  const browser=await chromium.launch(),page=await browser.newPage(),report={browser:browser.version(),pages:[],errors:[]};
  page.on('pageerror',e=>report.errors.push(e.message));page.on('console',m=>{if(m.type()==='error')report.errors.push(m.text());});
@@ -16,23 +100,23 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
   const key=`${slug}-${theme}-${scheme}-${width}`;
   try{
    await page.setViewportSize({width,height:1000});await page.goto(`${base}/showcase.html?widget=${slug}&theme=${theme}&scheme=${scheme}`);await page.waitForFunction(()=>window.ready===true,undefined,{timeout:20000});await tick();
-   const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;assert.equal(await page.locator('.site-component-detail').count(),4);
+   const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;assert.equal(await page.locator('.site-component-detail').count(),{'mask-input':7,'native-select':12,'file-input':8}[slug]);
    const primary=page.locator('.site-preview .site-demo').first();let captured=false;
    if(slug==='mask-input'){
-    const input=primary.getByRole('textbox',{name:'Phone number',exact:true});assert.equal(await input.getAttribute('placeholder'),'(000) 000-0000');await input.evaluate(e=>window.maskEditor=e);await input.fill('5551234567');await tick();assert.equal(await input.inputValue(),'(555) 123-4567');assert(await input.evaluate(e=>e===window.maskEditor));
+    const input=primary.getByRole('textbox',{name:'Input label',exact:true});assert.equal(await input.getAttribute('placeholder'),'(___) ___-____');await input.evaluate(e=>window.maskEditor=e);await input.fill('5551234567');await tick();assert.equal(await input.inputValue(),'(555) 123-4567');assert(await input.evaluate(e=>e===window.maskEditor));
     const patterns=detail('Telephone, date-shaped and code patterns');assert.equal(await patterns.getByRole('textbox',{name:'Telephone pattern',exact:true}).inputValue(),'(555) 123-4567');const date=patterns.getByRole('textbox',{name:'Date-shaped reference',exact:true});await date.fill('20269999');await tick();assert.equal(await date.inputValue(),'2026-99-99');assert.notEqual(await date.getAttribute('aria-invalid'),'true');
     const values=detail('Raw values and displayed separators'),reference=values.getByRole('textbox',{name:'Four-digit reference',exact:true});assert.equal(await reference.inputValue(),'12-34');await values.getByRole('button',{name:'Set reference from application',exact:true}).click();await tick();assert.equal(await reference.inputValue(),'98-76');assert(await values.getByText('Raw application value: 9876',{exact:true}).isVisible());await values.getByRole('button',{name:'Clear reference',exact:true}).click();await tick();assert.equal(await reference.inputValue(),'');assert.equal(await reference.getAttribute('placeholder'),'00-00');
     const editing=detail('Replacement, deletion, paste and composition').getByRole('textbox',{name:'Edit the reference',exact:true});await editing.focus();await editing.evaluate(e=>e.setSelectionRange(3,3));await editing.press('Backspace');await tick();assert.equal(await editing.inputValue(),'13-45-6');await editing.fill('65-43-21');await tick();assert.equal(await editing.inputValue(),'65-43-21');await editing.fill('bad');await tick();assert.equal(await editing.inputValue(),'65-43-21');
     const states=detail('Controlled refusal and current availability'),controlled=states.getByRole('textbox',{name:'Controlled reference',exact:true});await controlled.fill('99-88');await tick();assert.equal(await controlled.inputValue(),'12-34');await states.getByRole('checkbox',{name:'Accept masked proposals',exact:true}).check();await controlled.fill('99-88');await tick();assert.equal(await controlled.inputValue(),'99-88');assert(!(await states.getByRole('textbox',{name:'Read-only reference',exact:true}).isEditable()));assert(await states.getByRole('textbox',{name:'Disabled reference',exact:true}).isDisabled());
    }else if(slug==='native-select'){
-    const input=primary.getByRole('combobox',{name:'Country',exact:true});assert.equal(await input.evaluate(e=>e.tagName),'SELECT');await input.evaluate(e=>window.nativeSelect=e);await input.selectOption('jp');await tick();assert.equal(await input.inputValue(),'jp');assert(await input.evaluate(e=>e===window.nativeSelect));
+    await checkNativeUsage(primary,width,tick,key);captured=true;
     const groups=detail('Native option groups and unavailable options'),select=groups.getByRole('combobox',{name:'Grouped country',exact:true});assert.equal(await select.locator('optgroup').count(),3);assert(await select.locator('option[value="de"]').isDisabled());assert(await select.locator('option[value="xx"]').isDisabled());await select.selectOption('fr');assert.equal(await select.inputValue(),'fr');
     const modes=detail('Single dropdown and multiple listbox'),multiple=modes.getByRole('listbox',{name:'Several languages',exact:true});assert(await multiple.evaluate(e=>e.multiple&&e.size===4));await multiple.evaluate(e=>window.multipleSelect=e);await multiple.selectOption(['js','py']);await tick();assert.deepEqual(await multiple.evaluate(e=>[...e.selectedOptions].map(o=>o.value)),['js','py']);assert(await multiple.evaluate(e=>e===window.multipleSelect));
     const states=detail('Controlled selection, required and disabled'),controlled=states.getByRole('combobox',{name:'Controlled plan',exact:true});await controlled.selectOption('pro');await tick();assert.equal(await controlled.inputValue(),'starter');await states.getByRole('checkbox',{name:'Accept native selection',exact:true}).check();await controlled.selectOption('pro');await tick();assert.equal(await controlled.inputValue(),'pro');assert(await states.getByRole('combobox',{name:'Disabled plan',exact:true}).isDisabled());const invalid=states.getByRole('combobox',{name:'Required plan',exact:true});assert.equal(await invalid.getAttribute('aria-invalid'),'true');assert(await invalid.evaluate(e=>e.required));assert(await invalid.getAttribute('aria-errormessage'));
     const heights=await detail('Five native control sizes').locator('select').evaluateAll(es=>es.map(e=>e.getBoundingClientRect().height));assert.equal(heights.length,5);assert(heights.every((v,i)=>i===0||v>heights[i-1]));
    }else{
-    const input=primary.getByRole('button',{name:'Attachments',exact:true});await input.evaluate(e=>window.filePicker=e);const longName='project-research-notes-'.repeat(5)+'final.txt';await choose(input,[file(longName),file('second.txt')],true);assert.equal(await input.textContent(),`${longName}, +1 more`);assert.equal(await primary.locator('.sapid-file-attachment').count(),0);assert(await input.evaluate(e=>e===window.filePicker));const clear=primary.getByRole('button',{name:'Clear selected files',exact:true}),r=await input.boundingBox(),b=await clear.boundingBox();assert(b.width<=25&&b.height<=25);assert(b.x>=r.x&&b.x+b.width<=r.x+r.width+1&&b.y>=r.y&&b.y+b.height<=r.y+r.height+1);assert(r.width<=width);assert.equal(await input.evaluate(e=>getComputedStyle(e).display),'flex');assert(await primary.locator('.sapid-file-input-endcap').isVisible());assert.equal(await clear.locator('svg').count(),1);await primary.scrollIntoViewIfNeeded();await primary.screenshot({path:outputPath(`form-input-remediation/${key}.png`)});captured=true;
-    await clear.click();await tick();assert.equal(await input.textContent(),'Choose files');assert(await input.evaluate(e=>e===document.activeElement));assert.equal(await primary.getByRole('button',{name:'Clear selected files',exact:true}).count(),0);assert(await input.evaluate(e=>e===window.filePicker));
+    const input=primary.getByRole('button',{name:'Input label',exact:true});await input.evaluate(e=>window.filePicker=e);const longName='project-research-notes-'.repeat(5)+'final.txt';await choose(input,[file(longName),file('second.txt')],true);assert.equal(await input.textContent(),`${longName}, +1 more`);assert.equal(await primary.locator('.sapid-file-attachment').count(),0);assert(await input.evaluate(e=>e===window.filePicker));const clear=primary.getByRole('button',{name:'Clear selected files',exact:true}),r=await input.boundingBox(),b=await clear.boundingBox();assert(b.width<=25&&b.height<=25);assert(b.x>=r.x&&b.x+b.width<=r.x+r.width+1&&b.y>=r.y&&b.y+b.height<=r.y+r.height+1);assert(r.width<=width);assert.equal(await input.evaluate(e=>getComputedStyle(e).display),'flex');assert(await primary.locator('.sapid-file-input-endcap').isVisible());assert.equal(await clear.locator('svg').count(),1);await primary.scrollIntoViewIfNeeded();await primary.screenshot({path:outputPath(`form-input-remediation/${key}.png`)});captured=true;
+    await clear.click();await tick();assert.equal(await input.textContent(),'Input placeholder');assert(await input.evaluate(e=>e===document.activeElement));assert.equal(await primary.getByRole('button',{name:'Clear selected files',exact:true}).count(),0);assert(await input.evaluate(e=>e===window.filePicker));
     const single=detail('Single file summary and clearing'),document=single.getByRole('button',{name:'Project document',exact:true});await choose(document,[file('project.txt')],false);assert.equal(await document.textContent(),'project.txt');await single.getByRole('button',{name:'Clear selected files',exact:true}).click();await tick();assert.equal(await document.textContent(),'Choose a text document');
     const several=detail('Multiple files and long names'),support=several.getByRole('button',{name:'Supporting documents',exact:true});await choose(support,[file(longName),file('second.txt')],true);assert.equal(await several.locator('.sapid-file-attachment').count(),2);assert(await several.getByText(longName,{exact:true}).last().isVisible());
     const limits=detail('Types, count and byte limits'),bounded=limits.getByRole('button',{name:'Small text attachments',exact:true});await choose(bounded,[file('accepted.txt')],true);assert.equal(await bounded.textContent(),'accepted.txt');await choose(bounded,[file('too-large.txt','x'.repeat(600))],true);assert.equal(await bounded.textContent(),'accepted.txt');assert(await limits.getByText('Files rejected: the selected files exceed the size limit',{exact:true}).isVisible());await choose(bounded,[file('wrong.pdf','PDF','application/pdf')],true);assert.equal(await bounded.textContent(),'accepted.txt');assert(await limits.getByText('Files rejected: this file type is not accepted',{exact:true}).isVisible());

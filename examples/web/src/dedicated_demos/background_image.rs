@@ -1,15 +1,20 @@
 use glory::prelude::*;
 pub fn demo(theme: sapid::Theme) -> impl Widget {
-    let source = format!(
-        "{}/mountain-evening.svg",
-        option_env!("SAPID_SHOWCASE_MEDIA").unwrap_or("/assets")
-    );
-    sapid::background_image(source)
+    widget(move |scope| {
+        let radius = scope.cage(12_f64);
+        let preview = {
+            let theme = theme.clone();
+
+            let source = format!(
+                "{}/mountain-evening.svg",
+                option_env!("SAPID_SHOWCASE_MEDIA").unwrap_or("/assets")
+            );
+            sapid::background_image(source)
         .theme(theme.clone())
         .name("Mountain evening background")
         .width(Length::Percent(100.))
         .height(Length::Px(220.))
-        .style(Style::new().radius(12.))
+        .style(radius.map(|r|Style::new().radius(*r)))
         .fill(
             glory::ui::view()
                 .style(Style {
@@ -37,4 +42,19 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                     )),
                 ),
         )
+        };
+        view()
+            .class("site-configurator site-display-configurator site-background-image-configurator")
+            .fill(controls::playground(
+                Box::new(preview),
+                vec![controls::pixel_scale(
+                    "background_image-radius",
+                    "Radius",
+                    radius,
+                    [2., 4., 8., 16., 32.],
+                    &theme,
+                )],
+            ))
+            .show_in(scope)
+    })
 }

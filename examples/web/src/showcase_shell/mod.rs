@@ -1,6 +1,9 @@
 use super::showcase_examples::DetailSection;
 mod collapsed;
 mod configuration;
+mod disabled;
+mod headroom;
+mod nested;
 mod regions;
 mod resizable;
 mod responsive;
@@ -8,6 +11,27 @@ mod scrolling;
 pub(crate) mod viewport;
 pub fn sections(theme: sapid::Theme) -> Vec<DetailSection> {
     vec![
+        DetailSection {
+            id: "shell-disabled",
+            title: "Disable AppShell regions",
+            note: "Toggle the layout regions while editing a note in main.",
+            example: Box::new(disabled::demo(theme.clone())),
+            source: include_str!("disabled.rs"),
+        },
+        DetailSection {
+            id: "shell-headroom",
+            title: "Hide header on scroll",
+            note: "Scroll down through the article to hide the header, then scroll up to bring it back.",
+            example: Box::new(headroom::demo(theme.clone())),
+            source: include_str!("headroom.rs"),
+        },
+        DetailSection {
+            id: "shell-nested",
+            title: "Nested AppShell",
+            note: "The project has its own header, navigation and editable content inside the workspace.",
+            example: Box::new(nested::demo(theme.clone())),
+            source: include_str!("nested.rs"),
+        },
         DetailSection {
             id: "shell-regions",
             title: "Header, main and footer",

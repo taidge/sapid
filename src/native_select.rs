@@ -4,7 +4,8 @@ use std::rc::Rc;
 use glory::render::{
     Event, EventKind, FormControl, SelectEntry, SelectGroup, SelectOption, SelectProps, SemanticId,
 };
-use glory::ui::{Result, Widget};
+use glory::style::{Length, PointerEvents};
+use glory::ui::{Children, IntoChildren, Result, Widget};
 use glory::{Scope, Vary};
 
 use crate::appearance::{Common, common_methods, configure, observe};
@@ -82,13 +83,23 @@ impl NativeOptionGroup {
     }
 }
 enum Entry {
+    Native(SelectEntry),
     Option(NativeOption),
     Group(NativeOptionGroup),
+}
+
+#[derive(Clone, Copy, Default)]
+pub enum NativeSelectVariant {
+    #[default]
+    Default,
+    Filled,
+    Unstyled,
 }
 
 pub struct NativeSelect {
     key: String,
     common: Common,
+    variant: NativeSelectVariant,
     entries: Vec<Entry>,
     count: usize,
     multiple: bool,
@@ -98,6 +109,9 @@ pub struct NativeSelect {
     on_values: Option<Box<dyn FnMut(Vec<String>)>>,
     rows: Option<u16>,
     placeholder: String,
+    left_section: Option<Children>,
+    right_section: Option<Children>,
+    loading: Option<Vary<bool>>,
     field: Option<crate::FieldControl>,
     form_name: Option<Vary<String>>,
     required: Vary<bool>,
@@ -108,6 +122,7 @@ pub fn native_select(key: impl Into<String>) -> NativeSelect {
     NativeSelect {
         key: key.into(),
         common: Common::default(),
+        variant: NativeSelectVariant::Default,
         entries: Vec::new(),
         count: 0,
         multiple: false,
@@ -117,6 +132,9 @@ pub fn native_select(key: impl Into<String>) -> NativeSelect {
         on_values: None,
         rows: None,
         placeholder: String::new(),
+        left_section: None,
+        right_section: None,
+        loading: None,
         field: None,
         form_name: None,
         required: false.into(),
@@ -126,6 +144,22 @@ pub fn native_select(key: impl Into<String>) -> NativeSelect {
 }
 impl NativeSelect {
     common_methods!();
+    pub fn left_section(mut self, content: impl IntoChildren) -> Self {
+        self.left_section = Some(content.into_children());
+        self
+    }
+    pub fn right_section(mut self, content: impl IntoChildren) -> Self {
+        self.right_section = Some(content.into_children());
+        self
+    }
+    pub fn loading(mut self, value: impl Into<Vary<bool>>) -> Self {
+        self.loading = Some(value.into());
+        self
+    }
+    pub fn variant(mut self, variant: NativeSelectVariant) -> Self {
+        self.variant = variant;
+        self
+    }
     pub fn label(mut self, value: impl Into<Vary<String>>) -> Self {
         self.common.name = Some(value.into());
         self
@@ -212,6 +246,20 @@ impl NativeSelect {
         }
         self
     }
+    /// Append a renderer-native entry, including decorative entries supported by the host.
+    pub fn native_entry(mut self, entry: SelectEntry) -> Self {
+        if self.count <= MAX_NATIVE_SELECT_OPTIONS
+            && self.entries.len() <= MAX_NATIVE_SELECT_OPTIONS + glory::render::MAX_SELECT_GROUPS
+        {
+            if let SelectEntry::Group(group) = &entry {
+                self.count += group.options.len();
+            } else if matches!(entry, SelectEntry::Option(_)) {
+                self.count += 1;
+            }
+            self.entries.push(Entry::Native(entry));
+        }
+        self
+    }
     pub fn group(mut self, group: NativeOptionGroup) -> Self {
         if self.count <= MAX_NATIVE_SELECT_OPTIONS
             && self.entries.len() <= MAX_NATIVE_SELECT_OPTIONS + glory::render::MAX_SELECT_GROUPS
@@ -267,6 +315,7 @@ impl Widget for NativeSelect {
         let entries: Result<Vec<_>> = std::mem::take(&mut self.entries)
             .into_iter()
             .map(|entry| match entry {
+                Entry::Native(value) => Ok(value),
                 Entry::Option(value) => Ok(SelectEntry::Option(value.lower()?)),
                 Entry::Group(group) => Ok(SelectEntry::Group(SelectGroup {
                     label: group.label,
@@ -327,9 +376,13 @@ impl Widget for NativeSelect {
             self.readonly.clone(),
             self.invalid.clone(),
         );
+        let loading = self.loading.clone();
         let field_id = self.field.as_ref().map(|field| field.id.clone());
         let metadata = scope.bond(move || {
             let mut value = metadata.get().unwrap_or_default();
+            if let Some(loading) = &loading {
+                value.busy = Some(loading.get());
+            }
             if value.id.is_none() {
                 value.id = Some(field_id.clone().unwrap_or_else(|| id.clone()));
             }
@@ -344,13 +397,30 @@ impl Widget for NativeSelect {
         let dirty = Dirty::new(scope);
         let mut props = (*config).clone();
         props.selection.keys = initial.clone();
-        let base = self.common.theme.control(self.common.size);
+        let theme = &self.common.theme;
+        let mut style = theme.control(self.common.size);
+        let transparent = glory::style::Color(0, 0, 0, 0);
+        match self.variant {
+            NativeSelectVariant::Default => {}
+            NativeSelectVariant::Filled => {
+                style.background = Some(if theme.disabled == theme.input {
+                    theme.border
+                } else {
+                    theme.disabled
+                });
+                style.border_color = Some(transparent);
+            }
+            NativeSelectVariant::Unstyled => {
+                style.background = Some(transparent);
+                style.border_color = Some(transparent);
+            }
+        }
         if !self.common.unstyled && !props.multiple && props.rows.unwrap_or(1) == 1 {
             // WebKit's native menu button ignores min-height unless a height is
             // supplied. Keep the platform picker and use the control's size.
             let custom = self.common.style.clone();
             let reactive = custom.is_reactive();
-            let min_height = base.min_height;
+            let min_height = style.min_height;
             let menu_style = move || {
                 let mut style = custom.get();
                 style.height = style.height.or(style.min_height).or(min_height);
@@ -367,7 +437,7 @@ impl Widget for NativeSelect {
             glory::ui::select().configuration(props),
             scope,
             "sapid-native-select",
-            base
+            style
         )
         .enabled(enabled.clone())
         .semantics(metadata)
@@ -436,7 +506,51 @@ impl Widget for NativeSelect {
         for (kind, mut handlers) in std::mem::take(&mut self.common.handlers) {
             inner = inner.on(kind, move |event| observe(&mut handlers, owner, event));
         }
-        inner.show_in(scope)?;
+        if self.left_section.is_some() || self.right_section.is_some() || self.loading.is_some() {
+            let frame =
+                crate::input_actions::frame(scope, &self.common, "sapid-native-select-frame")?;
+            inner.show_in(&frame)?;
+            for (left, section) in [
+                (true, self.left_section.take()),
+                (false, self.right_section.take()),
+            ] {
+                if let Some(content) = section {
+                    let mut slot = crate::input_actions::action_style(&self.common, 0);
+                    slot.pointer_events = Some(PointerEvents::None);
+                    if left {
+                        slot.right = None;
+                        slot.left = Some(Length::Px(0.));
+                    }
+                    glory::ui::view()
+                        .class(if left {
+                            "sapid-native-select-left"
+                        } else {
+                            "sapid-native-select-right"
+                        })
+                        .style(slot)
+                        .fill(content)
+                        .show_in(&frame)?;
+                }
+            }
+            if let Some(loading) = self.loading.take() {
+                let mut slot = crate::input_actions::action_style(&self.common, 0);
+                slot.pointer_events = Some(PointerEvents::None);
+                glory::ui::view()
+                    .class("sapid-native-select-loader")
+                    .style(slot)
+                    .fill(
+                        crate::loader()
+                            .theme(self.common.theme.clone())
+                            .diameter(16.)
+                            .visible(loading)
+                            .decorative(),
+                    )
+                    .show_in(&frame)?;
+            }
+            scope.retain(frame)?;
+        } else {
+            inner.show_in(scope)?;
+        }
         let node = reference.try_get()?.ok_or(glory::ui::Error::Gone)?;
         let weak = scope.downgrade();
         let mut previous = initial;

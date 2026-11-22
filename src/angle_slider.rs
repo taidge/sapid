@@ -15,6 +15,10 @@ pub fn angle_slider(key: impl Into<String>) -> AngleSlider {
     }
 }
 impl AngleSlider {
+    pub fn thumb_size(mut self, value: impl Into<Vary<f64>>) -> Self {
+        self.inner = self.inner.thumb_size(value);
+        self
+    }
     pub fn value(mut self, value: impl Into<Vary<f64>>) -> Self {
         self.inner = self.inner.value(value);
         self

@@ -55,7 +55,7 @@ impl FloatingTarget {
         };
         self.bound.set(true);
         if base.id.as_ref().is_some_and(|id| id != &self.id)
-            || (state.kind == Kind::Tooltip
+            || (state.tooltip_role
                 && base
                     .described_by
                     .as_ref()
@@ -70,7 +70,7 @@ impl FloatingTarget {
         let id = self.panel.clone();
         let open = state.visible.clone();
         let enabled = state.enabled.clone();
-        let tooltip = state.kind == Kind::Tooltip;
+        let tooltip = state.tooltip_role;
         scope
             .bond(move || {
                 let mut value = base.clone();
@@ -128,6 +128,7 @@ macro_rules! target_adapter {
         }
     };
 }
+target_adapter!(view, view_with, View, false);
 target_adapter!(button, button_with, Button, true);
 target_adapter!(link, link_with, Link, false);
 target_adapter!(input, input_with, Input, false);
@@ -136,6 +137,7 @@ target_adapter!(check, check_with, Check, false);
 struct Hint {
     key: String,
     kind: Kind,
+    tooltip_role: bool,
     common: Common,
     label: Vary<String>,
     text: Vary<String>,
@@ -155,6 +157,7 @@ impl Hint {
         Self {
             key: key.into(),
             kind,
+            tooltip_role: kind == Kind::Tooltip,
             common: Common::default(),
             label: "More information".into(),
             text: "".into(),
@@ -303,6 +306,11 @@ impl Tooltip {
     }
 }
 impl HoverCard {
+    /// Describe a focusable target with supplementary read-only card content.
+    pub fn tooltip_role(mut self, value: bool) -> Self {
+        self.inner.tooltip_role = value;
+        self
+    }
     pub fn content<W: Widget + 'static>(
         mut self,
         mut factory: impl FnMut() -> W + 'static,
@@ -319,7 +327,7 @@ impl HoverCard {
 struct State {
     scope: glory::ui::WeakScope,
     owner: glory::core::InstanceId,
-    kind: Kind,
+    tooltip_role: bool,
     open: Control<bool>,
     changed: Callback<bool>,
     dismissed: Callback<DismissReason>,
@@ -410,7 +418,7 @@ impl Hint {
         let state = Rc::new(State {
             scope: owner.downgrade(),
             owner: owner.id(),
-            kind: self.kind,
+            tooltip_role: self.tooltip_role,
             open: control,
             changed: Callback::new(self.change.take()),
             dismissed: Callback::new(self.dismiss.take()),
@@ -457,7 +465,7 @@ impl Hint {
             .into());
         }
         drop(target);
-        let role = if self.kind == Kind::Tooltip {
+        let role = if self.tooltip_role {
             Role::Tooltip
         } else {
             Role::Dialog
@@ -486,7 +494,7 @@ impl Hint {
             },
             hint_style(&self.common, self.kind)
         )
-        .focus(if self.kind == Kind::Tooltip {
+        .focus(if self.tooltip_role {
             FocusMode::Auto
         } else {
             FocusMode::Programmatic

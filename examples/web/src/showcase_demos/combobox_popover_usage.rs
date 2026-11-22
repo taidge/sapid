@@ -3,6 +3,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
     sapid::select("framework-popover")
         .theme(theme.clone())
         .name("Choose framework")
+        .class("site-combobox-trigger-example")
         .placeholder("Select framework")
         .style(Style::new().gap(8.))
         .options([

@@ -91,6 +91,7 @@ pub(super) fn build(widget: &mut Accordion, scope: &Scope, input: Items) -> Resu
     let heading = widget.heading;
     let regions = widget.regions;
     let policy = widget.policy;
+    let duration = widget.transition_duration;
     let owner = scope.id();
     let registrations = collection.clone();
     let focus = dynamic::FocusRestore::new(
@@ -204,6 +205,7 @@ pub(super) fn build(widget: &mut Accordion, scope: &Scope, input: Items) -> Resu
                     class: "sapid-accordion-panel",
                     unstyled,
                 };
+                let panel = super::animated_panel(panel, duration);
                 let focused_key = config.key.clone();
                 let weak = scope.downgrade();
                 let mut row = glory::ui::view().class("sapid-accordion-item");

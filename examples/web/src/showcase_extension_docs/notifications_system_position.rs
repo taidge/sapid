@@ -1,55 +1,70 @@
 use glory::prelude::*;
-use sapid::prelude::*;
-use std::{cell::RefCell, rc::Rc};
+use sapid::{
+    AffixHorizontal::{Left, Right},
+    AffixOffset,
+    AffixVertical::{Bottom, Top},
+    NotificationsHandle,
+};
 pub fn demo(theme: sapid::Theme) -> impl Widget {
     widget(move |scope| {
-        let handle = Rc::new(RefCell::new(None::<NotificationsHandle>));
-        let ready = handle.clone();
-        let status = scope.cage("Ready".to_string());
-        let token = Rc::new(RefCell::new(None::<NotificationToken>));
-        let _ = &token;
-
-        sapid::stack()
-            .theme(theme.clone())
-            .fill((
-                {
-                    let handle = handle.clone();
-                    let token = token.clone();
-                    sapid::button()
-                        .theme(theme.clone())
-                        .label("Show corner notification")
-                        .on_press(move || {
-                            let _ = &token;
-                            if let Some(handle) = handle.borrow().clone() {
-                                let result = (|| -> glory::ui::Result {
-                                    handle.show(sapid::notification_request(
-                                        "corner",
-                                        "Saved at the corner",
-                                        "Dismiss to clear this viewport message.",
-                                    ))?;
-                                    Ok(())
-                                })();
-                                if let Err(error) = result {
-                                    status.revise(|o| *o = format!("Request rejected: {error}"));
-                                }
-                            }
-                        })
-                },
-                sapid::affix("notification-position")
+        let mut buttons = Vec::new();
+        let mut outlets = Vec::new();
+        for (position, horizontal, vertical) in [
+            ("top-left", Left(16.), Top(16.)),
+            ("top-right", Right(16.), Top(16.)),
+            ("bottom-left", Left(16.), Bottom(16.)),
+            ("bottom-right", Right(16.), Bottom(16.)),
+            ("top-center", Left(0.), Top(16.)),
+            ("bottom-center", Left(0.), Bottom(16.)),
+        ] {
+            let handle = scope.cage(None::<NotificationsHandle>);
+            let owner = scope.downgrade();
+            buttons.push(
+                sapid::button()
                     .theme(theme.clone())
+                    .label(position)
+                    .on_press(move || {
+                        let (Some(handle), Some(owner)) = (handle.get(), owner.upgrade()) else {
+                            return;
+                        };
+                        if let Err(error) = handle.show(sapid::notification_request(
+                            position,
+                            "Notification",
+                            format!("This notification is displayed at the {position}."),
+                        )) {
+                            owner.report_error(error);
+                        }
+                    }),
+            );
+            outlets.push(
+                sapid::affix(format!("notification-{position}"))
+                    .theme(theme.clone())
+                    .class(if position.ends_with("center") {
+                        "showcase-notice-outlet is-centered"
+                    } else {
+                        "showcase-notice-outlet"
+                    })
+                    .offset(AffixOffset {
+                        horizontal,
+                        vertical,
+                    })
                     .style(
                         Style::new()
-                            .width(Length::Px(300.))
+                            .width(Length::Px(320.))
                             .max_width(glory::style::Limit::Percent(90.)),
                     )
                     .fill(
-                        sapid::toaster("notify-position")
+                        sapid::toaster(format!("notify-{position}"))
                             .theme(theme.clone())
-                            .capacity(8)
-                            .visible_limit(3)
-                            .on_ready(move |h| *ready.borrow_mut() = Some(h)),
+                            .visible_limit(1)
+                            .on_ready(move |ready| handle.revise(|value| *value = Some(ready))),
                     ),
-                sapid::text().theme(theme.clone()).content(status),
+            );
+        }
+        glory::ui::view()
+            .fill((
+                sapid::group().theme(theme.clone()).fill(buttons),
+                glory::ui::view().fill(outlets),
             ))
             .show_in(scope)
     })

@@ -171,6 +171,7 @@ pub struct PinInput {
     value: Value<String>,
     domain: PinDomain,
     masked: Vary<bool>,
+    placeholder: Option<Vary<String>>,
     gap: f64,
     cell_padding: Option<f64>,
     autofill: Option<InputAutofill>,
@@ -195,6 +196,7 @@ pub fn pin_input() -> PinInput {
         value: Value::default(),
         domain: PinDomain::default(),
         masked: false.into(),
+        placeholder: None,
         gap: 8.,
         cell_padding: None,
         autofill: None,
@@ -231,6 +233,11 @@ impl PinInput {
     }
     pub fn alphabet(mut self, alphabet: PinAlphabet) -> Self {
         self.domain.alphabet = alphabet;
+        self
+    }
+    /// A decorative placeholder for each unfilled cell. The code stays in one editor.
+    pub fn placeholder(mut self, value: impl Into<Vary<String>>) -> Self {
+        self.placeholder = Some(value.into());
         self
     }
     pub fn masked(mut self, masked: impl Into<Vary<bool>>) -> Self {
@@ -341,7 +348,7 @@ impl Widget for PinInput {
         let assist = InputAssist {
             autofill: self.autofill,
             mode: Some(match domain.alphabet {
-                PinAlphabet::Digits => InputMode::Numeric,
+                PinAlphabet::Digits | PinAlphabet::DigitRange { .. } => InputMode::Numeric,
                 PinAlphabet::AsciiAlphanumeric => InputMode::Text,
             }),
         };
@@ -463,7 +470,7 @@ impl Widget for PinInput {
         let content = scope.child_in(frame.try_get()?.ok_or(glory::ui::Error::Gone)?)?;
         for index in 0..domain.length {
             let theme = self.common.theme.clone();
-            glory::ui::view()
+            let cell = glory::ui::view()
                 .class("sapid-pin-cell")
                 .style(scope.bond(move || {
                     let mut s = Style::new()
@@ -504,8 +511,37 @@ impl Widget for PinInput {
                             });
                     }
                     s
-                }))
+                }));
+            if let Some(placeholder) = self.placeholder.clone() {
+                let muted = self.common.theme.muted;
+                cell.semantics(Some(Box::new(Semantics {
+                    inert: true,
+                    ..Default::default()
+                })))
+                .fill(
+                    glory::ui::text()
+                        .class("sapid-pin-placeholder")
+                        .style(Style {
+                            display: Some(Display::Flex),
+                            align: Some(glory::style::Align::Center),
+                            justify: Some(glory::style::Justify::Center),
+                            color: Some(muted),
+                            ..Style::new()
+                                .width(Length::Percent(100.))
+                                .height(Length::Percent(100.))
+                        })
+                        .content(scope.bond(move || {
+                            if accepted.with(|s| index >= s.value.len()) {
+                                placeholder.with(|s| s.chars().take(1).collect::<String>())
+                            } else {
+                                String::new()
+                            }
+                        })),
+                )
                 .show_in(&content)?;
+            } else {
+                cell.show_in(&content)?;
+            }
         }
         let initial = accepted.try_with(|s| s.value.clone())?;
         let reference = self.common.node_ref.unwrap_or_else(|| scope.cage(None));

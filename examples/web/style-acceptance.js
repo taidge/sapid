@@ -53,23 +53,29 @@ async (hostPage) => {
         await page.locator('#fixture').evaluate((root, inputClass) => {
           root.innerHTML = '<button id="before">Before</button>';
           const input = document.createElement('input');
-          input.id = 'invalid'; input.className = inputClass;
-          input.setAttribute('data-gly-invalid', '');
-          input.style.cssText = 'border:1px solid var(--sp-danger);background:var(--sp-input)';
+          input.id = 'editor'; input.className = inputClass;
+          input.style.cssText = 'border:1px solid var(--sp-border);background:var(--sp-input)';
           root.append(input);
         }, inputClass);
-        const before = await page.locator('#invalid').evaluate(node => getComputedStyle(node).borderColor);
-        await page.locator('#before').focus();
-        await page.keyboard.press('Tab');
-        const focused = await page.locator('#invalid').evaluate(node => {
-          const style = getComputedStyle(node);
-          return { active: document.activeElement === node, visible: node.matches(':focus-visible'),
-            outline: style.outlineStyle, width: style.outlineWidth, border: style.borderColor };
-        });
-        assert(focused.active && focused.visible && focused.outline === 'solid' && focused.width === '2px',
-          `${mode}/${inputClass}: invalid input lost its focus ring: ${JSON.stringify(focused)}`);
-        assert(focused.border === before, `${mode}/${inputClass}: focus erased the error border`);
-        reports.push({ suite: `style-invalid-focus-${inputClass}-${mode}`, status: 'passed' });
+        const editor = page.locator('#editor');
+        for (const invalid of [false, true]) {
+          await page.locator('#before').focus();
+          await editor.evaluate((node, invalid) => {
+            node.toggleAttribute('data-gly-invalid', invalid);
+            node.style.borderColor = invalid ? 'var(--sp-danger)' : 'var(--sp-border)';
+            node.style.color = invalid ? 'var(--sp-danger)' : 'var(--sp-input-focus)';
+          }, invalid);
+          await page.keyboard.press('Tab');
+          const focused = await editor.evaluate(async node => {
+            await Promise.all(node.getAnimations().map(animation => animation.finished));
+            const style = getComputedStyle(node);
+            return node.matches(':focus-visible') && style.outlineStyle === 'none'
+              && style.borderColor === style.color && style.borderTopWidth === '1px'
+              && style.boxShadow.includes(style.borderColor) && style.boxShadow.includes('0px 0px 0px 1px inset');
+          });
+          assert(focused, `${mode}/${inputClass}: expected a single thickened ${invalid ? 'error' : 'focus'} border`);
+        }
+        reports.push({ suite: `style-input-focus-${inputClass}-${mode}`, status: 'passed' });
       }
     }
     const triggerClasses = ['sapid-accordion-trigger', 'sapid-tab', 'sapid-collapsible-trigger',

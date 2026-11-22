@@ -19,16 +19,42 @@ const plots=['candlestick-chart','donut-chart','pie-chart','funnel-chart','radar
  const asset=await page.evaluate(()=>document.documentElement.innerHTML.match(/assets-[a-f0-9]{20}/)?.[0]);assert(asset);if(report.asset)assert.equal(asset,report.asset);report.asset=asset;
  assert(await page.locator('.site-title,.site-section-title').evaluateAll(es=>es.every(e=>getComputedStyle(e).fontWeight==='400')));assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  const cartesian=chartPages.includes(slug),primary=page.locator('.site-preview .site-demo').first(),frameSelector=cartesian?'.sapid-chart-plot':'.sapid-plot-drawing',pointSelector=cartesian?'.sapid-chart-point':'.sapid-plot-point',legendSelector=cartesian?'.sapid-chart-legend-item':'.sapid-plot-legend-item',detailSelector=cartesian?'.sapid-chart-point-detail':'.sapid-plot-detail';
- const expected=cartesian?(slug==='area-chart'||slug==='bar-chart'?6:5):4;assert.equal(await page.locator('.site-component-detail').count(),expected);assert.equal(await primary.locator('.site-chart-card').count(),0);
- const frame=primary.locator(frameSelector),b=await rect(frame),container=await rect(primary);assert(b.width<=container.width+1&&b.width>=250);assert(b.height>=65);
+ const expected=({'area-chart':32,'bar-chart':26,'line-chart':27,'composite-chart':27,'donut-chart':14,'pie-chart':12,'funnel-chart':11,'radar-chart':6,'radial-bar-chart':7,'bubble-chart':6,'sunburst-chart':10,'waffle-chart':8,'sankey-chart':9,'treemap':8,'scatter-chart':5,'matrix-chart':10,'bars-list':5,'bullet-chart':10,'gauge-chart':10})[slug] || 4;assert.equal(await page.locator('.site-component-detail').count(),expected);assert.equal(await primary.locator('.site-chart-card').count(),0);
+ const frame=primary.locator(frameSelector),b=await rect(frame),container=await rect(primary);assert(b.width<=container.width+1&&b.width>=(['sparkline','donut-chart','pie-chart','gauge-chart'].includes(slug)?145:220));if(slug==='bullet-chart'){assert(Math.abs(b.height-b.width*120/800)<2)}else{assert(b.height>=(slug==='sparkline'?35:65))};
  await remember(frame,'primaryChartFrame');
  if(slug==='sparkline'){
-  assert(b.width<=321&&b.height<=81);assert.equal(await primary.locator(legendSelector).count(),0);assert.equal(await primary.getByRole('button',{name:'Next data point',exact:true}).count(),0);assert((await primary.textContent()).includes('Weekly values: 4, 7, 5, 9, 8, 12, 15'));
+  assert(b.width<=321&&b.height<=81);assert.equal(await primary.locator(legendSelector).count(),0);assert.equal(await primary.getByRole('button',{name:'Next data point',exact:true}).count(),0);assert(await primary.getByLabel('Weekly values: 4, 7, 5, 9, 8, 12, 15',{exact:true}).count());
+ }else if(slug==='candlestick-chart'){
+  const labels=primary.locator('.sapid-plot-label');
+  const initial=await labels.count();assert(initial>0);
+  await primary.getByLabel('With xaxis',{exact:true}).uncheck();await tick();
+  assert((await labels.count())<initial);
+  await primary.getByLabel('With xaxis',{exact:true}).check();await tick();
+  assert.equal(await labels.count(),initial);
+ }else if(cartesian){
+  const preview = primary.locator('.site-playground-preview');
+  const bounds = await rect(preview);
+  assert(b.width >= bounds.width - 75 && b.width <= bounds.width);
+  const panel = primary.locator('.site-playground-controls');
+  const paths = () => frame.locator('path').evaluateAll(nodes => nodes.map(node => node.getAttribute('d')).join(' '));
+  if(slug!=='bar-chart'){
+   const lines=await paths();
+   await panel.getByLabel('Curve type',{exact:true}).selectOption('step');await tick();
+   assert.notEqual(await paths(),lines);
+  }
+  for (const axis of ['x','y']){
+   const control=panel.getByLabel('With '+axis+'axis',{exact:true});
+   const before=await paths();await control.uncheck();await tick();assert.notEqual(await paths(),before);
+   await control.check();await tick();
+  }
+  const dataSection=section(slug,'series');
+  assert(await dataSection.getByRole('table').count()>0);
  }else{
-  assert(b.width>=container.width-80);assert(await primary.getByRole('table').count()>0);
-  const next=primary.getByRole('button',{name:'Next data point',exact:true});assert((await rect(next)).height<=31);await click(next);assert.notEqual((await primary.locator(detailSelector).textContent()).trim(),'No data point selected');
-  await click(primary.getByRole('button',{name:'Clear data point',exact:true}));assert.equal((await primary.locator(detailSelector).textContent()).trim(),'No data point selected');
-  const legend=primary.locator(legendSelector);if(await legend.count()){
+  const detailed=section(slug,'data');
+  assert(await detailed.getByRole('table').count()>0);assert(await primary.locator(pointSelector).count()>0);
+  const next=detailed.getByRole('button',{name:'Next data point',exact:true});assert((await rect(next)).height<=31);await click(next);assert.notEqual((await detailed.locator(detailSelector).textContent()).trim(),'No data point selected');
+  await click(detailed.getByRole('button',{name:'Clear data point',exact:true}));assert.equal((await detailed.locator(detailSelector).textContent()).trim(),'No data point selected');
+  const legend=detailed.locator(legendSelector);if(await legend.count()){
    const item=legend.first();await remember(item,'primaryLegend');assert.equal(await item.getAttribute('aria-pressed'),'true');assert((await rect(item)).height<=31);const name=await item.getAttribute('aria-label')||await item.textContent();assert(name.includes('Hide'));await click(item);assert.equal(await item.getAttribute('aria-pressed'),'false');assert((await item.textContent()).includes('Show'));await retained(item,'primaryLegend');await click(item);assert.equal(await item.getAttribute('aria-pressed'),'true');
   }
  }
@@ -43,8 +69,8 @@ const plots=['candlestick-chart','donut-chart','pie-chart','funnel-chart','radar
   if(slug==='scatter-chart'||slug==='bubble-chart'){for(const field of ['x=','y=','size='])assert(reading.includes(field));assert.equal(await primary.locator('.sapid-plot-label').count(),12);}
   if(slug==='treemap'||slug==='sunburst-chart'){await click(data.getByRole('button',{name:'First child',exact:true}));assert.notEqual(await data.locator(detailSelector).textContent(),reading);await click(data.getByRole('button',{name:'Parent node',exact:true}));assert.equal(await data.locator(detailSelector).textContent(),reading);}
   const presentation=section(slug,'presentation');
-  if(slug==='matrix-chart'){const labels=await primary.locator('.sapid-plot-label').allTextContents();for(const label of ['Product A','Product B','Product C','Q1','Q2','Q3'])assert(labels.includes(label));assert.equal(labels.length,15);const row=primary.locator('.sapid-plot-label').filter({hasText:/^Product A$/}),column=primary.locator('.sapid-plot-label').filter({hasText:/^Q1$/});assert((await rect(row)).x<(await rect(column)).x);}
-  if(slug==='donut-chart'){assert.equal(await primary.locator('.sapid-plot-label').textContent(),'72%');const center=presentation.getByText('Completion',{exact:true}),c=await rect(center),f=await rect(presentation.locator(frameSelector));assert(Math.abs(c.x+c.width/2-f.x-f.width/2)<2);assert(c.width<f.width/2);}
+  if(slug==='matrix-chart'){assert.deepEqual(await primary.locator('.sapid-plot-label').allTextContents(),['James','Mary','Robert','Linda','Michael','Sarah','David','Emma']);assert.equal(await primary.locator('.sapid-plot-layer path').count(),8*31);assert.equal(await primary.locator('.sapid-plot-scale-legend').innerText(),'');}
+  if(slug==='donut-chart'){assert.equal(await primary.locator('.sapid-plot-point').count(),4);const center=presentation.getByText('Completion',{exact:true}),c=await rect(center),f=await rect(presentation.locator(frameSelector));assert(Math.abs(c.x+c.width/2-f.x-f.width/2)<2);assert(c.width<f.width/2);}
   if(slug==='waffle-chart'){const cells=async scope=>scope.locator('.sapid-plot-layer path').evaluateAll(es=>es.reduce((sum,e)=>sum+(e.getAttribute('d').match(/M/g)||[]).length,0));assert.equal(await cells(primary),100);assert.equal(await cells(presentation),20);await click(presentation.getByRole('button',{name:'Next data point',exact:true}));assert((await presentation.locator(detailSelector).textContent()).includes('of 20 cells'));}
   if(slug==='bubble-chart'){const maximum=await presentation.locator('.sapid-plot-layer path').evaluateAll(es=>Math.max(...es.map(e=>e.getBBox()).filter(b=>Math.abs(b.width-b.height)<0.01).map(b=>b.width)));assert(Math.abs(maximum-64)<0.1);}
  }

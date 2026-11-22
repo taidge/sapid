@@ -2,28 +2,50 @@ use glory::prelude::*;
 pub fn demo(theme: sapid::Theme) -> impl Widget {
     widget(move |scope| {
         let open = scope.cage(true);
-        let card_theme = theme.clone();
+        let size = scope.cage(Some("md".to_owned()));
+        let variant = scope.cage("subtle".to_owned());
+        let palette = theme.clone();
+        let close = each(scope.bond(move || if open.get() { vec![size.get()] } else { vec![] }))
+            .key(Clone::clone)
+            .children(move |_| {
+                sapid::close_button()
+                    .theme(palette.clone())
+                    .size(controls::size_value(size.get().as_deref().unwrap_or("md")))
+                    .name("Close notification")
+                    .variant(sapid::ActionIconVariant::Subtle)
+                    .class(variant.map(|v| {
+                        if v == "transparent" {
+                            "site-close-transparent".to_owned()
+                        } else {
+                            String::new()
+                        }
+                    }))
+                    .on_press(move || open.revise(|v| *v = false))
+            });
         let restore_theme = theme.clone();
-        sapid::stack()
-            .theme(theme.clone())
-            .fill((
-                when(open, move || {
-                    sapid::group().theme(card_theme.clone()).gap(12.).fill((
-                        sapid::text()
-                            .theme(card_theme.clone())
-                            .content("The offline trail map is ready."),
-                        sapid::close_button()
-                            .theme(card_theme.clone())
-                            .name("Close notification")
-                            .on_press(move || open.revise(|v| *v = false)),
-                    ))
-                }),
-                when(open.map(|v| !*v), move || {
-                    sapid::button()
-                        .theme(restore_theme.clone())
-                        .label("Restore notification")
-                        .on_press(move || open.revise(|v| *v = true))
-                }),
+        let preview = view().fill((
+            close,
+            when(open.map(|v| !*v), move || {
+                sapid::button()
+                    .theme(restore_theme.clone())
+                    .label("Restore notification")
+                    .on_press(move || open.revise(|v| *v = true))
+            }),
+        ));
+        view()
+            .class("site-configurator site-action-configurator")
+            .fill(controls::playground(
+                Box::new(preview),
+                vec![
+                    controls::size_slider(size, &theme),
+                    controls::segmented_choice(
+                        "close-variant",
+                        "Variant",
+                        variant,
+                        &[("transparent", "Transparent"), ("subtle", "Subtle")],
+                        &theme,
+                    ),
+                ],
             ))
             .show_in(scope)
     })

@@ -36,6 +36,8 @@ pub struct Alert {
     key: String,
     common: Common,
     content: Vary<String>,
+    optional_content: bool,
+    notification_surface: bool,
     title: Option<Vary<String>>,
     severity: AlertSeverity,
     variant: AlertVariant,
@@ -55,6 +57,8 @@ pub fn alert(key: impl Into<String>) -> Alert {
         key: key.into(),
         common: Common::default(),
         content: "".into(),
+        optional_content: false,
+        notification_surface: false,
         title: None,
         severity: AlertSeverity::Info,
         variant: AlertVariant::Light,
@@ -74,6 +78,10 @@ pub fn alert(key: impl Into<String>) -> Alert {
     }
 }
 impl Alert {
+    pub(crate) fn notification_surface(mut self, value: bool) -> Self {
+        self.notification_surface = value;
+        self
+    }
     pub(crate) fn icon_color(&self) -> Color {
         let theme = &self.common.theme;
         let color = self.color.unwrap_or(match self.severity {
@@ -111,7 +119,14 @@ impl Alert {
         self
     }
     pub fn content(mut self, value: impl Into<Vary<String>>) -> Self {
+        self.optional_content = false;
         self.content = value.into();
+        self
+    }
+    /// An editable message may be cleared while its surrounding notice stays mounted.
+    pub fn optional_content(mut self, value: impl Into<Vary<String>>) -> Self {
+        self.content = value.into();
+        self.optional_content = true;
         self
     }
     pub fn title(mut self, value: impl Into<Vary<String>>) -> Self {
@@ -189,7 +204,14 @@ impl Widget for Alert {
         let id = composite::id("alert", &self.key, "root", "root")?;
         let title_id = composite::id("alert", &self.key, "title", "root")?;
         let content_id = composite::id("alert", &self.key, "message", "root")?;
-        let content = composite::validated(scope, &self.content, |value| message(value))?;
+        let optional = self.optional_content;
+        let content = composite::validated(scope, &self.content, move |value| {
+            if optional && value.trim().is_empty() && value.len() <= MAX_ALERT_TEXT_BYTES {
+                Ok(())
+            } else {
+                message(value)
+            }
+        })?;
         let title = self
             .title
             .as_ref()
@@ -223,7 +245,8 @@ impl Widget for Alert {
             Some(Box::new(Semantics {
                 id: Some(id.clone()),
                 labelled_by: labelled_by.clone(),
-                described_by: Some(description_id.clone()),
+                described_by: (!optional || !content.get().trim().is_empty())
+                    .then(|| description_id.clone()),
                 hidden: !source.get(),
                 busy: busy.as_ref().map(Vary::get),
                 ..Default::default()
@@ -244,7 +267,20 @@ impl Widget for Alert {
         };
         let filled = self.variant == AlertVariant::Filled;
         let foreground = self.icon_color();
-        let message_color = if filled { foreground } else { theme.foreground };
+        let notification = self.notification_surface;
+        let message_color = if notification && title.is_some() {
+            theme.muted
+        } else if filled {
+            foreground
+        } else {
+            theme.foreground
+        };
+        let title_color = if notification {
+            theme.foreground
+        } else {
+            foreground
+        };
+        let icon_size = if notification { 28. } else { 20. };
         let mut base = Style::new()
             .display(Display::Flex)
             .flex_direction(FlexDirection::Row)
@@ -265,6 +301,17 @@ impl Widget for Alert {
             AlertVariant::Filled => color,
             AlertVariant::Outline | AlertVariant::Transparent => Color(0, 0, 0, 0),
         });
+        if notification {
+            base.align = Some(Align::Center);
+            base.background = Some(theme.surface);
+            base.box_shadow = Some(crate::ShadowSize::Large.value(theme));
+            base.padding = Some(Edges {
+                top: 10.,
+                right: 10.,
+                bottom: 10.,
+                left: 22.,
+            });
+        }
         base.color = Some(foreground);
         let (classes, style) = self.common.appearance(scope, "sapid-alert", base);
         root = root.class(classes).style(style);
@@ -290,7 +337,19 @@ impl Widget for Alert {
             true.into()
         };
         // All child captures belong to the caller's mounting Owner.
-        root.fill(glory::ui::widget(move |scope| {
+        let wrapper = glory::ui::view().class("sapid-alert-wrapper").style(Style {
+            grow: Some(1.),
+            align: Some(if notification {
+                Align::Center
+            } else {
+                Align::Start
+            }),
+            ..Style::new()
+                .display(Display::Flex)
+                .gap(16.)
+                .min_width(Length::Px(0.))
+        });
+        root.fill(wrapper.fill(glory::ui::widget(move |scope| {
             if let Some(icon) = icon.take() {
                 let icon_visible = icon_visible.clone();
                 glory::ui::view()
@@ -303,9 +362,16 @@ impl Widget for Alert {
                     }))
                     .style(Style {
                         shrink: Some(0.0),
+                        align: Some(Align::Center),
+                        justify: Some(if notification {
+                            glory::style::Justify::Center
+                        } else {
+                            glory::style::Justify::Start
+                        }),
                         ..Style::new()
-                            .width(Length::Px(20.0))
-                            .height(Length::Px(20.0))
+                            .display(Display::Flex)
+                            .width(Length::Px(icon_size))
+                            .height(Length::Px(icon_size))
                     })
                     .fill(icon)
                     .show_in(scope)?;
@@ -318,31 +384,37 @@ impl Widget for Alert {
                 .class("sapid-alert-body")
                 .style(Style {
                     grow: Some(1.0),
-                    ..composite::column(8.0).min_width(Length::Px(0.0))
+                    ..composite::column(if notification { 2. } else { 8. })
+                        .min_width(Length::Px(0.0))
                 })
                 .fill(glory::ui::widget(move |scope| {
                     if let Some(title) = title {
-                        glory::ui::text()
-                            .class("sapid-alert-title")
-                            .kind(TextKind::Heading(3))
-                            .content(title)
-                            .style(if unstyled {
-                                Style::new()
-                            } else {
-                                Style {
-                                    color: Some(foreground),
-                                    ..body_theme
-                                        .label(size)
-                                        .font_weight(600.)
-                                        .margin(Edges::all(0.))
-                                }
-                            })
-                            .semantics(Some(Box::new(Semantics {
-                                id: Some(title_id.clone()),
-                                ..Default::default()
-                            })))
+                        glory::ui::view()
+                            .class("sapid-alert-title-row")
+                            .fill(
+                                glory::ui::text()
+                                    .class("sapid-alert-title")
+                                    .kind(TextKind::Heading(3))
+                                    .content(title)
+                                    .style(if unstyled {
+                                        Style::new()
+                                    } else {
+                                        Style {
+                                            color: Some(title_color),
+                                            ..body_theme
+                                                .label(size)
+                                                .font_weight(if notification { 500. } else { 700. })
+                                                .margin(Edges::all(0.))
+                                        }
+                                    })
+                                    .semantics(Some(Box::new(Semantics {
+                                        id: Some(title_id.clone()),
+                                        ..Default::default()
+                                    }))),
+                            )
                             .show_in(scope)?;
                     }
+                    let content_id = content_id.clone();
                     glory::ui::text()
                         .class("sapid-alert-content")
                         .content(content)
@@ -354,10 +426,13 @@ impl Widget for Alert {
                                 ..body_theme.label(size).font_weight(400.)
                             }
                         })
-                        .semantics(Some(Box::new(Semantics {
-                            id: Some(content_id.clone()),
-                            ..Default::default()
-                        })))
+                        .semantics(scope.bond(move || {
+                            Some(Box::new(Semantics {
+                                id: Some(content_id.clone()),
+                                hidden: optional && content.get().trim().is_empty(),
+                                ..Default::default()
+                            }))
+                        }))
                         .show_in(scope)?;
                     if let Some(children) = children.take() {
                         glory::ui::group().fill(children).show_in(scope)?;
@@ -394,10 +469,10 @@ impl Widget for Alert {
                         justify: Some(glory::style::Justify::Center),
                         ..Style::new()
                             .display(Display::InlineFlex)
-                            .width(Length::Px(24.0))
-                            .height(Length::Px(24.0))
-                            .min_width(Length::Px(24.0))
-                            .min_height(Length::Px(24.0))
+                            .width(Length::Px(if notification { 28.0 } else { 20.0 }))
+                            .height(Length::Px(if notification { 28.0 } else { 20.0 }))
+                            .min_width(Length::Px(if notification { 28.0 } else { 20.0 }))
+                            .min_height(Length::Px(if notification { 28.0 } else { 20.0 }))
                             .padding(Edges::all(0.0))
                             .radius(3.0)
                     })
@@ -414,7 +489,7 @@ impl Widget for Alert {
                 button.show_in(scope)?;
             }
             Ok(())
-        }))
+        })))
         .show_in(scope)
     }
 }

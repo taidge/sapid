@@ -41,34 +41,25 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
       assert(await editor.evaluate(e => e === window.transitionEditor)); assert.equal(await editor.inputValue(), 'Retained actual browser draft');
       await primary.screenshot({ path: outputPath(`transition-remediation/${key}.png`) });
 
-      const effects = detail('Effects and timing'); const effectShell = effects.locator('.sapid-transition');
-      const toggle = effects.getByRole('button', { name: 'Toggle effect example', exact: true });
-      await effects.getByRole('button', { name: 'Scale', exact: true }).click();
-      await toggle.click(); await hidden(effectShell); await toggle.click();
-      await until(effectShell, e => { const matrix = new DOMMatrixReadOnly(getComputedStyle(e).transform); return matrix.a > .85 && matrix.a < .995; }, 'scale effect has no real transform');
-      assert.equal(await effectShell.evaluate(e => getComputedStyle(e).transitionTimingFunction.split(',')[0].trim()), 'ease-out');
-      await shown(effectShell);
-      await effects.getByRole('button', { name: 'Slide left', exact: true }).click();
-      await toggle.click(); await hidden(effectShell); await toggle.click();
-      await until(effectShell, e => { const matrix = new DOMMatrixReadOnly(getComputedStyle(e).transform); return matrix.e > .1 && matrix.e < 24; }, 'slide effect has no real translation');
-      await shown(effectShell);
-
-      const custom = detail('Custom closed styles and transform origin'); const customShell = custom.locator('.sapid-transition');
-      await custom.getByRole('button', { name: 'Toggle custom transition', exact: true }).click(); await hidden(customShell);
-      await custom.getByRole('button', { name: 'Toggle custom transition', exact: true }).click();
-      await until(customShell, e => { const m = new DOMMatrixReadOnly(getComputedStyle(e).transform); return m.b < -.005 && m.a > .8 && m.a < .995; }, 'custom scale and rotation have no intermediate transform');
-      assert.equal(await customShell.evaluate(e => getComputedStyle(e).transformOrigin.split(' ')[1]), '0px');
+      const effects = detail('Effects and timing').locator('.site-demo');
+      assert.equal(await effects.getByRole('button').count(), 21);
+      for (const name of ['scale', 'slide-left', 'pop-top-right']) {
+        const trigger=effects.getByRole('button',{name,exact:true});const effectShell=effects.locator('[data-gly-presence-effect="'+name+'"]');
+        await trigger.click();
+        await until(effectShell,e=>getComputedStyle(e).transform!=='none'&&getComputedStyle(e).transform!=='matrix(1, 0, 0, 1, 0, 0)','missing live transform');
+        await shown(effectShell);
+      }
+      const custom=detail('Custom closed styles and transform origin'),customShell=custom.locator('.sapid-transition');
+      await custom.getByRole('button',{name:'Open dropdown',exact:true}).click();
+      await until(customShell,e=>{let m=new DOMMatrixReadOnly(getComputedStyle(e).transform);return m.d>0&&m.d<1},'custom vertical scale had no intermediate frame');
       await shown(customShell);
-
-      const lifecycle = detail('Delays, completion and interruption'); const delayed = lifecycle.locator('.sapid-transition');
-      await lifecycle.getByRole('button', { name: 'Toggle delayed transition', exact: true }).click();
-      await lifecycle.getByText('enter', { exact: true }).waitFor();
-      assert(await delayed.evaluate(e => e.getAnimations().some(a => a.effect.getTiming().delay === 150)));
-      await shown(delayed); await lifecycle.getByText('enter → entered', { exact: true }).waitFor();
-      await lifecycle.getByRole('button', { name: 'Toggle delayed transition', exact: true }).click();
-      await until(delayed, e => { const opacity = Number(getComputedStyle(e).opacity); return opacity > .1 && opacity < .9; }, 'no delayed exit frame');
-      await lifecycle.getByRole('button', { name: 'Toggle delayed transition', exact: true }).click();
-      await shown(delayed); await lifecycle.getByText('enter → entered → exit → enter → entered', { exact: true }).waitFor();
+      await custom.getByRole('button',{name:'Close dropdown',exact:true}).click();await hidden(customShell);
+      const lifecycle=detail('Delays, completion and interruption'),delayed=lifecycle.locator('.sapid-transition');
+      await lifecycle.getByRole('button',{name:'Open dropdown',exact:true}).click();
+      await until(delayed,e=>e.getAnimations().some(a=>a.effect.getTiming().delay===200),'missing enter delay');
+      await shown(delayed);await lifecycle.getByRole('button',{name:'Close dropdown',exact:true}).click();
+      await until(delayed,e=>{let v=Number(getComputedStyle(e).opacity);return v>0&&v<1},'missing delayed exit frame');
+      await lifecycle.getByRole('button',{name:'Open dropdown',exact:true}).click();await shown(delayed);
 
       const policies = detail('Keep mounted and unmount policies');
       const kept = policies.getByRole('textbox', { name: 'Kept editor', exact: true }); const unmounted = policies.getByRole('textbox', { name: 'Unmounted editor', exact: true });

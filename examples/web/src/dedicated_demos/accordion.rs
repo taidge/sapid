@@ -2,7 +2,7 @@ use glory::prelude::*;
 
 pub fn demo(theme: sapid::Theme) -> impl Widget {
     widget(move |scope| {
-        let open = scope.cage(vec!["shipping".to_owned()]);
+        let open = scope.cage(vec!["apples".to_owned()]);
         let variant = scope.cage(Some("default".to_owned()));
         let radius = scope.cage(6.);
         let position = scope.cage("right".to_owned());
@@ -35,31 +35,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                 Some("unstyled") => accordion.unstyled(),
                 _ => accordion,
             };
-            for (key, question, answer) in [
-                (
-                    "shipping",
-                    "How long does shipping take?",
-                    "Orders usually arrive within 3–5 business days.",
-                ),
-                (
-                    "returns",
-                    "What is your return policy?",
-                    "You can request a return within 30 days.",
-                ),
-                (
-                    "support",
-                    "How can I contact support?",
-                    "Send a message to the support team from your account.",
-                ),
-            ] {
-                let theme = palette.clone();
-                accordion = accordion.item(
-                    sapid::accordion_item(key)
-                        .label(question)
-                        .content(move || sapid::text().theme(theme.clone()).content(answer)),
-                );
-            }
-            accordion
+            display_sample::fruit_items(accordion, None)
         });
         let side = sapid::stack().theme(theme.clone()).gap(8.).fill((
             sapid::text()
@@ -77,7 +53,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                 .on_value_change(move |next| position.revise(|v| *v = next)),
         ));
         view()
-            .class("site-configurator")
+            .class("site-configurator site-display-configurator")
             .fill(controls::playground(
                 Box::new(preview),
                 vec![

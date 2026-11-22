@@ -1,27 +1,32 @@
 use glory::prelude::*;
 use sapid::charts::*;
-fn values(values: &[(&str, &str, f64)]) -> PlotData {
-    PlotData::Values(
-        values
-            .iter()
-            .map(|(key, label, value)| ValueDatum::new(*key, *label, *value))
-            .collect(),
-    )
-}
-fn sample_data() -> PlotData {
-    values(&[
-        ("done", "Completed", 72.0),
-        ("remaining", "Remaining", 28.0),
-    ])
-}
-
 pub fn demo(theme: sapid::Theme) -> impl Widget {
+    let palette = controls::chart_palette(&theme);
     donut_chart("donut-chart-overview")
-        .name("Shares, totals and the inner ring")
         .theme(theme)
-        .data(sample_data())
+        .name("Share by country")
+        .chart_theme(palette)
+        .data(controls::segment_example_data())
+        .frame(ChartFrame {
+            width: 320.,
+            height: 320.,
+        })
         .default_options(PlotOptions {
-            center_label: Some("72%".into()),
+            angles: Some(PlotAngles {
+                start: 0.,
+                sweep: 360.,
+            }),
+            counterclockwise: true,
+            tooltip: true,
+            donut_inner_ratio: Some(0.75),
             ..Default::default()
         })
+        .style(
+            Style::new()
+                .width(Length::Px(184.))
+                .max_width(Limit::Percent(100.)),
+        )
+        .legend(false)
+        .navigation(false)
+        .data_table(false)
 }

@@ -1,37 +1,32 @@
 use glory::prelude::*;
-use glory::style::Color;
-use sapid::{ProgressSection, group, ring_progress};
 pub fn demo(theme: sapid::Theme) -> impl Widget {
-    let sections = [
-        ProgressSection::new(20., Color(240, 62, 62, 255)),
-        ProgressSection::new(30., Color(34, 139, 230, 255)),
-        ProgressSection::new(10., Color(64, 192, 87, 255)),
-    ];
-    group().theme(theme.clone()).gap(24.).fill((
-        ring_progress(60.)
-            .theme(theme.clone())
-            .size(112.)
-            .sections(sections)
-            .start_angle(0.)
-            .root_color(Color(222, 226, 230, 255))
-            .label("0°"),
-        ring_progress(60.)
-            .theme(theme.clone())
-            .size(112.)
-            .sections(sections)
-            .start_angle(90.)
-            .label("90°"),
-        ring_progress(60.)
-            .theme(theme.clone())
-            .size(112.)
-            .sections(sections)
-            .start_angle(180.)
-            .label("180°"),
-        ring_progress(60.)
-            .theme(theme.clone())
-            .size(112.)
-            .sections(sections)
-            .start_angle(270.)
-            .label("270°"),
-    ))
+    sapid::group()
+        .theme(theme.clone())
+        .justify(Justify::Center)
+        .gap(24.)
+        .fill(
+            [
+                (0., "0° (right)"),
+                (90., "90° (bottom)"),
+                (180., "180° (left)"),
+                (270., "270° (top)"),
+            ]
+            .map(|(angle, label)| {
+                sapid::stack()
+                    .theme(theme.clone())
+                    .align(Align::Center)
+                    .gap(4.)
+                    .fill((
+                        sapid::ring_progress(25.)
+                            .theme(theme.clone())
+                            .size(80.)
+                            .thickness(8.)
+                            .sections([sapid::ProgressSection::new(25., Color(18, 184, 134, 255))])
+                            .start_angle(angle),
+                        sapid::text().theme(theme.clone()).content(label),
+                    ))
+            })
+            .into_iter()
+            .collect::<Vec<_>>(),
+        )
 }

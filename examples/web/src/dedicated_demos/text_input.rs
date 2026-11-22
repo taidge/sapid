@@ -1,8 +1,16 @@
 use glory::prelude::*;
+
 pub fn demo(theme: sapid::Theme) -> impl Widget {
-    sapid::field("text-name")
-        .theme(theme)
-        .label("Your name")
-        .description("How should we address you?")
-        .control(|field| sapid::text_field().field(field).placeholder("Ada Lovelace"))
+    controls::field_playground(
+        theme,
+        "text-name",
+        "Input label",
+        "Input description",
+        move |field, style| {
+            sapid::text_field()
+                .field(field)
+                .style(style)
+                .placeholder("Input placeholder")
+        },
+    )
 }

@@ -81,7 +81,7 @@ pub fn navigate(url: &str) -> Result<(), String> {
     crate::showcase_host::navigate(url)
 }
 #[cfg(target_arch = "wasm32")]
-fn style(id: &str, css: &str) -> Result<(), String> {
+pub(crate) fn style(id: &str, css: &str) -> Result<(), String> {
     let doc = web_sys::window()
         .and_then(|w| w.document())
         .ok_or("Missing document")?;

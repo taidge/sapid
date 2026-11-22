@@ -18,7 +18,6 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                 Some("end") => Justify::End,
                 Some("between") => Justify::Between,
                 Some("around") => Justify::Around,
-                Some("evenly") => Justify::Evenly,
                 _ => Justify::Center,
             }),
             ..Style::new()
@@ -30,14 +29,12 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
             .theme(theme.clone())
             .class("site-stack-example")
             .style(layout)
-            .fill(Vec::from(["Plan", "Design review", "Deliver"].map(
-                |label| {
-                    sapid::card()
-                        .theme(theme.clone())
-                        .style(Style::new().padding(Edges::all(8.)))
-                        .fill(sapid::text().theme(theme.clone()).content(label))
-                },
-            )));
+            .fill(Vec::from(["1", "2", "3"].map(|label| {
+                sapid::button()
+                    .theme(theme.clone())
+                    .variant(sapid::ButtonVariant::Secondary)
+                    .label(label)
+            })));
         view()
             .class("site-configurator")
             .fill(controls::playground(
@@ -50,8 +47,8 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                         &[
                             ("stretch", "Stretch"),
                             ("center", "Center"),
-                            ("start", "Start"),
-                            ("end", "End"),
+                            ("start", "Flex-start"),
+                            ("end", "Flex-end"),
                         ],
                         &theme,
                     ),
@@ -61,11 +58,10 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                         justify,
                         &[
                             ("center", "Center"),
-                            ("start", "Start"),
-                            ("end", "End"),
-                            ("between", "Space between"),
-                            ("around", "Space around"),
-                            ("evenly", "Space evenly"),
+                            ("start", "Flex-start"),
+                            ("end", "Flex-end"),
+                            ("between", "Space-between"),
+                            ("around", "Space-around"),
                         ],
                         &theme,
                     ),
@@ -187,6 +183,7 @@ mod controls {
                     .step(1.0)
                     .value(current)
                     .value_text(value_text)
+                    .marks((0..5).map(|i| sapid::SliderMark::unlabeled(f64::from(i))))
                     .on_value_change(move |next| {
                         value.revise(|current| {
                             *current = Some(

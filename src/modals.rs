@@ -224,6 +224,7 @@ pub struct ModalsManager {
     theme: Theme,
     capacity: usize,
     ready: Option<Box<dyn FnMut(ModalsHandle)>>,
+    stacked: bool,
 }
 pub fn modals_manager(key: impl Into<String>) -> ModalsManager {
     ModalsManager {
@@ -231,6 +232,7 @@ pub fn modals_manager(key: impl Into<String>) -> ModalsManager {
         theme: Theme::default(),
         capacity: 16,
         ready: None,
+        stacked: false,
     }
 }
 impl ModalsManager {
@@ -240,6 +242,11 @@ impl ModalsManager {
     }
     pub fn capacity(mut self, value: usize) -> Self {
         self.capacity = value;
+        self
+    }
+    /// Keep earlier modal layers mounted behind later requests. The default displays one queued request.
+    pub fn stacked(mut self, value: bool) -> Self {
+        self.stacked = value;
         self
     }
     pub fn on_ready(mut self, callback: impl FnMut(ModalsHandle) + 'static) -> Self {
@@ -286,8 +293,15 @@ impl Widget for ModalsManager {
         let handle = ModalsHandle(controller.clone());
         let cleanup = controller.clone();
         scope.on_cleanup(move || cleanup.live.set(false))?;
+        let stacked = self.stacked;
         let current = scope.bond(move || {
-            entries.with(|entries| entries.first().cloned().into_iter().collect::<Vec<_>>())
+            entries.with(|entries| {
+                if stacked {
+                    entries.clone()
+                } else {
+                    entries.first().cloned().into_iter().collect()
+                }
+            })
         });
         let key = self.key.clone();
         let theme = self.theme.clone();

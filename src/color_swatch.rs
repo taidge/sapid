@@ -13,6 +13,7 @@ pub struct ColorSwatch {
     color: Vary<Color>,
     side: f64,
     round: bool,
+    shadow: Vary<bool>,
     interactive: bool,
     pressed: Option<Value<bool>>,
     change: Option<Box<dyn FnMut(bool)>>,
@@ -24,6 +25,7 @@ pub fn color_swatch(color: impl Into<Vary<Color>>) -> ColorSwatch {
         color: color.into(),
         side: 32.,
         round: false,
+        shadow: false.into(),
         interactive: false,
         pressed: None,
         change: None,
@@ -61,6 +63,10 @@ impl ColorSwatch {
     }
     pub fn round(mut self, value: bool) -> Self {
         self.round = value;
+        self
+    }
+    pub fn with_shadow(mut self, value: impl Into<Vary<bool>>) -> Self {
+        self.shadow = value.into();
         self
     }
     pub fn enabled(mut self, value: impl Into<Vary<bool>>) -> Self {
@@ -273,9 +279,22 @@ impl Widget for ColorSwatch {
         let light_mark = self.common.theme.swatch_mark_light;
         let dark_mark = self.common.theme.swatch_mark_dark;
         let color = self.color.clone();
+        let shadow = self.shadow.clone();
+        let color_class = move || {
+            if shadow.get() {
+                "sapid-color-swatch-color sapid-color-swatch-shadow".to_owned()
+            } else {
+                "sapid-color-swatch-color".to_owned()
+            }
+        };
+        let color_class: Vary<String> = if self.shadow.is_reactive() {
+            scope.bond(color_class).into()
+        } else {
+            color_class().into()
+        };
         let foreground = glory::ui::graphic()
             .drawing(scope.bond(move || full(color.get())))
-            .class("sapid-color-swatch-color")
+            .class(color_class)
             .style(layer.clone());
         let check = self.color.clone();
         let checked_mark = glory::ui::graphic()

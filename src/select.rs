@@ -78,6 +78,7 @@ pub struct Select {
     loading: Vary<bool>,
     option_content: BTreeMap<String, SelectOptionContent>,
     check_position: SelectCheckPosition,
+    aligned_labels: bool,
     max_dropdown_height: f64,
     popup_placement: glory::render::AnchorPlacement,
     trigger_content: Option<Box<dyn FnMut(SelectTriggerContext) -> Children>>,
@@ -103,6 +104,7 @@ pub fn select(key: impl Into<String>) -> Select {
         loading: false.into(),
         option_content: BTreeMap::new(),
         check_position: SelectCheckPosition::Left,
+        aligned_labels: true,
         max_dropdown_height: 288.0,
         trigger_content: None,
         empty_message: "No options available".into(),
@@ -197,6 +199,11 @@ impl Select {
         if self.option_content.len() <= 1024 {
             self.option_content.insert(key.into(), content);
         }
+        self
+    }
+    /// Reserve a check column for unselected options as well as selected ones.
+    pub fn with_aligned_labels(mut self, value: bool) -> Self {
+        self.aligned_labels = value;
         self
     }
     pub fn check_position(mut self, value: SelectCheckPosition) -> Self {
@@ -659,18 +666,19 @@ impl Widget for Select {
             }
         });
         let side = crate::input_actions::side(&self.common);
+        let arrow_size = crate::input_actions::selector_size(side);
         let arrow_style = Style {
             shrink: Some(0.),
             ..Style::new()
                 .display(Display::Block)
                 .pointer_events(PointerEvents::None)
                 .position(Position::Absolute)
-                .width(Length::Px(16.))
-                .height(Length::Px(16.))
-                .right(Length::Px((side - 16.) / 2.))
+                .width(Length::Px(arrow_size))
+                .height(Length::Px(arrow_size))
+                .right(Length::Px((side - arrow_size) / 2. - 1.))
                 .top(Length::Percent(50.))
                 .margin(Edges {
-                    top: -8.,
+                    top: -arrow_size / 2.,
                     bottom: 0.,
                     left: 0.,
                     right: 0.,
@@ -678,7 +686,7 @@ impl Widget for Select {
         };
         let arrow_loading = self.loading.clone();
         trigger = trigger.fill(
-            crate::input_actions::glyph(crate::Icon::ChevronDown, self.common.theme.muted)
+            crate::input_actions::glyph(crate::Icon::Selector, self.common.theme.muted)
                 .class("sapid-select-chevron")
                 .style(scope.bond(move || {
                     let mut style = arrow_style.clone();
@@ -863,9 +871,13 @@ impl Widget for Select {
                         common: &self.common,
                         content: self.option_content.get(option.key.as_str()),
                         check_position: self.check_position,
+                        aligned_labels: self.aligned_labels,
                     },
                 )?,
-                SelectEntry::Group(group) => {
+                entry => {
+                    let SelectEntry::Group(group) = entry else {
+                        continue;
+                    };
                     let reference = scope.cage(None);
                     glory::ui::view()
                         .role(Role::Group)
@@ -892,6 +904,7 @@ impl Widget for Select {
                                 common: &self.common,
                                 content: self.option_content.get(option.key.as_str()),
                                 check_position: self.check_position,
+                                aligned_labels: self.aligned_labels,
                             },
                         )?;
                     }
@@ -1028,12 +1041,38 @@ impl Widget for Select {
     }
 }
 
+pub(crate) fn option_check(
+    scope: &Scope,
+    checked: glory::Bond<bool>,
+    aligned: bool,
+) -> glory::ui::Text {
+    glory::ui::text()
+        .class("sapid-select-option-check")
+        .content(scope.bond(move || {
+            if checked.get() {
+                "✓".to_owned()
+            } else {
+                String::new()
+            }
+        }))
+        .style(scope.bond(move || {
+            Style::new()
+                .display(if checked.get() || aligned {
+                    glory::style::Display::Block
+                } else {
+                    glory::style::Display::None
+                })
+                .width(Length::Px(16.))
+        }))
+}
+
 struct OptionPresentation<'a> {
     key: &'a str,
     owner: &'a SemanticId,
     common: &'a Common,
     content: Option<&'a SelectOptionContent>,
     check_position: SelectCheckPosition,
+    aligned_labels: bool,
 }
 
 fn mount_option(
@@ -1049,6 +1088,7 @@ fn mount_option(
         common,
         content,
         check_position,
+        aligned_labels,
     } = presentation;
     let parent = scope;
     let item_scope = parent.child()?;
@@ -1137,19 +1177,8 @@ fn mount_option(
             }
         });
     if content.is_some() || check_position != SelectCheckPosition::Hidden {
-        let checked = scope.bond(move || {
-            if selected.get().as_deref() == Some(check_key.as_str()) {
-                "✓".to_owned()
-            } else {
-                String::new()
-            }
-        });
-        let check = || {
-            glory::ui::text()
-                .class("sapid-select-option-check")
-                .content(checked)
-                .style(Style::new().width(Length::Px(16.0)))
-        };
+        let checked = scope.bond(move || selected.get().as_deref() == Some(check_key.as_str()));
+        let check = || option_check(scope, checked, aligned_labels);
         let mut row: Vec<Box<dyn Widget>> = Vec::with_capacity(4);
         if check_position == SelectCheckPosition::Left {
             row.push(Box::new(check()));

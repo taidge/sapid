@@ -789,10 +789,26 @@ def expand_macros(body, text):
 
 def dedicated_source(key):
     body = (WEB / f"src/dedicated_demos/{key}.rs").read_text(encoding="utf-8")
+    if "display_sample::" in body:
+        source = (WEB / "src/dedicated_demos/display_samples.rs").read_text(encoding="utf-8")
+        body = body.replace("display_sample::", "")
+        body += "\n" + referenced_helpers(source, body)
+    formatting = "crate::showcase_misc_docs::toolbar_format::"
+    if formatting in body:
+        formatter = (WEB / "src/showcase_misc_docs/toolbar_format.rs").read_text(encoding="utf-8")
+        body = body.replace(formatting, "") + "\n" + formatter.replace("use glory::prelude::*;", "", 1)
+    marquee_strip = "crate::showcase_misc_docs::marquee_logos::logo_strip"
+    if marquee_strip in body:
+        body = body.replace(marquee_strip, "logo_strip") + "\n" + (WEB / "src/showcase_misc_docs/marquee_logos.rs").read_text(encoding="utf-8")
     helpers = sorted(set(re.findall(r"\bcontrols::(\w+)", body)))
     if helpers:
         source = (WEB / "src/focused_demos/controls.rs").read_text(encoding="utf-8")
         shared = referenced_helpers(source, " ".join(f"{name}(" for name in helpers), calls_only=True)
+        if key.startswith("detail/"):
+            # Multiple live panels on one document need distinct field and radio IDs.
+            namespace = key.rsplit("/", 1)[1].replace("_", "-")
+            shared = shared.replace('"control-', f'"{namespace}-').replace(
+                '"custom-accent"', f'"{namespace}-accent"').replace('"gradient-', f'"{namespace}-gradient-')
         body += "\n#[allow(unused_imports)]\nmod controls {\n" + shared + "\n}\n"
     return formatted(body)
 
@@ -901,7 +917,7 @@ mod tests {
 # on a previously emitted file that may already have been retired.
 MAINTAINED_CORE_DEMOS = {
     "P0-01": "button", "P0-02": "text_input", "P0-03": "checkbox",
-    "P0-04": "collapse", "P0-05": "accordion", "P0-07": "modal",
+    "P0-04": "collapse", "P0-05": "accordion", "P0-06": "tabs", "P0-07": "modal",
     "P0-08": "drawer", "P0-09": "popover", "P2-08": "action_icon",
     "P3-10": "pill", "P4-08": "multi_select", "P4-09": "pills_input",
 }
@@ -954,6 +970,7 @@ for task in tasks:
             ("Box", "box"), ("Collapse", "collapse"), ("Divider", "divider"), ("FocusTrap", "focus_trap"), ("Marquee", "marquee"), ("Paper", "paper"), ("Portal", "portal"), ("ScrollArea", "scroll_area"), ("Toolbar", "toolbar"), ("VisuallyHidden", "visually_hidden"),
             ("Blockquote", "blockquote"), ("Code", "code"), ("Highlight", "highlight"), ("List", "list"), ("Mark", "mark"), ("Table", "table"), ("Text", "text"), ("Title", "title"), ("Typography", "typography"),
             ("Stepper", "stepper"), ("TableOfContents", "table_of_contents"), ("Tree", "tree"),
+            ("Pagination", "pagination"), ("Tabs", "tabs"),
             ("ActionBar", "action_bar"), ("Dialog", "floating_dialog"), ("Modal", "modal"), ("Drawer", "drawer"),
             ("FloatingIndicator", "floating_indicator"), ("HoverCard", "hover_card"), ("LoadingOverlay", "loading_overlay"),
             ("Overlay", "overlay"), ("Popover", "popover"), ("Tooltip", "tooltip"), ("Tour", "tour"),
@@ -970,7 +987,7 @@ for task in tasks:
             code = dedicated_source(source_key)
         elif display_name in {"Anchor", "Burger", "NavLink", "PinInput", "Scroller", "Rich text editor", "Affix", "BackgroundImage", "TimeGrid"}:
             key = {"Anchor": "anchor", "Burger": "burger", "NavLink": "nav_link", "PinInput": "pin_input", "Scroller": "scroller", "Rich text editor": "rich_text_editor", "Affix":"affix", "BackgroundImage":"background_image", "TimeGrid":"time_grid"}[display_name]
-            code = formatted((WEB / f"src/dedicated_demos/{key}.rs").read_text(encoding="utf-8"))
+            code = dedicated_source(key)
         elif display_id in FOCUSED_DISPLAY:
             key, family = FOCUSED_DISPLAY[display_id]
             code = focused_bundle(display_id, family)
@@ -1062,11 +1079,18 @@ registry = "//! Generated compiled widget examples; source panels include these 
 for key in sorted(modules):
     registry += f"mod {key};\n"
     registry += f"pub fn {key}_widget(theme: sapid::Theme) -> Box<dyn Widget> {{ Box::new({key}::demo(theme)) }}\n"
+registry += "pub(crate) use toolbar_usage::{ToolbarExample, format_toolbar};\n"
 outputs[WEB / "src/showcase_demos/mod.rs"] = formatted(registry)
 outputs[CATALOG] = formatted(catalog.replace("CATALOGUE_SIZE", str(len(entries))))
 outputs[WEB / "src/showcase_api.rs"] = formatted(api_catalog(tasks))
 for family, target_name in [("typography", "quote_color"), ("data_display", "theme_icon_gradient")]:
     outputs[WEB / f"src/showcase_{family}_docs/{target_name}.rs"] = dedicated_source(target_name)
+for template in sorted((WEB / "src/dedicated_demos/detail").glob("*/*.rs")):
+    family = template.parent.name
+    outputs[WEB / f"src/showcase_{family}_docs/{template.name}"] = dedicated_source(
+        f"detail/{family}/{template.stem}")
+for template in sorted((WEB / "src/dedicated_demos").glob("*_properties.rs")):
+    outputs[WEB / "src/showcase_field_docs" / template.name] = dedicated_source(template.stem)
 stale = []
 previous = {path.stem for path in (WEB / "src/showcase_demos").glob("*.rs")} - {"mod"}
 for retired in previous - set(modules):
@@ -1076,9 +1100,10 @@ for retired in previous - set(modules):
     elif path.is_file():
         path.unlink()
 for path, content in outputs.items():
+    if path.is_file() and path.read_text(encoding="utf-8") == content:
+        continue
     if args.check:
-        if not path.is_file() or path.read_text(encoding="utf-8") != content:
-            stale.append(path.relative_to(ROOT).as_posix())
+        stale.append(path.relative_to(ROOT).as_posix())
     else:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content, encoding="utf-8", newline="\n")

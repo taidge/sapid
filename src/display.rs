@@ -57,7 +57,7 @@ pub enum ShadowSize {
     Large,
 }
 impl ShadowSize {
-    fn value(self, theme: &crate::Theme) -> BoxShadow {
+    pub(crate) fn value(self, theme: &crate::Theme) -> BoxShadow {
         let (y, blur, spread, color) = match self {
             Self::None => return BoxShadow::None,
             Self::Small => (1., 3., 0., theme.shadow_small),
@@ -366,7 +366,10 @@ pub struct Pill {
 }
 pub fn pill() -> Pill {
     Pill {
-        common: Common::default(),
+        common: Common {
+            size: crate::Size::Small,
+            ..Common::default()
+        },
         content: "".into(),
         visible: Value {
             source: None,
@@ -440,7 +443,30 @@ impl Widget for Pill {
                 ..Default::default()
             }))
         });
-        let base = crate::tag::style(&self.common.theme, self.common.size, true);
+        let (font, height) = match self.common.size {
+            crate::Size::ExtraSmall => (10., 18.),
+            crate::Size::Small => (12., 22.),
+            crate::Size::Medium => (14., 25.),
+            crate::Size::Large => (16., 28.),
+            crate::Size::ExtraLarge => (18., 32.),
+        };
+        let mut base = crate::tag::style(&self.common.theme, self.common.size, true);
+        base.font_size = Some(font);
+        base.font_weight = Some(400.);
+        base.height = Some(Length::Px(height));
+        base.line_height = Some(height);
+        base.gap = Some(0.);
+        base.background = Some(self.common.theme.disabled);
+        base.color = Some(self.common.theme.foreground);
+        base.padding = Some(Edges {
+            left: 0.8 * font,
+            right: if self.remove_label.is_some() {
+                0.
+            } else {
+                0.8 * font
+            },
+            ..Edges::all(0.)
+        });
         let mut root = configure!(self.common, glory::ui::view(), scope, "sapid-pill", base)
             .semantics(metadata)
             .fill(
@@ -464,7 +490,20 @@ impl Widget for Pill {
             let mut button = crate::close_button()
                 .theme(self.common.theme.clone())
                 .size(self.common.size)
-                .style(crate::tag::remove_style(self.common.size))
+                .style(Style {
+                    width: Some(Length::Px(2. * font)),
+                    min_width: Some(Length::Px(2. * font)),
+                    height: Some(Length::Px(height)),
+                    min_height: Some(Length::Px(height)),
+                    border_width: Some(Edges::all(0.)),
+                    padding: Some(Edges {
+                        left: 0.1 * font,
+                        right: 0.3 * font,
+                        ..Edges::all(0.)
+                    }),
+                    color: Some(self.common.theme.foreground),
+                    ..Style::new()
+                })
                 .class("sapid-pill-remove")
                 .name(label)
                 .enabled(button_enabled)
@@ -754,7 +793,10 @@ impl Widget for EmptyState {
                     .fill(illustration),
             );
         }
-        root = root.fill(title);
+        let mut body = glory::ui::view()
+            .class("sapid-empty-body-group")
+            .style(column(12.))
+            .fill(title);
         if let Some(description) = self.description.take() {
             let mut text = glory::ui::text()
                 .class("sapid-empty-description")
@@ -768,15 +810,15 @@ impl Widget for EmptyState {
                         .margin(Edges::all(0.)),
                 );
             }
-            root = root.fill(text);
+            body = body.fill(text);
         }
         let children = glory::ui::fragment(take(&mut self.children));
         if !children.is_empty() {
-            root = root.fill(glory::ui::view().class("sapid-empty-body").fill(children));
+            body = body.fill(glory::ui::view().class("sapid-empty-body").fill(children));
         }
         let actions = glory::ui::fragment(take(&mut self.actions));
         if !actions.is_empty() {
-            root = root.fill(
+            body = body.fill(
                 glory::ui::view()
                     .class("sapid-empty-actions")
                     .style(if self.common.unstyled {
@@ -792,6 +834,7 @@ impl Widget for EmptyState {
                     .fill(actions),
             );
         }
+        root = root.fill(body);
         root.show_in(scope)
     }
 }

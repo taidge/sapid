@@ -658,6 +658,8 @@ impl Widget for NumberInput {
             base.radius = Some(0.);
         }
         let overrides = self.common.style.clone();
+        let frame_overrides = overrides.clone();
+        let panel_overrides = overrides.clone();
         let height = base.min_height.unwrap_or(Length::Px(36.));
         let themed = !self.common.unstyled;
         let danger = self.common.theme.danger;
@@ -777,15 +779,17 @@ impl Widget for NumberInput {
                 .bond(move || {
                     let current = accepted.get();
                     let mut style = row_shape.clone();
+                    let custom = frame_overrides.get();
+                    style.radius = custom.radius.or(style.radius);
                     style.border_color = Some(if current.semantics().invalid {
                         danger
                     } else if focused.get() {
                         input_focus
                     } else {
-                        row_border
+                        custom.border_color.unwrap_or(row_border)
                     });
                     style.background = Some(if current.enabled {
-                        row_input
+                        custom.background.unwrap_or(row_input)
                     } else {
                         row_disabled
                     });
@@ -844,7 +848,13 @@ impl Widget for NumberInput {
             };
             glory::ui::view()
                 .class("sapid-number-input-controls")
-                .style(panel_style)
+                .style(scope.bond(move || {
+                    let mut style = panel_style.clone();
+                    let height = panel_overrides.get().min_height.unwrap_or(height);
+                    style.height = Some(height);
+                    style.min_height = Some(height);
+                    style
+                }))
                 .node_ref(panel_ref)
                 .show_in(&container)?;
             let controls = scope.child_in(panel_ref.try_get()?.ok_or(glory::ui::Error::Gone)?)?;

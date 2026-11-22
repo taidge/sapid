@@ -551,6 +551,7 @@ pub struct TimePicker {
     grid: Option<TimeGridSpec>,
     presets: Option<TimePickerPresets>,
     with_dropdown: bool,
+    dropdown_icon: crate::Icon,
     reverse_time_controls_list: bool,
     max_dropdown_content_height: f64,
     open: Value<bool>,
@@ -592,6 +593,7 @@ pub fn time_picker(key: impl Into<String>) -> TimePicker {
         grid: None,
         presets: None,
         with_dropdown: false,
+        dropdown_icon: crate::Icon::ChevronDown,
         reverse_time_controls_list: false,
         max_dropdown_content_height: 240.,
         open: Value::default(),
@@ -680,6 +682,11 @@ impl TimePicker {
     }
     pub fn with_dropdown(mut self, value: bool) -> Self {
         self.with_dropdown = value;
+        self
+    }
+    /// The graphic on the button that opens the preset or time choices.
+    pub fn dropdown_icon(mut self, icon: crate::Icon) -> Self {
+        self.dropdown_icon = icon;
         self
     }
     pub fn reverse_time_controls_list(mut self, value: bool) -> Self {
@@ -1239,7 +1246,7 @@ impl Widget for TimePicker {
             let mut button = glory::ui::button()
                 .name("Choose time")
                 .fill(crate::input_actions::glyph(
-                    crate::Icon::ChevronDown,
+                    self.dropdown_icon,
                     self.common.theme.muted,
                 ))
                 .class("sapid-time-picker-preset-trigger")

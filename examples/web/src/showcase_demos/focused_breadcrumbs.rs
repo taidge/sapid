@@ -11,17 +11,24 @@ mod focused {
 
     pub fn demo_for(id: &str, theme: Theme) -> Box<dyn Widget> {
         match id {
-            "P6-01" => Box::new(
-                sapid::breadcrumbs("focused-trail")
-                    .theme(theme.clone())
-                    .current("article")
-                    .items([
-                        sapid::breadcrumb_item("home", "Home").href("#home"),
-                        sapid::breadcrumb_item("guides", "Guides").href("#guides"),
-                        sapid::breadcrumb_item("rust", "Rust").href("#rust"),
-                        sapid::breadcrumb_item("article", "Semantic widgets"),
-                    ]),
-            ),
+            "P6-01" => {
+                let trail = |key, separator, gap| {
+                    sapid::breadcrumbs(key)
+                        .theme(theme.clone())
+                        .separator(separator)
+                        .gap(gap)
+                        .items([
+                            sapid::breadcrumb_item("home", "Sapid").href("showcase.html"),
+                            sapid::breadcrumb_item("library", "Components")
+                                .href("?widget=breadcrumbs"),
+                            sapid::breadcrumb_item("anchor", "Anchor").href("?widget=anchor"),
+                        ])
+                };
+                Box::new(sapid::stack().theme(theme.clone()).gap(10.).fill((
+                    trail("focused-trail", "/", 8.),
+                    trail("spaced-trail", "→", 16.),
+                )))
+            }
             "P6-02" => Box::new(widget(move |scope| {
                 let page = scope.cage(3_u64);
                 sapid::pagination("focused-pages")

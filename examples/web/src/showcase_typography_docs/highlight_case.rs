@@ -1,25 +1,27 @@
 use glory::prelude::*;
 pub fn demo(theme: sapid::Theme) -> impl Widget {
-    sapid::stack().theme(theme.clone()).gap(12.).fill((
-        glory::ui::view().fill(
-            sapid::highlight()
-                .theme(theme.clone())
-                .content("Design · design · DESIGN")
-                .query("design"),
-        ),
-        glory::ui::view().fill(
-            sapid::highlight()
-                .theme(theme.clone())
-                .content("Design and DESIGN match, redesign stays plain.")
-                .query("design")
-                .ignore_ascii_case(true)
-                .whole_words(true),
-        ),
-        glory::ui::view().fill(
-            sapid::highlight()
-                .theme(theme.clone())
-                .content("团队设计指南 · café notes · 设计评审")
-                .query("设计"),
-        ),
-    ))
+    sapid::stack().theme(theme.clone()).gap(20.).fill(
+        [true, false]
+            .map(|ignore| {
+                sapid::stack().theme(theme.clone()).gap(4.).fill((
+                    sapid::text()
+                        .theme(theme.clone())
+                        .weight(600.)
+                        .content(if ignore {
+                            "With case-insensitive matching (default)"
+                        } else {
+                            "With case-sensitive matching"
+                        }),
+                    view().fill(
+                        sapid::highlight()
+                            .theme(theme.clone())
+                            .content("Highlight This, definitely THIS and also this!")
+                            .query("this")
+                            .ignore_ascii_case(ignore),
+                    ),
+                ))
+            })
+            .into_iter()
+            .collect::<Vec<_>>(),
+    )
 }

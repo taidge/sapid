@@ -38,10 +38,17 @@ pub struct Indicator {
     common: Common,
     position: IndicatorPosition,
     diameter: f64,
+    radius: Option<f64>,
+    with_border: bool,
+    processing: Vary<bool>,
     offset: f64,
     color: Option<glory::style::Color>,
     visible: Vary<bool>,
     label: Option<Vary<String>>,
+    count: Option<Vary<i64>>,
+    max_value: Option<i64>,
+    show_zero: bool,
+    auto_contrast: bool,
     children: Children,
     marker_ref: Option<Cage<Option<NodeId>>>,
 }
@@ -50,10 +57,17 @@ pub fn indicator() -> Indicator {
         common: Common::default(),
         position: IndicatorPosition::default(),
         diameter: 12.0,
+        radius: None,
+        with_border: false,
+        processing: false.into(),
         offset: 0.,
         color: None,
         visible: true.into(),
         label: None,
+        count: None,
+        max_value: None,
+        show_zero: true,
+        auto_contrast: true,
         children: ().into_children(),
         marker_ref: None,
     }
@@ -98,6 +112,18 @@ impl Indicator {
         self.diameter = diameter;
         self
     }
+    pub fn radius(mut self, radius: f64) -> Self {
+        self.radius = Some(radius);
+        self
+    }
+    pub fn with_border(mut self, with_border: bool) -> Self {
+        self.with_border = with_border;
+        self
+    }
+    pub fn processing(mut self, processing: impl Into<Vary<bool>>) -> Self {
+        self.processing = processing.into();
+        self
+    }
     /// Positive offsets inset from the selected edges; center axes stay centered.
     /// Signed finite CSS pixels are bounded to -128..=128.
     pub fn offset(mut self, offset: f64) -> Self {
@@ -114,7 +140,26 @@ impl Indicator {
     }
     /// Optional nonempty label, at most 32 UTF-8 bytes. A dot has no text.
     pub fn label(mut self, label: impl Into<Vary<String>>) -> Self {
+        self.count = None;
         self.label = Some(label.into());
+        self
+    }
+    /// Numeric marker text. A count can be capped independently of its underlying value.
+    pub fn count(mut self, value: impl Into<Vary<i64>>) -> Self {
+        self.label = None;
+        self.count = Some(value.into());
+        self
+    }
+    pub fn max_value(mut self, value: i64) -> Self {
+        self.max_value = Some(value);
+        self
+    }
+    pub fn show_zero(mut self, value: bool) -> Self {
+        self.show_zero = value;
+        self
+    }
+    pub fn auto_contrast(mut self, value: bool) -> Self {
+        self.auto_contrast = value;
         self
     }
     pub fn fill(mut self, children: impl IntoChildren) -> Self {
@@ -156,6 +201,14 @@ fn accepted_text(scope: &Scope, source: Vary<String>, max: usize) -> Result<Vary
 }
 impl Widget for Indicator {
     fn build(&mut self, scope: &Scope) -> Result {
+        if self
+            .radius
+            .is_some_and(|r| !r.is_finite() || !(0.0..=128.0).contains(&r))
+        {
+            return Err(
+                glory::render::Error::InvalidProps("indicator radius must be in 0..=128").into(),
+            );
+        }
         if !self.diameter.is_finite() || !(4.0..=128.0).contains(&self.diameter) {
             return Err(glory::render::Error::InvalidProps(
                 "indicator diameter must be finite and in 4..=128 pixels",
@@ -174,6 +227,23 @@ impl Widget for Indicator {
         }
         if let Some(name) = &self.common.name {
             name.try_with(|value| valid_text(value, 256))??;
+        }
+        let numeric = self.count.is_some();
+        if let Some(count) = self.count.take() {
+            let reactive = count.is_reactive();
+            let maximum = self.max_value;
+            let text = move || {
+                let current = count.get();
+                match maximum {
+                    Some(limit) if current > limit => format!("{limit}+"),
+                    _ => current.to_string(),
+                }
+            };
+            self.label = Some(if reactive {
+                scope.bond(text).into()
+            } else {
+                text().into()
+            });
         }
         let label = self
             .label
@@ -214,15 +284,33 @@ impl Widget for Indicator {
             }),
             ..Style::new()
         };
+        if numeric {
+            marker_style.width = None;
+            marker_style.min_width = Some(Length::Px(self.diameter));
+            marker_style.margin.as_mut().unwrap().left = inset(left);
+            marker_style.padding = Some(Edges {
+                top: 0.,
+                right: 4.,
+                bottom: 0.,
+                left: 4.,
+            });
+        }
         if !self.common.unstyled {
-            marker_style.radius = Some(self.diameter / 2.0);
+            marker_style.radius = Some(self.radius.unwrap_or(self.diameter / 2.0));
+            if self.with_border {
+                marker_style.border_color = Some(self.common.theme.surface);
+                marker_style.border_style = Some(glory::style::BorderStyle::Solid);
+                marker_style.border_width = Some(Edges::all(2.));
+            }
             let color = self.color.unwrap_or(self.common.theme.accent);
             marker_style.background = Some(color);
-            marker_style.color = Some(
+            marker_style.color = Some(if self.auto_contrast {
                 self.common
                     .theme
-                    .contrasting_foreground(color, self.common.theme.on_accent),
-            );
+                    .contrasting_foreground(color, self.common.theme.on_accent)
+            } else {
+                self.common.theme.on_accent
+            });
             marker_style.font_family = Some(vec![glory::style::Family::System]);
             marker_style.font_size = Some((self.diameter * 0.65).min(18.0));
             marker_style.font_weight = Some(600.0);
@@ -234,16 +322,36 @@ impl Widget for Indicator {
             marker_style.background = Some(color);
         }
         let visible = self.visible.clone();
+        let check_zero = !self.show_zero;
+        let zero_label = label.clone();
+        let dynamic_visibility = visible.is_reactive()
+            || check_zero && zero_label.as_ref().is_some_and(Vary::is_reactive);
         let semantics = move || {
             Some(Box::new(Semantics {
-                hidden: !visible.get(),
+                hidden: !visible.get()
+                    || check_zero && zero_label.as_ref().is_some_and(|value| value.get() == "0"),
                 ..Default::default()
             }))
         };
-        let mut marker = glory::ui::view()
-            .class("sapid-indicator-marker")
-            .style(marker_style);
-        marker = if self.visible.is_reactive() {
+        let processing = self.processing.clone();
+        let styled = !self.common.unstyled;
+        let class = move || {
+            let mut classes = "sapid-indicator-marker".to_owned();
+            if numeric {
+                classes.push_str(" sapid-indicator-count");
+            }
+            if styled && processing.get() {
+                classes.push_str(" sapid-indicator-processing");
+            }
+            classes
+        };
+        let marker_class: Vary<String> = if styled && self.processing.is_reactive() {
+            scope.bond(class).into()
+        } else {
+            class().into()
+        };
+        let mut marker = glory::ui::view().class(marker_class).style(marker_style);
+        marker = if dynamic_visibility {
             marker.semantics(scope.bond(semantics))
         } else {
             marker.semantics(semantics())

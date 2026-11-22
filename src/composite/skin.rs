@@ -139,7 +139,7 @@ pub(crate) fn tab(
     } else {
         Color(0, 0, 0, 0)
     });
-    style.radius = Some(if variant == TabsVariant::Pills {
+    style.radius = Some(if variant != TabsVariant::Default {
         theme.radius
     } else {
         0.

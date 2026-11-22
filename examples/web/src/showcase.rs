@@ -527,6 +527,19 @@ fn saved_actions(
 fn source(code: &'static str, theme: Theme, full: bool) -> impl Widget {
     widget(move |scope| {
         let expanded = scope.cage(full);
+        // Only the first 250px are visible in a collapsed example. Tokenize the
+        // remaining source when it is expanded, keeping copy tied to the full file.
+        let preview_end = code
+            .match_indices('\n')
+            .nth(15)
+            .map_or(code.len(), |(end, _)| end);
+        let shown = scope.bond(move || {
+            if expanded.get() {
+                code.to_owned()
+            } else {
+                code[..preview_end].to_owned()
+            }
+        });
         let class = scope.bond(move || {
             if expanded.get() {
                 "site-code is-expanded".to_owned()
@@ -555,7 +568,7 @@ fn source(code: &'static str, theme: Theme, full: bool) -> impl Widget {
                 view().class("site-code-body").fill(
                     sapid::code_highlight()
                         .theme(theme.clone())
-                        .source(code)
+                        .source(shown)
                         .language(sapid::CodeLanguage::Rust),
                 ),
                 when(!full, move || {
@@ -630,6 +643,149 @@ fn api_styles(entry: &'static Entry, theme: Theme) -> impl Widget {
     ))
 }
 
+fn documentation_preview_class(widget: &str, section: &str) -> &'static str {
+    match (widget, section) {
+        ("heatmap", "reference-heatmap-first-day-of-week") => {
+            "site-demo site-demo-centered site-demo-compact-heatmap"
+        }
+        ("accordion", "accordion-composed")
+        | ("action-icon", "icon-sizes" | "icon-loading")
+        | (
+            "agenda-view",
+            "reference-agenda-view-all-day-and-multi-day-events"
+            | "reference-agenda-view-date-formats"
+            | "reference-agenda-view-custom-event-rendering"
+            | "reference-agenda-view-event-click",
+        )
+        | ("autocomplete", "autocomplete-control-dropdown-opened-state-demo")
+        | ("avatar", "avatar-link")
+        | ("badge", "badge-circle" | "badge-sections" | "badge-variants" | "badge-auto-contrast")
+        | (
+            "bullet-chart",
+            "reference-bullet-chart-label"
+            | "reference-bullet-chart-vertical-orientation"
+            | "reference-bullet-chart-bar-color"
+            | "reference-bullet-chart-chart-size"
+            | "reference-bullet-chart-value-formatter"
+            | "reference-bullet-chart-without-target",
+        )
+        | ("close-button", "close-custom")
+        | ("color-swatch", "swatch-controlled")
+        | ("combobox", "combobox-control-dropdown-opened-state-demo")
+        | (
+            "combobox-popover",
+            "combobox-popover-limit-options-demo"
+            | "combobox-popover-allow-deselect-demo"
+            | "combobox-popover-large-data-sets-demo",
+        )
+        | ("copy-button", "copy-timer")
+        | (
+            "date-input",
+            "reference-date-input-date-parser"
+            | "reference-date-input-min-and-max-date"
+            | "reference-date-input-disabled-state",
+        )
+        | (
+            "date-picker",
+            "reference-date-picker-allow-deselect"
+            | "reference-date-picker-multiple-dates"
+            | "reference-date-picker-dates-range"
+            | "reference-date-picker-default-date"
+            | "reference-date-picker-hide-outside-dates"
+            | "reference-date-picker-display-week-numbers"
+            | "reference-date-picker-hide-weekdays"
+            | "reference-date-picker-min-and-max-date"
+            | "reference-date-picker-exclude-dates"
+            | "date-picker-columns"
+            | "reference-date-picker-localization",
+        )
+        | (
+            "donut-chart",
+            "reference-donut-chart-legend"
+            | "reference-donut-chart-without-tooltip"
+            | "reference-donut-chart-chart-label"
+            | "reference-donut-chart-start-and-end-angle"
+            | "reference-donut-chart-segments-stroke",
+        )
+        | (
+            "drawer",
+            "drawer-offset"
+            | "drawer-backdrop"
+            | "drawer-without-header"
+            | "drawer-scroll"
+            | "drawer-close-icon",
+        )
+        | (
+            "funnel-chart",
+            "reference-funnel-chart-without-tooltip" | "reference-funnel-chart-segments-stroke",
+        )
+        | ("indicator", "indicator-max-value" | "indicator-zero" | "indicator-contrast")
+        | ("loader", "loader-inline")
+        | (
+            "mini-calendar",
+            "reference-mini-calendar-number-of-days"
+            | "reference-mini-calendar-getdayprops"
+            | "reference-mini-calendar-min-and-max-dates",
+        )
+        | (
+            "modal",
+            "modal-centered"
+            | "modal-without-header"
+            | "modal-full-screen"
+            | "modal-backdrop"
+            | "modal-scroll"
+            | "modal-nested"
+            | "modal-close-icon",
+        )
+        | (
+            "month-picker",
+            "reference-month-picker-allow-deselect"
+            | "reference-month-picker-multiple-dates"
+            | "reference-month-picker-dates-range"
+            | "reference-month-picker-default-date"
+            | "reference-month-picker-min-and-max-date"
+            | "reference-month-picker-localization",
+        )
+        | ("multi-select", "multi-select-control-dropdown-opened-state-demo")
+        | (
+            "notifications-system",
+            "extensions-notifications-system-stack" | "extensions-notifications-system-updates",
+        )
+        | ("number-formatter", "number-precision" | "number-affixes" | "number-locales")
+        | ("phone-input", "phone-input-controlled-demo" | "phone-input-phone-extensions-demo")
+        | (
+            "pie-chart",
+            "reference-pie-chart-legend"
+            | "reference-pie-chart-enable-tooltip"
+            | "reference-pie-chart-start-and-end-angle"
+            | "reference-pie-chart-segments-stroke",
+        )
+        | ("popover", "popover-controlled" | "popover-widths" | "popover-nested")
+        | ("progress", "progress-vertical")
+        | ("scroll-area", "scroll-into-view" | "scroll-popover")
+        | ("scroller", "scroller-drag" | "scroller-icons" | "scroller-tabs")
+        | ("select", "select-control-dropdown-opened-state-demo")
+        | ("theme-icon", "theme-icon-variants")
+        | (
+            "time-grid",
+            "reference-time-grid-min-and-max-time"
+            | "reference-time-grid-disable-specific-controls"
+            | "reference-time-grid-disabled",
+        )
+        | ("tooltip", "tooltip-multiline")
+        | ("waffle-chart", "reference-waffle-chart-tooltip")
+        | (
+            "year-picker",
+            "reference-year-picker-allow-deselect"
+            | "reference-year-picker-multiple-dates"
+            | "reference-year-picker-dates-range"
+            | "reference-year-picker-default-date"
+            | "reference-year-picker-min-and-max-date",
+        ) => "site-demo site-demo-centered",
+        _ => "site-demo",
+    }
+}
+
 fn documentation(
     entry: &'static Entry,
     theme: Theme,
@@ -638,19 +794,16 @@ fn documentation(
 ) -> impl Widget {
     widget(move |scope| {
         let mut tabs = Vec::new();
-        for (index, label) in [
-            (0, "Documentation"),
-            (1, "Properties"),
-            (2, "Styles API"),
-            (3, "Source"),
-            (4, "Capabilities"),
+        for (index, label, tab_class) in [
+            (0, "Documentation", "site-tab-docs"),
+            (1, "Properties", "site-tab-props"),
+            (2, "Styles API", "site-tab-styles"),
+            (3, "Source", "site-tab-source"),
+            (4, "Capabilities", "site-tab-capabilities"),
         ] {
             let class = scope.bond(move || {
-                if tab.get() == index {
-                    "site-tab is-active".to_owned()
-                } else {
-                    "site-tab".to_owned()
-                }
+                let active = if tab.get() == index { " is-active" } else { "" };
+                format!("site-tab {tab_class}{active}")
             });
             tabs.push(
                 sapid::button()
@@ -695,7 +848,7 @@ fn documentation(
                         view().class("site-component-detail").fill((
                             section_title(section.id, section.title),
                             text().class("site-doc-note").content(section.note),
-                            view().class("site-preview").fill(view().class("site-demo").fill(section.example)),
+                            view().class("site-preview").fill(view().class(documentation_preview_class(entry.slug, section.id)).fill(section.example)),
                             view().class("site-doc-code").fill(
                                 source(section.source, demo_theme.clone(), false),
                             ),
@@ -704,6 +857,11 @@ fn documentation(
                     .collect::<Vec<_>>();
                 view().class("site-doc-content").fill((
                     section_title("usage", "Usage"),
+                    (entry.slug == "native-select").then(|| view().class("site-doc-note site-native-select-note").fill((
+                        text().content("NativeSelect uses the browser’s select menu. Pair it with a Field to add a label, description and error message. See "),
+                        link("Input", route("input", &demo_theme), "site-inline-link"),
+                        text().content(" for more field examples."),
+                    ))),
                     view().class("site-preview").fill(view().class("site-demo").fill(crate::showcase_examples::demo(entry.slug, demo_theme.clone()))),
                     view().semantics(Some(Box::new(Semantics { id: Some(SemanticId::new("example-source").expect("static id")), ..Default::default() }))).fill(source(entry.code, demo_theme.clone(), false)),
                     view().class("site-component-details").fill(details),

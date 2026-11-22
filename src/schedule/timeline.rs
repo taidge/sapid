@@ -59,6 +59,7 @@ fn prepare(data: &snapshot::Snapshot, base_width: f64) -> Prepared {
                     candidate: occurrence.candidate_index(),
                     interval: occurrence.interval(),
                     title: event.title().into(),
+                    color: event.event_color(),
                     resource: event
                         .resource_key()
                         .map(|k| k.as_str().to_owned())
@@ -203,6 +204,9 @@ pub(super) struct Config {
     pub column_width: f64,
     pub viewport_height: f64,
     pub slot_height: f64,
+    pub labels: super::TimelineLabels,
+    pub minimum_column_width: Option<f64>,
+    pub gutter_width: f64,
 }
 pub(super) fn build(scope: &Scope, root: Rc<Controller>, config: Config) -> Result {
     let Config {
@@ -218,9 +222,14 @@ pub(super) fn build(scope: &Scope, root: Rc<Controller>, config: Config) -> Resu
         column_width,
         viewport_height,
         slot_height,
+        labels: presentation,
+        minimum_column_width,
+        gutter_width,
     } = config;
+    let repeat_in_slots = presentation.repeat_in_slots;
     let accepted = root.accepted;
-    let prepared = scope.bond(move || accepted.with(|data| prepare(data, column_width)));
+    let width = scope.cage(column_width);
+    let prepared = scope.bond(move || accepted.with(|data| prepare(data, width.get())));
     let state = Rc::new(TimelineState {
         owner: scope.id(),
         weak: scope.downgrade(),
@@ -244,7 +253,7 @@ pub(super) fn build(scope: &Scope, root: Rc<Controller>, config: Config) -> Resu
         }
     })?;
     let viewport = viewport_ref.unwrap_or_else(|| scope.cage(None));
-    glory::ui::view()
+    let mut scroll_area = glory::ui::view()
         .role(Role::Group)
         .name("Schedule timeline viewport")
         .class("sapid-schedule-viewport")
@@ -255,8 +264,20 @@ pub(super) fn build(scope: &Scope, root: Rc<Controller>, config: Config) -> Resu
                 .overflow_x(Overflow::Auto)
                 .overflow_y(Overflow::Auto),
         )
-        .node_ref(viewport)
-        .show_in(scope)?;
+        .node_ref(viewport);
+    if let Some(minimum) = minimum_column_width {
+        scroll_area = scroll_area.on(EventKind::Resize, move |event| {
+            if let Event::Resize { size, .. } = event
+                && size.width > 0.
+            {
+                let next = ((size.width - gutter_width) / days as f64).max(minimum);
+                if (width.get_untracked() - next).abs() > 0.01 {
+                    width.revise(|current| *current = next);
+                }
+            }
+        });
+    }
+    scroll_area.show_in(scope)?;
     let viewport_scope = child(scope, viewport)?;
     let canvas = scope.cage(None);
     let heading_height = 32.;
@@ -268,7 +289,7 @@ pub(super) fn build(scope: &Scope, root: Rc<Controller>, config: Config) -> Resu
             Style::new()
                 .position(Position::Relative)
                 .width(Length::Px(
-                    64. + days as f64 * prepared.with(|p| p.column_width),
+                    gutter_width + days as f64 * prepared.with(|p| p.column_width),
                 ))
                 .height(Length::Px(height))
         }))
@@ -326,7 +347,7 @@ pub(super) fn build(scope: &Scope, root: Rc<Controller>, config: Config) -> Resu
                 Style::new()
                     .position(Position::Relative)
                     .width(Length::Px(
-                        64. + days as f64 * prepared.with(|p| p.column_width),
+                        gutter_width + days as f64 * prepared.with(|p| p.column_width),
                     ))
                     .height(Length::Px(if row == 0 {
                         heading_height
@@ -346,10 +367,11 @@ pub(super) fn build(scope: &Scope, root: Rc<Controller>, config: Config) -> Resu
                 .semantics(scope.bond(move||Some(Box::new(Semantics{selected:if row==0||col==0{None}else{Some(active.with(|v|matches!(v,Some(ScheduleSelection::Slot{interval,resource:None})if state_for_cell.interval((row-1)*days+col-1).ok()==Some(*interval))))},table:Some(TableMetadata::Cell{row:row as u32,column:col as u16,row_span:1,column_span:1,headers:vec![]}),..Default::default()}))))
                 .style(scope.bond(move||{
                     let width=prepared.with(|p|p.column_width);let physical=if col==0{0}else if direction==Direction::Ltr{col}else{days+1-col};
-                    Style::new().position(Position::Absolute).left(Length::Px(if physical==0{0.}else{64.+(physical-1)as f64*width})).top(Length::Px(0.)).width(Length::Px(if col==0{64.}else{width})).height(Length::Px(if row==0{heading_height}else{slot_height}))
+                    Style::new().position(Position::Absolute).left(Length::Px(if physical==0{0.}else{gutter_width+(physical-1)as f64*width})).top(Length::Px(0.)).width(Length::Px(if col==0{gutter_width}else{width})).height(Length::Px(if row==0{heading_height}else{slot_height}))
                 })).node_ref(cell).show_in(&row_scope)?;
             let cell_scope = child(scope, cell)?;
             if row == 0 {
+                let day_format = presentation.day.clone();
                 let label = scope.bond(move || {
                     if col == 0 {
                         "Time".to_owned()
@@ -361,6 +383,9 @@ pub(super) fn build(scope: &Scope, root: Rc<Controller>, config: Config) -> Resu
                                 .date()
                                 .checked_add_days((col - 1) as i32)
                                 .unwrap();
+                            if let Some(format) = &day_format {
+                                return format(date);
+                            }
                             format!(
                                 "{} {:02}-{:02}",
                                 locale.weekday_short(date.weekday()),
@@ -379,8 +404,18 @@ pub(super) fn build(scope: &Scope, root: Rc<Controller>, config: Config) -> Resu
                     .show_in(&cell_scope)?;
             } else if col == 0 {
                 let minutes = time.start_minutes() + (row as u16 - 1) * time.step_minutes();
+                let label = if presentation
+                    .interval
+                    .is_some_and(|interval| !minutes.is_multiple_of(interval.get()))
+                {
+                    String::new()
+                } else if let Some(format) = &presentation.time {
+                    format((minutes / 60) as u8, (minutes % 60) as u8)
+                } else {
+                    format!("{:02}:{:02}", minutes / 60, minutes % 60)
+                };
                 glory::ui::text()
-                    .content(format!("{:02}:{:02}", minutes / 60, minutes % 60))
+                    .content(label)
                     .style(Style {
                         font_size: Some(12.),
                         ..Style::new()
@@ -399,7 +434,7 @@ pub(super) fn build(scope: &Scope, root: Rc<Controller>, config: Config) -> Resu
                 let selected = root.selection.source.clone();
                 let button_theme = theme.clone();
                 glory::ui::button().class("sapid-schedule-slot").node_ref(reference)
-                    .label(scope.bond(move||labels.interval(at).map(|span|format!("{:02}:{:02}",span.start().time().hour(),span.start().time().minute())).unwrap_or_default()))
+                    .label(scope.bond(move||if repeat_in_slots { labels.interval(at).map(|span|format!("{:02}:{:02}",span.start().time().hour(),span.start().time().minute())).unwrap_or_default() } else {String::new()}))
                     .name(scope.bond(move||names.interval(at).map(|span|format!("{} {} — {}",locale.date_label(span.start().date()),span.start().time(),span.end().time())).unwrap_or_default()))
                     .enabled(flags.map(|f|f.enabled)).focus(scope.bond(move||if focus.get()==at{FocusMode::TabStop}else{FocusMode::Programmatic}))
                     .style(scope.bond(move||{
@@ -432,6 +467,7 @@ pub(super) fn build(scope: &Scope, root: Rc<Controller>, config: Config) -> Resu
                 days,
                 heading_height,
                 height: timeline_height,
+                gutter_width,
             }
         })
         .show_in(&canvas_scope)?;
@@ -473,6 +509,7 @@ struct TimelineEventWidget {
     days: usize,
     height: f64,
     heading_height: f64,
+    gutter_width: f64,
 }
 impl Widget for TimelineEventWidget {
     fn build(&mut self, scope: &Scope) -> Result {
@@ -482,6 +519,7 @@ impl Widget for TimelineEventWidget {
         let direction = self.direction;
         let days = self.days;
         let height = self.height;
+        let gutter_width = self.gutter_width;
         let heading_height = self.heading_height;
         let theme = self.theme.clone();
         let unstyled = self.unstyled;
@@ -489,9 +527,12 @@ impl Widget for TimelineEventWidget {
         let style=scope.bond(move||{
             let width=prepared.with(|p|p.column_width);event.with(|e|{
                 let day=if direction==Direction::Ltr{e.day}else{days-1-e.day};let fraction=width/e.position.lanes()as f64;
-                let mut style=Style::new().position(Position::Absolute).left(Length::Px(64.+day as f64*width+e.position.lane()as f64*fraction)).top(Length::Px(heading_height+e.position.start_fraction()*height))
+                let mut style=Style::new().position(Position::Absolute).left(Length::Px(gutter_width+day as f64*width+e.position.lane()as f64*fraction)).top(Length::Px(heading_height+e.position.start_fraction()*height))
                     .width(Length::Px((fraction-2.).max(2.))).height(Length::Px(((e.position.end_fraction()-e.position.start_fraction())*height).max(18.))).padding(Edges::all(1.)).overflow_x(Overflow::Hidden).overflow_y(Overflow::Hidden);
-                if !unstyled{let chosen=selected.with(|v|matches!(v,Some(ScheduleSelection::Event{key,candidate,interval})if *key==e.row.key&&*candidate==e.row.candidate&&*interval==e.row.interval));style.background=Some(if chosen{theme.accent}else{theme.accent_soft});style.color=Some(if chosen{theme.on_accent}else{theme.accent_text});style=style.border_width(Edges::all(1.)).border_style(BorderStyle::Solid).border_color(theme.accent);style.font_size=Some(11.);}
+                if !unstyled{let chosen=selected.with(|v|matches!(v,Some(ScheduleSelection::Event{key,candidate,interval})if *key==e.row.key&&*candidate==e.row.candidate&&*interval==e.row.interval));let (surface,ink,accent)=e.row.paint(&theme,chosen);
+                    style.background=Some(surface);style.color=Some(ink);
+                    style=style.border_width(Edges{left:3.,..Edges::all(0.)}).border_style(BorderStyle::Solid).border_color(accent);
+                    style.font_size=Some(12.);}
                 style
             })
         });

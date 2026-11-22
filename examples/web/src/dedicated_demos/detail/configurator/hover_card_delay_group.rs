@@ -1,0 +1,131 @@
+use glory::prelude::*;
+
+pub fn demo(theme: sapid::Theme) -> impl Widget {
+    widget(move |scope| {
+        let warm = scope.cage(false);
+        let sequence = scope.cage(0usize);
+        let controls = ["First", "Second", "Third"]
+            .into_iter()
+            .map(|name| {
+                let weak = scope.downgrade();
+                sapid::hover_card(format!("reference-group-{}", name.to_lowercase()))
+                    .theme(theme.clone())
+                    .content(move || text().content(format!("{name} hover card content")))
+                    .open_delay_with(move || timer_delay(if warm.get() { 0 } else { 500 }))
+                    .close_delay_with(|| timer_delay(100))
+                    .on_open_change(move |value| {
+                        sequence.revise(|n| *n += 1);
+                        let token = sequence.get();
+                        if value {
+                            warm.revise(|v| *v = true)
+                        } else if let Some(scope) = weak.upgrade() {
+                            let _ = scope.spawn(async move {
+                                timer_delay(100).await;
+                                if token == sequence.get() {
+                                    warm.revise(|v| *v = false)
+                                }
+                            });
+                        }
+                    })
+                    .target(move |t| {
+                        t.button(
+                            glory::ui::button()
+                                .class("site-reference-target")
+                                .label(name),
+                        )
+                    })
+            })
+            .collect::<Vec<_>>();
+        sapid::group()
+            .theme(theme.clone())
+            .class("site-reference-actions")
+            .fill(controls)
+            .show_in(scope)
+    })
+}
+
+fn timer_delay(millis: i32) -> glory::core::LocalFuture {
+    #[cfg(target_arch = "wasm32")]
+    {
+        Box::pin(timer::Delay::new(millis))
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let _ = millis;
+        Box::pin(std::future::ready(()))
+    }
+}
+#[cfg(target_arch = "wasm32")]
+mod timer {
+    use std::{
+        cell::{Cell, RefCell},
+        future::Future,
+        pin::Pin,
+        rc::Rc,
+        task::{Context, Poll, Waker},
+    };
+    use wasm_bindgen::{JsCast, prelude::*};
+    struct TimerState {
+        done: Cell<bool>,
+        waker: RefCell<Option<Waker>>,
+    }
+    pub struct Delay {
+        millis: i32,
+        state: Rc<TimerState>,
+        timer: Option<i32>,
+        callback: Option<Closure<dyn FnMut()>>,
+    }
+    impl Delay {
+        pub fn new(millis: i32) -> Self {
+            Self {
+                millis,
+                state: Rc::new(TimerState {
+                    done: Cell::new(false),
+                    waker: RefCell::new(None),
+                }),
+                timer: None,
+                callback: None,
+            }
+        }
+    }
+    impl Future for Delay {
+        type Output = ();
+        fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
+            if self.state.done.get() {
+                return Poll::Ready(());
+            }
+            let previous = self.state.waker.borrow_mut().replace(cx.waker().clone());
+            drop(previous);
+            if self.timer.is_none() {
+                let state = self.state.clone();
+                let callback = Closure::new(move || {
+                    state.done.set(true);
+                    let waker = state.waker.borrow_mut().take();
+                    if let Some(waker) = waker {
+                        waker.wake();
+                    }
+                });
+                self.timer = Some(
+                    web_sys::window()
+                        .unwrap()
+                        .set_timeout_with_callback_and_timeout_and_arguments_0(
+                            callback.as_ref().unchecked_ref(),
+                            self.millis,
+                        )
+                        .unwrap(),
+                );
+                self.callback = Some(callback);
+            }
+            Poll::Pending
+        }
+    }
+    impl Drop for Delay {
+        fn drop(&mut self) {
+            if let Some(timer) = self.timer.take()
+                && let Some(window) = web_sys::window()
+            {
+                window.clear_timeout_with_handle(timer);
+            }
+        }
+    }
+}

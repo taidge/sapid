@@ -11,6 +11,17 @@ pub(crate) fn side(common: &Common) -> f64 {
     common.theme.tokens.control(common.size).min_height
 }
 
+/// Select chevrons follow the field height across the compact through large sizes.
+pub(crate) fn selector_size(height: f64) -> f64 {
+    match height {
+        h if h <= 30. => 14.,
+        h if h <= 36. => 18.,
+        h if h <= 42. => 20.,
+        h if h <= 50. => 24.,
+        _ => 28.,
+    }
+}
+
 pub(crate) fn frame(scope: &Scope, common: &Common, class: &str) -> Result<Scope> {
     let reference = scope.cage(None);
     let own = common.style.clone();

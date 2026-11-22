@@ -351,6 +351,15 @@ fn empty_state_keeps_illustration_title_description_body_and_actions_ordered() {
         children,
         [
             find(&app, "sapid-empty-illustration"),
+            find(&app, "sapid-empty-body-group")
+        ]
+    );
+    assert_eq!(
+        app.tree()
+            .node(find(&app, "sapid-empty-body-group"))
+            .unwrap()
+            .children,
+        [
             find(&app, "sapid-empty-title"),
             find(&app, "sapid-empty-description"),
             find(&app, "sapid-empty-body"),
@@ -368,7 +377,9 @@ fn empty_state_does_not_reserve_gaps_for_unsupplied_slots() {
     app.mount(empty_state().title("No saved projects")).unwrap();
     let root = find(&app, "sapid-empty-state");
     let title = find(&app, "sapid-empty-title");
-    assert_eq!(app.tree().node(root).unwrap().children, vec![title]);
+    let body = find(&app, "sapid-empty-body-group");
+    assert_eq!(app.tree().node(root).unwrap().children, vec![body]);
+    assert_eq!(app.tree().node(body).unwrap().children, vec![title]);
     assert_eq!(app.stats().handlers, 0);
 }
 

@@ -81,7 +81,7 @@ impl ChartError {
             Self::Budget => "chart exceeds its finite points, series or text budget",
             Self::Key => "chart keys require distinct 1..64 ASCII semantic tokens",
             Self::Label => "chart labels require nonempty canonical text within 256 UTF-8 bytes",
-            Self::CenterLabel => "donut center text must fit 64 UTF-8 bytes on one line",
+            Self::CenterLabel => "chart center text must fit 64 UTF-8 bytes on one line",
             Self::Presentation => {
                 "chart presentation is unsupported for this plot or exceeds its finite bounds"
             }

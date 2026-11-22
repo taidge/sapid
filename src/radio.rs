@@ -500,6 +500,7 @@ impl Widget for RadioGroup {
             self.common.style = scope
                 .bond(move || {
                     let base = glory::style::Style {
+                        width: stretch.get().then_some(glory::style::Length::Percent(100.)),
                         align: Some(if stretch.get() {
                             glory::style::Align::Stretch
                         } else {

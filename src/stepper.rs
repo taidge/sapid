@@ -25,6 +25,7 @@ pub struct Step {
     inner: Item,
     description: Vary<String>,
     status: Vary<Option<StepStatus>>,
+    loading: Vary<bool>,
     optional: bool,
 }
 pub fn step(key: impl Into<String>) -> Step {
@@ -32,11 +33,21 @@ pub fn step(key: impl Into<String>) -> Step {
         inner: Item::new(key.into()),
         description: "".into(),
         status: None.into(),
+        loading: false.into(),
         optional: false,
     }
 }
 impl Step {
     item_methods!();
+    /// Supply the custom graphic used for the selected or pending step.
+    pub fn icon<W: Widget>(mut self, mut icon: impl FnMut() -> W + 'static) -> Self {
+        self.inner.trigger_content = Some(Box::new(move || Box::new(icon())));
+        self
+    }
+    pub fn loading(mut self, value: impl Into<Vary<bool>>) -> Self {
+        self.loading = value.into();
+        self
+    }
     pub fn description(mut self, value: impl Into<Vary<String>>) -> Self {
         self.description = value.into();
         self
@@ -59,6 +70,8 @@ pub struct Stepper {
     selectable: Vary<bool>,
     skip: Vary<bool>,
     orientation: Orientation,
+    icon_size: Option<f64>,
+    icon_radius: f64,
     policy: ContentPolicy,
     completed: Option<Factory>,
     completed_label: Vary<String>,
@@ -73,6 +86,8 @@ pub fn stepper(key: impl Into<String>) -> Stepper {
         selectable: false.into(),
         skip: false.into(),
         orientation: Orientation::Horizontal,
+        icon_size: None,
+        icon_radius: 999.,
         policy: ContentPolicy::KeepMounted,
         completed: None,
         completed_label: "Completed".into(),
@@ -81,6 +96,15 @@ pub fn stepper(key: impl Into<String>) -> Stepper {
 }
 impl Stepper {
     common_methods!();
+    /// Overrides the step indicator diameter and its connector geometry.
+    pub fn icon_size(mut self, size: f64) -> Self {
+        self.icon_size = Some(size);
+        self
+    }
+    pub fn icon_radius(mut self, radius: f64) -> Self {
+        self.icon_radius = radius;
+        self
+    }
     pub fn step(mut self, value: Step) -> Self {
         if self.steps.len() <= MAX_STEPPER_STEPS {
             self.steps.push(value);
@@ -206,6 +230,14 @@ impl Widget for StepPanel {
 }
 impl Widget for Stepper {
     fn build(&mut self, scope: &Scope) -> Result {
+        if self.icon_size.is_some_and(|v| !v.is_finite() || v <= 0.)
+            || !self.icon_radius.is_finite()
+            || self.icon_radius < 0.
+        {
+            return Err(invalid(
+                "stepper indicator diameter must be positive and radius nonnegative",
+            ));
+        }
         let count = self.steps.len();
         if count == 0 || count > MAX_STEPPER_STEPS {
             return Err(invalid("stepper requires 1..=128 steps"));
@@ -285,12 +317,14 @@ impl Widget for Stepper {
                 .unwrap_or_default(),
         );
         let owner = scope.id();
-        let diameter = self
-            .common
-            .theme
-            .tokens
-            .control(self.common.size)
-            .min_height;
+        let diameter = self.icon_size.unwrap_or_else(|| {
+            self.common
+                .theme
+                .tokens
+                .control(self.common.size)
+                .min_height
+        });
+        let radius = self.icon_radius;
         let mut panels = glory::ui::group();
         for (index, mut step) in std::mem::take(&mut self.steps).into_iter().enumerate() {
             let trigger_id = composite::id("stepper", &self.key, "trigger", &step.inner.key)?;
@@ -307,7 +341,9 @@ impl Widget for Stepper {
             });
             let label = step.inner.label.clone();
             let content = scope.bond(move || format!("{}. {}", index + 1, label.get()));
+            let loading = step.loading.clone();
             let icon = scope.bond(move || match status.get() {
+                _ if loading.get() => String::new(),
                 StepStatus::Completed => "✓".to_owned(),
                 StepStatus::Error => "!".to_owned(),
                 StepStatus::Pending => (index + 1).to_string(),
@@ -337,11 +373,21 @@ impl Widget for Stepper {
             let panel = panel_id.clone();
             let trigger = trigger_id.clone();
             let description = description_id.clone();
+            let loading = step.loading.clone();
             let mut button = glory::ui::button()
                 .label(icon)
                 .name(content)
                 .enabled(enabled)
-                .class("sapid-button sapid-stepper-trigger")
+                .class(scope.bond(move || {
+                    let part = if loading.get() {
+                        "sapid-stepper-loading"
+                    } else if status.get() == StepStatus::Completed {
+                        "sapid-stepper-completed-icon"
+                    } else {
+                        "sapid-stepper-icon-content"
+                    };
+                    format!("sapid-button sapid-stepper-trigger {part}")
+                }))
                 .semantics(scope.bond(move || {
                     composite::metadata(Semantics {
                         id: Some(trigger.clone()),
@@ -351,6 +397,20 @@ impl Widget for Stepper {
                         ..Default::default()
                     })
                 }));
+            if let Some(custom) = step.inner.trigger_content.take() {
+                let loading = step.loading.clone();
+                let show_icon =
+                    scope.bond(move || status.get() == StepStatus::Pending && !loading.get());
+                button = button
+                    .label(scope.bond(move || {
+                        if show_icon.get() {
+                            String::new()
+                        } else {
+                            icon.get()
+                        }
+                    }))
+                    .fill(glory::ui::when(show_icon, custom));
+            }
             let reference = step.inner.trigger.unwrap_or_else(|| scope.cage(None));
             let weak = scope.downgrade();
             button = button
@@ -369,6 +429,15 @@ impl Widget for Stepper {
                         }
                     }
                 });
+            if step.loading.is_reactive() || step.loading.try_get()? {
+                button = button.fill(crate::actions::inline_loader(
+                    scope,
+                    step.loading.clone(),
+                    self.common.theme.accent,
+                    crate::LoaderType::Oval,
+                    "sapid-button-loader",
+                ));
+            }
             if !self.common.unstyled {
                 let theme = self.common.theme.clone();
                 let size = self.common.size;
@@ -382,7 +451,7 @@ impl Widget for Stepper {
                     style.align = Some(Align::Center);
                     style.justify = Some(Justify::Center);
                     style.padding = Some(Edges::all(0.0));
-                    style.radius = Some(999.0);
+                    style.radius = Some(radius);
                     style.shrink = Some(0.0);
                     if status.get() == StepStatus::Error {
                         style.background = Some(theme.danger_soft);
@@ -493,9 +562,14 @@ impl Widget for Stepper {
             if !self.common.unstyled && index + 1 < count {
                 let vertical = self.orientation == Orientation::Vertical;
                 let theme = self.common.theme.clone();
-                step_view =
-                    step_view.fill(glory::ui::view().class("sapid-stepper-connector").style(
-                        scope.bond(move || {
+                step_view = step_view.fill(
+                    glory::ui::view()
+                        .class(if vertical {
+                            "sapid-stepper-connector sapid-stepper-vertical-connector"
+                        } else {
+                            "sapid-stepper-connector"
+                        })
+                        .style(scope.bond(move || {
                             let mut style = if vertical {
                                 Style::new()
                                     .position(Position::Absolute)
@@ -520,8 +594,8 @@ impl Widget for Stepper {
                                 theme.border
                             });
                             style
-                        }),
-                    ));
+                        })),
+                );
             }
             headers = headers.fill(step_view);
             panels = panels.fill(StepPanel {

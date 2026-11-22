@@ -103,6 +103,7 @@ pub struct ColorPicker {
     form_name: Option<Vary<String>>,
     form_format: ColorFormat,
     side: f64,
+    plane_height: Option<f64>,
     change: Option<Box<dyn FnMut(Hsva)>>,
     commit: Option<Box<dyn FnMut(Hsva)>>,
 }
@@ -129,6 +130,7 @@ pub fn color_picker(key: impl Into<String>) -> ColorPicker {
         form_name: None,
         form_format: ColorFormat::Hexa,
         side: 240.,
+        plane_height: None,
         change: None,
         commit: None,
     }
@@ -240,7 +242,12 @@ impl ColorPicker {
         self.form_format = value;
         self
     }
-    /// Intrinsic plane side; custom outer style does not turn the plane into a zero-height box.
+    /// Override the plane height while preserving the width and pointer coordinate mapping.
+    pub fn plane_height(mut self, height: f64) -> Self {
+        self.plane_height = Some(height);
+        self
+    }
+    /// Set the intrinsic width and default height of the color plane.
     pub fn plane_size(mut self, value: f64) -> Self {
         self.side = value;
         self
@@ -281,6 +288,10 @@ impl Widget for ColorPicker {
     fn build(&mut self, scope: &Scope) -> Result {
         if self.key.len() > MAX_COLOR_PICKER_KEY_BYTES {
             return Err(invalid("color picker keys are limited to 48 bytes"));
+        }
+        let plane_height = self.plane_height.unwrap_or(self.side);
+        if !plane_height.is_finite() || !(48. ..=512.).contains(&plane_height) {
+            return Err(invalid("color plane height requires 48..=512 pixels"));
         }
         if !self.side.is_finite() || !(128. ..=512.).contains(&self.side) {
             return Err(invalid("color plane side requires 128..=512 pixels"));
@@ -452,8 +463,8 @@ impl Widget for ColorPicker {
                 Style::new()
                     .position(Position::Relative)
                     .width(Length::Percent(100.))
-                    .height(Length::Px(side))
-                    .min_height(Length::Px(side)),
+                    .height(Length::Px(plane_height))
+                    .min_height(Length::Px(plane_height)),
             )
             .on(EventKind::Drag, move |event| {
                 if let Err(error) = drag.event(event)
@@ -612,6 +623,35 @@ impl Widget for ColorPicker {
         let weak_commit = scope.downgrade();
         let observe_range = state.clone();
         let observe_drag = state.clone();
+        let body_node = scope.cage(None);
+        glory::ui::view()
+            .class("sapid-color-picker-body")
+            .node_ref(body_node)
+            .style(Style {
+                align: Some(glory::style::Align::Center),
+                ..Style::new()
+                    .display(Display::Flex)
+                    .flex_direction(glory::style::FlexDirection::Row)
+                    .width(Length::Percent(100.))
+                    .gap(10.)
+            })
+            .show_in(&parent)?;
+        let body = scope.child_in(body_node.get().ok_or(glory::ui::Error::Gone)?)?;
+        let sliders_node = scope.cage(None);
+        glory::ui::view()
+            .class("sapid-color-picker-sliders")
+            .node_ref(sliders_node)
+            .style(Style {
+                grow: Some(1.),
+                shrink: Some(1.),
+                ..Style::new()
+                    .display(Display::Flex)
+                    .flex_direction(glory::style::FlexDirection::Column)
+                    .min_width(Length::Px(0.))
+                    .gap(4.)
+            })
+            .show_in(&body)?;
+        let sliders = scope.child_in(sliders_node.get().ok_or(glory::ui::Error::Gone)?)?;
         let mut hue = crate::hue_slider(format!("{}-h", self.key))
             .value(channel(state.clone(), scope, 0))
             .name(hue_label)
@@ -644,7 +684,7 @@ impl Widget for ColorPicker {
         if self.common.unstyled {
             hue = hue.unstyled();
         }
-        hue.show_in(&parent)?;
+        hue.show_in(&sliders)?;
         if self.alpha {
             let preview = state.clone();
             let color = scope.bond(move || {
@@ -692,8 +732,24 @@ impl Widget for ColorPicker {
             if self.common.unstyled {
                 alpha = alpha.unstyled();
             }
-            alpha.show_in(&parent)?;
+            alpha.show_in(&sliders)?;
+            let side = match self.common.size {
+                crate::Size::ExtraSmall => 26.,
+                crate::Size::Small => 34.,
+                crate::Size::Medium => 42.,
+                crate::Size::Large => 50.,
+                crate::Size::ExtraLarge => 54.,
+            };
+            crate::color_swatch(color)
+                .theme(self.common.theme.clone())
+                .class("sapid-color-picker-preview")
+                .name("Current color")
+                .side(side)
+                .round(false)
+                .show_in(&body)?;
         }
+        body.retain(sliders)?;
+        parent.retain(body)?;
         if !swatches.is_empty() {
             show_swatches(
                 &parent,

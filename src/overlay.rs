@@ -383,6 +383,13 @@ impl Drawer {
     }
 }
 impl Popover {
+    /// Leave focus on the current control when a non-modal popover opens or closes.
+    pub fn preserve_focus(mut self) -> Self {
+        self.inner.config.focus = glory::render::LayerFocus::Preserve;
+        self.inner.config.initial_focus = None;
+        self.inner.config.return_focus = None;
+        self
+    }
     /// Use an existing semantic control as the trigger and anchor. The caller
     /// owns activation and the controlled `open` state.
     pub(crate) fn external_trigger(mut self, anchor: SemanticId) -> Self {

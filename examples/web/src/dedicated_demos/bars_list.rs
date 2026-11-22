@@ -1,25 +1,34 @@
 use glory::prelude::*;
 use sapid::charts::*;
-fn values(values: &[(&str, &str, f64)]) -> PlotData {
-    PlotData::Values(
-        values
-            .iter()
-            .map(|(key, label, value)| ValueDatum::new(*key, *label, *value))
-            .collect(),
-    )
-}
-fn sample_data() -> PlotData {
-    values(&[
-        ("north", "North", 42.0),
-        ("south", "South", 31.0),
-        ("west", "West", 18.0),
-        ("returns", "Returns", -9.0),
-    ])
-}
-
 pub fn demo(theme: sapid::Theme) -> impl Widget {
+    let palette = {
+        let mut p = controls::chart_palette(&theme);
+        p.series.fill(glory::style::Color(208, 235, 255, 255));
+        p
+    };
     bars_list("bars-list-overview")
-        .name("Ranked labels and signed values")
         .theme(theme)
-        .data(sample_data())
+        .name("Downloads by framework")
+        .chart_theme(palette)
+        .data(PlotData::values([
+            ValueDatum::new("group0", "React", 950000.0),
+            ValueDatum::new("group1", "Vue", 320000.0),
+            ValueDatum::new("group2", "Angular", 580000.0),
+            ValueDatum::new("group3", "Svelte", 145000.0),
+            ValueDatum::new("group4", "Next.js", 720000.0),
+            ValueDatum::new("group5", "Nuxt", 180000.0),
+            ValueDatum::new("group6", "Remix", 95000.0),
+        ]))
+        .frame(ChartFrame {
+            width: 640.,
+            height: 320.,
+        })
+        .default_options(PlotOptions {
+            bar_labels: true,
+            ..Default::default()
+        })
+        .style(Style::new().width(Length::Percent(100.)))
+        .legend(false)
+        .navigation(false)
+        .data_table(false)
 }

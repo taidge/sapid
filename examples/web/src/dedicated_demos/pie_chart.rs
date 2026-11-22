@@ -1,25 +1,30 @@
 use glory::prelude::*;
 use sapid::charts::*;
-fn values(values: &[(&str, &str, f64)]) -> PlotData {
-    PlotData::Values(
-        values
-            .iter()
-            .map(|(key, label, value)| ValueDatum::new(*key, *label, *value))
-            .collect(),
-    )
-}
-fn sample_data() -> PlotData {
-    values(&[
-        ("a", "Product A", 42.0),
-        ("b", "Product B", 31.0),
-        ("c", "Product C", 18.0),
-        ("other", "Other", 9.0),
-    ])
-}
-
 pub fn demo(theme: sapid::Theme) -> impl Widget {
+    let palette = controls::chart_palette(&theme);
     pie_chart("pie-chart-overview")
-        .name("Shares, angles and percentages")
         .theme(theme)
-        .data(sample_data())
+        .name("Share by country")
+        .chart_theme(palette)
+        .data(controls::segment_example_data())
+        .frame(ChartFrame {
+            width: 320.,
+            height: 320.,
+        })
+        .default_options(PlotOptions {
+            angles: Some(PlotAngles {
+                start: 0.,
+                sweep: 360.,
+            }),
+            counterclockwise: true,
+            ..Default::default()
+        })
+        .style(
+            Style::new()
+                .width(Length::Px(184.))
+                .max_width(Limit::Percent(100.)),
+        )
+        .legend(false)
+        .navigation(false)
+        .data_table(false)
 }

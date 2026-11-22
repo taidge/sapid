@@ -68,6 +68,31 @@ fn command(app: &App, from: NodeId, command: MenuCommand) {
 }
 
 #[test]
+fn an_inline_dropdown_keeps_its_root_in_flow_and_anchors_its_submenu() {
+    let app = App::memory();
+    app.mount(
+        dropdown_menu("inline")
+            .label("Commands")
+            .inline_panel()
+            .open(true)
+            .submenu(
+                menu_submenu("export")
+                    .label("Export")
+                    .item(menu_item("pdf").label("PDF")),
+            ),
+    )
+    .unwrap();
+    let panels = panels(&app);
+    assert_eq!(panels.len(), 2);
+    let tree = app.tree();
+    let root = tree.node(panels[0]).unwrap().descriptor.view();
+    assert!(root.semantics.as_ref().unwrap().layer.is_none());
+    assert!(!root.semantics.as_ref().unwrap().hidden);
+    let child = tree.node(panels[1]).unwrap().descriptor.view();
+    assert!(child.semantics.as_ref().unwrap().layer.is_some());
+}
+
+#[test]
 fn passive_captions_and_sections_preserve_names_navigation_and_identity() {
     let app = App::memory();
     let caption = app.scope().cage("Workspace".to_owned());

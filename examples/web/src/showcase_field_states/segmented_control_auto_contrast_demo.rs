@@ -1,0 +1,61 @@
+use glory::prelude::*;
+
+pub fn demo(theme: sapid::Theme) -> impl Widget {
+    sapid::stack()
+        .theme(theme.clone())
+        .class("site-field-state-example choice-demos-centered")
+        .gap(16.)
+        .style(
+            Style::new()
+                .width(Length::Percent(100.))
+                .max_width(Limit::Px(340.)),
+        )
+        .fill(
+            sapid::stack().gap(7.).fill((
+                sapid::segmented_control("lime-regular")
+                    .theme(theme.clone())
+                    .class("choice-segment-lime")
+                    .default_value("React")
+                    .segments([
+                        sapid::segment("React")
+                            .label("React")
+                            .name("React")
+                            .class("choice-segment-React"),
+                        sapid::segment("Angular")
+                            .label("Angular")
+                            .name("Angular")
+                            .class("choice-segment-Angular"),
+                        sapid::segment("Vue")
+                            .label("Vue")
+                            .name("Vue")
+                            .class("choice-segment-Vue"),
+                        sapid::segment("Svelte")
+                            .label("Svelte")
+                            .name("Svelte")
+                            .class("choice-segment-Svelte"),
+                    ]),
+                sapid::segmented_control("lime-auto")
+                    .theme(theme.clone())
+                    .class("choice-segment-lime choice-segment-contrast")
+                    .default_value("React")
+                    .segments([
+                        sapid::segment("React")
+                            .label("React")
+                            .name("React")
+                            .class("choice-segment-React"),
+                        sapid::segment("Angular")
+                            .label("Angular")
+                            .name("Angular")
+                            .class("choice-segment-Angular"),
+                        sapid::segment("Vue")
+                            .label("Vue")
+                            .name("Vue")
+                            .class("choice-segment-Vue"),
+                        sapid::segment("Svelte")
+                            .label("Svelte")
+                            .name("Svelte")
+                            .class("choice-segment-Svelte"),
+                    ]),
+            )),
+        )
+}

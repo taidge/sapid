@@ -1,5 +1,6 @@
 //! Portable finite geometry for Cartesian charts. Every layer is one existing
 //! validated Graphic, shared by HTML/SVG and native rendering.
+use crate::chart_curve::ChartCurve;
 use crate::chart_model::*;
 use glory::render::{
     GraphicPoint as Point, GraphicProps, GraphicStroke, PathCommand as Cmd, StrokeCap,
@@ -55,14 +56,85 @@ impl ChartTheme {
 }
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct CartesianOptions {
+    pub presentation: ChartPresentation,
     pub kind: CartesianKind,
     pub stacked: bool,
     pub hidden: BTreeSet<String>,
     pub brush: Option<ChartBrush>,
     pub domain: Option<ChartDomain>,
+    /// Axis titles, shown alongside the corresponding visible scale.
+    pub x_axis_title: Option<String>,
+    pub y_axis_title: Option<String>,
     pub reference_lines: Vec<ChartReferenceLine>,
     pub reference_areas: Vec<ChartReferenceArea>,
     pub reference_dots: Vec<ChartReferenceDot>,
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ChartAxes {
+    None,
+    X,
+    Y,
+    Both,
+}
+impl ChartAxes {
+    pub(crate) fn x(self) -> bool {
+        matches!(self, Self::X | Self::Both)
+    }
+    pub(crate) fn y(self) -> bool {
+        matches!(self, Self::Y | Self::Both)
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct ChartPresentation {
+    pub curve: ChartCurve,
+    pub grid: ChartAxes,
+    pub tick_lines: ChartAxes,
+    pub x_axis: bool,
+    pub y_axis: bool,
+    pub dots: bool,
+    pub connect_nulls: bool,
+    pub edge_categories: bool,
+    pub fill_opacity: f64,
+    pub bar_opacity: f64,
+    /// Cap the width of each column in chart frame units.
+    pub max_bar_width: Option<f64>,
+    pub stroke_width: f64,
+    pub area_gradient: bool,
+    pub tooltip: bool,
+    pub point_labels: bool,
+    pub dot_size: f64,
+    pub dashed_series: bool,
+    /// Additional inset at each horizontal end of the category scale in frame units.
+    pub x_inset: f64,
+    /// Format numeric ticks, point labels and tooltips with thousands separators.
+    pub group_digits: bool,
+    pub axis_text_color: Option<Color>,
+}
+impl Default for ChartPresentation {
+    fn default() -> Self {
+        Self {
+            curve: ChartCurve::Linear,
+            grid: ChartAxes::X,
+            tick_lines: ChartAxes::None,
+            x_axis: true,
+            y_axis: true,
+            dots: true,
+            connect_nulls: false,
+            edge_categories: false,
+            fill_opacity: 96. / 255.,
+            bar_opacity: 1.,
+            max_bar_width: None,
+            stroke_width: 2.,
+            area_gradient: false,
+            tooltip: true,
+            point_labels: false,
+            dot_size: 8.,
+            dashed_series: false,
+            x_inset: 0.,
+            group_digits: false,
+            axis_text_color: None,
+        }
+    }
 }
 pub const MAX_CHART_REFERENCES: usize = 16;
 #[derive(Clone, Debug, PartialEq)]
@@ -253,7 +325,7 @@ impl CartesianScene {
     pub fn to_svg(&self) -> Result<String, ChartError> {
         use std::fmt::Write;
         self.frame.validate()?;
-        if self.paths.len() > MAX_CHART_SERIES * 3 + 1 {
+        if self.paths.len() > MAX_CHART_SERIES * MAX_CHART_POINTS + MAX_CHART_REFERENCES + 2 {
             return Err(ChartError::Budget);
         }
         for path in &self.paths {
@@ -320,6 +392,17 @@ impl CartesianScene {
     ) -> Result<Self, ChartError> {
         frame.validate()?;
         data.validate()?;
+        let style = options.presentation;
+        if !(0.0..=1.0).contains(&style.bar_opacity)
+            || !(0.0..=1.0).contains(&style.fill_opacity)
+            || !(0.0..=32.0).contains(&style.stroke_width)
+            || style
+                .max_bar_width
+                .is_some_and(|w| !w.is_finite() || w <= 0.)
+            || !(1.0..=64.0).contains(&style.dot_size)
+        {
+            return Err(ChartError::Geometry);
+        }
         // Validate hidden keys even when the caller supplies an explicit domain.
         let natural = data.domain(options.stacked, &options.hidden)?;
         let domain = options.domain.unwrap_or(natural);
@@ -331,15 +414,49 @@ impl CartesianScene {
             .brush
             .map_or(data.categories.len(), |brush| brush.last + 1);
         let count = end - first;
-        let left = 52.;
-        let top = 12.;
-        let right = frame.width - 16.;
-        let bottom = frame.height - 36.;
+        for title in [&options.x_axis_title, &options.y_axis_title]
+            .into_iter()
+            .flatten()
+        {
+            if title.len() > MAX_CHART_TEXT_BYTES || title.chars().any(char::is_control) {
+                return Err(ChartError::Geometry);
+            }
+        }
+        if !style.x_inset.is_finite()
+            || style.x_inset < 0.
+            || style.x_inset > (frame.width - 100.) / 2.
+        {
+            return Err(ChartError::Geometry);
+        }
+        let left = if style.y_axis { 52. } else { 12. } + style.x_inset;
+        let top = if style.y_axis && options.y_axis_title.is_some() {
+            32.
+        } else {
+            12.
+        };
+        let right = frame.width - 16. - style.x_inset;
+        let bottom = frame.height
+            - if style.x_axis && options.x_axis_title.is_some() {
+                54.
+            } else if style.x_axis {
+                36.
+            } else {
+                12.
+            };
         let y = |value: f64| -> Result<f64, ChartError> {
             Ok(bottom - domain.fraction(value)?.clamp(0., 1.) * (bottom - top))
         };
         let band = (right - left) / count.max(1) as f64;
-        let x = |index: usize| left + (index - first) as f64 * band + band / 2.;
+        let x = |index: usize| {
+            if style.edge_categories
+                && count > 1
+                && matches!(options.kind, CartesianKind::Line | CartesianKind::Area)
+            {
+                left + (index - first) as f64 * (right - left) / (count - 1) as f64
+            } else {
+                left + (index - first) as f64 * band + band / 2.
+            }
+        };
         let reference_count = options.reference_lines.len()
             + options.reference_areas.len()
             + options.reference_dots.len();
@@ -372,10 +489,35 @@ impl CartesianScene {
             .collect::<Result<Vec<_>, ChartError>>()?;
         let mut grid = Vec::new();
         for tick in &ticks {
-            grid.extend([
-                Cmd::Move(Point::new(left, tick.y)),
-                Cmd::Line(Point::new(right, tick.y)),
-            ]);
+            if style.grid.x() {
+                grid.extend([
+                    Cmd::Move(Point::new(left, tick.y)),
+                    Cmd::Line(Point::new(right, tick.y)),
+                ]);
+            }
+            if style.y_axis && style.tick_lines.y() {
+                grid.extend([
+                    Cmd::Move(Point::new(left - 4., tick.y)),
+                    Cmd::Line(Point::new(left, tick.y)),
+                ]);
+            }
+        }
+        for index in (first..end)
+            .filter(|i| (*i - first).is_multiple_of(count.div_ceil(8).max(1)) || *i + 1 == end)
+        {
+            let px = x(index);
+            if style.grid.y() {
+                grid.extend([
+                    Cmd::Move(Point::new(px, top)),
+                    Cmd::Line(Point::new(px, bottom)),
+                ]);
+            }
+            if style.x_axis && style.tick_lines.x() {
+                grid.extend([
+                    Cmd::Move(Point::new(px, bottom)),
+                    Cmd::Line(Point::new(px, bottom + 4.)),
+                ]);
+            }
         }
         let mut paths = vec![path(
             frame,
@@ -569,7 +711,7 @@ impl CartesianScene {
             let mut spans = Vec::new();
             for category in first..end {
                 let Some(value) = series.values[category] else {
-                    if !run.is_empty() {
+                    if !style.connect_nulls && !run.is_empty() {
                         spans.push(std::mem::take(&mut run));
                     }
                     continue;
@@ -600,16 +742,20 @@ impl CartesianScene {
                     y: py,
                 };
                 if kind == ChartSeriesKind::Bar {
-                    let width = band * 0.72
-                        / if options.stacked {
-                            1.
-                        } else {
-                            bar_count as f64
-                        };
-                    let bx = if options.stacked {
-                        px - width / 2.
+                    let count = if options.stacked {
+                        1.
                     } else {
-                        px - band * 0.36 + bar_index as f64 * width
+                        bar_count as f64
+                    };
+                    let nominal_width = band * 0.72 / count;
+                    let width = style
+                        .max_bar_width
+                        .map_or(nominal_width, |limit| nominal_width.min(limit));
+                    let first = px - width * count / 2.;
+                    let bx = if options.stacked {
+                        first
+                    } else {
+                        first + bar_index as f64 * width
                     };
                     locations.push(ChartLocation {
                         x: bx + width / 2.,
@@ -632,31 +778,31 @@ impl CartesianScene {
             if !run.is_empty() {
                 spans.push(run);
             }
+            let mut outlines = Vec::new();
             for span in spans {
+                let edge_commands = style.curve.commands_per_edge();
+                let area = kind == ChartSeriesKind::Area;
+                let limit = (255 - usize::from(area)) / (edge_commands + usize::from(area));
+                let tangents = style.curve.tangents(&span);
                 let mut start = 0;
                 loop {
-                    let end = if kind == ChartSeriesKind::Area {
-                        (start + 127).min(span.len())
-                    } else {
-                        span.len()
-                    };
+                    let end = (start + limit).min(span.len());
                     let slice = &span[start..end];
-                    let size = if kind == ChartSeriesKind::Area {
-                        slice.len() * 2 + 1
-                    } else {
-                        slice.len()
-                    };
+                    let size = 1
+                        + (slice.len() - 1) * edge_commands
+                        + if area { slice.len() + 1 } else { 0 };
                     if commands.len() + size > 256 {
                         batches.push(std::mem::take(&mut commands));
                     }
+                    let origin = commands.len();
                     commands.push(Cmd::Move(Point::new(slice[0].0, slice[0].1)));
-                    commands.extend(
-                        slice
-                            .iter()
-                            .skip(1)
-                            .map(|(x, y, _)| Cmd::Line(Point::new(*x, *y))),
-                    );
+                    for i in start + 1..end {
+                        style.curve.edge(&span, i, &tangents, &mut commands);
+                    }
                     if kind == ChartSeriesKind::Area {
+                        if style.stroke_width > 0. {
+                            outlines.push(commands[origin..].to_vec());
+                        }
                         commands.extend(
                             slice
                                 .iter()
@@ -675,8 +821,10 @@ impl CartesianScene {
                 batches.push(commands);
             }
             let mut fill = theme.series[series_index];
-            if kind == ChartSeriesKind::Area {
-                fill.3 = 96;
+            if kind == ChartSeriesKind::Bar {
+                fill.3 = (f64::from(fill.3) * style.bar_opacity).round() as u8;
+            } else if kind == ChartSeriesKind::Area {
+                fill.3 = (style.fill_opacity * 255.).round() as u8;
             }
             for (batch, commands) in batches.into_iter().enumerate() {
                 paths.push(path(
@@ -685,8 +833,18 @@ impl CartesianScene {
                     Some(series_index),
                     commands,
                     (kind != ChartSeriesKind::Line).then_some(fill),
-                    (kind != ChartSeriesKind::Bar)
-                        .then_some(stroke(theme.series[series_index], 2.)),
+                    (kind == ChartSeriesKind::Line && style.stroke_width > 0.)
+                        .then_some(stroke(theme.series[series_index], style.stroke_width)),
+                )?);
+            }
+            for (index, outline) in outlines.into_iter().enumerate() {
+                paths.push(path(
+                    frame,
+                    format!("outline:{}:{index}", series.key),
+                    Some(series_index),
+                    outline,
+                    None,
+                    Some(stroke(theme.series[series_index], style.stroke_width)),
                 )?);
             }
             if kind == ChartSeriesKind::Bar {

@@ -333,3 +333,27 @@ fn queued_changes_share_the_original_revision_until_the_entire_host_tick_finishe
     assert_eq!(props(&app, id).selection.keys[0].as_str(), "b");
     assert_eq!(props(&app, id).selection.revision, revision + 1);
 }
+
+#[test]
+fn renderer_native_entries_preserve_selection_and_form_values() {
+    let app = App::memory();
+    let native = glory::render::SelectEntry::Option(glory::render::SelectOption {
+        key: SemanticId::new("two").unwrap(),
+        label: "Second".to_owned(),
+        value: "second-value".to_owned(),
+        disabled: false,
+    });
+    let select = native_select("native-entry")
+        .form_name("library")
+        .option(select_option("one", "First"))
+        .native_entry(native)
+        .default_value(Some("two".into()));
+    app.mount(select).unwrap();
+    let id = node(&app);
+    let config = props(&app, id);
+    assert_eq!(config.options().count(), 2);
+    assert_eq!(config.options().last().unwrap().0.value, "second-value");
+    assert_eq!(config.selection.keys[0].as_str(), "two");
+    change(&app, id, &["one"]);
+    assert_eq!(props(&app, id).selection.keys[0].as_str(), "one");
+}

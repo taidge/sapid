@@ -88,6 +88,7 @@ pub struct Accordion {
     variant: AccordionVariant,
     chevron: Chevron,
     item_radius: Option<f64>,
+    transition_duration: Option<u16>,
 }
 pub fn accordion(key: impl Into<String>) -> Accordion {
     Accordion {
@@ -112,6 +113,7 @@ pub fn accordion(key: impl Into<String>) -> Accordion {
             rotate: true,
         },
         item_radius: None,
+        transition_duration: None,
     }
 }
 impl Accordion {
@@ -134,6 +136,11 @@ impl Accordion {
     }
     pub fn rotate_chevron(mut self, rotate: bool) -> Self {
         self.chevron.rotate = rotate;
+        self
+    }
+    /// Animate opening and closing to the measured panel height. Zero disables motion.
+    pub fn transition_duration(mut self, milliseconds: u16) -> Self {
+        self.transition_duration = Some(milliseconds);
         self
     }
     pub fn item_radius(mut self, radius: f64) -> Self {
@@ -198,6 +205,34 @@ impl Accordion {
         self.policy = policy;
         self
     }
+}
+
+fn animated_panel(mut panel: Panel, duration: Option<u16>) -> Box<dyn Widget> {
+    let Some(duration) = duration else {
+        return Box::new(panel);
+    };
+    Box::new(glory::ui::widget(move |scope| {
+        let state = crate::collapsible::motion::State::new(
+            scope,
+            panel.open.clone(),
+            duration.into(),
+            true.into(),
+            panel.policy,
+        )?;
+        crate::collapsible::motion::Panel {
+            class: panel.class,
+            role: panel.role,
+            id: panel.id.clone(),
+            label: panel.label.clone(),
+            state,
+            trigger: panel.trigger,
+            reference: panel.reference,
+            factory: panel.factory.take(),
+            unstyled: panel.unstyled,
+            on_end: None,
+        }
+        .show_in(scope)
+    }))
 }
 
 fn valid_open(
@@ -363,6 +398,7 @@ impl Widget for Accordion {
                 class: "sapid-accordion-panel",
                 unstyled: self.common.unstyled,
             };
+            let panel = animated_panel(panel, self.transition_duration);
             let mut row = glory::ui::view().class("sapid-accordion-item");
             if !self.common.unstyled {
                 let theme = self.common.theme.clone();

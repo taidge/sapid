@@ -1,5 +1,10 @@
 use glory::prelude::*;
+
 pub fn demo(theme: sapid::Theme) -> impl Widget {
+    focus_form(theme, "focus-first", false)
+}
+
+fn focus_form(theme: sapid::Theme, key: &'static str, target_second: bool) -> impl Widget {
     widget(move |scope| {
         let active = scope.cage(false);
         let preferred = scope.cage(None::<glory::render::SemanticId>);
@@ -7,67 +12,60 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
             initial_focus: preferred.get(),
             ..Default::default()
         });
-        sapid::stack()
+        let toggle = sapid::button()
             .theme(theme.clone())
-            .gap(14.)
-            .fill((
-                sapid::button()
+            .class("site-focus-form-toggle")
+            .label(active.map(|on| {
+                if *on {
+                    String::from("Deactivate focus trap")
+                } else {
+                    String::from("Activate focus trap")
+                }
+            }))
+            .on_press(move || active.revise(|v| *v = !*v));
+        let fields = ["First input", "Second input", "Third input"]
+            .into_iter()
+            .enumerate()
+            .map(|(index, name)| {
+                sapid::field(format!("{key}-{index}"))
                     .theme(theme.clone())
-                    .label("Edit shipping details")
-                    .on_press(move || active.revise(|v| *v = true)),
-                sapid::focus_scope()
-                    .configuration(configuration)
-                    .active(active)
-                    .loop_tab(true)
-                    .contain_focus(true)
-                    .auto_focus(true)
-                    .restore_focus(true)
-                    .class("shipping-focus-form")
-                    .style(Style {
-                        border_color: Some(theme.border),
-                        background: Some(theme.surface),
-                        ..Style::new()
-                            .display(glory::style::Display::Flex)
-                            .flex_direction(glory::style::FlexDirection::Column)
-                            .gap(12.)
-                            .padding(Edges::all(16.))
-                            .border_width(Edges::all(1.))
-                            .border_style(glory::style::BorderStyle::Solid)
-                            .radius(8.)
-                    })
-                    .fill((
-                        sapid::field("shipping-primary-name")
-                            .theme(theme.clone())
-                            .label("Shipping name")
-                            .control(|field| {
-                                sapid::text_field().field(field).default_value("Ava Patel")
-                            }),
-                        sapid::field("shipping-primary-address")
-                            .theme(theme.clone())
-                            .label("Shipping address")
-                            .control(move |field| {
-                                preferred.revise(|id| *id = Some(field.id.clone()));
-                                sapid::text_field()
-                                    .field(field)
-                                    .default_value("Mountain studio reception")
-                            }),
-                        sapid::button()
-                            .theme(theme.clone())
-                            .label("Done editing shipping")
-                            .on_press(move || active.revise(|v| *v = false)),
-                    )),
-                sapid::text()
-                    .theme(theme.clone())
-                    .variant(sapid::TextVariant::Small)
-                    .content(active.map(|v| {
-                        if *v {
-                            "Tab stays in the shipping form. Choose Done editing to return."
-                                .to_owned()
-                        } else {
-                            "Choose Edit shipping details to focus the address field.".to_owned()
+                    .label(name)
+                    .control(move |field| {
+                        if target_second && index == 1 {
+                            preferred.revise(|id| *id = Some(field.id.clone()));
                         }
-                    })),
-            ))
+                        sapid::text_field().field(field).placeholder(name)
+                    })
+            })
+            .collect::<Vec<_>>();
+        let form = sapid::focus_scope()
+            .configuration(configuration)
+            .active(active)
+            .loop_tab(true)
+            .contain_focus(true)
+            .auto_focus(true)
+            .restore_focus(true)
+            .style(
+                Style::new()
+                    .display(Display::Flex)
+                    .flex_direction(FlexDirection::Column)
+                    .gap(12.),
+            )
+            .fill(fields);
+        sapid::group()
+            .theme(theme.clone())
+            .justify(Justify::Center)
+            .fill(
+                sapid::stack()
+                    .theme(theme.clone())
+                    .gap(12.)
+                    .style(
+                        Style::new()
+                            .width(Length::Percent(100.))
+                            .max_width(Limit::Px(400.)),
+                    )
+                    .fill((toggle, form)),
+            )
             .show_in(scope)
     })
 }

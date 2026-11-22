@@ -5,6 +5,7 @@ mod angle_controls;
 mod angle_direction;
 mod hue_controls;
 mod hue_sizes;
+mod picker_default_swatches;
 mod picker_formats;
 mod picker_palette;
 mod picker_precision;
@@ -66,6 +67,12 @@ pub fn sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         ],
         "color-picker" => vec![
             section!(
+                picker_default_swatches,
+                "picker-default-swatches",
+                "With swatches",
+                "Pick a preset or adjust the continuous color plane."
+            ),
+            section!(
                 picker_swatches,
                 "picker-swatches",
                 "With swatches",
@@ -75,7 +82,7 @@ pub fn sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
                 picker_palette,
                 "picker-swatches-only",
                 "Swatches only and full width",
-                "show_picker(false) removes the continuous controls while the finite palette fills its bounded parent. Seven swatches share the available width. The wrapper is capped at 420px and can shrink on narrow screens; it does not force a 420px overflow region. Selection updates the same controlled HSVA source."
+                "Three rows of red, green and blue shades fill a 220-pixel palette. Select any swatch to update the hexadecimal value beneath it."
             ),
             section!(
                 picker_precision,
@@ -108,7 +115,8 @@ pub fn navigation(id: &str) -> Vec<(&'static str, &'static str)> {
             ("Direction and states", "#angle-direction"),
         ],
         "color-picker" => vec![
-            ("With swatches", "#picker-swatches"),
+            ("With swatches", "#picker-default-swatches"),
+            ("Swatches per row", "#picker-swatches"),
             ("Swatches only", "#picker-swatches-only"),
             ("Keyboard precision", "#picker-precision"),
             ("Formatted form value", "#picker-form-value"),

@@ -1,6 +1,7 @@
 use glory::prelude::*;
 pub fn demo(theme: sapid::Theme) -> impl Widget {
     sapid::field("primary-autocomplete")
+        .class("site-field-example")
         .theme(theme.clone())
         .label("Contact email")
         .control(move |field| {

@@ -5,7 +5,7 @@ use glory::render::{Event, EventKind, NodeId, Semantics, TextKind};
 use glory::style::{
     Color, Display, Edges, Family, FlexDirection, Length, Overflow, Style, WhiteSpace,
 };
-use glory::ui::{Result, Widget};
+use glory::ui::{Children, IntoChildren, Result, Widget};
 use glory::{Cage, Scope, Vary};
 use std::rc::Rc;
 
@@ -37,18 +37,30 @@ fn prepare(
     language: CodeLanguage,
     highlighted: &[usize],
     start: u32,
+    dedent_first: bool,
 ) -> Result<Presentation> {
     if source.len() > MAX_CODE_BYTES {
         return Err(invalid(CodeError::Bytes));
     }
     let source = glory::render::normalize_text(source, true);
     let document = tokenize_code(&source, language).map_err(invalid)?;
+    let mut prefix = if dedent_first {
+        document
+            .source()
+            .bytes()
+            .take_while(|b| matches!(b, b' ' | b'\t'))
+            .count()
+    } else {
+        0
+    };
     let mut line = 1;
     let mut spans = Vec::new();
     for token in document.tokens() {
         for part in document.source()[token.range.clone()].split_inclusive('\n') {
+            let skip = prefix.min(part.len());
+            prefix -= skip;
             spans.push(Rc::new(Span {
-                text: part.into(),
+                text: part[skip..].into(),
                 kind: token.kind,
                 highlighted: highlighted.contains(&line),
             }));
@@ -78,6 +90,8 @@ struct Config {
     start: u32,
     highlighted: Vec<usize>,
     copy: Option<crate::CopyButton>,
+    controls: Option<Children>,
+    dedent_first: bool,
 }
 impl Config {
     fn new(language: CodeLanguage) -> Self {
@@ -89,6 +103,8 @@ impl Config {
             start: 1,
             highlighted: Vec::new(),
             copy: None,
+            controls: None,
+            dedent_first: false,
         }
     }
 }
@@ -162,6 +178,16 @@ macro_rules! methods {
                 self.config.copy = Some(value);
                 self
             }
+            /// Place application-owned controls inside the code surface.
+            pub fn controls(mut self, children: impl IntoChildren) -> Self {
+                self.config.controls = Some(children.into_children());
+                self
+            }
+            /// Hide leading spaces and tabs on the first displayed line. Copy retains the accepted source.
+            pub fn dedent_first_line(mut self, value: bool) -> Self {
+                self.config.dedent_first = value;
+                self
+            }
             pub fn line_numbers(mut self, value: bool) -> Self {
                 self.config.numbers = value;
                 self
@@ -220,10 +246,17 @@ fn build(config: &mut Config, scope: &Scope) -> Result {
         )
         .into());
     }
+    let dedent_first = config.dedent_first;
     let language = config.language.try_get()?;
-    let initial = config
-        .source
-        .try_with(|source| prepare(source, language, &config.highlighted, config.start))??;
+    let initial = config.source.try_with(|source| {
+        prepare(
+            source,
+            language,
+            &config.highlighted,
+            config.start,
+            dedent_first,
+        )
+    })??;
     let accepted = scope.cage(Rc::new(initial));
     let source = config.source.clone();
     let language = config.language.clone();
@@ -242,7 +275,7 @@ fn build(config: &mut Config, scope: &Scope) -> Result {
                 if same {
                     return Ok::<_, glory::ui::Error>(None);
                 }
-                prepare(source, language, &highlighted, start).map(Some)
+                prepare(source, language, &highlighted, start, dedent_first).map(Some)
             })??;
             if let Some(next) = next {
                 accepted.try_revise(|old| *old = Rc::new(next))?;
@@ -272,6 +305,12 @@ fn build(config: &mut Config, scope: &Scope) -> Result {
     }
     root.show_in(scope)?;
     let area = scope.child_in(reference.try_get()?.ok_or(glory::ui::Error::Gone)?)?;
+    if let Some(controls) = config.controls.take() {
+        glory::ui::view()
+            .class("sapid-code-controls")
+            .fill(controls)
+            .show_in(&area)?;
+    }
     if let Some(mut copy) = config.copy.take() {
         if unstyled {
             copy = copy.unstyled();

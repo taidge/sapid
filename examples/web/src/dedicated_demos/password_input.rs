@@ -1,17 +1,16 @@
 use glory::prelude::*;
+
 pub fn demo(theme: sapid::Theme) -> impl Widget {
-    sapid::field("password-usage")
-        .theme(theme)
-        .label("Password")
-        .description("Use at least 12 characters")
-        .style(
-            Style::new()
-                .width(Length::Percent(100.))
-                .max_width(Limit::Px(360.)),
-        )
-        .control(|field| {
+    controls::field_playground(
+        theme,
+        "password-usage",
+        "Input label",
+        "Input description",
+        move |field, style| {
             sapid::password_input()
                 .field(field)
-                .placeholder("Your password")
-        })
+                .style(style)
+                .placeholder("Input placeholder")
+        },
+    )
 }

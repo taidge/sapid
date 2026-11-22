@@ -23,6 +23,7 @@ pub struct TextField {
     loading_position: InputSectionPosition,
     left_section: Option<Children>,
     right_section: Option<Children>,
+    bottom_section: Option<Children>,
     left_section_width: f64,
     right_section_width: f64,
     extra_error: Option<(glory::render::SemanticId, Vary<String>)>,
@@ -59,6 +60,7 @@ pub fn text_field() -> TextField {
         loading_position: InputSectionPosition::Right,
         left_section: None,
         right_section: None,
+        bottom_section: None,
         left_section_width: 36.,
         right_section_width: 36.,
         extra_error: None,
@@ -132,6 +134,10 @@ impl TextField {
     }
     pub fn loading_position(mut self, value: InputSectionPosition) -> Self {
         self.loading_position = value;
+        self
+    }
+    pub fn bottom_section(mut self, value: impl IntoChildren) -> Self {
+        self.bottom_section = Some(value.into_children());
         self
     }
     pub fn left_section(mut self, value: impl IntoChildren) -> Self {
@@ -216,7 +222,8 @@ impl Widget for TextField {
         let has_loading = self.loading.is_reactive() || self.loading.get();
         let has_left = self.left_section.is_some() || (has_loading && loading_left);
         let has_right = self.right_section.is_some() || (has_loading && !loading_left);
-        if has_left || has_right {
+        let has_bottom = self.bottom_section.is_some();
+        if has_left || has_right || has_bottom {
             let styles = self.common.style.clone();
             let mut fallback = base.padding.unwrap_or_else(|| glory::style::Edges::all(0.));
             if has_left {
@@ -236,6 +243,9 @@ impl Widget for TextField {
                     }
                     if has_right {
                         padding.right = padding.right.max(right);
+                    }
+                    if has_bottom {
+                        padding.bottom = padding.bottom.max(28.);
                     }
                     style.padding = Some(padding);
                     style
@@ -398,7 +408,10 @@ impl Widget for TextField {
         for (kind, mut handlers) in std::mem::take(&mut self.common.handlers) {
             inner = inner.on(kind, move |event| observe(&mut handlers, owner, event));
         }
-        let decorated = self.left_section.is_some() || self.right_section.is_some() || has_loading;
+        let decorated = self.left_section.is_some()
+            || self.right_section.is_some()
+            || has_loading
+            || has_bottom;
         if decorated {
             let section_style = |left: bool, width: f64| {
                 let mut style = glory::style::Style::new()
@@ -437,6 +450,19 @@ impl Widget for TextField {
                     glory::ui::view()
                         .class("sapid-input-right-section")
                         .style(section_container(false, self.right_section_width))
+                        .fill(children),
+                );
+            }
+            if let Some(children) = self.bottom_section.take() {
+                editor = editor.fill(
+                    glory::ui::view()
+                        .class("sapid-input-bottom-section")
+                        .style(
+                            glory::style::Style::new()
+                                .position(glory::style::Position::Absolute)
+                                .right(glory::style::Length::Px(12.))
+                                .bottom(glory::style::Length::Px(6.)),
+                        )
                         .fill(children),
                 );
             }

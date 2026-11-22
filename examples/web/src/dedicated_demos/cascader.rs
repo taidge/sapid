@@ -1,6 +1,7 @@
 use glory::prelude::*;
 pub fn demo(theme: sapid::Theme) -> impl Widget {
     sapid::field("primary-cascader")
+        .class("site-field-example")
         .theme(theme.clone())
         .label("Product category")
         .control(move |field| {

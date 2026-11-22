@@ -10,37 +10,32 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
             .key(Clone::clone)
             .children(move |_| {
                 let theme = controls::accent(palette.clone(), &color.get());
-                sapid::group().theme(theme.clone()).gap(12.).fill((
-                    sapid::loader()
-                        .theme(theme.clone())
-                        .name("Loading workspace")
-                        .animated(animated)
-                        .color(theme.accent)
-                        .size(controls::size_value(size.get().as_deref().unwrap_or("md")))
-                        .kind(match kind.get().as_deref() {
-                            Some("bars") => sapid::LoaderType::Bars,
-                            Some("dots") => sapid::LoaderType::Dots,
-                            _ => sapid::LoaderType::Oval,
-                        }),
-                    sapid::text()
-                        .theme(theme)
-                        .content("Loading your workspace…"),
-                ))
+                sapid::loader()
+                    .theme(theme.clone())
+                    .name("Loading workspace")
+                    .animated(animated)
+                    .color(theme.accent)
+                    .size(controls::size_value(size.get().as_deref().unwrap_or("md")))
+                    .kind(match kind.get().as_deref() {
+                        Some("bars") => sapid::LoaderType::Bars,
+                        Some("dots") => sapid::LoaderType::Dots,
+                        _ => sapid::LoaderType::Oval,
+                    })
             });
         view()
-            .class("site-configurator")
+            .class("site-configurator site-display-configurator")
             .fill(controls::playground(
                 Box::new(preview),
                 vec![
-                    controls::select(
+                    controls::color_choices(color, &theme),
+                    controls::size_slider(size, &theme),
+                    controls::option_segments(
                         "loader-type",
                         "Type",
                         kind,
                         &[("oval", "Oval"), ("bars", "Bars"), ("dots", "Dots")],
                         &theme,
                     ),
-                    controls::size_slider(size, &theme),
-                    controls::color_choices(color, &theme),
                     controls::checkbox("Animate loading indicator", animated, &theme),
                 ],
             ))

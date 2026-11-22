@@ -35,6 +35,8 @@ pub struct InputGroup {
     common: Common,
     input: Option<Box<dyn Widget>>,
     start: Children,
+    inset: bool,
+    trailing_inset: bool,
     end: Children,
 }
 pub fn input_group() -> InputGroup {
@@ -42,6 +44,8 @@ pub fn input_group() -> InputGroup {
         common: Common::default(),
         input: None,
         start: ().into_children(),
+        inset: false,
+        trailing_inset: false,
         end: ().into_children(),
     }
 }
@@ -51,11 +55,25 @@ impl InputGroup {
         self.input = Some(Box::new(input));
         self
     }
-    pub fn start(mut self, children: impl IntoChildren) -> Self {
+    /// Place a passive leading adornment inside the field surface.
+    pub fn inset_start(mut self, children: impl IntoChildren) -> Self {
+        self.inset = true;
         self.start = children.into_children();
         self
     }
+    pub fn start(mut self, children: impl IntoChildren) -> Self {
+        self.inset = false;
+        self.start = children.into_children();
+        self
+    }
+    /// Place a passive trailing adornment inside the field surface.
+    pub fn inset_end(mut self, children: impl IntoChildren) -> Self {
+        self.trailing_inset = true;
+        self.end = children.into_children();
+        self
+    }
     pub fn end(mut self, children: impl IntoChildren) -> Self {
+        self.trailing_inset = false;
         self.end = children.into_children();
         self
     }
@@ -77,15 +95,48 @@ impl Widget for InputGroup {
         ))?;
         let start = std::mem::replace(&mut self.start, ().into_children());
         let end = std::mem::replace(&mut self.end, ().into_children());
-        configure!(
+        let style = if self.inset || self.trailing_inset {
+            row().position(glory::style::Position::Relative)
+        } else {
+            row()
+        };
+        let mut group = configure!(
             self.common,
             glory::ui::view(),
             scope,
             "sapid-input-group",
-            row()
-        )
-        .fill(start)
-        .fill(
+            style
+        );
+        let inset_slot = |leading| {
+            let mut slot = Style {
+                align: Some(Align::Center),
+                justify: Some(glory::style::Justify::Center),
+                ..Style::new()
+                    .display(Display::Flex)
+                    .position(glory::style::Position::Absolute)
+                    .top(Length::Px(0.))
+                    .height(Length::Percent(100.))
+                    .width(Length::Px(36.))
+                    .pointer_events(glory::style::PointerEvents::None)
+            };
+            if leading {
+                slot.left = Some(Length::Px(0.));
+            } else {
+                slot.right = Some(Length::Px(0.));
+            }
+            slot
+        };
+        if self.inset {
+            group = group.fill(
+                glory::ui::view()
+                    .class("sapid-input-inset-start")
+                    .style(inset_slot(true))
+                    .fill(start),
+            );
+        } else {
+            group = group.fill(start);
+        }
+        group = group.fill(
             glory::ui::view()
                 .class("sapid-input-group-control")
                 .style(Style {
@@ -94,9 +145,18 @@ impl Widget for InputGroup {
                     ..Style::new().min_width(Length::Px(0.0))
                 })
                 .fill(input),
-        )
-        .fill(end)
-        .show_in(scope)
+        );
+        if self.trailing_inset {
+            group = group.fill(
+                glory::ui::view()
+                    .class("sapid-input-inset-end")
+                    .style(inset_slot(false))
+                    .fill(end),
+            );
+        } else {
+            group = group.fill(end);
+        }
+        group.show_in(scope)
     }
 }
 

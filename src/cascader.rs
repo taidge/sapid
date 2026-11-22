@@ -58,8 +58,28 @@ impl Cascader {
         default_expanded(v: BTreeSet<String>),
         direction(v: Direction),
         clearable(v: bool),
+        searchable(v: bool),
+        close_on_select(v: bool),
+        allow_deselect(v: bool),
+        popup_placement(v: glory::render::AnchorPlacement),
+        max_dropdown_height(v: f64),
         field(v: crate::FieldControl)
     );
+    pub fn path_separator(mut self, separator: impl Into<String>) -> Self {
+        self.inner = self.inner.path_separator(separator);
+        self
+    }
+    pub fn nothing_found_message(mut self, message: impl Into<String>) -> Self {
+        self.inner = self.inner.nothing_found_message(message);
+        self
+    }
+    pub fn render_node<W: Widget>(
+        mut self,
+        render: impl FnMut(Vary<TreeNode>) -> W + 'static,
+    ) -> Self {
+        self.inner = self.inner.render_node(render);
+        self
+    }
     pub fn nodes(mut self, v: impl Into<Vary<Vec<TreeNode>>>) -> Self {
         self.inner = self.inner.nodes(v);
         self

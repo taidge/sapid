@@ -54,6 +54,7 @@ pub struct PasswordInput {
     input: crate::TextField,
     visible: Value<bool>,
     on_visibility: Option<Box<dyn FnMut(bool)>>,
+    visibility_icon: fn(bool, Color) -> glory::render::GraphicProps,
     show_label: String,
     hide_label: String,
 }
@@ -64,6 +65,7 @@ pub fn password_input() -> PasswordInput {
         input,
         visible: Value::default(),
         on_visibility: None,
+        visibility_icon: eye,
         show_label: "Show password".into(),
         hide_label: "Hide password".into(),
     }
@@ -80,6 +82,11 @@ impl PasswordInput {
     }
     pub fn on_visibility_change(mut self, handler: impl FnMut(bool) + 'static) -> Self {
         self.on_visibility = Some(Box::new(handler));
+        self
+    }
+    /// Draw the visibility action for its current reveal state and foreground color.
+    pub fn visibility_icon(mut self, draw: fn(bool, Color) -> glory::render::GraphicProps) -> Self {
+        self.visibility_icon = draw;
         self
     }
     /// Localized action names must both be nonempty.
@@ -136,13 +143,21 @@ impl Widget for PasswordInput {
         let weak = scope.downgrade();
         let mut callback = self.on_visibility.take();
         let side = theme.tokens.control(size).min_height;
+        let (icon_size, button_size) = match side {
+            h if h <= 30. => (16., 22.),
+            h if h <= 36. => (20., 26.),
+            h if h <= 42. => (22., 28.),
+            h if h <= 50. => (24., 32.),
+            _ => (28., 40.),
+        };
         let source = control.source.clone();
         let action_enabled = enabled.clone();
         let action_loading = loading.clone();
         let enabled_icon = enabled.clone();
         let colors = theme.clone();
+        let draw_icon = self.visibility_icon;
         let drawing = scope.bond(move || {
-            eye(
+            draw_icon(
                 source.get(),
                 if enabled_icon.get() {
                     colors.foreground
@@ -161,11 +176,11 @@ impl Widget for PasswordInput {
             .fill(
                 glory::ui::graphic().drawing(drawing).style(
                     Style::new()
-                        .width(Length::Px(side * 0.5))
-                        .height(Length::Px(side * 0.5)),
+                        .width(Length::Px(icon_size))
+                        .height(Length::Px(icon_size)),
                 ),
             )
-            .enabled(enabled)
+            .enabled(enabled.clone())
             .on(glory::render::EventKind::Activate, move |_| {
                 let Some(scope) = weak.upgrade() else { return };
                 let result = (|| -> Result {
@@ -196,8 +211,8 @@ impl Widget for PasswordInput {
                 background: Some(Color(0, 0, 0, 0)),
                 ..Style::new()
                     .display(Display::InlineFlex)
-                    .width(Length::Px(side - 6.))
-                    .height(Length::Px(side - 6.))
+                    .width(Length::Px(button_size))
+                    .height(Length::Px(button_size))
                     .padding(Edges::all(0.))
                     .border_width(Edges::all(0.))
                     .radius(theme.radius)
@@ -205,13 +220,14 @@ impl Widget for PasswordInput {
         }
         std::mem::take(&mut self.input)
             .purpose(purpose)
-            .right_section_width(side.max(20.))
+            .right_section_width((side - 2.).max(20.))
             .right_section(
                 glory::ui::view()
                     .class("sapid-password-visibility")
                     .semantics(scope.bond(move || {
                         crate::composite::metadata(glory::render::Semantics {
-                            hidden: loading.as_ref().is_some_and(|loading| loading.get()),
+                            hidden: !enabled.get()
+                                || loading.as_ref().is_some_and(|loading| loading.get()),
                             ..Default::default()
                         })
                     }))

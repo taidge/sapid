@@ -1,3 +1,10 @@
+mod dropzone_child;
+mod dropzone_disabled;
+mod dropzone_fullscreen;
+mod dropzone_loading;
+mod dropzone_open;
+mod dropzone_styling;
+mod image_dropzone;
 use super::showcase_examples::DetailSection;
 mod limits;
 mod previews;
@@ -5,6 +12,12 @@ mod read;
 mod states;
 pub fn navigation() -> Vec<(&'static str, &'static str)> {
     vec![
+        ("Dropzone.FullScreen component", "#dropzone-fullscreen"),
+        ("Open file browser manually", "#dropzone-open"),
+        ("Enable child pointer events", "#dropzone-child"),
+        ("Styles API", "#dropzone-styling"),
+        ("Loading state", "#dropzone-loading"),
+        ("Disabled state", "#dropzone-disabled"),
         ("Limits and rejection", "#dropzone-limits"),
         ("Image previews", "#dropzone-previews"),
         ("Bounded text read", "#dropzone-read"),
@@ -13,6 +26,48 @@ pub fn navigation() -> Vec<(&'static str, &'static str)> {
 }
 pub fn sections(theme: sapid::Theme) -> Vec<DetailSection> {
     vec![
+        DetailSection {
+            id: "dropzone-fullscreen",
+            title: "Dropzone.FullScreen component",
+            note: "Try the component in the preview.",
+            example: Box::new(dropzone_fullscreen::demo(theme.clone())),
+            source: include_str!("dropzone_fullscreen.rs"),
+        },
+        DetailSection {
+            id: "dropzone-open",
+            title: "Open file browser manually",
+            note: "Try the component in the preview.",
+            example: Box::new(dropzone_open::demo(theme.clone())),
+            source: include_str!("dropzone_open.rs"),
+        },
+        DetailSection {
+            id: "dropzone-child",
+            title: "Enable child pointer events",
+            note: "Try the component in the preview.",
+            example: Box::new(dropzone_child::demo(theme.clone())),
+            source: include_str!("dropzone_child.rs"),
+        },
+        DetailSection {
+            id: "dropzone-styling",
+            title: "Styles API",
+            note: "Try the component in the preview.",
+            example: Box::new(dropzone_styling::demo(theme.clone())),
+            source: include_str!("dropzone_styling.rs"),
+        },
+        DetailSection {
+            id: "dropzone-loading",
+            title: "Loading state",
+            note: "Change the control state and try selecting a file.",
+            example: Box::new(dropzone_loading::demo(theme.clone())),
+            source: include_str!("dropzone_loading.rs"),
+        },
+        DetailSection {
+            id: "dropzone-disabled",
+            title: "Disabled state",
+            note: "Change the control state and try selecting a file.",
+            example: Box::new(dropzone_disabled::demo(theme.clone())),
+            source: include_str!("dropzone_disabled.rs"),
+        },
         DetailSection {
             id: "dropzone-limits",
             title: "File limits and rejection",

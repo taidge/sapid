@@ -7,7 +7,7 @@ use glory::render::{Event, EventKind, FocusMode, Navigation, NodeId};
 use glory::style::{Display, FlexDirection, FlexWrap, Length, Limit, ObjectFit, Overflow, Style};
 use glory::ui::{Result, Widget};
 use glory::{Cage, Scope, Vary};
-use std::{collections::BTreeSet, rc::Rc};
+use std::{cell::Cell, collections::BTreeSet, rc::Rc};
 pub const MAX_LIGHTBOX_IMAGES: usize = 128;
 pub const MAX_LIGHTBOX_METADATA_BYTES: usize = 262_144;
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -136,6 +136,9 @@ impl Model {
         self.index().map(|i| &self.images[i])
     }
 }
+type SlideRenderer = Rc<dyn Fn(LightboxImage) -> Box<dyn Widget>>;
+type ToolbarRenderer = Rc<dyn Fn() -> Box<dyn Widget>>;
+
 pub struct Lightbox {
     key: String,
     images: Vary<Vec<LightboxImage>>,
@@ -144,6 +147,13 @@ pub struct Lightbox {
     label: String,
     title: String,
     show_trigger: bool,
+    close_on_outside: bool,
+    loop_navigation: bool,
+    thumbnails: bool,
+    swipe_close: Vary<bool>,
+    open_motion: Option<(Vary<crate::TransitionEffect>, u16)>,
+    slide_renderer: Option<SlideRenderer>,
+    toolbar: Option<ToolbarRenderer>,
     theme: crate::Theme,
     unstyled: bool,
     enabled: Vary<bool>,
@@ -163,6 +173,13 @@ pub fn lightbox(key: impl Into<String>) -> Lightbox {
         label: "Open image gallery".into(),
         title: "Image gallery".into(),
         show_trigger: true,
+        close_on_outside: true,
+        loop_navigation: false,
+        thumbnails: false,
+        swipe_close: false.into(),
+        open_motion: None,
+        slide_renderer: None,
+        toolbar: None,
         theme: crate::Theme::default(),
         unstyled: false,
         enabled: true.into(),
@@ -179,6 +196,49 @@ impl Lightbox {
     /// The shared modal Layer still owns focus containment and restoration.
     pub fn show_trigger(mut self, value: bool) -> Self {
         self.show_trigger = value;
+        self
+    }
+    /// Continue at the opposite edge when moving past the first or final image.
+    pub fn loop_navigation(mut self, value: bool) -> Self {
+        self.loop_navigation = value;
+        self
+    }
+    /// Dismiss the open gallery when the backdrop is activated.
+    pub fn close_on_click_outside(mut self, value: bool) -> Self {
+        self.close_on_outside = value;
+        self
+    }
+    /// Let a downward swipe dismiss the gallery while the current image fits the viewport.
+    pub fn close_on_swipe(mut self, enabled: impl Into<Vary<bool>>) -> Self {
+        self.swipe_close = enabled.into();
+        self
+    }
+    /// Animate opening and closing while retaining the managed layer through its exit.
+    /// A duration of zero presents the dialog immediately.
+    pub fn transition(
+        mut self,
+        effect: impl Into<Vary<crate::TransitionEffect>>,
+        duration: u16,
+    ) -> Self {
+        self.open_motion = Some((effect.into(), duration));
+        self
+    }
+    /// Replace the image viewport contents for each current slide.
+    pub fn render_slide<W: Widget + 'static>(
+        mut self,
+        render: impl Fn(LightboxImage) -> W + 'static,
+    ) -> Self {
+        self.slide_renderer = Some(Rc::new(move |slide| Box::new(render(slide))));
+        self
+    }
+    /// Append application-specific actions to the navigation and zoom controls.
+    pub fn toolbar<W: Widget + 'static>(mut self, render: impl Fn() -> W + 'static) -> Self {
+        self.toolbar = Some(Rc::new(move || Box::new(render())));
+        self
+    }
+    /// Show a focusable thumbnail for every available slide inside the lightbox.
+    pub fn thumbnails(mut self, value: bool) -> Self {
+        self.thumbnails = value;
         self
     }
     pub fn images(mut self, value: impl Into<Vary<Vec<LightboxImage>>>) -> Self {
@@ -248,17 +308,23 @@ impl Lightbox {
 }
 #[derive(Clone)]
 struct State {
+    loop_navigation: bool,
+    thumbnails: bool,
+    swipe_close: Vary<bool>,
+    slide_renderer: Option<SlideRenderer>,
+    toolbar: Option<ToolbarRenderer>,
     owner: glory::core::InstanceId,
     model: Cage<Rc<Model>>,
     images: Vary<Vec<LightboxImage>>,
     view: crate::state::Control<LightboxView>,
-    open: Vary<bool>,
+    open: crate::state::Control<bool>,
+    opened: Callback<bool>,
     enabled: Vary<bool>,
     changed: Callback<LightboxView>,
 }
 impl State {
     fn propose(&self, view: LightboxView) -> Result {
-        if !self.owner.is_alive() || !self.enabled.get() || !self.open.get() {
+        if !self.owner.is_alive() || !self.enabled.get() || !self.open.source.get() {
             return Ok(());
         }
         self.images.with(|images| validate(images, &view))?;
@@ -282,7 +348,9 @@ impl State {
                 return Ok(None);
             };
             let next = match command {
+                Navigation::Previous if i == 0 && self.loop_navigation => images.len() - 1,
                 Navigation::Previous => i.saturating_sub(1),
+                Navigation::Next if i + 1 == images.len() && self.loop_navigation => 0,
                 Navigation::Next => (i + 1).min(images.len() - 1),
                 Navigation::First => 0,
                 Navigation::Last => images.len() - 1,
@@ -349,11 +417,17 @@ impl Widget for Lightbox {
             clean_open.clear();
         })?;
         let state = State {
+            loop_navigation: self.loop_navigation,
+            thumbnails: self.thumbnails,
+            swipe_close: self.swipe_close.clone(),
+            slide_renderer: self.slide_renderer.clone(),
+            toolbar: self.toolbar.clone(),
             owner: scope.id(),
             model,
             images: self.images.clone(),
             view,
-            open: open.source.clone(),
+            open: open.clone(),
+            opened: opened.clone(),
             enabled: self.enabled.clone(),
             changed,
         };
@@ -373,15 +447,35 @@ impl Widget for Lightbox {
                 custom.get(),
             )
         });
+        let open_motion = self
+            .open_motion
+            .clone()
+            .filter(|(_, duration)| *duration > 0);
+        let displayed = scope.cage(open.source.get());
+        let requested = open.source.clone();
+        if open_motion.is_some() {
+            let requested = requested.clone();
+            scope.structural(move || {
+                if requested.get() {
+                    displayed.revise(|value| *value = true);
+                }
+            });
+        }
+        let layer_open: Vary<bool> = if open_motion.is_some() {
+            displayed.into()
+        } else {
+            requested.clone()
+        };
         let mut dialog = crate::dialog(&self.key)
             .show_trigger(self.show_trigger)
+            .dismiss_on_outside(self.close_on_outside)
             .class(scope.bond({
                 let class = self.class.clone();
                 move || format!("sapid-lightbox {}", class.get())
             }))
             .label(self.label.clone())
             .title(self.title.clone())
-            .open(open.source.clone())
+            .open(layer_open)
             .enabled(enabled)
             .theme(theme.clone())
             .style(panel_style)
@@ -394,7 +488,32 @@ impl Widget for Lightbox {
             .content(move || {
                 let state = state_content.clone();
                 let theme = theme.clone();
-                glory::ui::widget(move |scope| build_content(scope, &state, &theme, unstyled))
+                let motion_theme = theme.clone();
+                let content = move || {
+                    let state = state.clone();
+                    let theme = theme.clone();
+                    glory::ui::widget(move |scope| build_content(scope, &state, &theme, unstyled))
+                };
+                if let Some((effect, duration)) = &open_motion {
+                    let wanted = requested.clone();
+                    Box::new(
+                        crate::transition()
+                            .theme(motion_theme)
+                            .mounted(requested.clone())
+                            .appear(true)
+                            .duration(*duration)
+                            .effect(effect.clone())
+                            .class("sapid-lightbox-presence")
+                            .on_exited(move || {
+                                if !wanted.get() {
+                                    displayed.revise(|value| *value = false);
+                                }
+                            })
+                            .content(content),
+                    ) as Box<dyn Widget>
+                } else {
+                    Box::new(content())
+                }
             });
         if let Some(trigger) = self.trigger {
             dialog = dialog.trigger_ref(trigger);
@@ -423,6 +542,8 @@ fn build_content(scope: &Scope, state: &State, theme: &crate::Theme, unstyled: b
     let viewport = area.cage(None);
     let event_state = state.clone();
     let weak = area.downgrade();
+    let gesture = state.clone();
+    let swipe = state.swipe_close.clone();
     glory::ui::view()
         .class("sapid-lightbox-viewport")
         .name("Image navigation")
@@ -439,12 +560,15 @@ fn build_content(scope: &Scope, state: &State, theme: &crate::Theme, unstyled: b
         })
         .node_ref(viewport)
         .style(
-            Style::new()
-                .width(Length::Percent(100.))
-                .height(Length::Px(320.))
-                .min_width(Length::Px(0.))
-                .overflow_x(Overflow::Auto)
-                .overflow_y(Overflow::Auto),
+            Style {
+                position: Some(glory::style::Position::Relative),
+                ..Style::new()
+            }
+            .width(Length::Percent(100.))
+            .height(Length::Px(320.))
+            .min_width(Length::Px(0.))
+            .overflow_x(Overflow::Auto)
+            .overflow_y(Overflow::Auto),
         )
         .on(EventKind::Navigate, move |event| {
             if let Event::Navigate { from, command } = event
@@ -457,56 +581,120 @@ fn build_content(scope: &Scope, state: &State, theme: &crate::Theme, unstyled: b
         })
         .show_in(&area)?;
     let canvas = area.child_in(viewport.get().ok_or(glory::ui::Error::Gone)?)?;
-    let exists = canvas.bond(move || model.with(|m| m.image().is_some()));
-    let theme_image = theme.clone();
-    glory::ui::when(exists, move || {
-        let theme = theme_image.clone();
-        glory::ui::widget(move |scope| {
-            let status = scope.cage("Loading image".to_owned());
-            let previous = std::cell::RefCell::new(None);
-            scope.structural(move || {
-                let source = model.with(|m| {
-                    m.image()
-                        .map(|i| (&i.key, &i.source))
-                        .map(|(k, s)| (k.clone(), s.clone()))
+    if let Some(render) = state.slide_renderer.clone() {
+        let current =
+            canvas.bond(move || model.with(|m| m.image().cloned().into_iter().collect::<Vec<_>>()));
+        glory::ui::each(current)
+            .key(|i| {
+                (
+                    i.key.clone(),
+                    i.source.clone(),
+                    i.alternative.clone(),
+                    i.caption.clone(),
+                )
+            })
+            .seed(move |image| render(image))
+            .show_in(&canvas)?;
+    } else {
+        let exists = canvas.bond(move || model.with(|m| m.image().is_some()));
+        let theme_image = theme.clone();
+        glory::ui::when(exists, move || {
+            let theme = theme_image.clone();
+            glory::ui::widget(move |scope| {
+                let status = scope.cage("Loading image".to_owned());
+                let previous = std::cell::RefCell::new(None);
+                scope.structural(move || {
+                    let source = model.with(|m| {
+                        m.image()
+                            .map(|i| (&i.key, &i.source))
+                            .map(|(k, s)| (k.clone(), s.clone()))
+                    });
+                    if *previous.borrow() != source {
+                        *previous.borrow_mut() = source;
+                        status.revise(|v| *v = "Loading image".into());
+                    }
                 });
-                if *previous.borrow() != source {
-                    *previous.borrow_mut() = source;
-                    status.revise(|v| *v = "Loading image".into());
+                let mut image =
+                    crate::image(scope.bond(move || {
+                        model.with(|m| m.image().expect("live image").source.clone())
+                    }))
+                    .alt(scope.bond(move || {
+                        model.with(|m| m.image().expect("live image").alternative.clone())
+                    }))
+                    .class("sapid-lightbox-image")
+                    .theme(theme.clone())
+                    .fit(ObjectFit::Contain)
+                    .style(scope.bond(move || {
+                        model.with(|m| {
+                            let factor = f64::from(m.view.zoom.factor());
+                            Style::new()
+                                .width(Length::Percent(100. * factor))
+                                .height(Length::Px(320. * factor))
+                                .max_width(Limit::None)
+                        })
+                    }))
+                    .on_load(move |_| status.revise(|v| v.clear()))
+                    .on_error(move |_| status.revise(|v| *v = "Image could not be loaded".into()));
+                if unstyled {
+                    image = image.unstyled();
                 }
-            });
-            let mut image = crate::image(
-                scope.bond(move || model.with(|m| m.image().expect("live image").source.clone())),
-            )
-            .alt(
-                scope.bond(move || {
-                    model.with(|m| m.image().expect("live image").alternative.clone())
-                }),
-            )
-            .class("sapid-lightbox-image")
-            .theme(theme.clone())
-            .fit(ObjectFit::Contain)
-            .style(scope.bond(move || {
-                model.with(|m| {
-                    let factor = f64::from(m.view.zoom.factor());
-                    Style::new()
-                        .width(Length::Percent(100. * factor))
-                        .height(Length::Px(320. * factor))
-                        .max_width(Limit::None)
-                })
-            }))
-            .on_load(move |_| status.revise(|v| v.clear()))
-            .on_error(move |_| status.revise(|v| *v = "Image could not be loaded".into()));
-            if unstyled {
-                image = image.unstyled();
-            }
-            image.show_in(scope)?;
-            glory::ui::text()
-                .class("sapid-lightbox-status")
-                .content(status)
-                .show_in(scope)
+                image.show_in(scope)?;
+                glory::ui::text()
+                    .class("sapid-lightbox-status")
+                    .content(status)
+                    .show_in(scope)
+            })
         })
-    })
+        .show_in(&canvas)?;
+    }
+    let enabled = state.enabled.clone();
+    glory::ui::when(
+        canvas.bond(move || {
+            swipe.get() && enabled.get() && model.with(|model| model.view.zoom == LightboxZoom::Fit)
+        }),
+        move || {
+            let gesture = gesture.clone();
+            let swipe_origin = Cell::new(None);
+            glory::ui::view()
+                .class("sapid-lightbox-swipe-surface")
+                .style(Style {
+                    position: Some(glory::style::Position::Absolute),
+                    top: Some(Length::Px(0.)),
+                    left: Some(Length::Px(0.)),
+                    ..Style::new()
+                        .width(Length::Percent(100.))
+                        .height(Length::Percent(100.))
+                })
+                .semantics(Some(Box::new(glory::render::Semantics {
+                    swipe_capture: Some(glory::render::SwipeCapture {
+                        axis: glory::render::Orientation::Vertical,
+                        revision: 0,
+                    }),
+                    ..Default::default()
+                })))
+                .on(EventKind::Swipe, move |event| {
+                    if let Event::Swipe { phase, y, .. } = event {
+                        match phase {
+                            glory::render::DragPhase::Start => swipe_origin.set(Some(y)),
+                            glory::render::DragPhase::Drop => {
+                                if swipe_origin.take().is_some_and(|start| y - start >= 50.)
+                                    && gesture.owner.is_alive()
+                                    && gesture.swipe_close.get()
+                                    && gesture.enabled.get()
+                                    && gesture.open.source.get()
+                                    && gesture.model.with(|m| m.view.zoom == LightboxZoom::Fit)
+                                    && gesture.open.accept(&false).is_ok()
+                                {
+                                    gesture.opened.emit(gesture.owner, false);
+                                }
+                            }
+                            glory::render::DragPhase::Cancel => swipe_origin.set(None),
+                            _ => {}
+                        }
+                    }
+                })
+        },
+    )
     .show_in(&canvas)?;
     area.retain(canvas)?;
     glory::ui::text()
@@ -536,6 +724,74 @@ fn build_content(scope: &Scope, state: &State, theme: &crate::Theme, unstyled: b
             })
         }))
         .show_in(&area)?;
+    if state.thumbnails {
+        let items = area.bond(move || {
+            model.with(|m| {
+                m.images
+                    .iter()
+                    .map(|i| (i.key.clone(), i.source.clone(), i.alternative.clone()))
+                    .collect::<Vec<_>>()
+            })
+        });
+        let thumbnails_state = state.clone();
+        let thumbs =
+            glory::ui::each(items)
+                .key(Clone::clone)
+                .seed(move |(key, source, alt)| {
+                    let action = thumbnails_state.clone();
+                    let current = key.clone();
+                    glory::ui::widget(move |scope| {
+                        let current = current.clone();
+                        let key = key.clone();
+                        let action = action.clone();
+                        let weak = scope.downgrade();
+                        glory::ui::button()
+                            .class("sapid-lightbox-thumbnail")
+                            .label("")
+                            .name(format!("Show {alt}"))
+                            .enabled(action.enabled.clone())
+                            .semantics(scope.bond(move || {
+                                Some(Box::new(glory::render::Semantics {
+                                    pressed: Some(model.with(|m| {
+                                        m.image().is_some_and(|image| image.key == current)
+                                    })),
+                                    ..Default::default()
+                                }))
+                            }))
+                            .fill(
+                                glory::ui::image()
+                                    .source(source.clone())
+                                    .decorative()
+                                    .style(
+                                        Style::new()
+                                            .width(Length::Px(64.))
+                                            .height(Length::Px(44.))
+                                            .object_fit(ObjectFit::Cover),
+                                    ),
+                            )
+                            .on(EventKind::Activate, move |_| {
+                                if let Err(error) = action.propose(LightboxView {
+                                    current: Some(key.clone()),
+                                    zoom: action.view.source.get().zoom,
+                                }) && let Some(scope) = weak.upgrade()
+                                {
+                                    scope.report_error(error)
+                                }
+                            })
+                            .show_in(scope)
+                    })
+                });
+        glory::ui::view()
+            .class("sapid-lightbox-thumbnails")
+            .style(
+                Style::new()
+                    .display(Display::Flex)
+                    .gap(6.)
+                    .overflow_x(Overflow::Auto),
+            )
+            .fill(thumbs)
+            .show_in(&area)?;
+    }
     let controls = area.cage(None);
     glory::ui::view()
         .class("sapid-lightbox-controls")
@@ -551,11 +807,19 @@ fn build_content(scope: &Scope, state: &State, theme: &crate::Theme, unstyled: b
     for (next, label) in [(false, "Previous image"), (true, "Next image")] {
         let enabled = state.enabled.clone();
         let action = state.clone();
+        let wraps = state.loop_navigation;
         let available = actions.bond(move || {
             enabled.get()
                 && model.with(|m| {
-                    m.index()
-                        .is_some_and(|i| if next { i + 1 < m.images.len() } else { i > 0 })
+                    m.index().is_some_and(|i| {
+                        if wraps {
+                            m.images.len() > 1
+                        } else if next {
+                            i + 1 < m.images.len()
+                        } else {
+                            i > 0
+                        }
+                    })
                 })
         });
         let weak = actions.downgrade();
@@ -578,39 +842,44 @@ fn build_content(scope: &Scope, state: &State, theme: &crate::Theme, unstyled: b
         }
         button.show_in(&actions)?;
     }
-    for (zoom, label) in [
-        (Some(false), "Zoom out"),
-        (None, "Fit image"),
-        (Some(true), "Zoom in"),
-    ] {
-        let action = state.clone();
-        let enabled = state.enabled.clone();
-        let available = actions.bond(move || {
-            enabled.get()
-                && model.with(|m| {
-                    m.image().is_some()
-                        && match zoom {
-                            Some(true) => m.view.zoom != LightboxZoom::Four,
-                            Some(false) | None => m.view.zoom != LightboxZoom::Fit,
-                        }
-                })
-        });
-        let weak = actions.downgrade();
-        let mut button = crate::button()
-            .label(label)
-            .theme(theme.clone())
-            .enabled(available)
-            .on_press(move || {
-                if let Err(error) = action.zoom(zoom)
-                    && let Some(scope) = weak.upgrade()
-                {
-                    scope.report_error(error);
-                }
+    if state.slide_renderer.is_none() {
+        for (zoom, label) in [
+            (Some(false), "Zoom out"),
+            (None, "Fit image"),
+            (Some(true), "Zoom in"),
+        ] {
+            let action = state.clone();
+            let enabled = state.enabled.clone();
+            let available = actions.bond(move || {
+                enabled.get()
+                    && model.with(|m| {
+                        m.image().is_some()
+                            && match zoom {
+                                Some(true) => m.view.zoom != LightboxZoom::Four,
+                                Some(false) | None => m.view.zoom != LightboxZoom::Fit,
+                            }
+                    })
             });
-        if unstyled {
-            button = button.unstyled();
+            let weak = actions.downgrade();
+            let mut button = crate::button()
+                .label(label)
+                .theme(theme.clone())
+                .enabled(available)
+                .on_press(move || {
+                    if let Err(error) = action.zoom(zoom)
+                        && let Some(scope) = weak.upgrade()
+                    {
+                        scope.report_error(error);
+                    }
+                });
+            if unstyled {
+                button = button.unstyled();
+            }
+            button.show_in(&actions)?;
         }
-        button.show_in(&actions)?;
+    }
+    if let Some(render) = &state.toolbar {
+        render().show_in(&actions)?;
     }
     area.retain(actions)?;
     scope.retain(area)?;

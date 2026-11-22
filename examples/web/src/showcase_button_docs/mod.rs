@@ -18,6 +18,7 @@ mod icon_group;
 mod icon_loading;
 mod icon_sizes;
 mod icon_variants;
+mod toggle_configurator;
 mod toggle_controlled;
 mod toggle_groups;
 mod toggle_states;
@@ -30,7 +31,7 @@ pub fn sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             DetailSection {
                 id: "icon-sizes",
                 title: "Sizes and square hit areas",
-                note: "Five square targets are 24, 30, 36, 42 and 50 CSS pixels. Icon drawing size is independent. Each action has an explicit accessible name; decorative SVG content does not add a focus stop.",
+                note: "Five square targets are 18, 22, 28, 34 and 44 CSS pixels. Icon drawing size is independent. Each action has an explicit accessible name; decorative SVG content does not add a focus stop.",
                 example: Box::new(icon_sizes::demo(theme.clone())),
                 source: include_str!("icon_sizes.rs"),
             },
@@ -171,6 +172,13 @@ pub fn sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         ],
         "toggle" => vec![
             DetailSection {
+                id: "toggle-configurator",
+                title: "Configurator",
+                note: "Press the formatting button to preview its selected appearance.",
+                example: Box::new(toggle_configurator::demo(theme.clone())),
+                source: include_str!("toggle_configurator.rs"),
+            },
+            DetailSection {
                 id: "toggle-controlled",
                 title: "Controlled pressed proposals",
                 note: "pressed is the accepted source. on_pressed_change proposes a replacement, and the application can refuse it. The visible state and aria-pressed remain accepted until the source changes.",
@@ -253,6 +261,7 @@ pub fn navigation(id: &str) -> Vec<(&'static str, &'static str)> {
             ("Custom presentation and admission limits", "#file-custom"),
         ],
         "toggle" => vec![
+            ("Configurator", "#toggle-configurator"),
             ("Controlled pressed proposals", "#toggle-controlled"),
             ("Single and multiple groups", "#toggle-groups"),
             ("Pressed and disabled states", "#toggle-states"),

@@ -513,6 +513,7 @@ pub struct RichTextEditor {
     readonly: Vary<bool>,
     toolbar: bool,
     toolbar_actions: Vec<EditorToolbarAction>,
+    toolbar_glyphs: Vec<(EditorToolbarAction, String)>,
     subtle: bool,
     placeholder: Vary<String>,
     controller_ref: Option<Cage<Option<EditorController>>>,
@@ -529,6 +530,7 @@ pub fn rich_text_editor() -> RichTextEditor {
         initial: Rc::new(RichDocument::default()),
         readonly: false.into(),
         toolbar: true,
+        toolbar_glyphs: Vec::new(),
         toolbar_actions: vec![
             EditorToolbarAction::Bold,
             EditorToolbarAction::Italic,
@@ -572,6 +574,20 @@ impl RichTextEditor {
             .into_iter()
             .take(MAX_EDITOR_TOOLBAR_ACTIONS + 1)
             .collect();
+        self
+    }
+    /// Change a toolbar action's visible glyph while preserving its accessible name and behavior.
+    pub fn toolbar_glyph(mut self, action: EditorToolbarAction, glyph: impl Into<String>) -> Self {
+        let glyph = glyph.into();
+        if let Some(existing) = self
+            .toolbar_glyphs
+            .iter_mut()
+            .find(|(key, _)| *key == action)
+        {
+            existing.1 = glyph;
+        } else {
+            self.toolbar_glyphs.push((action, glyph));
+        }
         self
     }
     pub fn subtle(mut self, value: bool) -> Self {
@@ -701,6 +717,7 @@ impl Widget for RichTextEditor {
             if self.common.unstyled {
                 toolbar = toolbar.unstyled();
             }
+            let control_size = if self.subtle { 32. } else { 26. };
             for action in self.toolbar_actions.iter().copied() {
                 let current = controller.clone();
                 let weak = scope.downgrade();
@@ -713,7 +730,12 @@ impl Widget for RichTextEditor {
                         }
                 });
                 let mut button = crate::button()
-                    .label(action.glyph())
+                    .label(
+                        self.toolbar_glyphs
+                            .iter()
+                            .find(|(key, _)| *key == action)
+                            .map_or_else(|| action.glyph().to_owned(), |(_, glyph)| glyph.clone()),
+                    )
                     .name(action.name())
                     .theme(self.common.theme.clone())
                     .variant(crate::ButtonVariant::Subtle)
@@ -726,14 +748,11 @@ impl Widget for RichTextEditor {
                             400.
                         }),
                         ..Style::new()
-                            .min_width(Length::Px(28.))
+                            .min_width(Length::Px(control_size))
+                            .min_height(Length::Px(control_size))
+                            .height(Length::Px(control_size))
                             .white_space(WhiteSpace::NoWrap)
-                            .padding(Edges {
-                                top: 2.,
-                                bottom: 2.,
-                                left: 6.,
-                                right: 6.,
-                            })
+                            .padding(Edges::all(0.))
                     })
                     .enabled(active)
                     .on_press(move || {

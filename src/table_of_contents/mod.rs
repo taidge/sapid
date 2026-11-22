@@ -788,6 +788,7 @@ struct NavState {
     siblings: RefCell<BTreeMap<Option<SemanticId>, Vec<SemanticId>>>,
     pending_focus: Cage<Option<SemanticId>>,
     theme: crate::Theme,
+    variant: crate::NavLinkVariant,
     size: crate::Size,
     unstyled: bool,
     current: Vary<Option<SemanticId>>,
@@ -934,7 +935,15 @@ impl NavState {
             if self.unstyled {
                 link = link.unstyled();
             } else {
-                let background = self.theme.accent_soft;
+                let (background, ink) = match self.variant {
+                    crate::NavLinkVariant::Filled => (self.theme.accent, self.theme.on_accent),
+                    crate::NavLinkVariant::Light => {
+                        (self.theme.accent_soft, self.theme.accent_text)
+                    }
+                    crate::NavLinkVariant::Subtle => {
+                        (glory::style::Color(0, 0, 0, 0), self.theme.accent_text)
+                    }
+                };
                 let radius = self.theme.radius;
                 link = link.style(owner.bond(move || {
                     let selected = current.get().is_some();
@@ -945,6 +954,7 @@ impl NavState {
                             glory::style::Color(0, 0, 0, 0)
                         }),
                         font_weight: Some(if selected { 700. } else { 400. }),
+                        color: selected.then_some(ink),
                         radius: Some(radius),
                         padding: Some(glory::style::Edges::all(4.)),
                         ..Style::new()
@@ -1029,6 +1039,7 @@ pub struct TableOfContents {
     context: TocContext,
     key: String,
     common: Common,
+    variant: crate::NavLinkVariant,
     current: Option<Vary<Option<SemanticId>>>,
 }
 pub fn table_of_contents(context: TocContext, key: impl Into<String>) -> TableOfContents {
@@ -1036,10 +1047,16 @@ pub fn table_of_contents(context: TocContext, key: impl Into<String>) -> TableOf
         context,
         key: key.into(),
         common: Common::default(),
+        variant: crate::NavLinkVariant::Light,
         current: None,
     }
 }
 impl TableOfContents {
+    /// Sets the appearance of the link to the current heading.
+    pub fn variant(mut self, variant: crate::NavLinkVariant) -> Self {
+        self.variant = variant;
+        self
+    }
     pub fn current(mut self, value: impl Into<Vary<Option<SemanticId>>>) -> Self {
         self.current = Some(value.into());
         self
@@ -1119,6 +1136,7 @@ impl Widget for TableOfContents {
             siblings: RefCell::new(BTreeMap::new()),
             pending_focus: scope.cage(None),
             theme: self.common.theme.clone(),
+            variant: self.variant,
             size: self.common.size,
             unstyled: self.common.unstyled,
             current: active,

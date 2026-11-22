@@ -49,7 +49,10 @@ fn assets() -> BTreeMap<String, Asset> {
     }
     BTreeMap::from([
         asset!("alpine-lake-photo.png", "image/png"),
+        asset!("reference-ratio-panda.png", "image/png"),
+        asset!("reference-ratio-avatar.png", "image/png"),
         asset!("team-member-photo.png", "image/png"),
+        asset!("menu-user-avatar.png", "image/png"),
         asset!("image-pattern.png", "image/png"),
         asset!("image-fallback.png", "image/png"),
         asset!("image-invalid.png", "image/png"),

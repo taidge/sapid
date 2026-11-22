@@ -64,6 +64,9 @@ pub struct OverflowList {
     items: Vec<OverflowItem>,
     dynamic: Option<(Vary<Vec<String>>, KeyFactory)>,
     initial: usize,
+    max_rows: usize,
+    from_start: bool,
+    hover: bool,
     visible: Option<Vary<usize>>,
     changed: Option<Box<dyn FnMut(usize)>>,
     gap: Vary<f64>,
@@ -81,6 +84,9 @@ pub fn overflow_list(key: impl Into<String>) -> OverflowList {
         items: Vec::new(),
         dynamic: None,
         initial: 3,
+        max_rows: 1,
+        from_start: false,
+        hover: false,
         visible: None,
         changed: None,
         gap: 8.0.into(),
@@ -118,6 +124,21 @@ impl OverflowList {
     /// Deterministic SSR/client-first-shape prefix before physical observation.
     pub fn initial_visible(mut self, value: usize) -> Self {
         self.initial = value;
+        self
+    }
+    /// Maximum number of wrapped inline rows before moving items into the popup.
+    pub fn max_rows(mut self, rows: usize) -> Self {
+        self.max_rows = rows.clamp(1, MAX_OVERFLOW_ITEMS);
+        self
+    }
+    /// Place the overflow trigger first and retain the trailing items.
+    pub fn collapse_from_start(mut self, from_start: bool) -> Self {
+        self.from_start = from_start;
+        self
+    }
+    /// Open the overflow list when the trigger receives pointer hover or focus.
+    pub fn hover_card(mut self, hover: bool) -> Self {
+        self.hover = hover;
         self
     }
     pub fn visible_count(mut self, value: impl Into<Vary<usize>>) -> Self {
@@ -182,6 +203,8 @@ struct Controller {
     owner: glory::core::InstanceId,
     live: Cell<bool>,
     popup: bool,
+    max_rows: usize,
+    from_start: bool,
     line: Cell<Option<NodeId>>,
     strip: Cell<Option<NodeId>>,
     lane: Cell<Option<NodeId>>,
@@ -239,6 +262,14 @@ impl OverflowHandle {
     }
 }
 impl Controller {
+    fn visible_indices(&self, count: usize, total: usize) -> std::ops::Range<usize> {
+        let count = count.min(total);
+        if self.from_start {
+            total - count..total
+        } else {
+            0..count
+        }
+    }
     fn sync_pending(&self) -> Result {
         let count = self
             .batch
@@ -404,9 +435,14 @@ impl Controller {
         let lost = focused
             .as_ref()
             .is_some_and(|(key, _)| !rows.iter().any(|row| &row.key == key));
-        let hidden = focused
-            .as_ref()
-            .is_some_and(|(key, _)| !open && rows.iter().skip(count).any(|row| &row.key == key));
+        let visible_indices = self.visible_indices(count, rows.len());
+        let hidden = focused.as_ref().is_some_and(|(key, _)| {
+            !open
+                && rows
+                    .iter()
+                    .enumerate()
+                    .any(|(index, row)| !visible_indices.contains(&index) && &row.key == key)
+        });
         let can_focus = self.enabled.try_get()? && scope.capabilities()?.focus;
         if (lost || hidden) && can_focus {
             self.handoff.set(true);
@@ -434,13 +470,17 @@ impl Controller {
         let strip = self.strip.get().ok_or(glory::ui::Error::Gone)?;
         let panel = self.panel.get();
         let mut moved_focus = false;
+        let reorder = self.from_start
+            && rows.iter().enumerate().any(|(index, row)| {
+                visible_indices.contains(&index) != (row.parent.get() == strip)
+            });
         for (index, row) in rows.iter().enumerate() {
-            let parent = if index < count {
+            let parent = if visible_indices.contains(&index) {
                 strip
             } else {
                 panel.ok_or(glory::ui::Error::Gone)?
             };
-            if force || row.parent.get() != parent {
+            if force || reorder || row.parent.get() != parent {
                 moved_focus |= focused.as_ref().is_some_and(|(key, _)| key == &row.key);
                 scope.place(row.node, Some(parent), None)?;
                 row.parent.set(parent);
@@ -485,7 +525,11 @@ impl Controller {
         // Only currently hidden rows enter the inert, transparent measurement
         // lane. Visible/focused widgets keep their actual presentation parent.
         if !open {
-            for row in rows.iter().skip(self.count.try_get()?) {
+            let visible = self.visible_indices(self.count.try_get()?, rows.len());
+            for (index, row) in rows.iter().enumerate() {
+                if visible.contains(&index) {
+                    continue;
+                }
                 if row.parent.get() != lane {
                     scope.place(row.node, Some(lane), None)?;
                     row.parent.set(lane);
@@ -578,14 +622,23 @@ impl Controller {
         // A hidden ancestor has no intrinsic observation. Keep the accepted
         // prefix; a later positive Resize starts a fresh bounded observation.
         if available > 0. {
-            let count = model::capacity(
-                &widths,
-                available,
-                work.trigger
-                    .ok_or_else(|| invalid("overflow trigger geometry missing"))?,
-                self.gap.try_get()?,
-                self.more_focus.get(),
-            )?;
+            let trigger = work
+                .trigger
+                .ok_or_else(|| invalid("overflow trigger geometry missing"))?;
+            let gap = self.gap.try_get()?;
+            let count = if self.max_rows == 1 && !self.from_start {
+                model::capacity(&widths, available, trigger, gap, self.more_focus.get())?
+            } else {
+                model::pack(
+                    &widths,
+                    available,
+                    trigger,
+                    gap,
+                    self.more_focus.get(),
+                    self.max_rows,
+                    self.from_start,
+                )
+            };
             let current = self.visible.source.try_get()?.min(widths.len());
             if count != current {
                 self.visible.accept(&count)?;
@@ -789,6 +842,8 @@ impl Widget for OverflowList {
             owner: scope.id(),
             live: Cell::new(true),
             popup: self.popup,
+            max_rows: self.max_rows,
+            from_start: self.from_start,
             line: Cell::new(None),
             strip: Cell::new(None),
             lane: Cell::new(None),
@@ -870,12 +925,25 @@ impl Widget for OverflowList {
         let parent = scope.child_in(root_ref.try_get()?.ok_or(glory::ui::Error::Gone)?)?;
         let line_ref = scope.cage(None);
         let line_state = Rc::downgrade(&state);
+        let wraps = self.max_rows > 1;
+        let mut line_class = String::from("sapid-overflow-line");
+        if wraps {
+            line_class.push_str(" sapid-overflow-wrap");
+        }
+        if self.from_start {
+            line_class.push_str(" sapid-overflow-from-start");
+        }
         glory::ui::view()
-            .class("sapid-overflow-line")
+            .class(line_class)
             .node_ref(line_ref)
             .style(scope.bond(move || {
                 Style {
                     gap: Some(gap.get()),
+                    flex_wrap: Some(if wraps {
+                        FlexWrap::Wrap
+                    } else {
+                        FlexWrap::NoWrap
+                    }),
                     align: Some(Align::Start),
                     ..Style::new()
                         .display(Display::Flex)
@@ -972,50 +1040,72 @@ impl Widget for OverflowList {
             let open = state.open.source.clone();
             let on_open = Rc::downgrade(&state);
             let trigger = state.trigger;
-            let popup = crate::popover(format!("{}-more", self.key))
-                .theme(self.common.theme.clone())
-                .size(self.common.size)
-                .label(scope.bond(move || {
-                    format!(
-                        "{} ({} hidden)",
-                        label.get(),
-                        total.get().saturating_sub(count.get())
-                    )
-                }))
-                .trigger_style(Style {
-                    white_space: Some(WhiteSpace::NoWrap),
-                    shrink: Some(0.0),
-                    ..Style::new()
-                })
-                .open(scope.bond(move || open.get() && count.get() < total.get()))
-                .enabled(self.common.enabled.clone())
-                .show_close(false)
-                .content_policy(ContentPolicy::KeepMounted)
-                .trigger_ref(trigger)
-                .on_open_change(move |open| {
-                    if let Some(state) = on_open.upgrade()
-                        && let Err(error) = state.set_open(open)
-                    {
-                        state.report(error)
-                    }
-                })
-                .content(move || {
-                    glory::ui::view()
-                        .class("sapid-overflow-panel")
-                        .node_ref(panel_ref)
-                        .style(Style {
-                            align: Some(Align::Start),
-                            flex_direction: Some(FlexDirection::Column),
-                            gap: Some(8.0),
-                            ..Style::new().display(Display::Flex)
-                        })
-                });
-            let popup = if self.common.unstyled {
-                popup.unstyled()
-            } else {
-                popup
+            let content = move || {
+                glory::ui::view()
+                    .class("sapid-overflow-panel")
+                    .node_ref(panel_ref)
+                    .style(Style {
+                        align: Some(Align::Start),
+                        flex_direction: Some(FlexDirection::Column),
+                        gap: Some(8.0),
+                        ..Style::new().display(Display::Flex)
+                    })
             };
-            popup.show_in(&more_scope)?;
+            let label = scope.bond(move || {
+                format!(
+                    "{} ({} hidden)",
+                    label.get(),
+                    total.get().saturating_sub(count.get())
+                )
+            });
+            let on_open = move |open| {
+                if let Some(state) = on_open.upgrade()
+                    && let Err(error) = state.set_open(open)
+                {
+                    state.report(error)
+                }
+            };
+            if self.hover {
+                let popup = crate::hover_card(format!("{}-more", self.key))
+                    .theme(self.common.theme.clone())
+                    .size(self.common.size)
+                    .label(label)
+                    .open(scope.bond(move || open.get() && count.get() < total.get()))
+                    .enabled(self.common.enabled.clone())
+                    .content_policy(ContentPolicy::KeepMounted)
+                    .trigger_ref(trigger)
+                    .on_open_change(on_open)
+                    .content(content);
+                if self.common.unstyled {
+                    popup.unstyled()
+                } else {
+                    popup
+                }
+                .show_in(&more_scope)?;
+            } else {
+                let popup = crate::popover(format!("{}-more", self.key))
+                    .theme(self.common.theme.clone())
+                    .size(self.common.size)
+                    .label(label)
+                    .open(scope.bond(move || open.get() && count.get() < total.get()))
+                    .enabled(self.common.enabled.clone())
+                    .content_policy(ContentPolicy::KeepMounted)
+                    .trigger_ref(trigger)
+                    .on_open_change(on_open)
+                    .content(content)
+                    .show_close(false)
+                    .trigger_style(Style {
+                        white_space: Some(WhiteSpace::NoWrap),
+                        shrink: Some(0.),
+                        ..Style::new()
+                    });
+                if self.common.unstyled {
+                    popup.unstyled()
+                } else {
+                    popup
+                }
+                .show_in(&more_scope)?;
+            }
             scope.on(
                 trigger.try_get()?.ok_or(glory::ui::Error::Gone)?,
                 EventKind::FocusChanged,
@@ -1055,7 +1145,10 @@ impl Widget for OverflowList {
         let mut rows = Vec::with_capacity(initial_keys.len());
         if let Some((_, factory)) = &mut self.dynamic {
             for (index, key) in initial_keys.iter().enumerate() {
-                let target = if index < count.get() {
+                let target = if state
+                    .visible_indices(count.get(), total.get())
+                    .contains(&index)
+                {
                     strip
                 } else {
                     state.panel.get().ok_or(glory::ui::Error::Gone)?
@@ -1064,7 +1157,10 @@ impl Widget for OverflowList {
             }
         } else {
             for (index, item) in std::mem::take(&mut self.items).into_iter().enumerate() {
-                let target = if index < count.get() {
+                let target = if state
+                    .visible_indices(count.get(), total.get())
+                    .contains(&index)
+                {
                     strip
                 } else {
                     state.panel.get().ok_or(glory::ui::Error::Gone)?

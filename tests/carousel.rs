@@ -97,7 +97,7 @@ fn controls_can_be_omitted_and_invalid_sizes_reject_before_slide_factories() {
     .unwrap();
     assert!(nodes(&app, "sapid-carousel-next").is_empty());
     assert_eq!(nodes(&app, "sapid-carousel-indicator").len(), 2);
-    for size in [f64::NAN, 0., 19., 65.] {
+    for size in [f64::NAN, 0., 13., 65.] {
         let calls = Rc::new(Cell::new(0));
         let made = calls.clone();
         let app = App::memory();

@@ -35,6 +35,7 @@ fn prepare(model: &snapshot::Snapshot, base_width: f64) -> Prepared {
                 candidate: occurrence.candidate_index(),
                 interval: occurrence.interval(),
                 title: event.title().into(),
+                color: event.event_color(),
                 resource: event.resource_key().unwrap().as_str().to_owned(),
                 all_day: event.is_all_day(),
                 selectable: event.edit_permissions().select,
@@ -610,7 +611,10 @@ impl Widget for TimelineEventWidget {
                 };
                 let mut style=Style::new().position(Position::Absolute).left(Length::Px(left)).top(Length::Px(top))
                     .width(Length::Px(w)).height(Length::Px(h)).padding(Edges::all(1.)).overflow_x(Overflow::Hidden).overflow_y(Overflow::Hidden);
-                if !unstyled{let chosen=selected.with(|v|matches!(v,Some(ScheduleSelection::Event{key,candidate,interval})if *key==e.row.key&&*candidate==e.row.candidate&&*interval==e.row.interval));style.background=Some(if chosen{theme.accent}else{theme.accent_soft});style.color=Some(if chosen{theme.on_accent}else{theme.accent_text});style=style.border_width(Edges::all(1.)).border_style(BorderStyle::Solid).border_color(theme.accent);style.font_size=Some(11.);}
+                if !unstyled{let chosen=selected.with(|v|matches!(v,Some(ScheduleSelection::Event{key,candidate,interval})if *key==e.row.key&&*candidate==e.row.candidate&&*interval==e.row.interval));let (surface,ink,accent)=e.row.paint(&theme,chosen);
+                    style.background=Some(surface);style.color=Some(ink);
+                    style=style.border_width(Edges{left:3.,..Edges::all(0.)}).border_style(BorderStyle::Solid).border_color(accent);
+                    style.font_size=Some(12.);}
                 style
             })
         });
@@ -650,7 +654,8 @@ impl Widget for TimelineEventWidget {
                 let mut style=Style::new().width(Length::Percent(100.)).height(Length::Percent(if editable {65.}else {100.})).padding(Edges::all(0.));
                 if !unstyled {
                     let chosen=button_selected.with(|v|matches!(v,Some(ScheduleSelection::Event{key,candidate,interval})if event.with(|e|e.row.key==*key&&e.row.candidate==*candidate&&e.row.interval==*interval)));
-                    style.background=Some(if chosen {button_theme.accent}else{button_theme.accent_soft});
+                    let color=event.with(|e| e.row.color);
+                    style.background=Some(if chosen {color.unwrap_or(button_theme.accent)}else{color.map_or(button_theme.accent_soft, |c|glory::style::Color(c.0,c.1,c.2,52))});
                     style.color=Some(if chosen {button_theme.on_accent}else{button_theme.accent_text});
                     style.font_size=Some(11.);style.border_width=Some(Edges::all(0.));
                 }

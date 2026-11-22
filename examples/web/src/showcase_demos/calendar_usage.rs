@@ -12,12 +12,15 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                     .theme(theme.clone())
                     .name("Project review calendar")
                     .value(value)
-                    .with_week_numbers(true)
+                    .with_week_numbers(false)
                     .on_value_change(move |v| value.revise(|s| *s = v)),
-                sapid::text().theme(theme.clone()).content(value.map(|v| {
-                    v.map(|d| format!("Review scheduled for {d}"))
-                        .unwrap_or_else(|| "Choose a day for your review.".to_owned())
-                })),
+                sapid::text()
+                    .class("site-screen-reader-only")
+                    .theme(theme.clone())
+                    .content(value.map(|v| {
+                        v.map(|d| format!("Review scheduled for {d}"))
+                            .unwrap_or_else(|| "Choose a day for your review.".to_owned())
+                    })),
             ))
             .show_in(scope)
     })

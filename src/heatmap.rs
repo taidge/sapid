@@ -370,7 +370,7 @@ impl Widget for Heatmap {
         }
         if self.colors.len() > MAX_HEATMAP_COLORS
             || !self.cell_size.is_finite()
-            || !(8.0..=32.0).contains(&self.cell_size)
+            || !(6.0..=32.0).contains(&self.cell_size)
             || !self.gap.is_finite()
             || !(0.0..=8.0).contains(&self.gap)
             || !self.radius.is_finite()
@@ -384,8 +384,10 @@ impl Widget for Heatmap {
             .flatten()
             .chain(self.month_labels.iter().flatten())
         {
-            if label.is_empty() || label.len() > 32 || label.contains('\0') {
-                return Err(invalid("heatmap axis labels require 1–32 UTF-8 bytes"));
+            if label.len() > 32 || label.contains('\0') {
+                return Err(invalid(
+                    "heatmap axis labels must be at most 32 UTF-8 bytes and free of NUL",
+                ));
             }
         }
         let range = self

@@ -1,43 +1,71 @@
 mod avatar_fallbacks;
 mod avatar_group;
+mod avatar_group_count;
+mod avatar_group_names;
+mod avatar_initial_colors;
+mod avatar_initials;
+mod avatar_link;
+mod avatar_placeholders;
 mod avatar_recovery;
 mod avatar_sizes;
+mod avatar_variant_play;
 mod badge_actions;
+mod badge_auto_contrast;
+mod badge_circle;
+mod badge_full_width;
+mod badge_gradient_play;
 mod badge_sections;
 mod badge_sizes;
+mod badge_style_selectors;
 mod badge_variants;
 mod card_content;
+mod card_horizontal;
+mod card_link;
+mod card_section_link;
 mod card_sections;
 mod card_surfaces;
 mod data_content;
+mod data_list_divider;
 mod data_orientation;
 mod data_spacing;
 mod image_alternative;
 mod image_dimensions;
 mod image_fallback;
 mod image_fit;
+mod indicator_contrast;
+mod indicator_disabled_toggle;
+mod indicator_max_value;
 mod indicator_offsets;
 mod indicator_pointer;
 mod indicator_positions;
+mod indicator_processing;
+mod indicator_zero;
 mod kbd_combinations;
 mod kbd_platforms;
+mod kbd_size_play;
 mod kbd_sizes;
 mod number_affixes;
 mod number_locales;
 mod number_precision;
 mod overflow_controlled;
+mod overflow_hover;
 mod overflow_retained;
+mod overflow_rows;
+mod overflow_start;
 mod overflow_width;
 mod rolling_digits;
 mod rolling_format;
 mod rolling_motion;
 mod spoiler_changes;
 mod spoiler_controlled;
+mod spoiler_instant;
 mod spoiler_threshold;
 mod swatch_alpha;
 mod swatch_controlled;
+mod swatch_shadow_play;
 mod swatch_sizes;
 mod theme_icon_actions;
+mod theme_icon_contrast;
 mod theme_icon_gradient;
 mod theme_icon_sizes;
 mod theme_icon_variants;
@@ -45,6 +73,55 @@ use super::showcase_examples::DetailSection;
 pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
     match slug {
         "avatar" => vec![
+            DetailSection {
+                id: "avatar-initials",
+                title: "Initials",
+                note: "Each avatar derives its two initials from its name.",
+                example: Box::new(avatar_initials::demo(theme.clone())),
+                source: include_str!("avatar_initials.rs"),
+            },
+            DetailSection {
+                id: "avatar-placeholders",
+                title: "Placeholder",
+                note: "An avatar can show a user outline, initials or a custom icon.",
+                example: Box::new(avatar_placeholders::demo(theme.clone())),
+                source: include_str!("avatar_placeholders.rs"),
+            },
+            DetailSection {
+                id: "avatar-group-count",
+                title: "Grouped avatars",
+                note: "Three portraits share a row with the remaining count.",
+                example: Box::new(avatar_group_count::demo(theme.clone())),
+                source: include_str!("avatar_group_count.rs"),
+            },
+            DetailSection {
+                id: "avatar-group-names",
+                title: "Avatars with tooltips",
+                note: "Focus or hover a portrait to reveal its name.",
+                example: Box::new(avatar_group_names::demo(theme.clone())),
+                source: include_str!("avatar_group_names.rs"),
+            },
+            DetailSection {
+                id: "avatar-initial-colors",
+                title: "Allowed initials colors",
+                note: "Choose a deterministic fallback color from the allowed palette.",
+                example: Box::new(avatar_initial_colors::demo(theme.clone())),
+                source: include_str!("avatar_initial_colors.rs"),
+            },
+            DetailSection {
+                id: "avatar-link",
+                title: "Polymorphic component",
+                note: "The profile image acts as a named link.",
+                example: Box::new(avatar_link::demo(theme.clone())),
+                source: include_str!("avatar_link.rs"),
+            },
+            DetailSection {
+                id: "avatar-variant-play",
+                title: "Variants",
+                note: "Change the avatar shape, photo and fallback colors.",
+                example: Box::new(avatar_variant_play::demo(theme.clone())),
+                source: include_str!("avatar_variant_play.rs"),
+            },
             DetailSection {
                 id: "avatar-fallbacks",
                 title: "Photos, initials and vector fallback",
@@ -76,6 +153,41 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         ],
         "badge" => vec![
             DetailSection {
+                id: "badge-style-selectors",
+                title: "Component Styles API",
+                note: "Hover or focus a selector to outline the corresponding component element.",
+                example: Box::new(badge_style_selectors::demo(theme.clone())),
+                source: include_str!("badge_style_selectors.rs"),
+            },
+            DetailSection {
+                id: "badge-circle",
+                title: "Rounded",
+                note: "Compare circular badges at all five sizes.",
+                example: Box::new(badge_circle::demo(theme.clone())),
+                source: include_str!("badge_circle.rs"),
+            },
+            DetailSection {
+                id: "badge-full-width",
+                title: "Full width",
+                note: "The badge fills the available width and centers its label.",
+                example: Box::new(badge_full_width::demo(theme.clone())),
+                source: include_str!("badge_full_width.rs"),
+            },
+            DetailSection {
+                id: "badge-auto-contrast",
+                title: "autoContrast",
+                note: "Compare fixed and contrast-aware foreground colors on the same fill.",
+                example: Box::new(badge_auto_contrast::demo(theme.clone())),
+                source: include_str!("badge_auto_contrast.rs"),
+            },
+            DetailSection {
+                id: "badge-gradient-play",
+                title: "Gradient variant",
+                note: "Choose two color stops and change the gradient direction.",
+                example: Box::new(badge_gradient_play::demo(theme.clone())),
+                source: include_str!("badge_gradient_play.rs"),
+            },
+            DetailSection {
                 id: "badge-variants",
                 title: "Variants and readable custom color",
                 note: "Soft, Solid, Outline and Dot share a finite passive label. Solid chooses a contrasting foreground; a custom color controls the dot in Dot mode.",
@@ -106,6 +218,27 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         ],
         "card" => vec![
             DetailSection {
+                id: "card-link",
+                title: "Polymorphic component",
+                note: "The complete card opens the card sections example.",
+                example: Box::new(card_link::demo(theme.clone())),
+                source: include_str!("card_link.rs"),
+            },
+            DetailSection {
+                id: "card-section-link",
+                title: "Polymorphic Card.Section",
+                note: "Only the image section links to the project details.",
+                example: Box::new(card_section_link::demo(theme.clone())),
+                source: include_str!("card_section_link.rs"),
+            },
+            DetailSection {
+                id: "card-horizontal",
+                title: "Horizontal orientation",
+                note: "Compare task completion and totals in a horizontal card.",
+                example: Box::new(card_horizontal::demo(theme.clone())),
+                source: include_str!("card_horizontal.rs"),
+            },
+            DetailSection {
                 id: "card-sections",
                 title: "Header, body and footer",
                 note: "Card exposes three explicit content slots and an optional semantic heading. Each slot accepts actual widgets; a footer can hold an independent action without making the entire card a button.",
@@ -129,6 +262,13 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         ],
         "color-swatch" => vec![
             DetailSection {
+                id: "swatch-shadow-play",
+                title: "withShadow",
+                note: "Compare the swatch edge against its surrounding surface.",
+                example: Box::new(swatch_shadow_play::demo(theme.clone())),
+                source: include_str!("swatch_shadow_play.rs"),
+            },
+            DetailSection {
                 id: "swatch-alpha",
                 title: "Transparency and checkerboard",
                 note: "A real finite checkerboard remains beneath transparent colors. Every passive swatch has an explicit text name; color alone is not the explanation.",
@@ -151,6 +291,13 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             },
         ],
         "data-list" => vec![
+            DetailSection {
+                id: "data-list-divider",
+                title: "With divider",
+                note: "A divider separates each pair of terms and values.",
+                example: Box::new(data_list_divider::demo(theme.clone())),
+                source: include_str!("data_list_divider.rs"),
+            },
             DetailSection {
                 id: "data-orientation",
                 title: "Horizontal and vertical descriptions",
@@ -205,6 +352,41 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         ],
         "indicator" => vec![
             DetailSection {
+                id: "indicator-processing",
+                title: "Processing animation",
+                note: "A pulsing marker appears at the upper right of the portrait.",
+                example: Box::new(indicator_processing::demo(theme.clone())),
+                source: include_str!("indicator_processing.rs"),
+            },
+            DetailSection {
+                id: "indicator-disabled-toggle",
+                title: "Disabled",
+                note: "Toggle the indicator while the portrait stays in place.",
+                example: Box::new(indicator_disabled_toggle::demo(theme.clone())),
+                source: include_str!("indicator_disabled_toggle.rs"),
+            },
+            DetailSection {
+                id: "indicator-max-value",
+                title: "Max value",
+                note: "Compare capped counts on three avatars.",
+                example: Box::new(indicator_max_value::demo(theme.clone())),
+                source: include_str!("indicator_max_value.rs"),
+            },
+            DetailSection {
+                id: "indicator-zero",
+                title: "Show zero",
+                note: "The first marker displays zero. The second hides when its count is zero.",
+                example: Box::new(indicator_zero::demo(theme.clone())),
+                source: include_str!("indicator_zero.rs"),
+            },
+            DetailSection {
+                id: "indicator-contrast",
+                title: "Auto contrast",
+                note: "Compare the foreground on light and saturated indicator colors.",
+                example: Box::new(indicator_contrast::demo(theme.clone())),
+                source: include_str!("indicator_contrast.rs"),
+            },
+            DetailSection {
                 id: "indicator-positions",
                 title: "Nine anchor positions",
                 note: "The marker anchors to the content box. All nine physical positions use the same independent content slot; a centered axis remains centered when offset changes.",
@@ -213,20 +395,27 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             },
             DetailSection {
                 id: "indicator-offsets",
-                title: "Offsets, labels and color",
-                note: "Positive offsets inset the chosen edge; negative offsets move outward. Diameter is explicit and does not grow with label text, so choose a box that fits the short count.",
+                title: "Offset",
+                note: "A red dot sits seven pixels inside the lower-right corner of a round portrait.",
                 example: Box::new(indicator_offsets::demo(theme.clone())),
                 source: include_str!("indicator_offsets.rs"),
             },
             DetailSection {
                 id: "indicator-pointer",
-                title: "Overlapping markers preserve activation",
-                note: "The passive marker does not intercept pointer input. Try the action underneath the centered marker; hiding the marker also leaves the same independent action enabled.",
+                title: "Inline",
+                note: "A small portrait carries a text label anchored to its top-right corner.",
                 example: Box::new(indicator_pointer::demo(theme.clone())),
                 source: include_str!("indicator_pointer.rs"),
             },
         ],
         "kbd" => vec![
+            DetailSection {
+                id: "kbd-size-play",
+                title: "Size",
+                note: "Adjust the keycap size.",
+                example: Box::new(kbd_size_play::demo(theme.clone())),
+                source: include_str!("kbd_size_play.rs"),
+            },
             DetailSection {
                 id: "kbd-combinations",
                 title: "Readable key combinations",
@@ -252,27 +441,48 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         "number-formatter" => vec![
             DetailSection {
                 id: "number-locales",
-                title: "Three explicit locale policies",
-                note: "EnUs, DeDe and ZhCn are finite deterministic format policies, independent of host locale. No claim is made for arbitrary Intl locale or numbering-system support.",
+                title: "Thousands separator",
+                note: "Two locale settings demonstrate comma and period grouping for the same amount.",
                 example: Box::new(number_locales::demo(theme.clone())),
                 source: include_str!("number_locales.rs"),
             },
             DetailSection {
                 id: "number-precision",
-                title: "Grouping, precision and percentages",
-                note: "Fraction limits control deterministic rounding and padding. Percent multiplies by 100 before formatting; grouping can be disabled explicitly.",
+                title: "Decimal scale",
+                note: "Divide five by three and round the displayed value to two decimal places.",
                 example: Box::new(number_precision::demo(theme.clone())),
                 source: include_str!("number_precision.rs"),
             },
             DetailSection {
                 id: "number-affixes",
-                title: "Currency and reactive literal affixes",
-                note: "prefix and suffix are bounded literal strings around the complete formatted value. They do not alter the numeric source, currency policy or sign placement. Invalid reactive affixes preserve the last accepted output.",
+                title: "Prefix and suffix",
+                note: "Apply a currency prefix and a currency suffix to the same amount.",
                 example: Box::new(number_affixes::demo(theme.clone())),
                 source: include_str!("number_affixes.rs"),
             },
         ],
         "overflow-list" => vec![
+            DetailSection {
+                id: "overflow-rows",
+                title: "Max rows",
+                note: "Resize the container to fit the visible fruit badges into two rows.",
+                example: Box::new(overflow_rows::demo(theme.clone())),
+                source: include_str!("overflow_rows.rs"),
+            },
+            DetailSection {
+                id: "overflow-start",
+                title: "Collapse from",
+                note: "The first fruit badges move into the overflow as the container narrows.",
+                example: Box::new(overflow_start::demo(theme.clone())),
+                source: include_str!("overflow_start.rs"),
+            },
+            DetailSection {
+                id: "overflow-hover",
+                title: "Hover card",
+                note: "Hover or focus the overflow control to reveal the remaining fruit.",
+                example: Box::new(overflow_hover::demo(theme.clone())),
+                source: include_str!("overflow_hover.rs"),
+            },
             DetailSection {
                 id: "overflow-width",
                 title: "Container width and automatic overflow",
@@ -312,13 +522,20 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             },
             DetailSection {
                 id: "rolling-motion",
-                title: "Motion preference, pause and immediate output",
-                note: "animated false and zero duration display the final value immediately. The browser also honors prefers-reduced-motion; pause stops presentation without changing the numeric source. No per-frame application Cage is created.",
+                title: "Animation duration",
+                note: "Three copies of one value roll at 200, 600 and 1200 milliseconds.",
                 example: Box::new(rolling_motion::demo(theme.clone())),
                 source: include_str!("rolling_motion.rs"),
             },
         ],
         "spoiler" => vec![
+            DetailSection {
+                id: "spoiler-instant",
+                title: "Transition duration",
+                note: "Expand and collapse the measured content immediately.",
+                example: Box::new(spoiler_instant::demo(theme.clone())),
+                source: include_str!("spoiler_instant.rs"),
+            },
             DetailSection {
                 id: "spoiler-threshold",
                 title: "Threshold and short content",
@@ -342,6 +559,13 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             },
         ],
         "theme-icon" => vec![
+            DetailSection {
+                id: "theme-icon-contrast",
+                title: "autoContrast",
+                note: "The second icon computes its foreground from the lime background.",
+                example: Box::new(theme_icon_contrast::demo(theme.clone())),
+                source: include_str!("theme_icon_contrast.rs"),
+            },
             DetailSection {
                 id: "theme-icon-gradient",
                 title: "Gradient variant",
@@ -377,23 +601,39 @@ pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {
 pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
     match slug {
         "avatar" => vec![
+            ("Initials", "#avatar-initials"),
+            ("Placeholder", "#avatar-placeholders"),
+            ("Grouped avatars", "#avatar-group-count"),
+            ("Avatars with tooltips", "#avatar-group-names"),
+            ("Allowed initials colors", "#avatar-initial-colors"),
+            ("Polymorphic component", "#avatar-link"),
+            ("Variants", "#avatar-variant-play"),
             ("Photos, initials and vector fallback", "#avatar-fallbacks"),
             ("Five sizes and two shapes", "#avatar-sizes"),
             ("Overlapping group and overflow count", "#avatar-group"),
             ("Image failure and recovery", "#avatar-recovery"),
         ],
         "badge" => vec![
+            ("Component Styles API", "#badge-style-selectors"),
+            ("Rounded", "#badge-circle"),
+            ("Full width", "#badge-full-width"),
+            ("autoContrast", "#badge-auto-contrast"),
+            ("Gradient variant", "#badge-gradient-play"),
             ("Variants and readable custom color", "#badge-variants"),
             ("Compact sizes and long labels", "#badge-sizes"),
             ("Passive sections and reactive status", "#badge-sections"),
             ("Badges beside real actions", "#badge-actions"),
         ],
         "card" => vec![
+            ("Polymorphic component", "#card-link"),
+            ("Polymorphic Card.Section", "#card-section-link"),
+            ("Horizontal orientation", "#card-horizontal"),
             ("Header, body and footer", "#card-sections"),
             ("Border, shadow and radius", "#card-surfaces"),
             ("Long content and independent actions", "#card-content"),
         ],
         "color-swatch" => vec![
+            ("withShadow", "#swatch-shadow-play"),
             ("Transparency and checkerboard", "#swatch-alpha"),
             ("Sizes and rounded outlines", "#swatch-sizes"),
             (
@@ -402,6 +642,7 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ),
         ],
         "data-list" => vec![
+            ("With divider", "#data-list-divider"),
             ("Horizontal and vertical descriptions", "#data-orientation"),
             ("Label width, spacing and compact rows", "#data-spacing"),
             ("Wrapping values and real widgets", "#data-content"),
@@ -419,6 +660,11 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ("Informative and decorative images", "#image-alternative"),
         ],
         "indicator" => vec![
+            ("Processing animation", "#indicator-processing"),
+            ("Disabled", "#indicator-disabled-toggle"),
+            ("Max value", "#indicator-max-value"),
+            ("Show zero", "#indicator-zero"),
+            ("Auto contrast", "#indicator-contrast"),
             ("Nine anchor positions", "#indicator-positions"),
             ("Offsets, labels and color", "#indicator-offsets"),
             (
@@ -427,6 +673,7 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ),
         ],
         "kbd" => vec![
+            ("Size", "#kbd-size-play"),
             ("Readable key combinations", "#kbd-combinations"),
             ("Explicit platform names", "#kbd-platforms"),
             ("Theme sizes and ordinary editing", "#kbd-sizes"),
@@ -437,6 +684,9 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ("Currency and reactive literal affixes", "#number-affixes"),
         ],
         "overflow-list" => vec![
+            ("Max rows", "#overflow-rows"),
+            ("Collapse from", "#overflow-start"),
+            ("Hover card", "#overflow-hover"),
             ("Container width and automatic overflow", "#overflow-width"),
             ("Controlled prefix and popup", "#overflow-controlled"),
             ("Retained editing and keyboard access", "#overflow-retained"),
@@ -447,12 +697,10 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
                 "#rolling-digits",
             ),
             ("Locale, currency and precision", "#rolling-format"),
-            (
-                "Motion preference, pause and immediate output",
-                "#rolling-motion",
-            ),
+            ("Animation duration", "#rolling-motion"),
         ],
         "spoiler" => vec![
+            ("Transition duration", "#spoiler-instant"),
             ("Threshold and short content", "#spoiler-threshold"),
             (
                 "Controlled expansion and custom labels",
@@ -464,6 +712,7 @@ pub fn navigation(slug: &str) -> Vec<(&'static str, &'static str)> {
             ),
         ],
         "theme-icon" => vec![
+            ("autoContrast", "#theme-icon-contrast"),
             ("Gradient variant", "#theme-icon-gradient"),
             (
                 "Container size and independent glyph size",

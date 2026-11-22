@@ -1,25 +1,23 @@
 use glory::prelude::*;
 use sapid::charts::*;
-fn values(values: &[(&str, &str, f64)]) -> PlotData {
-    PlotData::Values(
-        values
-            .iter()
-            .map(|(key, label, value)| ValueDatum::new(*key, *label, *value))
-            .collect(),
-    )
-}
-fn sample_data() -> PlotData {
-    values(&[
-        ("visitors", "Visitors", 1000.0),
-        ("trials", "Trials", 640.0),
-        ("active", "Activated", 280.0),
-        ("paid", "Paid", 96.0),
-    ])
-}
-
 pub fn demo(theme: sapid::Theme) -> impl Widget {
+    let palette = controls::chart_palette(&theme);
     funnel_chart("funnel-chart-overview")
-        .name("Stage order and conversion counts")
         .theme(theme)
-        .data(sample_data())
+        .name("Value by country")
+        .chart_theme(palette)
+        .data(controls::segment_example_data())
+        .frame(ChartFrame {
+            width: 340.,
+            height: 300.,
+        })
+        .default_options(PlotOptions::default())
+        .style(
+            Style::new()
+                .width(Length::Px(340.))
+                .max_width(Limit::Percent(100.)),
+        )
+        .legend(false)
+        .navigation(false)
+        .data_table(false)
 }

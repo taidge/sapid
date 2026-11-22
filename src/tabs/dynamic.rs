@@ -6,6 +6,7 @@ use std::cell::RefCell;
 
 struct Selection {
     control: Control<String>,
+    deactivate: bool,
     selected: Cage<Option<String>>,
     callback: Callback<String>,
     pending: RefCell<Option<CollectionMember>>,
@@ -13,10 +14,11 @@ struct Selection {
     owner: glory::core::InstanceId,
 }
 impl Selection {
-    fn propose(&self, key: &str, member: &CollectionMember) -> Result {
-        if self
+    fn propose(&self, key: &str, member: &CollectionMember, activate: bool) -> Result {
+        let same = self
             .selected
-            .try_with(|selected| selected.as_deref() == Some(key))?
+            .try_with(|selected| selected.as_deref() == Some(key))?;
+        if (same && !(self.deactivate && activate))
             || self.pending.borrow().as_ref() == Some(member)
         {
             return Ok(());
@@ -24,7 +26,7 @@ impl Selection {
         let previous = self.pending.replace(Some(member.clone()));
         drop(previous);
         self.dirty.touch()?;
-        let next = key.to_owned();
+        let next = if same { String::new() } else { key.to_owned() };
         self.control.accept(&next)?;
         self.callback.emit(self.owner, next);
         Ok(())
@@ -50,6 +52,7 @@ pub(super) fn build(widget: &mut Tabs, scope: &Scope, input: Items) -> Result {
     let root_id = composite::id("t", &widget.key, "root", "root")?;
     let configs = dynamic::mount(scope, input)?;
     let local = widget.value.source.is_none();
+    let deactivate = widget.deactivate;
     let control = std::mem::take(&mut widget.value).mount(scope);
     let source = composite::validated(scope, &control.source, |value| check_value(value))?;
     let selected = scope.cage(None::<String>);
@@ -64,7 +67,7 @@ pub(super) fn build(widget: &mut Tabs, scope: &Scope, input: Items) -> Result {
                 .iter()
                 .find(|config| config.key == source)
                 .map(|config| config.key.clone());
-            if local && next.is_none() {
+            if local && next.is_none() && !(deactivate && source.is_empty()) {
                 for config in &configs {
                     if config.enabled.try_get()? {
                         next = Some(config.key.clone());
@@ -117,6 +120,7 @@ pub(super) fn build(widget: &mut Tabs, scope: &Scope, input: Items) -> Result {
         }
     });
     let selection = Rc::new(Selection {
+        deactivate,
         control,
         selected,
         callback: Callback::new(widget.on_change.take()),
@@ -261,7 +265,11 @@ pub(super) fn build(widget: &mut Tabs, scope: &Scope, input: Items) -> Result {
                                     .unwrap_or(false);
                                 focused_roving.observe(&focused_member)?;
                                 if automatic && !restoring && enabled.try_get()? {
-                                    focused_selection.propose(&focused_key, &focused_member)?;
+                                    focused_selection.propose(
+                                        &focused_key,
+                                        &focused_member,
+                                        false,
+                                    )?;
                                 }
                             }
                             focus.observe(&focused_key, focused)?;
@@ -281,7 +289,7 @@ pub(super) fn build(widget: &mut Tabs, scope: &Scope, input: Items) -> Result {
                     let Some(scope) = weak.upgrade() else { return };
                     let result = (|| -> Result {
                         if enabled.try_get()? {
-                            selection.propose(&key, &member)?;
+                            selection.propose(&key, &member, true)?;
                         }
                         presses.emit(owner, event);
                         Ok(())

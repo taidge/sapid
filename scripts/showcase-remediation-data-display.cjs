@@ -7,7 +7,7 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
  const report={browser:browser.version(),pages:[],errors:[]};
  page.on('pageerror',e=>report.errors.push(e.message));
  page.on('console',m=>{if(m.type()==='error')report.errors.push(m.text());});
- const counts={avatar:4,badge:4,card:3,'color-swatch':3,'data-list':3,image:4,indicator:3,kbd:3,'number-formatter':3,'overflow-list':3,'rolling-number':3,spoiler:3,'theme-icon':4};
+ const counts={avatar:11,badge:9,card:6,'color-swatch':4,'data-list':4,image:4,indicator:8,kbd:4,'number-formatter':3,'overflow-list':6,'rolling-number':3,spoiler:4,'theme-icon':5};
  const tick=()=>page.evaluate(()=>new Promise(resolve=>{let n=0;const f=()=>++n===8?resolve():requestAnimationFrame(f);requestAnimationFrame(f);}));
  const detail=id=>page.locator('.site-component-detail').filter({has:page.locator(`#${id}`)});
  const box=async l=>{const r=await l.boundingBox();assert(r);return r;};
@@ -41,7 +41,7 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
     assert.equal(await detail('swatch-alpha').locator('.sapid-color-swatch').count(),4);assert.equal(await detail('swatch-sizes').locator('.sapid-color-swatch').count(),6);
     const control=detail('swatch-controlled'),swatch=control.getByRole('button',{name:'Controlled lake blue',exact:true});await swatch.click();await tick();assert.equal(await swatch.getAttribute('aria-pressed'),'false');await control.getByRole('checkbox',{name:'Accept swatch selection',exact:true}).check();await swatch.focus();await page.keyboard.press('Space');await tick();assert.equal(await swatch.getAttribute('aria-pressed'),'true');assert(await control.getByRole('button',{name:'Unavailable gray',exact:true}).isDisabled());
    } else if(slug==='data-list') {
-    const list=primary.locator('dl');assert.equal(await list.count(),1);assert.equal(await list.locator(':scope > dt').count(),4);assert.equal(await list.locator(':scope > dd').count(),4);const term=await box(list.locator('dt').first()),definition=await box(list.locator('dd').first());assert(definition.x>term.x+80);assert(Math.abs(term.y-definition.y)<2);
+    const list=primary.locator('dl');assert.equal(await list.count(),1);assert.equal(await list.locator(':scope > dt').count(),4);assert.equal(await list.locator(':scope > dd').count(),4);const term=await box(list.locator('dt').first()),definition=await box(list.locator('dd').first());assert(Math.abs(definition.x-term.x)<2);assert(definition.y>=term.y+term.height);
     const lists=detail('data-orientation').locator('dl'),vertical=lists.nth(1),t=await box(vertical.locator('dt').first()),d=await box(vertical.locator('dd').first());assert(Math.abs(t.x-d.x)<2);assert(d.y>=t.y+t.height);
     const content=detail('data-content');await content.getByRole('button',{name:'Show delivery instructions',exact:true}).click();await tick();assert(await content.getByText('Ask reception to notify Ava when the package arrives.',{exact:true}).isVisible());
    } else if(slug==='image') {
@@ -50,12 +50,21 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
     const dimensions=detail('image-dimensions').locator('img').first();await loaded(dimensions);const r=await box(dimensions);assert(Math.abs(r.width/r.height-1.5)<0.02);
     const fallback=detail('image-fallback'),photo=fallback.getByRole('img');await loaded(photo);await photo.evaluate(e=>window.fallbackPhoto=e);await fallback.getByRole('button',{name:'Load unavailable photo',exact:true}).click();await page.waitForFunction(()=>window.fallbackPhoto.currentSrc.includes('alpine-lake-photo.png')&&window.fallbackPhoto.complete&&window.fallbackPhoto.naturalWidth>0);await fallback.getByRole('button',{name:'Restore original photo',exact:true}).click();await tick();await loaded(photo);assert(await photo.evaluate(e=>e===window.fallbackPhoto));assert.equal(await detail('image-alternative').locator('img').getAttribute('alt'),'');
    } else if(slug==='indicator') {
-    await primary.getByRole('button',{name:'Open inbox',exact:true}).click();await tick();assert(await primary.getByText('Inbox opened 1 times',{exact:true}).isVisible());const button=primary.getByRole('button',{name:'Open inbox',exact:true});await button.evaluate(e=>window.inboxButton=e);await primary.getByRole('checkbox',{name:'Show unread count',exact:true}).uncheck();await tick();assert(!await primary.locator('.sapid-indicator-marker').isVisible());assert(await button.evaluate(e=>e===window.inboxButton));await primary.getByRole('checkbox',{name:'Show unread count',exact:true}).check();await tick();
-    assert.equal(await detail('indicator-positions').locator('.sapid-indicator-marker').count(),9);const overlap=detail('indicator-pointer'),marker=overlap.locator('.sapid-indicator-marker');await marker.scrollIntoViewIfNeeded();const r=await box(marker);await page.mouse.click(r.x+r.width/2,r.y+r.height/2);await tick();assert(await overlap.getByText('Confirmed 1 times',{exact:true}).isVisible());assert.equal(await marker.evaluate(e=>getComputedStyle(e).pointerEvents),'none');
+    const demoMarker=primary.locator('.sapid-indicator-marker');assert.equal(await primary.locator('.sapid-avatar img').count(),1);await loaded(primary.locator('.sapid-avatar img'));await primary.getByRole('switch',{name:'Disabled',exact:true}).check();await tick();assert(!await demoMarker.isVisible());await primary.getByRole('switch',{name:'Disabled',exact:true}).uncheck();await tick();assert(await demoMarker.isVisible());
+    assert.equal(await detail('indicator-positions').locator('.sapid-indicator-marker').count(),9);
+    const inline=detail('indicator-pointer'), marker=inline.locator('.sapid-indicator-marker');
+    assert.equal(await marker.innerText(),'New');
+    assert.equal(await marker.evaluate(e=>getComputedStyle(e).pointerEvents),'none');
+    await loaded(inline.locator('.sapid-avatar img'));
+    assert.deepEqual(await detail('indicator-max-value').locator('.sapid-indicator-marker').allTextContents(), ['50','99+','999+']);
+    assert.equal(await detail('indicator-zero').locator('.sapid-indicator-marker:visible').count(),1);
    } else if(slug==='kbd') {
     assert.equal(await primary.locator('kbd').count(),2);assert.equal(await primary.getByRole('button').count(),0);const platforms=detail('kbd-platforms');for(const label of ['Windows','Command','Super'])assert(await platforms.locator('kbd').filter({hasText:new RegExp('^'+label+'$')}).isVisible());const editor=detail('kbd-sizes').getByRole('textbox',{name:'Try normal typing',exact:true});await editor.fill('Ctrl K is ordinary text here');await page.keyboard.press('Home');await page.keyboard.press('ArrowRight');await page.keyboard.type('!');assert.equal(await editor.inputValue(),'C!trl K is ordinary text here');await focus(editor);
    } else if(slug==='number-formatter') {
-    const number=primary.locator('.sapid-number-formatter');assert.equal(await number.textContent(),'$12,500.50');await number.evaluate(e=>window.budgetNumber=e);await primary.getByRole('button',{name:'Add 250 to budget',exact:true}).click();await tick();assert.equal(await number.textContent(),'$12,750.50');assert(await number.evaluate(e=>e===window.budgetNumber));const locales=detail('number-locales');for(const label of ['-1,234,567.89','-1.234.567,89'])assert(await locales.getByText(label,{exact:true}).first().isVisible());const affix=detail('number-affixes');assert(await affix.getByText('Balance: -1,250.50 credits',{exact:true}).isVisible());await affix.getByRole('checkbox',{name:'Use kilometer suffix',exact:true}).uncheck();await tick();assert(await affix.getByText('12.75 mi',{exact:true}).isVisible());
+    assert.equal(await primary.locator('.sapid-number-formatter').textContent(),'$ 1,000,000');
+    assert.deepEqual(await detail('number-locales').locator('.sapid-number-formatter').allTextContents(),['1,000,000','1.000.000']);
+    assert.deepEqual(await detail('number-affixes').locator('.sapid-number-formatter').allTextContents(),['$ 100','100 RUB']);
+    assert.equal(await detail('number-precision').locator('.sapid-number-formatter').textContent(),'1.67');
    } else if(slug==='overflow-list') {
     const resizing=detail('overflow-width');await resizing.getByRole('checkbox',{name:'Use narrow navigation',exact:true}).check();await tick();const trigger=resizing.getByRole('button',{name:/^More \(/});await trigger.click();await tick();const settings=resizing.getByRole('button',{name:'Settings',exact:true});assert(await settings.isVisible());await settings.focus();await page.keyboard.press('Enter');await tick();assert(await resizing.getByText('Selected workspace section: Settings',{exact:true}).isVisible());await page.keyboard.press('Escape');await tick();
     const control=detail('overflow-controlled'),more=control.getByRole('button',{name:/^More \(/});await more.click();await tick();assert.equal(await more.getAttribute('aria-expanded'),'false');await control.getByRole('checkbox',{name:'Allow more tags popup',exact:true}).check();await more.click();await tick();assert.equal(await more.getAttribute('aria-expanded'),'true');assert(await control.getByText('Accessibility',{exact:true}).isVisible());await page.keyboard.press('Escape');await tick();
@@ -81,7 +90,7 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
     await page.keyboard.press('Space');
     await tick();
     assert.equal(await trigger.getAttribute('aria-expanded'),'false');
-    assert.equal((await box(viewport)).height,before);
+    await viewport.evaluate((el,target)=>new Promise((resolve,reject)=>{const deadline=performance.now()+2000;function check(){if(Math.abs(el.getBoundingClientRect().height-target)<0.5)return resolve();if(performance.now()>deadline)return reject(Error('Spoiler did not settle at collapsed height'));requestAnimationFrame(check)}check()}),before);
     await focus(trigger);
     assert.equal(await detail('spoiler-threshold').locator('.site-preview').getByRole('button').count(),1);const control=detail('spoiler-controlled'),expand=control.getByRole('button',{name:'Read more about the route',exact:true});await expand.click();await tick();assert.equal(await expand.getAttribute('aria-expanded'),'false');await control.getByRole('checkbox',{name:'Allow guide expansion',exact:true}).check();await expand.click();await tick();assert(await control.getByRole('button',{name:'Collapse route details',exact:true}).isVisible());const changing=detail('spoiler-changes');assert.equal(await changing.locator('.site-preview').getByRole('button').count(),0);await changing.getByRole('checkbox',{name:'Show extended route notes',exact:true}).check();await tick();assert(await changing.getByRole('button',{name:'Show more',exact:true}).isVisible());
    } else if(slug==='theme-icon') {
@@ -94,8 +103,8 @@ const {matrix, chromium, base, outputPath, writeReport } = require('./showcase-b
     assert.equal(await icon.evaluate(e=>getComputedStyle(e).borderTopStyle),'solid');
     const gradient=detail('theme-icon-gradient'), tile=gradient.locator('.sapid-theme-icon');
     const initialGradient=await tile.evaluate(e=>getComputedStyle(e).backgroundImage);
-    await gradient.getByRole('combobox',{name:'Gradient to'}).selectOption('Orange');
-    await gradient.getByRole('slider',{name:'Gradient angle'}).press('End');
+    await gradient.getByRole('button', { name: 'Gradient to: use Orange' }).click();
+    await gradient.getByRole('slider',{name:'Gradient degree'}).press('End');
     await tick();
     const changed=await tile.evaluate(e=>getComputedStyle(e).backgroundImage);
     assert.notEqual(changed,initialGradient);

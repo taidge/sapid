@@ -15,6 +15,13 @@ pub struct JsonViewer {
     common: Common,
     key: String,
     source: Vary<String>,
+    root_name: String,
+    sort_keys: bool,
+    line_numbers: bool,
+    types: bool,
+    string_limit: Option<usize>,
+    marks: Vec<(String, glory::style::Color)>,
+    initial_depth: Option<usize>,
     expanded: Value<Vec<String>>,
     search: Vary<String>,
     limits: JsonViewLimits,
@@ -27,6 +34,13 @@ pub fn json_viewer(key: impl Into<String>) -> JsonViewer {
         common: Common::default(),
         key: key.into(),
         source: "null".into(),
+        root_name: "$".into(),
+        sort_keys: false,
+        line_numbers: false,
+        types: false,
+        string_limit: None,
+        marks: Vec::new(),
+        initial_depth: None,
         expanded: Value {
             source: None,
             default: vec![String::new()],
@@ -59,7 +73,46 @@ impl JsonViewer {
         self.expanded.source = Some(value.into());
         self
     }
+    /// Choose the label for the root value. JSON pointer paths remain stable.
+    pub fn root_name(mut self, name: impl Into<String>) -> Self {
+        self.root_name = name.into();
+        self
+    }
+    /// Present object children alphabetically while preserving numeric array order and source text.
+    pub fn sort_keys(mut self, value: bool) -> Self {
+        self.sort_keys = value;
+        self
+    }
+    /// Show a gutter with consecutive numbers for visible rows.
+    pub fn with_line_numbers(mut self, value: bool) -> Self {
+        self.line_numbers = value;
+        self
+    }
+
+    /// Add a type badge after primitive values.
+    pub fn with_types(mut self, value: bool) -> Self {
+        self.types = value;
+        self
+    }
+    /// Shorten long strings to a Unicode character count until the user expands the row.
+    pub fn collapse_strings_after(mut self, characters: usize) -> Self {
+        self.string_limit = Some(characters);
+        self
+    }
+    /// Highlight a JSON pointer using the supplied row background.
+    pub fn highlight_path(mut self, path: impl Into<String>, color: glory::style::Color) -> Self {
+        if self.marks.len() <= MAX_JSON_VIEW_NODES {
+            self.marks.push((path.into(), color));
+        }
+        self
+    }
+    /// Open object and array rows through this many levels on initial mount.
+    pub fn default_expand_depth(mut self, depth: usize) -> Self {
+        self.initial_depth = Some(depth);
+        self
+    }
     pub fn default_expanded(mut self, value: impl IntoIterator<Item = String>) -> Self {
+        self.initial_depth = None;
         self.expanded.default.clear();
         crate::document::extend_bounded(&mut self.expanded.default, value, MAX_JSON_VIEW_NODES);
         self
@@ -75,6 +128,15 @@ impl JsonViewer {
     pub fn on_expanded_change(mut self, value: impl FnMut(Vec<String>) + 'static) -> Self {
         self.change = Some(Box::new(value));
         self
+    }
+}
+fn value_ink(theme: &crate::Theme, kind: crate::JsonKind) -> glory::style::Color {
+    match kind {
+        crate::JsonKind::String => theme.syntax_string,
+        crate::JsonKind::Number => theme.accent_text,
+        crate::JsonKind::Boolean => theme.warning,
+        crate::JsonKind::Null => theme.danger,
+        _ => theme.foreground,
     }
 }
 fn error(value: JsonViewError) -> glory::ui::Error {
@@ -126,6 +188,9 @@ fn check_paths(paths: &[String]) -> Result {
     Ok(())
 }
 struct State {
+    types: bool,
+    string_limit: Option<usize>,
+    marks: std::collections::HashMap<String, glory::style::Color>,
     expanded: Control<Vec<String>>,
     accepted_paths: Cage<Vec<String>>,
     query: Cage<String>,
@@ -158,6 +223,112 @@ impl State {
     }
 }
 type Item = (Rc<JsonTree>, usize);
+fn show_row(
+    state: Rc<State>,
+    row: Bond<Option<Item>>,
+    class: &'static str,
+    scope: &Scope,
+) -> Result {
+    let expanded = scope.cage(false);
+    let limit = state.string_limit;
+    let display = scope.bond(move || {
+        row.with(|item| {
+            let Some((tree, index)) = item else {
+                return (String::new(), false, "", false);
+            };
+            let node = &tree.nodes()[*index];
+            let kind = tree_mode::kind(node.kind);
+            let primitive = !matches!(node.kind, crate::JsonKind::Object | crate::JsonKind::Array);
+            if !primitive {
+                return (
+                    format!("{}: {} {}", node.label, kind, node.children.len()),
+                    false,
+                    kind,
+                    false,
+                );
+            }
+            let raw = tree.value(*index).unwrap_or("");
+            if node.kind == crate::JsonKind::String
+                && let Some(max) = limit
+                && let Ok(decoded) = serde_json::from_str::<String>(raw)
+                && decoded.chars().count() > max
+            {
+                let content = if expanded.get() {
+                    raw.to_string()
+                } else {
+                    format!(
+                        "{}…",
+                        serde_json::to_string(&decoded.chars().take(max).collect::<String>())
+                            .expect("a string is valid JSON")
+                    )
+                };
+                return (format!("{}: {}", node.label, content), true, kind, true);
+            }
+            (format!("{}: {}", node.label, raw), false, kind, true)
+        })
+    });
+    let paint = state.clone();
+    let text = glory::ui::text()
+        .kind(TextKind::Code)
+        .class(class)
+        .content(scope.bond(move || display.with(|value| value.0.clone())))
+        .selectable(true)
+        .style(scope.bond(move || {
+            let mut style = Style::new();
+            if !paint.unstyled {
+                row.with(|item| {
+                    if let Some((tree, index)) = item {
+                        let node = &tree.nodes()[*index];
+                        style.color = Some(value_ink(&paint.theme, node.kind));
+                        style.background = paint.marks.get(&node.path).copied().or_else(|| {
+                            paint
+                                .matching(&node.path)
+                                .then_some(paint.theme.accent_soft)
+                        });
+                    }
+                });
+            }
+            style
+        }));
+    if !state.types && limit.is_none() {
+        return text.show_in(scope);
+    }
+    let type_label = scope.bond(move || display.with(|value| value.2.to_lowercase()));
+    let show_types = state.types;
+    let palette = state.theme.clone();
+    glory::ui::view()
+        .class("sapid-json-formatted")
+        .style(Style::new().display(Display::Flex).gap(5.))
+        .fill((
+            text,
+            glory::ui::when(
+                scope.bond(move || display.with(|value| show_types && value.3)),
+                move || {
+                    glory::ui::text()
+                        .class("sapid-json-type")
+                        .content(type_label)
+                },
+            ),
+            glory::ui::when(
+                scope.bond(move || display.with(|value| value.1)),
+                move || {
+                    crate::button()
+                        .theme(palette.clone())
+                        .compact(true)
+                        .class("sapid-json-string-toggle")
+                        .label(expanded.map(|open| {
+                            if *open {
+                                "Show less".to_owned()
+                            } else {
+                                "Show more".to_owned()
+                            }
+                        }))
+                        .on_press(move || expanded.revise(|old| *old = !*old))
+                },
+            ),
+        ))
+        .show_in(scope)
+}
 fn branch(state: Rc<State>, item: Cage<Item>) -> Box<dyn Widget> {
     Box::new(glory::ui::widget(move |scope| {
         let path = item.with(|(tree, index)| tree.nodes()[*index].path.clone());
@@ -195,7 +366,7 @@ fn branch(state: Rc<State>, item: Cage<Item>) -> Box<dyn Widget> {
         let branch_state = state.clone();
         let branch_path = path.clone();
         let leaf_state = state.clone();
-        let leaf_path = path.clone();
+
         glory::ui::when(container, move || {
             let state = branch_state.clone();
             let path = branch_path.clone();
@@ -303,32 +474,11 @@ fn branch(state: Rc<State>, item: Cage<Item>) -> Box<dyn Widget> {
         })
         .otherwise(move || {
             let state = leaf_state.clone();
-            let path = leaf_path.clone();
+
             glory::ui::widget(move |scope| {
                 let state = state.clone();
-                let path = path.clone();
-                let theme = state.theme.clone();
-                let unstyled = state.unstyled;
-                let marked = scope.bond(move || state.matching(&path));
-                let text = scope.bond(move || {
-                    item.with(|(tree, index)| {
-                        format!(
-                            "{}: {}",
-                            tree.nodes()[*index].label,
-                            tree.value(*index).unwrap()
-                        )
-                    })
-                });
-                glory::ui::text()
-                    .kind(TextKind::Code)
-                    .class("sapid-json-value")
-                    .content(text)
-                    .selectable(true)
-                    .style(scope.bond(move || Style {
-                        background: (!unstyled && marked.get()).then_some(theme.accent_soft),
-                        ..Style::new()
-                    }))
-                    .show_in(scope)
+                let row = scope.bond(move || Some(item.get()));
+                show_row(state, row, "sapid-json-value", scope)
             })
         })
         .show_in(&children)?;
@@ -345,9 +495,27 @@ impl Widget for JsonViewer {
         }
         glory::render::SemanticId::new(&self.key)?;
         self.limits.validate().map_err(error)?;
-        let initial = self
+        if self.root_name.trim().is_empty()
+            || self.root_name.len() > 256
+            || self.root_name.contains(['\0', '\r', '\n'])
+        {
+            return Err(glory::render::Error::InvalidProps(
+                "JSON root label must be a nonempty single line within 256 bytes",
+            )
+            .into());
+        }
+        let mut initial = self
             .source
             .try_with(|source| parse_json_tree(source, self.limits).map_err(error))??;
+        let sort_keys = self.sort_keys;
+        if sort_keys {
+            initial.sort_keys();
+        }
+        initial.label_root(&self.root_name);
+        if let Some(depth) = self.initial_depth {
+            self.expanded.default = initial.expanded_at_depth(depth);
+        }
+        let root_name = self.root_name.clone();
         let initial = Rc::new(initial);
         let projection = if self.tree_navigation {
             Some(scope.cage(tree_mode::Projection::prepare(initial.clone(), None)?))
@@ -365,7 +533,15 @@ impl Widget for JsonViewer {
                     if glory::core::untracked(|| tree.try_with(|old| old.source() == source))? {
                         return Ok::<_, glory::ui::Error>(None);
                     }
-                    parse_json_tree(source, limits).map(Some).map_err(error)
+                    parse_json_tree(source, limits)
+                        .map(|mut tree| {
+                            if sort_keys {
+                                tree.sort_keys();
+                            }
+                            tree.label_root(&root_name);
+                            Some(tree)
+                        })
+                        .map_err(error)
                 })??;
                 if let Some(next) = next {
                     let next = Rc::new(next);
@@ -417,7 +593,17 @@ impl Widget for JsonViewer {
                 Rc::new(result)
             })
         });
+        check_paths(
+            &self
+                .marks
+                .iter()
+                .map(|(p, _)| p.clone())
+                .collect::<Vec<_>>(),
+        )?;
         let state = Rc::new(State {
+            types: self.types,
+            string_limit: self.string_limit,
+            marks: std::mem::take(&mut self.marks).into_iter().collect(),
             expanded,
             accepted_paths,
             query,
@@ -439,11 +625,16 @@ impl Widget for JsonViewer {
         let reference = self.common.node_ref.unwrap_or_else(|| scope.cage(None));
         let mut style = self.common.theme.label(self.common.size);
         style.font_family = Some(vec![Family::Mono]);
+        style.background = Some(self.common.theme.canvas);
         let mut root = configure!(
             self.common,
             glory::ui::view(),
             scope,
-            "sapid-json-viewer",
+            if self.line_numbers {
+                "sapid-json-viewer sapid-json-numbered"
+            } else {
+                "sapid-json-viewer"
+            },
             style
         )
         .node_ref(reference);

@@ -254,6 +254,7 @@ impl ScheduleWindow {
 pub struct ScheduleEvent {
     key: ScheduleKey,
     title: String,
+    color: Option<glory::style::Color>,
     interval: ScheduleInterval,
     all_day: bool,
     resource: Option<ScheduleKey>,
@@ -274,6 +275,7 @@ impl ScheduleEvent {
         Ok(Self {
             key,
             title,
+            color: None,
             interval,
             all_day: false,
             resource: None,
@@ -281,6 +283,13 @@ impl ScheduleEvent {
             exceptions: vec![],
             permissions: SchedulePermissions::default(),
         })
+    }
+    pub fn color(mut self, color: glory::style::Color) -> Self {
+        self.color = Some(color);
+        self
+    }
+    pub fn event_color(&self) -> Option<glory::style::Color> {
+        self.color
     }
     pub fn all_day(mut self) -> Result<Self, ScheduleError> {
         if self.interval.start.time() != midnight() || self.interval.end.time() != midnight() {

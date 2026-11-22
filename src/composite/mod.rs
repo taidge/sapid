@@ -267,6 +267,7 @@ impl Widget for Panel {
                     id: Some(id.clone()),
                     labelled_by: Some(label.clone()),
                     hidden: !open.get(),
+                    inert: !open.get(),
                     ..Semantics::default()
                 })
             }))

@@ -4,10 +4,12 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
         let loading = scope.cage(true);
         let draft = scope.cage("Personal workspace".to_owned());
         let field_theme = theme.clone();
-        sapid::stack()
-            .theme(theme.clone())
-            .gap(16.)
-            .fill((
+
+        let animate = scope.cage(true);
+        let preview = {
+            let theme = theme.clone();
+
+            sapid::stack().theme(theme.clone()).gap(16.).fill((
                 sapid::checkbox()
                     .theme(theme.clone())
                     .label("Loading workspace card")
@@ -17,6 +19,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                     .theme(theme.clone())
                     .name("Workspace card")
                     .loading(loading)
+                    .animated(animate)
                     .fill(
                         sapid::field("skeleton-workspace-field")
                             .theme(theme.clone())
@@ -30,6 +33,13 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
                                     .on_value_change(move |v| draft.revise(|old| *old = v))
                             }),
                     ),
+            ))
+        };
+        view()
+            .class("site-configurator site-display-configurator site-skeleton-configurator")
+            .fill(controls::playground(
+                Box::new(preview),
+                vec![controls::switch("Animate", animate, &theme)],
             ))
             .show_in(scope)
     })

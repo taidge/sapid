@@ -11,7 +11,7 @@ const {matrix,chromium,base,outputPath,writeReport}=require('./showcase-browser-
  const compact=async l=>{const r=await box(l);assert.equal(r.width,24);assert.equal(r.height,24);assert.equal(await l.locator('svg').count(),1);};
  const close=async panel=>{await panel.locator('.sapid-layer-close').first().click();await tick();assert(!await panel.isVisible());};
  const settleHints=async()=>{await page.mouse.move(0,0);await page.locator('.site-title').click();await page.keyboard.press('Escape');await page.waitForTimeout(230);await tick();};
- const counts={modal:6,drawer:5,popover:5,dialog:3,'loading-overlay':3,overlay:3,tooltip:5,'hover-card':4,'action-bar':3,'floating-indicator':3,tour:3};
+ const counts={modal:12,drawer:10,popover:9,dialog:3,'loading-overlay':4,overlay:5,tooltip:10,'hover-card':4,'action-bar':4,'floating-indicator':3,tour:4};
  fs.mkdirSync(outputPath('overlays-remediation'),{recursive:true});
  try{
  for(const theme of (process.env.SAPID_OVERLAY_THEMES||matrix.themes.join(',')).split(','))for(const scheme of (process.env.SAPID_OVERLAY_SCHEMES||matrix.schemes.join(',')).split(','))for(const width of (process.env.SAPID_OVERLAY_WIDTHS||'1280,390').split(',').map(Number))for(const slug of (process.env.SAPID_OVERLAY_PAGES||Object.keys(counts).join(',')).split(',')){

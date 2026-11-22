@@ -318,7 +318,8 @@ fn color_input_popup_keeps_the_continuous_picker_and_every_declared_swatch() {
     .unwrap();
     assert_eq!(nodes(&app, "sapid-color-picker").len(), 1);
     assert_eq!(nodes(&app, "sapid-color-swatch").len(), 4);
-    assert_eq!(nodes(&app, "sapid-color-picker-swatch").len(), 0);
+    assert_eq!(nodes(&app, "sapid-color-picker-swatch").len(), 3);
+    assert_eq!(nodes(&app, "sapid-color-picker-swatches").len(), 1);
 }
 #[test]
 fn hex_controlled_refusal_keeps_source_and_typed_change_precedes_generic_observer() {

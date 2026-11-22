@@ -1263,6 +1263,7 @@ fn build_all_day(
                             .any(|r| Some(r.key()) == e.resource_key()))
                     .then(|| AgendaRow {
                         key: e.key().clone(),
+                        color: e.event_color(),
                         candidate: occ.candidate_index(),
                         interval: occ.interval(),
                         title: e.title().to_owned(),

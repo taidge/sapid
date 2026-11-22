@@ -133,9 +133,9 @@ pub(crate) fn editor_frame(
             Length::Px(72.)
         });
         style.min_width = Some(Length::Px(0.));
-        style.min_height = Some(Length::Px(
-            (theme.tokens.control(size).min_height - 10.).max(0.),
-        ));
+        let input_height = Length::Px(1.6 * source.font_size.or(style.font_size).unwrap_or(14.));
+        style.height = Some(input_height);
+        style.min_height = Some(input_height);
         style.grow = (!actions.wrapped).then_some(1.);
         style.shrink = Some(1.);
         style.padding = Some(Edges {

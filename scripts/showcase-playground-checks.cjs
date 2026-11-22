@@ -6,7 +6,7 @@ const near = (a, b) => assert(Math.abs(a - b) < 1, `${a} != ${b}`);
 async function checkAccordion({ page, primary, width, tick, key, detail }) {
   await assertPlaygroundLayout(primary, width);
   const trigger = primary.getByRole('button', {
-    name: 'How long does shipping take?',
+    name: 'Apples',
     exact: true,
   });
   const triggerBox = await trigger.boundingBox();
@@ -24,10 +24,10 @@ async function checkAccordion({ page, primary, width, tick, key, detail }) {
   await tick();
   assert(
     await primary
-      .getByRole('button', { name: 'How can I contact support?', exact: true })
+      .getByRole('button', { name: 'Broccoli', exact: true })
       .evaluate((element) => element === document.activeElement),
   );
-  const returns = primary.getByRole('button', { name: 'What is your return policy?' });
+  const returns = primary.getByRole('button', { name: 'Bananas' });
   await returns.click();
   await tick();
   const arrow = returns.locator('.sapid-disclosure-chevron');
@@ -63,17 +63,12 @@ async function checkAccordion({ page, primary, width, tick, key, detail }) {
   await tick();
   assert.equal(await path.getAttribute('d'), fixedPath);
   if (!detail) return;
-  const multiple = detail('Multiple sections and controlled state');
-  await multiple.getByRole('button', { name: 'Payment methods', exact: true }).click();
+  const disabled = detail('Disabled items');
+  assert(await disabled.getByRole('button', { name: 'Bananas', exact: true }).isDisabled());
+  await disabled.getByRole('button', { name: 'Broccoli', exact: true }).click();
   await tick();
-  for (const name of ['Delivery options', 'Payment methods'])
-    assert.equal(
-      await multiple.getByRole('button', { name, exact: true }).getAttribute('aria-expanded'),
-      'true',
-    );
-  assert(
-    await multiple.getByRole('button', { name: 'Archived information', exact: true }).isDisabled(),
-  );
+  assert.equal(await disabled.getByRole('button', { name: 'Broccoli', exact: true }).getAttribute('aria-expanded'), 'true');
+  assert.equal(await disabled.getByRole('button', { name: 'Apples', exact: true }).getAttribute('aria-expanded'), 'false');
   const lifetime = detail('Retain or retire panel content');
   const retained = lifetime.getByRole('textbox', { name: 'Retained draft', exact: true });
   await retained.fill('Retained note');
@@ -109,7 +104,7 @@ async function checkAccordion({ page, primary, width, tick, key, detail }) {
 async function checkStack({ primary, width, tick, detail }) {
   await assertPlaygroundLayout(primary, width);
   const preview = primary.locator('.site-stack-example'),
-    cards = preview.locator('.sapid-card');
+    cards = preview.getByRole('button');
   const alignment = primary.getByRole('combobox', { name: 'Align' });
   const distribution = primary.getByRole('combobox', { name: 'Justify' });
   const stretch = await box(cards.first());
@@ -156,6 +151,7 @@ async function checkBadge({ primary, width, tick, detail }) {
   const variant = primary.getByRole('combobox', { name: 'Variant' });
   const css = (prop) => badge.evaluate((el, p) => getComputedStyle(el)[p], prop);
   const colorEditor = primary.getByRole('textbox', { name: 'Custom color' });
+  await primary.getByRole('button', { name: 'Custom color', exact: true }).click();
   await colorEditor.click();
   const palette = primary.getByRole('dialog', { name: 'Choose color' });
   await palette.waitFor();
@@ -201,9 +197,9 @@ async function checkBadge({ primary, width, tick, detail }) {
     assert(await badge.evaluate((el, s) => el.classList.contains('sapid-badge-' + s), suffix));
     if (option === 'dot') assert.equal(await badge.locator('svg').count(), 1);
   }
-  await primary.getByRole('combobox', { name: 'Gradient from' }).selectOption('Teal');
-  await primary.getByRole('combobox', { name: 'Gradient to' }).selectOption('Orange');
-  await primary.getByRole('slider', { name: 'Gradient angle' }).press('End');
+  await primary.getByRole('button', { name: 'Gradient from: use Teal' }).click();
+  await primary.getByRole('button', { name: 'Gradient to: use Orange' }).click();
+  await primary.getByRole('slider', { name: 'Gradient degree' }).press('End');
   await tick();
   assert.match(await css('backgroundImage'), /360deg.*18, 184, 134.*253, 126, 20/);
   await variant.selectOption('filled');

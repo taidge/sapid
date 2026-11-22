@@ -228,7 +228,12 @@ fn year_page_large_page_and_row_navigation_are_finite_and_readonly_does_not_writ
     .unwrap();
     app.flush().unwrap();
     assert_eq!(
-        app.tree().node(from).unwrap().descriptor.view().focus,
+        app.tree()
+            .node(button(&app, "2125"))
+            .unwrap()
+            .descriptor
+            .view()
+            .focus,
         FocusMode::TabStop
     );
     readonly.revise(|v| *v = true);

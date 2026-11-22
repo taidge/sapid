@@ -1,4 +1,4 @@
-//! Finite text-only marquee; the host owns presentation time and preference.
+//! Finite marquee with a single accessible description and host-driven motion.
 use crate::appearance::{Common, configure, merge, observe};
 use crate::composite;
 use glory::render::{
@@ -18,26 +18,32 @@ pub enum MarqueeDirection {
     #[default]
     Left,
     Right,
+    Up,
+    Down,
 }
 pub struct Marquee {
     common: Common,
     text: Vary<String>,
+    visual: Option<Box<dyn Fn() -> Box<dyn Widget>>>,
     paused: Vary<bool>,
     animated: Vary<bool>,
     period: Vary<u32>,
     revision: Vary<u64>,
     direction: MarqueeDirection,
+    repeat: usize,
     gap: f64,
 }
 pub fn marquee() -> Marquee {
     Marquee {
         common: Common::default(),
         text: "".into(),
+        visual: None,
         paused: false.into(),
         animated: true.into(),
         period: 8000.into(),
         revision: 0.into(),
         direction: MarqueeDirection::Left,
+        repeat: 2,
         gap: 24.,
     }
 }
@@ -70,6 +76,11 @@ impl Marquee {
         self.text = value.into();
         self
     }
+    /// Supplies each decorative copy. Use passive, unkeyed content; `text` names the strip once.
+    pub fn visual_content<W: Widget>(mut self, factory: impl Fn() -> W + 'static) -> Self {
+        self.visual = Some(Box::new(move || Box::new(factory())));
+        self
+    }
     pub fn paused(mut self, value: impl Into<Vary<bool>>) -> Self {
         self.paused = value.into();
         self
@@ -89,6 +100,11 @@ impl Marquee {
     }
     pub fn direction(mut self, value: MarqueeDirection) -> Self {
         self.direction = value;
+        self
+    }
+    /// Total visible repetitions, including the measured first item.
+    pub fn repeat(mut self, value: usize) -> Self {
+        self.repeat = value;
         self
     }
     pub fn gap(mut self, value: f64) -> Self {
@@ -131,6 +147,7 @@ struct Measure {
     distance: Cage<Option<f64>>,
     enabled: Vary<bool>,
     gap: f64,
+    vertical: bool,
     next: Cell<u64>,
     batch: RefCell<Option<Batch>>,
     task: Cell<Option<glory::core::TaskToken>>,
@@ -271,12 +288,17 @@ impl Measure {
                 "marquee measured boxes require finite dimensions in 0..=1000000",
             ));
         }
-        let distance = first.width + self.gap;
+        let (viewport, extent) = if self.vertical {
+            (root.height, first.height)
+        } else {
+            (root.width, first.width)
+        };
+        let distance = extent + self.gap;
         if distance > 1_000_000. {
             return Err(invalid("marquee cycle exceeds 1000000 CSS pixels"));
         }
-        let next =
-            (root.width > 0. && first.height > 0. && first.width > root.width).then_some(distance);
+        let next = (viewport > 0. && first.width > 0. && first.height > 0. && extent > viewport)
+            .then_some(distance);
         if self.distance.try_get()? != next {
             self.distance.try_revise(|value| *value = next)?;
         }
@@ -291,6 +313,18 @@ impl Widget for Marquee {
         if !self.gap.is_finite() || !(0. ..=4096.).contains(&self.gap) {
             return Err(invalid("marquee gap must be finite in 0..=4096"));
         }
+        if !(1..=32).contains(&self.repeat) {
+            return Err(invalid("marquee repeat must be in 1..=32"));
+        }
+        let vertical = matches!(
+            self.direction,
+            MarqueeDirection::Up | MarqueeDirection::Down
+        );
+        let whitespace = if vertical {
+            WhiteSpace::PreWrap
+        } else {
+            WhiteSpace::NoWrap
+        };
         let content = composite::validated(scope, &self.text, |value| text(value))?;
         let period = composite::validated(scope, &self.period, |value| {
             if (16..=60_000).contains(value) {
@@ -311,6 +345,7 @@ impl Widget for Marquee {
             distance,
             enabled: self.animated.clone(),
             gap: self.gap,
+            vertical,
             next: Cell::new(0),
             batch: RefCell::new(None),
             task: Cell::new(None),
@@ -358,6 +393,11 @@ impl Widget for Marquee {
             .style(
                 Style::new()
                     .width(Length::Percent(100.))
+                    .height(if vertical {
+                        Length::Percent(100.)
+                    } else {
+                        Length::Auto
+                    })
                     .display(Display::Block)
                     .overflow_x(Overflow::Hidden)
                     .overflow_y(Overflow::Hidden),
@@ -372,13 +412,21 @@ impl Widget for Marquee {
                 inert: true,
                 translation: distance.get().filter(|_| animated.get()).map(|distance| {
                     let (from, to) = match direction {
-                        MarqueeDirection::Left => (0., -distance),
-                        MarqueeDirection::Right => (-distance, 0.),
+                        MarqueeDirection::Left | MarqueeDirection::Up => (0., -distance),
+                        MarqueeDirection::Right | MarqueeDirection::Down => (-distance, 0.),
                     };
                     TranslationMotion {
                         kind: TranslationKind::Loop {
-                            from: TranslationOffset::new(from, 0.),
-                            to: TranslationOffset::new(to, 0.),
+                            from: if vertical {
+                                TranslationOffset::new(0., from)
+                            } else {
+                                TranslationOffset::new(from, 0.)
+                            },
+                            to: if vertical {
+                                TranslationOffset::new(0., to)
+                            } else {
+                                TranslationOffset::new(to, 0.)
+                            },
                             period_millis: period.get(),
                         },
                         paused: paused.get(),
@@ -389,17 +437,30 @@ impl Widget for Marquee {
         });
         let resize = Rc::downgrade(&state);
         let copies = self.animated.clone();
+        let render_copy = || -> Box<dyn Widget> {
+            match &self.visual {
+                Some(factory) => factory(),
+                None => Box::new(glory::ui::text().content(content).style(Style {
+                    white_space: Some(whitespace),
+                    ..Style::new()
+                })),
+            }
+        };
         glory::ui::view()
             .class("sapid-marquee-track")
             .semantics(metadata)
             .style(Style {
                 display: Some(Display::InlineFlex),
-                flex_direction: Some(FlexDirection::Row),
+                flex_direction: Some(if vertical {
+                    FlexDirection::Column
+                } else {
+                    FlexDirection::Row
+                }),
                 gap: Some(self.gap),
-                white_space: Some(WhiteSpace::NoWrap),
+                white_space: Some(whitespace),
                 ..Style::new()
             })
-            .fill((
+            .fill(
                 glory::ui::view()
                     .class("sapid-marquee-first")
                     .node_ref(first)
@@ -414,27 +475,28 @@ impl Widget for Marquee {
                             state.report(error);
                         }
                     })
-                    .fill(glory::ui::text().content(content).style(Style {
-                        white_space: Some(WhiteSpace::NoWrap),
-                        ..Style::new()
-                    })),
-                glory::ui::view()
-                    .class("sapid-marquee-copy")
-                    .semantics(scope.bond(move || {
-                        Some(Box::new(Semantics {
-                            hidden: distance.get().is_none() || !copies.get(),
-                            ..Default::default()
-                        }))
-                    }))
-                    .style(Style {
-                        shrink: Some(0.),
-                        ..Style::new()
+                    .fill(render_copy()),
+            )
+            .fill(
+                (1..self.repeat)
+                    .map(|_| {
+                        let copies = copies.clone();
+                        glory::ui::view()
+                            .class("sapid-marquee-copy")
+                            .semantics(scope.bond(move || {
+                                Some(Box::new(Semantics {
+                                    hidden: distance.get().is_none() || !copies.get(),
+                                    ..Default::default()
+                                }))
+                            }))
+                            .style(Style {
+                                shrink: Some(0.),
+                                ..Style::new()
+                            })
+                            .fill(render_copy())
                     })
-                    .fill(glory::ui::text().content(content).style(Style {
-                        white_space: Some(WhiteSpace::NoWrap),
-                        ..Style::new()
-                    })),
-            ))
+                    .collect::<Vec<_>>(),
+            )
             .show_in(&area)?;
         let refresh = Rc::downgrade(&state);
         let animated = self.animated.clone();

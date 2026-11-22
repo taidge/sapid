@@ -48,6 +48,7 @@ pub struct MenuItem {
     close: bool,
     check_configured: bool,
     sections: Sections,
+    href: Option<(Vary<String>, glory::render::LinkOpen)>,
     visible: Vary<bool>,
 }
 pub fn menu_item(key: impl Into<String>) -> MenuItem {
@@ -62,6 +63,7 @@ pub fn menu_item(key: impl Into<String>) -> MenuItem {
         close: true,
         check_configured: false,
         sections: Sections::default(),
+        href: None,
         visible: true.into(),
     }
 }
@@ -74,6 +76,11 @@ pub fn menu_checkbox(key: impl Into<String>) -> MenuItem {
 }
 impl MenuItem {
     common_methods!();
+    /// Use a native link for this action while retaining the menu keyboard behavior.
+    pub fn href(mut self, url: impl Into<Vary<String>>, open: glory::render::LinkOpen) -> Self {
+        self.href = Some((url.into(), open));
+        self
+    }
     pub fn visible(mut self, visible: impl Into<Vary<bool>>) -> Self {
         self.visible = visible.into();
         self
@@ -365,6 +372,8 @@ pub struct Menu {
     delay: Option<Delay>,
     trigger: Option<Cage<Option<NodeId>>>,
     dropdown: bool,
+    inline_panel: bool,
+    trigger_content: Option<Box<dyn Widget>>,
     position: Option<glory::render::AnchorPlacement>,
     panel_width: Option<f64>,
     context: Option<ContextConfig>,
@@ -388,6 +397,8 @@ pub fn menu(key: impl Into<String>) -> Menu {
         delay: None,
         trigger: None,
         dropdown: false,
+        inline_panel: false,
+        trigger_content: None,
         position: None,
         panel_width: None,
         context: None,
@@ -525,6 +536,18 @@ macro_rules! dropdown_methods {
     ($( $name:ident ( $arg:ident : $ty:ty ) );* $(;)?) => { $(pub fn $name(mut self, $arg: $ty) -> Self { self.inner = self.inner.$name($arg); self })* };
 }
 impl DropdownMenu {
+    /// Render the root panel alongside its trigger without opening a focus-managed layer.
+    /// Its container controls positioning. Submenus keep their anchored placement.
+    pub fn inline_panel(mut self) -> Self {
+        self.inner.inline_panel = true;
+        self
+    }
+
+    /// Put custom text and graphics inside the accessible native menu trigger.
+    pub fn trigger_content(mut self, child: impl Widget + 'static) -> Self {
+        self.inner.trigger_content = Some(Box::new(child));
+        self
+    }
     dropdown_methods! {
         label(value: impl Into<Vary<String>>); open(value: impl Into<Vary<bool>>); default_open(value: bool);
         on_open_change(callback: impl FnMut(bool) + 'static); item(item: impl Into<MenuEntry>); items(items: impl IntoIterator<Item = MenuItem>);
@@ -657,7 +680,8 @@ fn validate(
             MenuEntry::Item(item)
                 if item.common.focus != FocusMode::Auto
                     || item.kind == ItemKind::Action && item.check_configured
-                    || item.kind != ItemKind::Action && !item.sections.is_empty() =>
+                    || item.kind != ItemKind::Action
+                        && (!item.sections.is_empty() || item.href.is_some()) =>
             {
                 return Err(invalid(
                     "menu owns focus; checkbox state needs a checkbox item and passive slots need an action item",
@@ -981,6 +1005,7 @@ impl MenuState {
 }
 
 struct Level {
+    inline_panel: bool,
     editor: Option<Box<MenuSearch>>,
     bar: Option<(String, Weak<bar::BarState>)>,
     key: String,
@@ -1085,6 +1110,7 @@ impl Level {
             return_focus: self.return_focus,
         };
         let stable_id = panel_id.clone();
+        let inline_panel = self.inline_panel;
         let typeahead = state.search_editor.is_none();
         let panel_name = self.common.name.clone().unwrap_or(self.label.clone());
         let mut panel_widget = configure!(
@@ -1102,7 +1128,7 @@ impl Level {
             config.placement = placement.get();
             composite::metadata(Semantics {
                 id: Some(stable_id.clone()),
-                layer: Some(config),
+                layer: (!inline_panel).then_some(config),
                 hidden: !open.get(),
                 navigation: Some(Orientation::Vertical),
                 navigation_direction: direction,
@@ -1237,6 +1263,7 @@ impl Level {
                         })
                         .into();
                     let child = Level {
+                        inline_panel: false,
                         editor: submenu.editor,
                         bar: None,
                         key: self.key.clone(),
@@ -1581,8 +1608,13 @@ fn mount_member<W: MenuControl>(
     } else {
         None
     };
+    let can_navigate = enabled.clone();
     let metadata = owner.bond(move || {
         let mut metadata = semantics.clone();
+        if metadata.link_open.is_some() {
+            metadata.disabled = !can_navigate.get();
+            metadata.link_request = metadata.disabled;
+        }
         if let Some(expanded) = &expanded {
             metadata.expanded = Some(expanded.get());
         }
@@ -1730,6 +1762,19 @@ impl MenuControl for glory::ui::Button {
             .on(EventKind::Activate, activation)
     }
 }
+impl MenuControl for glory::ui::Link {
+    fn member(
+        self,
+        focus: Vary<FocusMode>,
+        _enabled: Vary<bool>,
+        semantics: Vary<Option<Box<Semantics>>>,
+        activation: impl FnMut(Event) + 'static,
+    ) -> Self {
+        self.focus(focus)
+            .semantics(semantics)
+            .on(EventKind::Activate, activation)
+    }
+}
 impl MenuControl for glory::ui::Check {
     fn member(
         self,
@@ -1787,50 +1832,87 @@ fn build_item(
     let instance = owner.id();
     let weak = owner.downgrade();
     if item.kind == ItemKind::Action {
-        let native = item
-            .sections
-            .decorate(glory::ui::button().node_ref(reference), item.label.clone());
-        let native = configure!(
-            item.common,
-            native,
-            &owner,
-            "sapid-menu-item",
-            menu_item_style(parent)
-        );
         let mut observers = item
             .common
             .handlers
             .remove(&EventKind::Activate)
             .unwrap_or_default();
-        mount_member(
-            &owner,
-            state,
-            native,
-            parent,
-            &mut item.common,
-            &item.key,
-            item.label,
-            reference,
-            enabled,
-            semantics,
-            None,
-            None,
-            move |event| {
-                let Some(scope) = weak.upgrade() else { return };
-                if !live.visible.get() {
-                    return;
-                }
-                callback.emit(instance, ());
-                if instance.is_alive()
-                    && close
-                    && let Err(error) = live.root_close()
-                {
-                    scope.report_error(error);
-                    return;
-                }
-                observe(&mut observers, instance, event);
-            },
-        )?;
+        let activate = move |event| {
+            let Some(scope) = weak.upgrade() else { return };
+            if !live.visible.get() {
+                return;
+            }
+            callback.emit(instance, ());
+            if instance.is_alive()
+                && close
+                && let Err(error) = live.root_close()
+            {
+                scope.report_error(error);
+                return;
+            }
+            observe(&mut observers, instance, event);
+        };
+        if let Some((href, open)) = item.href.take() {
+            let mut semantics = semantics;
+            semantics.link_open = Some(open);
+            let native = glory::ui::link().target(href).node_ref(reference);
+            let native = if item.sections.is_empty() {
+                native.label(item.label.clone())
+            } else {
+                native
+                    .name(item.label.clone())
+                    .label("")
+                    .fill(item.sections.children(item.label.clone()))
+            };
+            let native = configure!(
+                item.common,
+                native,
+                &owner,
+                "sapid-menu-item sapid-menu-link",
+                menu_item_style(parent)
+            );
+            mount_member(
+                &owner,
+                state,
+                native,
+                parent,
+                &mut item.common,
+                &item.key,
+                item.label,
+                reference,
+                enabled,
+                semantics,
+                None,
+                None,
+                activate,
+            )?;
+        } else {
+            let native = item
+                .sections
+                .decorate(glory::ui::button().node_ref(reference), item.label.clone());
+            let native = configure!(
+                item.common,
+                native,
+                &owner,
+                "sapid-menu-item",
+                menu_item_style(parent)
+            );
+            mount_member(
+                &owner,
+                state,
+                native,
+                parent,
+                &mut item.common,
+                &item.key,
+                item.label,
+                reference,
+                enabled,
+                semantics,
+                None,
+                None,
+                activate,
+            )?;
+        }
     } else {
         let control = item.checked.mount(&owner);
         let initial = control.source.try_get()?;
@@ -2168,6 +2250,7 @@ impl Widget for Menu {
         let unstyled = common.unstyled;
         let bar = self.bar.take();
         let state = Level {
+            inline_panel: self.inline_panel,
             editor: self.editor.take(),
             bar: bar
                 .as_ref()
@@ -2315,6 +2398,9 @@ impl Widget for Menu {
                     }
                     menu_observers.emit(instance, event);
                 });
+            if let Some(content) = self.trigger_content.take() {
+                button = button.name(label.clone()).label("").fill(content);
+            }
             if !unstyled {
                 let available = enabled.clone();
                 button = button.style(scope.bond(move || {

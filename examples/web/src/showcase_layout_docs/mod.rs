@@ -5,11 +5,23 @@ mod center_axes;
 mod container_widths;
 mod flex_directions;
 mod flex_responsive;
+mod grid_auto;
+mod grid_column_align;
+mod grid_content;
+mod grid_gap;
+mod grid_offset;
+mod grid_order;
 mod grid_responsive;
+mod grid_row_gap;
+mod grid_rows;
 mod grid_spans;
+mod grid_tracks;
 mod group_growth;
 mod group_wrap;
+mod simple_auto_flow;
+mod simple_auto_rows;
 mod simple_columns;
+mod simple_min_width;
 mod simple_responsive;
 mod space_axes;
 mod splitter_controlled;
@@ -72,6 +84,60 @@ pub fn sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         ],
         "grid" => vec![
             section!(
+                grid_gap,
+                "grid-gap",
+                "Gap",
+                "Resize the viewport to change the space between columns."
+            ),
+            section!(
+                grid_row_gap,
+                "grid-row-gap",
+                "Row and column gap",
+                "The two rows have 32 pixels of space between them. Adjacent columns have 12 pixels."
+            ),
+            section!(
+                grid_offset,
+                "grid-offset",
+                "Column offset",
+                "The final item starts in column ten and leaves three empty tracks before it."
+            ),
+            section!(
+                grid_order,
+                "grid-order",
+                "Order",
+                "Resize the viewport to change the column order."
+            ),
+            section!(
+                grid_rows,
+                "grid-rows",
+                "Multiple rows",
+                "When a row fills, the next item starts on the following row."
+            ),
+            section!(
+                grid_column_align,
+                "grid-column-align",
+                "Column alignment",
+                "Each column positions its content at the top, middle or bottom."
+            ),
+            section!(
+                grid_auto,
+                "grid-auto",
+                "Auto sized columns",
+                "The middle column occupies half of the available track space. The outer columns split the rest."
+            ),
+            section!(
+                grid_content,
+                "grid-content",
+                "Fit column content",
+                "The first track fits its label. The second occupies half of the grid width."
+            ),
+            section!(
+                grid_tracks,
+                "grid-tracks",
+                "Change columns count",
+                "This grid has 24 tracks. The first cell spans twelve tracks, followed by two six-track cells."
+            ),
+            section!(
                 grid_spans,
                 "grid-spans",
                 "Spans, row spans and column offsets",
@@ -99,6 +165,24 @@ pub fn sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
             ),
         ],
         "simple-grid" => vec![
+            section!(
+                simple_min_width,
+                "simple-min-width",
+                "Minimum column width",
+                "Columns have a minimum width of 200 pixels. Resize the container to change how many columns fit."
+            ),
+            section!(
+                simple_auto_flow,
+                "simple-auto-flow",
+                "Auto fill and auto fit",
+                "With two items, auto-fill reserves empty tracks while auto-fit expands the occupied tracks."
+            ),
+            section!(
+                simple_auto_rows,
+                "simple-auto-rows",
+                "Auto rows",
+                "The grid reserves at least 100 pixels for every row."
+            ),
             section!(
                 simple_columns,
                 "simple-columns",
@@ -160,6 +244,15 @@ pub fn navigation(id: &str) -> Vec<(&'static str, &'static str)> {
             ("Responsive layout", "#flex-responsive"),
         ],
         "grid" => vec![
+            ("Gap", "#grid-gap"),
+            ("Row and column gap", "#grid-row-gap"),
+            ("Column offset", "#grid-offset"),
+            ("Order", "#grid-order"),
+            ("Multiple rows", "#grid-rows"),
+            ("Column alignment", "#grid-column-align"),
+            ("Auto sized columns", "#grid-auto"),
+            ("Fit column content", "#grid-content"),
+            ("Change columns count", "#grid-tracks"),
             ("Spans and offsets", "#grid-spans"),
             ("Responsive spans", "#grid-responsive"),
         ],
@@ -168,6 +261,9 @@ pub fn navigation(id: &str) -> Vec<(&'static str, &'static str)> {
             ("Growth and long content", "#group-growth"),
         ],
         "simple-grid" => vec![
+            ("Minimum column width", "#simple-min-width"),
+            ("Auto fill and auto fit", "#simple-auto-flow"),
+            ("Auto rows", "#simple-auto-rows"),
             ("Columns and gaps", "#simple-columns"),
             ("Responsive columns", "#simple-responsive"),
         ],

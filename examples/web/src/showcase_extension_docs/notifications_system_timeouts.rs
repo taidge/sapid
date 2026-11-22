@@ -91,7 +91,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
             .show_in(scope)
     })
 }
-fn clock() -> NotificationClock {
+pub(super) fn clock() -> NotificationClock {
     #[cfg(target_arch = "wasm32")]
     {
         let performance = web_sys::window().unwrap().performance().unwrap();
@@ -105,8 +105,7 @@ fn clock() -> NotificationClock {
         NotificationClock::new(|| Duration::ZERO, |_| std::future::pending::<()>())
     }
 }
-#[cfg(target_arch = "wasm32")]
-fn delay(millis: i32) -> glory::core::LocalFuture {
+pub(super) fn delay(millis: i32) -> glory::core::LocalFuture {
     #[cfg(target_arch = "wasm32")]
     {
         std::boxed::Box::pin(timer::Delay::new(millis))

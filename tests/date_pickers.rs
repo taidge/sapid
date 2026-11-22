@@ -776,3 +776,14 @@ fn range_and_multiple_inputs_preserve_partial_and_multi_open_policy_and_exact_su
         );
     }
 }
+
+#[test]
+fn a_valid_date_input_key_can_mount_all_nested_calendar_levels() {
+    let app = App::memory();
+    app.mount(
+        date_picker_input("reference-date-picker-input-min-and-max-dates", p()).default_open(true),
+    )
+    .unwrap();
+    app.clear().unwrap();
+    assert_eq!(app.stats().nodes, 0);
+}

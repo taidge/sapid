@@ -4,6 +4,7 @@ pub fn demo(theme: sapid::Theme) -> impl Widget {
         let draft = scope.cage(sapid::PhoneDraft::new("GB", ""));
         sapid::stack()
             .theme(theme.clone())
+            .class("site-field-example")
             .gap(8.)
             .fill((
                 sapid::phone_input("contact-number")

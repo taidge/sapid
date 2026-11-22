@@ -114,3 +114,34 @@ fn swipe_threshold_direction_and_finite_geometry() {
         assert!(page.swipe(delta, extent, Direction::Ltr).is_err());
     }
 }
+
+#[test]
+fn free_scroll_clamps_at_boundaries_and_wraps_in_both_directions() {
+    let page = Page {
+        current: 0,
+        count: 5,
+        overscan: 2,
+        looping: false,
+    };
+    assert_eq!(
+        page.scroll_offset(30., 100., Direction::Ltr, 0.).unwrap(),
+        0.
+    );
+    assert_eq!(
+        page.scroll_offset(-30., 100., Direction::Ltr, 0.).unwrap(),
+        0.3
+    );
+    assert!(page.scroll_offset(20., 0., Direction::Ltr, 0.).is_err());
+    let looping = Page {
+        looping: true,
+        ..page
+    };
+    assert_eq!(looping.index_at(-1), 4);
+    assert_eq!(looping.distance_to(4), -1);
+    assert_eq!(
+        looping
+            .scroll_offset(30., 100., Direction::Rtl, 0.)
+            .unwrap(),
+        0.3
+    );
+}

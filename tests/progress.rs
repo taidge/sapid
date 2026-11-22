@@ -224,7 +224,7 @@ fn circular_progress_uses_bounded_real_paths_for_all_themes_and_endpoints() {
                 assert_eq!(props.commands.is_empty(), value == 0.);
                 assert!(props.alternative.is_none());
                 assert_eq!(props.stroke.unwrap().color, theme.accent);
-                assert_eq!(props.height, if semi { 66. } else { 120. });
+                assert_eq!(props.height, if semi { 60. } else { 120. });
             }
         }
     }
@@ -238,22 +238,22 @@ fn semicircle_orientation_fill_direction_colors_and_labels_are_real_geometry() {
         (
             SemiCircleOrientation::Up,
             SemiCircleFillDirection::LeftToRight,
-            (6., 60.),
+            (12., 60.),
         ),
         (
             SemiCircleOrientation::Up,
             SemiCircleFillDirection::RightToLeft,
-            (114., 60.),
+            (108., 60.),
         ),
         (
             SemiCircleOrientation::Down,
             SemiCircleFillDirection::LeftToRight,
-            (6., 6.),
+            (12., 0.),
         ),
         (
             SemiCircleOrientation::Down,
             SemiCircleFillDirection::RightToLeft,
-            (114., 6.),
+            (108., 0.),
         ),
     ] {
         let app = App::memory();

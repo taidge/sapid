@@ -56,6 +56,7 @@ pub struct Combobox {
     values: Value<Vec<String>>,
     search: Value<String>,
     explicit_search: bool,
+    inline_list: bool,
     open: Value<bool>,
     changed: Option<Box<dyn FnMut(Option<String>)>>,
     values_changed: Option<Box<dyn FnMut(Vec<String>)>>,
@@ -65,6 +66,9 @@ pub struct Combobox {
     opened: Option<Box<dyn FnMut(bool)>>,
     filter: ComboboxFilter,
     empty: String,
+    header: Option<String>,
+    footer: Option<String>,
+    empty_group_message: Option<String>,
     field: Option<crate::FieldControl>,
     form_name: Option<Vary<String>>,
     required: Vary<bool>,
@@ -82,10 +86,14 @@ pub struct Combobox {
     auto_select_on_blur: bool,
     loading: Vary<bool>,
     loading_left: bool,
+    check_position: Option<crate::SelectCheckPosition>,
+    aligned_labels: bool,
     option_content: BTreeMap<String, crate::SelectOptionContent>,
 }
 pub fn combobox(key: impl Into<String>) -> Combobox {
     Combobox {
+        check_position: None,
+        aligned_labels: false,
         option_content: BTreeMap::new(),
         kind: ComboboxKind::Editable,
         common: Common::default(),
@@ -96,6 +104,7 @@ pub fn combobox(key: impl Into<String>) -> Combobox {
         values: Value::default(),
         search: Value::default(),
         explicit_search: false,
+        inline_list: false,
         open: Value::default(),
         changed: None,
         values_changed: None,
@@ -105,6 +114,9 @@ pub fn combobox(key: impl Into<String>) -> Combobox {
         opened: None,
         filter: ComboboxFilter::default(),
         empty: "No matching options".into(),
+        header: None,
+        footer: None,
+        empty_group_message: None,
         field: None,
         form_name: None,
         required: false.into(),
@@ -133,6 +145,14 @@ impl Combobox {
     /// Bounded passive option adornments; filtering and the accessible name use
     /// the original option label, independently from descriptive content. At most
     /// 256 embellished rows fit alongside all 1024 finite option declarations.
+    pub fn check_position(mut self, value: crate::SelectCheckPosition) -> Self {
+        self.check_position = Some(value);
+        self
+    }
+    pub fn with_aligned_labels(mut self, value: bool) -> Self {
+        self.aligned_labels = value;
+        self
+    }
     pub fn option_content(
         mut self,
         key: impl Into<String>,
@@ -172,7 +192,7 @@ impl Combobox {
         self.visible_limit = limit;
         self
     }
-    pub(crate) fn select_first_on_change(mut self, value: bool) -> Self {
+    pub fn select_first_on_change(mut self, value: bool) -> Self {
         self.select_first_on_change = value;
         self
     }
@@ -246,6 +266,11 @@ impl Combobox {
         self.explicit_search = true;
         self
     }
+    /// Render options in the layout of an enclosing surface that already handles positioning.
+    pub fn inline_list(mut self, value: bool) -> Self {
+        self.inline_list = value;
+        self
+    }
     pub fn open(mut self, value: impl Into<Vary<bool>>) -> Self {
         self.open.source = Some(value.into());
         self
@@ -289,6 +314,18 @@ impl Combobox {
     /// Places the loading indicator before the text when `left` is true.
     pub fn loading_left(mut self, left: bool) -> Self {
         self.loading_left = left;
+        self
+    }
+    pub fn header(mut self, content: impl Into<String>) -> Self {
+        self.header = Some(content.into());
+        self
+    }
+    pub fn footer(mut self, content: impl Into<String>) -> Self {
+        self.footer = Some(content.into());
+        self
+    }
+    pub fn empty_group_message(mut self, content: impl Into<String>) -> Self {
+        self.empty_group_message = Some(content.into());
         self
     }
     pub fn empty_message(mut self, value: impl Into<String>) -> Self {
@@ -488,7 +525,9 @@ impl State {
     fn flat_option(&self, row: usize) -> &glory::render::SelectOption {
         match &self.config.entries[row] {
             SelectEntry::Option(option) => option,
-            SelectEntry::Group(_) => unreachable!("validated flat option list"),
+            _ => {
+                unreachable!("validated flat option list")
+            }
         }
     }
     fn window_cursor(
@@ -987,7 +1026,7 @@ impl Widget for Combobox {
             && config
                 .entries
                 .iter()
-                .any(|e| matches!(e, SelectEntry::Group(_)))
+                .any(|e| !matches!(e, SelectEntry::Option(_)))
         {
             return Err(invalid("virtualized combobox requires ungrouped options"));
         }
@@ -1711,6 +1750,7 @@ impl Widget for Combobox {
         } else {
             trigger_id.clone()
         };
+        let floating = !self.inline_list;
         let panel_meta = scope.bond(move || {
             Some(Box::new(Semantics {
                 id: Some(panel_name.clone()),
@@ -1725,7 +1765,7 @@ impl Widget for Combobox {
                 navigation: Some(Orientation::Vertical),
                 listbox_multiple: panel_multiple,
                 hidden: !panel_visible.get(),
-                layer: Some(Layer {
+                layer: floating.then(|| Layer {
                     modal: false,
                     focus: LayerFocus::Preserve,
                     placement: LayerPlacement::Anchor(glory::render::AnchorPlacement {
@@ -1777,6 +1817,8 @@ impl Widget for Combobox {
                     scope.report_error(error);
                 }
             });
+        let check_position = self.check_position;
+        let aligned_labels = self.aligned_labels;
         if let Some(window) = window {
             panel = panel.on(EventKind::Scroll, move |event| {
                 if let Event::Scroll { y, viewport, .. } = event {
@@ -1789,6 +1831,13 @@ impl Widget for Combobox {
         }
         if let Some(name) = panel_accessible_name {
             panel = panel.name(name);
+        }
+        if let Some(header) = self.header.take() {
+            panel = panel.fill(
+                glory::ui::text()
+                    .class("sapid-combobox-header")
+                    .content(header),
+            );
         }
         panel.show_in(&content)?;
         let items_scope = scope.child_in(panel_ref.get().ok_or(glory::ui::Error::Gone)?)?;
@@ -1854,6 +1903,8 @@ impl Widget for Combobox {
                             option,
                             false,
                             OptionPresentation {
+                                check_position,
+                                aligned_labels,
                                 key: &key,
                                 owner: &owner,
                                 common: &common,
@@ -1872,16 +1923,23 @@ impl Widget for Combobox {
                         option,
                         false,
                         OptionPresentation {
+                            check_position,
+                            aligned_labels,
                             key: &self.key,
                             owner: &panel_id,
                             common: &self.common,
                             content: self.option_content.get(option.key.as_str()),
                         },
                     )?,
-                    SelectEntry::Group(group) => {
+                    entry => {
+                        let SelectEntry::Group(group) = entry else {
+                            continue;
+                        };
                         let reference = scope.cage(None);
                         let group_state = state.clone();
                         let group_config = config.clone();
+                        let empty_group =
+                            group.options.is_empty() && self.empty_group_message.is_some();
                         glory::ui::view()
                             .role(Role::Group)
                             .name(group.label.clone())
@@ -1892,18 +1950,20 @@ impl Widget for Combobox {
                             )
                             .semantics(scope.bond(move || {
                                 Some(Box::new(Semantics {
-                                    hidden: !{
-                                        match &group_config.entries[entry_index] {
-                                            SelectEntry::Group(group) => {
-                                                group.options.iter().any(|option| {
-                                                    group_state.option_visible(option.key.as_str())
-                                                })
+                                    hidden: !empty_group
+                                        && !{
+                                            match &group_config.entries[entry_index] {
+                                                SelectEntry::Group(group) => {
+                                                    group.options.iter().any(|option| {
+                                                        group_state
+                                                            .option_visible(option.key.as_str())
+                                                    })
+                                                }
+                                                _ => {
+                                                    unreachable!("static group declaration")
+                                                }
                                             }
-                                            SelectEntry::Option(_) => {
-                                                unreachable!("static group declaration")
-                                            }
-                                        }
-                                    },
+                                        },
                                     ..Default::default()
                                 }))
                             }))
@@ -1912,6 +1972,12 @@ impl Widget for Combobox {
                             .show_in(&items_scope)?;
                         let group_scope =
                             scope.child_in(reference.get().ok_or(glory::ui::Error::Gone)?)?;
+                        if empty_group {
+                            glory::ui::text()
+                                .class("sapid-combobox-empty")
+                                .content(self.empty_group_message.clone().unwrap_or_default())
+                                .show_in(&group_scope)?;
+                        }
                         for option in &group.options {
                             mount_option(
                                 &group_scope,
@@ -1919,6 +1985,8 @@ impl Widget for Combobox {
                                 option,
                                 group.disabled,
                                 OptionPresentation {
+                                    check_position,
+                                    aligned_labels,
                                     key: &self.key,
                                     owner: &panel_id,
                                     common: &self.common,
@@ -1933,6 +2001,7 @@ impl Widget for Combobox {
         }
         let controller = state.clone();
         glory::ui::view()
+            .class("sapid-combobox-empty")
             .fill(glory::ui::text().content(self.empty.clone()))
             .semantics(scope.bond(move || {
                 Some(Box::new(Semantics {
@@ -1941,6 +2010,12 @@ impl Widget for Combobox {
                 }))
             }))
             .show_in(&items_scope)?;
+        if let Some(footer) = self.footer.take() {
+            glory::ui::text()
+                .class("sapid-combobox-footer")
+                .content(footer)
+                .show_in(&items_scope)?;
+        }
         content.retain(items_scope)?;
         if self.kind != ComboboxKind::Autocomplete
             && (window.is_none() || form_name.is_some() || self.field.is_some())
@@ -2088,6 +2163,8 @@ impl Widget for Combobox {
 }
 
 struct OptionPresentation<'a> {
+    check_position: Option<crate::SelectCheckPosition>,
+    aligned_labels: bool,
     key: &'a str,
     owner: &'a SemanticId,
     common: &'a Common,
@@ -2102,11 +2179,15 @@ fn mount_option(
     presentation: OptionPresentation<'_>,
 ) -> Result {
     let OptionPresentation {
+        check_position,
+        aligned_labels,
         key,
         owner,
         common,
         content,
     } = presentation;
+    let configured_check = check_position.is_some();
+    let check_position = check_position.unwrap_or(crate::SelectCheckPosition::Hidden);
     let parent = scope;
     let item_scope = parent.child()?;
     let scope = &item_scope;
@@ -2131,17 +2212,18 @@ fn mount_option(
     let multiple = state.multiple.as_ref().map(|multiple| multiple.selected);
     let option_key = option.key.as_str().to_owned();
     let semantic_owner = owner.clone();
+    let checked = scope.bond(move || {
+        multiple
+            .map(|values| values.with(|v| v.contains(&option_key)))
+            .unwrap_or_else(|| selected.get().as_deref() == Some(&option_key))
+    });
     let metadata = scope.bond(move || {
         Some(Box::new(Semantics {
             id: Some(id.clone()),
             option: Some(OptionSemantics {
                 owner: semantic_owner.clone(),
             }),
-            selected: Some(
-                multiple
-                    .map(|values| values.with(|values| values.contains(&option_key)))
-                    .unwrap_or_else(|| selected.get().as_deref() == Some(&option_key)),
-            ),
+            selected: Some(checked.get()),
             hidden: !matching.get(),
             ..Default::default()
         }))
@@ -2155,7 +2237,7 @@ fn mount_option(
         base.border_width = Some(Edges::all(0.0));
         base.background = Some(Color(0, 0, 0, 0));
     }
-    if content.is_some() {
+    if content.is_some() || check_position != crate::SelectCheckPosition::Hidden {
         base.display = Some(Display::Flex);
         base.align = Some(Align::Center);
         base.gap = Some(8.);
@@ -2200,10 +2282,15 @@ fn mount_option(
         .label(option.label.clone())
         .focus(FocusMode::Programmatic)
         .class(format!(
-            "sapid-combobox-option {}{}",
+            "sapid-combobox-option {}{}{}",
             common.theme.class(),
             if common.unstyled {
                 " sapid-unstyled"
+            } else {
+                ""
+            },
+            if configured_check {
+                " sapid-option-check-configured"
             } else {
                 ""
             }
@@ -2250,9 +2337,16 @@ fn mount_option(
                 }
             }
         });
-    if let Some(content) = content {
-        let mut row: Vec<Box<dyn Widget>> = Vec::with_capacity(4);
-        if let Some(value) = &content.leading {
+    if content.is_some() || check_position != crate::SelectCheckPosition::Hidden {
+        let mut row: Vec<Box<dyn Widget>> = Vec::with_capacity(5);
+        if check_position == crate::SelectCheckPosition::Left {
+            row.push(Box::new(crate::select::option_check(
+                scope,
+                checked,
+                aligned_labels,
+            )));
+        }
+        if let Some(value) = content.and_then(|c| c.leading.as_ref()) {
             row.push(Box::new(
                 glory::ui::text()
                     .class("sapid-combobox-option-leading")
@@ -2264,7 +2358,7 @@ fn mount_option(
                 .class("sapid-combobox-option-label")
                 .content(option.label.clone()),
         ));
-        if let Some(value) = &content.description {
+        if let Some(value) = content.and_then(|c| c.description.as_ref()) {
             row.push(Box::new(
                 glory::ui::text()
                     .class("sapid-combobox-option-description")
@@ -2275,12 +2369,19 @@ fn mount_option(
                     }),
             ));
         }
-        if let Some(value) = &content.trailing {
+        if let Some(value) = content.and_then(|c| c.trailing.as_ref()) {
             row.push(Box::new(
                 glory::ui::text()
                     .class("sapid-combobox-option-trailing")
                     .content(value.clone()),
             ));
+        }
+        if check_position == crate::SelectCheckPosition::Right {
+            row.push(Box::new(crate::select::option_check(
+                scope,
+                checked,
+                aligned_labels,
+            )));
         }
         button = button
             .label("")

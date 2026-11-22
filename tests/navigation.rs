@@ -40,6 +40,18 @@ fn current(app: &App) -> Vec<NodeId> {
 #[test]
 fn window_handles_limits_gaps_dedup_and_unknown_total_without_scanning_total() {
     assert_eq!(
+        pagination_window(1, Some(10), 1, 1).unwrap(),
+        vec![
+            PageItem::Page(1),
+            PageItem::Page(2),
+            PageItem::Page(3),
+            PageItem::Page(4),
+            PageItem::Page(5),
+            PageItem::Gap,
+            PageItem::Page(10),
+        ]
+    );
+    assert_eq!(
         pagination_window(5, Some(10), 1, 1).unwrap(),
         vec![
             PageItem::Page(1),

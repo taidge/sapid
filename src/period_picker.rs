@@ -27,9 +27,7 @@ fn invalid() -> glory::ui::Error {
 fn count<T: DatePeriod>() -> usize {
     if T::MONTH { 12 } else { 10 }
 }
-fn columns<T: DatePeriod>() -> usize {
-    if T::MONTH { 3 } else { 5 }
-}
+const PERIOD_COLUMNS: usize = 3;
 fn year<T: DatePeriod>(value: T) -> CivilYear {
     CivilYear::new(
         (if T::MONTH {
@@ -230,7 +228,7 @@ impl<T: DatePeriod> Controller<T> {
         if !self.allowed(s, current) {
             return Ok(());
         }
-        let cols = columns::<T>() as i32;
+        let cols = PERIOD_COLUMNS as i32;
         let delta = match command {
             GridCommand::Left => -1,
             GridCommand::Right => 1,
@@ -256,13 +254,15 @@ impl<T: DatePeriod> Controller<T> {
         }
         match command {
             GridCommand::FirstInRow | GridCommand::LastInRow => {
-                let col = (index(current) % columns::<T>()) as i32;
+                let at = index(current);
+                let col = (at % PERIOD_COLUMNS) as i32;
+                let row_length = (count::<T>() - at + col as usize).min(PERIOD_COLUMNS) as i32;
                 let (delta, step) = if command == GridCommand::FirstInRow {
                     (-col, 1)
                 } else {
-                    (cols - 1 - col, -1)
+                    (row_length - 1 - col, -1)
                 };
-                for n in 0..cols {
+                for n in 0..row_length {
                     if let Ok(value) = current.checked_shift(delta + n * step)
                         && self.allowed(s, value)
                     {
@@ -506,7 +506,8 @@ fn place(scope: &Scope, r: Cage<Option<NodeId>>) -> Result<Scope> {
 impl<T: DatePeriod> Widget for PeriodPicker<T> {
     fn build(&mut self, scope: &Scope) -> Result {
         if self.key.is_empty()
-            || self.key.len() > 64
+            // The final semantic ID appends "-grid" to the picker key.
+            || self.key.len() > 251
             || !self
                 .key
                 .bytes()
@@ -607,14 +608,10 @@ impl<T: DatePeriod> Widget for PeriodPicker<T> {
             Some(Length::Px(v)) => v,
             _ => 36.,
         };
-        let width = if T::MONTH {
-            height.max(30.) * 2.5
-        } else {
-            height.max(24.) * 1.5
-        };
+        let width = height.max(30.) * 2.5;
         let gap = 2.;
-        let cols = columns::<T>();
-        let rows = count::<T>() / cols;
+        let cols = PERIOD_COLUMNS;
+        let rows = count::<T>().div_ceil(cols);
         let total = cols as f64 * (width + gap) - gap;
         let (class, appearance) = self.common.appearance(
             scope,
@@ -820,6 +817,9 @@ impl<T: DatePeriod> Widget for PeriodPicker<T> {
             let row_scope = place(scope, reference)?;
             for col in 0..cols {
                 let at = row * cols + col;
+                if at >= count::<T>() {
+                    break;
+                }
                 let reference = scope.cage(None);
                 let physical = if direction == Direction::Ltr {
                     col

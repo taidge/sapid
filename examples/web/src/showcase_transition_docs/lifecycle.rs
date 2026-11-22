@@ -1,49 +1,40 @@
 use glory::prelude::*;
 pub fn demo(theme: sapid::Theme) -> impl Widget {
     widget(move |scope| {
-        let mounted = scope.cage(false);
-        let log = scope.cage(Vec::<&'static str>::new());
-        let content_theme = theme.clone();
-        let record = move |name| {
-            log.revise(|v| {
-                if v.len() == 8 {
-                    v.remove(0);
-                }
-                v.push(name);
-            })
-        };
+        let open = scope.cage(false);
+        let palette = theme.clone();
         sapid::stack()
             .theme(theme.clone())
-            .gap(12.)
+            .align(Align::Center)
+            .gap(8.)
             .fill((
                 sapid::button()
                     .theme(theme.clone())
-                    .label("Toggle delayed transition")
-                    .on_press(move || mounted.revise(|v| *v = !*v)),
+                    .label(open.map(|on| {
+                        if *on {
+                            "Close dropdown".to_owned()
+                        } else {
+                            "Open dropdown".to_owned()
+                        }
+                    }))
+                    .on_press(move || open.revise(|v| *v = !*v)),
                 sapid::transition()
-                    .mounted(mounted)
-                    .duration(300)
-                    .exit_duration(600)
-                    .enter_delay(150)
-                    .exit_delay(100)
-                    .on_enter(move || record("enter"))
-                    .on_entered(move || record("entered"))
-                    .on_exit(move || record("exit"))
-                    .on_exited(move || record("exited"))
+                    .theme(theme.clone())
+                    .mounted(open)
+                    .duration(220)
+                    .exit_duration(180)
+                    .enter_delay(200)
+                    .exit_delay(200)
                     .content(move || {
-                        sapid::paper().theme(content_theme.clone()).fill(
-                            sapid::text()
-                                .theme(content_theme.clone())
-                                .content("Delayed content"),
-                        )
+                        sapid::paper()
+                            .theme(palette.clone())
+                            .class("sapid-demo-transition-content")
+                            .fill(
+                                sapid::text()
+                                    .theme(palette.clone())
+                                    .content("This dropdown is animated."),
+                            )
                     }),
-                sapid::text().theme(theme.clone()).content(log.map(|v| {
-                    if v.is_empty() {
-                        "No lifecycle events".into()
-                    } else {
-                        v.join(" → ")
-                    }
-                })),
             ))
             .show_in(scope)
     })
