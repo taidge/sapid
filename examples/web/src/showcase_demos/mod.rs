@@ -36,10 +36,6 @@ mod angle_slider_usage;
 pub fn angle_slider_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(angle_slider_usage::demo(theme))
 }
-mod area_chart_usage;
-pub fn area_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(area_chart_usage::demo(theme))
-}
 mod aspect_ratio_usage;
 pub fn aspect_ratio_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(aspect_ratio_usage::demo(theme))
@@ -60,14 +56,6 @@ mod badge_usage;
 pub fn badge_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(badge_usage::demo(theme))
 }
-mod bar_chart_usage;
-pub fn bar_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(bar_chart_usage::demo(theme))
-}
-mod bars_list_usage;
-pub fn bars_list_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(bars_list_usage::demo(theme))
-}
 mod blockquote_usage;
 pub fn blockquote_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(blockquote_usage::demo(theme))
@@ -75,14 +63,6 @@ pub fn blockquote_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
 mod box_usage;
 pub fn box_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(box_usage::demo(theme))
-}
-mod bubble_chart_usage;
-pub fn bubble_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(bubble_chart_usage::demo(theme))
-}
-mod bullet_chart_usage;
-pub fn bullet_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(bullet_chart_usage::demo(theme))
 }
 mod burger;
 pub fn burger_widget(theme: sapid::Theme) -> Box<dyn Widget> {
@@ -95,10 +75,6 @@ pub fn button_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
 mod calendar_usage;
 pub fn calendar_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(calendar_usage::demo(theme))
-}
-mod candlestick_chart_usage;
-pub fn candlestick_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(candlestick_chart_usage::demo(theme))
 }
 mod card_usage;
 pub fn card_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
@@ -160,10 +136,6 @@ mod combobox_usage;
 pub fn combobox_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(combobox_usage::demo(theme))
 }
-mod composite_chart_usage;
-pub fn composite_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(composite_chart_usage::demo(theme))
-}
 mod container_usage;
 pub fn container_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(container_usage::demo(theme))
@@ -199,10 +171,6 @@ pub fn day_view_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
 mod divider_usage;
 pub fn divider_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(divider_usage::demo(theme))
-}
-mod donut_chart_usage;
-pub fn donut_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(donut_chart_usage::demo(theme))
 }
 mod drawer_usage;
 pub fn drawer_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
@@ -256,14 +224,6 @@ mod focused_breadcrumbs;
 pub fn focused_breadcrumbs_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(focused_breadcrumbs::demo(theme))
 }
-mod funnel_chart_usage;
-pub fn funnel_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(funnel_chart_usage::demo(theme))
-}
-mod gauge_chart_usage;
-pub fn gauge_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(gauge_chart_usage::demo(theme))
-}
 mod grid_usage;
 pub fn grid_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(grid_usage::demo(theme))
@@ -271,10 +231,6 @@ pub fn grid_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
 mod group_usage;
 pub fn group_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(group_usage::demo(theme))
-}
-mod heatmap_usage;
-pub fn heatmap_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(heatmap_usage::demo(theme))
 }
 mod highlight_usage;
 pub fn highlight_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
@@ -320,10 +276,6 @@ mod lightbox_usage;
 pub fn lightbox_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(lightbox_usage::demo(theme))
 }
-mod line_chart_usage;
-pub fn line_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(line_chart_usage::demo(theme))
-}
 mod list_usage;
 pub fn list_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(list_usage::demo(theme))
@@ -347,10 +299,6 @@ pub fn marquee_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
 mod mask_input_usage;
 pub fn mask_input_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(mask_input_usage::demo(theme))
-}
-mod matrix_chart_usage;
-pub fn matrix_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(matrix_chart_usage::demo(theme))
 }
 mod menu_usage;
 pub fn menu_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
@@ -444,10 +392,6 @@ mod phone_input_usage;
 pub fn phone_input_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(phone_input_usage::demo(theme))
 }
-mod pie_chart_usage;
-pub fn pie_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(pie_chart_usage::demo(theme))
-}
 mod pill_usage;
 pub fn pill_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(pill_usage::demo(theme))
@@ -471,14 +415,6 @@ pub fn portal_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
 mod progress_usage;
 pub fn progress_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(progress_usage::demo(theme))
-}
-mod radar_chart_usage;
-pub fn radar_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(radar_chart_usage::demo(theme))
-}
-mod radial_bar_chart_usage;
-pub fn radial_bar_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(radial_bar_chart_usage::demo(theme))
 }
 mod radio_usage;
 pub fn radio_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
@@ -524,14 +460,6 @@ mod rolling_number_usage;
 pub fn rolling_number_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(rolling_number_usage::demo(theme))
 }
-mod sankey_chart_usage;
-pub fn sankey_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(sankey_chart_usage::demo(theme))
-}
-mod scatter_chart_usage;
-pub fn scatter_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(scatter_chart_usage::demo(theme))
-}
 mod schedule_usage;
 pub fn schedule_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(schedule_usage::demo(theme))
@@ -576,10 +504,6 @@ mod space_usage;
 pub fn space_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(space_usage::demo(theme))
 }
-mod sparkline_usage;
-pub fn sparkline_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(sparkline_usage::demo(theme))
-}
 mod splitter_usage;
 pub fn splitter_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(splitter_usage::demo(theme))
@@ -599,10 +523,6 @@ pub fn stack_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
 mod stepper_usage;
 pub fn stepper_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(stepper_usage::demo(theme))
-}
-mod sunburst_chart_usage;
-pub fn sunburst_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(sunburst_chart_usage::demo(theme))
 }
 mod switch_usage;
 pub fn switch_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
@@ -692,10 +612,6 @@ mod tree_usage;
 pub fn tree_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(tree_usage::demo(theme))
 }
-mod treemap_usage;
-pub fn treemap_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(treemap_usage::demo(theme))
-}
 mod typography_usage;
 pub fn typography_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(typography_usage::demo(theme))
@@ -707,10 +623,6 @@ pub fn unstyled_button_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
 mod visually_hidden_usage;
 pub fn visually_hidden_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
     Box::new(visually_hidden_usage::demo(theme))
-}
-mod waffle_chart_usage;
-pub fn waffle_chart_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {
-    Box::new(waffle_chart_usage::demo(theme))
 }
 mod week_view_usage;
 pub fn week_view_usage_widget(theme: sapid::Theme) -> Box<dyn Widget> {

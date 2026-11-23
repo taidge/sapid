@@ -8,7 +8,7 @@ const { cases, select, metrics, comparable } = require('./run.cjs');
 test('matrix includes real and unused cases for every optional family', () => {
   assert.equal(cases.length, 17);
   assert.equal(new Set(cases.map(value => value.name)).size, cases.length);
-  for (const family of ['charts', 'code', 'files', 'editor', 'json', 'dates']) {
+  for (const family of ['code', 'files', 'editor', 'json', 'dates']) {
     assert.deepEqual(select(`${family}-used`)[0].features, [`use-${family}`]);
     assert.deepEqual(select(`${family}-unused`)[0].features, [family]);
   }

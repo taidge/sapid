@@ -8,7 +8,7 @@ const inventory = fs.readdirSync(path.join(dir,'upstream')).map(slug=>{
   const page=JSON.parse(fs.readFileSync(path.join(dir,'upstream',slug,'index.json'),'utf8'));
   return {...page,examples:page.examples.map(e=>({...e,controls:e.panelKind==='selectors'?[]:e.fields}))};
 });
-const groups = new Set(['Charts','Dates','Extensions']);
+const groups = new Set(['Dates','Extensions']);
 
 async function operate(panel, label) {
   const role = kind => panel.getByRole(kind,{name:label,exact:true});

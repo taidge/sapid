@@ -153,13 +153,9 @@ SVG 宽高均为 256；顶栏桌面显示 36 × 36，手机显示 32 × 32，保
 - [TextInput](http://127.0.0.1:8795/showcase.html?widget=text-input)
 - [Button 深色主题](http://127.0.0.1:8795/showcase.html?widget=button&scheme=dark)
 
-展示站包含 181 个官方对应指南；路线图的 137 个工程工作项仍单独保留，其中 122 个映射到这些指南。
-Core 的 121 个条目、分类和顺序与 Mantine 9.7.4 一致；内部工作项名称不显示在侧栏。
-每个指南都有独立的构建入口。同一工作项中的多个组件不再共用混杂预览，分别由
-`focused_demos/mantine_pages.rs` 或 `focused_demos/charts.rs` 按页面身份构建。
-共 181 个生成模块供 181 个指南使用；目录的 `build` 指向模块的 `demo(theme)`，
-`code` 通过 `include_str!` 读取同一个文件。因此 Source、Copy 与预览使用完全相同的已编译源码。
-生成器 `--check` 验证同步；Rust 测试逐一挂载 181 个指南、检查高亮预算和卸载后的节点/任务清理。
+展示站包含 160 个指南，其中 159 个对应 Mantine 条目。路线图包含 129 个工程工作项。
+生成的目录为每个指南提供独立的 `build` 入口；`code` 通过 `include_str!` 读取同一份
+示例源码，供 Source 和 Copy 使用。生成器的 `--check` 验证同步。
 
 生成器固定读取仓库的 `rustfmt.toml`，目录文件和示例模块使用同一格式流程。
 修改格式配置或夹具后运行 `python scripts/showcase-catalog.py`，再执行 `--check` 和
@@ -181,8 +177,7 @@ Button 页的 Variant、Color、Size、Radius、Compact、Disabled、Loading 控
 结果为实际语义链接。手机导航通过 Rust 状态打开和关闭。
 所有指南提供 Mantine 式 Documentation、Properties、Styles API、Source、Capabilities 页签；
 Properties 只列出当前 Sapid Widget 的真实 Rust builder 签名，不把 Mantine 或 React 属性当作 Sapid 属性；
-Styles API 列出实现中的实际类名。Charts 的 22 个指南分别使用独立示例和数据说明，不再混入共享验收工作台；
-`charts` feature 在库中默认关闭，展示应用只是显式启用它来编译这些指南。
+Styles API 列出实现中的实际类名。
 TreeSelect 展示单选、可移除多选、父子级联、独立选择、保留祖先的搜索、受控展开及禁用/只读/错误状态；
 Select、Combobox、Autocomplete 和 Cascader 同样使用各自的使用示例，不再显示工程拒绝、提案计数或 Owner 开关。
 Calendar 展示真实42格使用方式、调用方拥有的三项自定义选择、全宽百分比网格、无隐藏按钮的静态自定义日期，
@@ -198,7 +193,7 @@ AreaChart、BarChart、LineChart 与 CompositeChart 各自展示 usage、stack/l
 - 页面与状态：[showcase.rs](../examples/web/src/showcase.rs)。
 - 首页：[showcase_home.rs](../examples/web/src/showcase_home.rs)。
 - 实际控件示例：[showcase_examples.rs](../examples/web/src/showcase_examples.rs)。
-- 181 项目录：[生成器](../scripts/showcase-catalog.py)读取 canonical inventory、能力账本和 Mantine 9.7.4 审计快照，
+- 160 项目录：[生成器](../scripts/showcase-catalog.py)读取 canonical inventory、能力账本和 Mantine 9.7.4 审计快照，
   `--check` 检测目录漂移；[生成结果](../examples/web/src/showcase_catalog.rs)保留真实支持范围。
   Core 分组与顺序和 Mantine 一致；[API 元数据](../examples/web/src/showcase_api.rs)
   只从当前 Widget 的实际 Rust 实现生成。
@@ -222,8 +217,8 @@ Schedule、ResourcesSchedule、Day/Week 与 Month/Year/MobileMonth 专项完成�
 
 构建门禁包括 14 项 focused Rust 测试、host 全 target 严格 Clippy、wasm32 严格 Clippy、
 WASM 构建，以及 12 个代表页面乘 4 个主题组合的 48 个 SSR/adoption 页面。
-181 个指南均通过 CSR 路由提供；48 个代表 SSR 页面不代表已经逐一验收 181 个 SSR 页面。
-站点的完整浏览器验收逐一点击 181 个侧栏链接，并检查实际演示、搜索、Button 参数与节点身份、
+160 个指南均通过 CSR 路由提供；SSR 预渲染覆盖代表页面。
+站点的完整浏览器验收逐一点击组件侧栏链接，并检查实际演示、搜索、Button 参数与节点身份、
 代码展开/收起、完整复制、Source 页、主题、TextField、手机菜单、SSR 及采用前的编辑/选择区。
 
 最终运行结果、产物哈希和截图见下方记录。原有widget的全量能力验收继续保存在

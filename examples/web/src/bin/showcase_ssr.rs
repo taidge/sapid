@@ -143,8 +143,7 @@ fn generate() -> Result<(), Box<dyn Error>> {
                 &format!("'./{assets}/sapid_web_example.js'"),
             ),
     )?;
-    // This is a deliberately representative SSR set, not 181 × four renders.
-    // All 181 canonical documents remain directly addressable in the CSR shell.
+    // Pre-render representative pages across all four palettes.
     for &(selection, name) in sapid_web_example::showcase_navigation::SSR_PAGES {
         for hue_name in ["blue", "green"] {
             for (scheme_name, scheme) in [

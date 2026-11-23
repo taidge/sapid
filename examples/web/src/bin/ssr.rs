@@ -212,26 +212,6 @@ fn generate() -> Result<(), Box<dyn std::error::Error>> {
             )?;
             let tree =
                 glory::ssr::snapshot(sapid_web_example::tree_form::tree_form(theme.clone()))?;
-            let charts = glory::ssr::snapshot(sapid_web_example::charts_form::charts_form(
-                theme.clone(),
-                false,
-            ))?;
-            let cartesian = glory::ssr::snapshot(sapid_web_example::charts_form::charts_form(
-                theme.clone(),
-                true,
-            ))?;
-            let plot_0 =
-                glory::ssr::snapshot(sapid_web_example::plots_form::plots_form(theme.clone(), 0))?;
-            let plot_1 =
-                glory::ssr::snapshot(sapid_web_example::plots_form::plots_form(theme.clone(), 1))?;
-            let plot_2 =
-                glory::ssr::snapshot(sapid_web_example::plots_form::plots_form(theme.clone(), 2))?;
-            let plot_3 =
-                glory::ssr::snapshot(sapid_web_example::plots_form::plots_form(theme.clone(), 3))?;
-            let plot_4 =
-                glory::ssr::snapshot(sapid_web_example::plots_form::plots_form(theme.clone(), 4))?;
-            let plot_5 =
-                glory::ssr::snapshot(sapid_web_example::plots_form::plots_form(theme.clone(), 5))?;
             let lightbox = glory::ssr::snapshot(sapid_web_example::lightbox_form::lightbox_form(
                 theme.clone(),
             ))?;
@@ -608,7 +588,6 @@ fn generate() -> Result<(), Box<dyn std::error::Error>> {
                     text_motion,
                 ),
                 ("tree-hydrate", include_str!("../../tree.html"), tree),
-                ("charts-hydrate", include_str!("../../charts.html"), charts),
                 (
                     "rich-editor-hydrate",
                     include_str!("../../rich-editor.html"),
@@ -618,41 +597,6 @@ fn generate() -> Result<(), Box<dyn std::error::Error>> {
                     "lightbox-hydrate",
                     include_str!("../../lightbox.html"),
                     lightbox,
-                ),
-                (
-                    "polar-charts-hydrate",
-                    include_str!("../../polar-charts.html"),
-                    plot_0,
-                ),
-                (
-                    "point-charts-hydrate",
-                    include_str!("../../point-charts.html"),
-                    plot_1,
-                ),
-                (
-                    "shape-charts-hydrate",
-                    include_str!("../../shape-charts.html"),
-                    plot_2,
-                ),
-                (
-                    "matrix-charts-hydrate",
-                    include_str!("../../matrix-charts.html"),
-                    plot_3,
-                ),
-                (
-                    "range-charts-hydrate",
-                    include_str!("../../range-charts.html"),
-                    plot_4,
-                ),
-                (
-                    "hierarchy-charts-hydrate",
-                    include_str!("../../hierarchy-charts.html"),
-                    plot_5,
-                ),
-                (
-                    "cartesian-hydrate",
-                    include_str!("../../cartesian.html"),
-                    cartesian,
                 ),
                 (
                     "tree-select-hydrate",

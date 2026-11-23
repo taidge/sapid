@@ -3,22 +3,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 const {base, chromium, outputPath} = require('./showcase-browser-env.cjs');
 
-const charts = ['area-chart','bar-chart','line-chart','composite-chart'];
 const groups = {
   'agenda-view': ['all-day-and-multi-day-events','date-formats','custom-event-rendering','event-click'],
-  'gauge-chart': ['sections','target-marker','start-and-end-angle','thickness','custom-label','round-caps'],
-  'sankey-chart': ['node-color','node-width-and-padding','link-opacity'],
-  'sunburst-chart': ['node-color','stroke-color','labels'],
-  'treemap': ['node-stroke'],
   'time-picker': ['min-and-max-values','control-dropdown-opened-state','time-presets','time-presets-groups',
     'time-presets-range','close-dropdown-on-preset-select','dropdown-position','dropdown-width','paste-events'],
 };
-for (const slug of charts) {
-  const color = {'area-chart':'area','bar-chart':'bar','line-chart':'line','composite-chart':'chart'}[slug];
-  groups[slug] = ['axis-labels','x-axis-offset','y-axis-scale','value-formatter','grid-and-text-colors',
-    `change-${color}-color-depending-on-color-scheme`];
-  if (slug==='area-chart' || slug==='composite-chart') groups[slug].push('rotate-x-axis-labels');
-}
 const settle = page => page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
 
 async function checkAgenda(page, demo, name) {
@@ -80,26 +69,6 @@ async function checkTime(page, demo, name) {
   assert.equal(await trigger.getAttribute('aria-expanded'),'false');
 }
 
-async function checkChart(page,demo,slug,name) {
-  if (charts.includes(slug)) {
-    const y=demo.locator('.sapid-chart-axis-tick:visible');
-    if (name==='axis-labels') {assert.equal(await demo.locator('.sapid-chart-x-title').textContent(),'Date');assert.equal(await demo.locator('.sapid-chart-y-title').textContent(),'Amount');}
-    if (name==='value-formatter') assert((await y.allTextContents()).some(x=>/\d,\d{3}/.test(x)));
-    if (name==='y-axis-scale') assert.equal(Math.max(...(await y.allTextContents()).map(Number)),slug==='bar-chart'?2000:100);
-    if (name==='rotate-x-axis-labels') assert.notEqual(await demo.locator('.sapid-chart-category-label').first().evaluate(e=>getComputedStyle(e).transform),'none');
-    if (name==='grid-and-text-colors') assert.equal(await y.first().evaluate(e=>getComputedStyle(e).color),'rgb(73, 80, 87)');
-    const point=demo.locator('.sapid-chart-point').first();await point.hover({force:true});await settle(page);
-    return;
-  }
-  const frames=demo.locator('.sapid-plot-drawing'), expected=name==='round-caps'?3:name==='thickness'?2:1;
-  assert.equal(await frames.count(),expected);
-  if(name==='round-caps') assert(await frames.nth(0).locator('svg').count() > await frames.nth(1).locator('svg').count());
-  if(name==='custom-label') {assert.match(await demo.textContent(),/72%/);assert.match(await demo.textContent(),/CPU Usage/);}
-  if(name==='sections'||name==='target-marker')assert(await frames.first().locator('svg').count()>=4);
-  if(name==='labels') assert(await demo.locator('.sapid-plot-label').count()>6);
-  if(name==='node-color'&&slug==='sunburst-chart')assert.equal(await demo.locator('.sapid-plot-point').count(),4);
-  const point=demo.locator('.sapid-plot-point').first();await point.focus();await settle(page);assert(await point.evaluate(e=>document.activeElement===e));
-}
 
 (async()=>{
   const folder=outputPath('example-review/reference-variants');fs.mkdirSync(folder,{recursive:true});
@@ -114,7 +83,6 @@ async function checkChart(page,demo,slug,name) {
           let result=demo;
           if(slug==='agenda-view') result=await checkAgenda(page,demo,name);
           else if(slug==='time-picker') await checkTime(page,demo,name);
-          else await checkChart(page,demo,slug,name);
           await result.screenshot({path:path.join(folder,id+'-after.png')});
           if(slug==='agenda-view' && name==='event-click') {
             await page.keyboard.press('Escape');

@@ -1,8 +1,5 @@
 /* Opt-in interaction styles. Rust Theme owns the same semantic tokens. */
 .sapid-alert{text-align:start}
-.sapid-chart-axis-tick{text-align:end}
-.sapid-chart-category-label{text-align:center}
-.sapid-chart-area-gradient{mask-image:linear-gradient(to bottom,black 12%,transparent 96%)}
 .sapid-progress-striped::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(45deg,rgba(255,255,255,.23) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.23) 50%,rgba(255,255,255,.23) 75%,transparent 75%);background-size:16px 16px}
 .sapid-indicator-marker{box-sizing:border-box}
 .sapid-color-swatch:where(:not(.sapid-unstyled)):has(.sapid-color-swatch-shadow)::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12),inset 0 2px 4px rgba(0,0,0,.16)}
@@ -318,7 +315,6 @@
 
 .sapid-indicator-count { transform: translateX(-50%); }
 
-.sapid-chart-tooltip,.sapid-plot-tooltip{background:var(--sapid-surface,white);border:1px solid var(--sapid-border,#ced4da);border-radius:4px;padding:5px 8px;font-size:12px;z-index:1}
 
 fieldset.sapid-file-input,fieldset.sapid-dropzone{margin:0;padding:0;border:0;min-inline-size:0}
 
@@ -336,7 +332,6 @@ fieldset.sapid-file-input,fieldset.sapid-dropzone{margin:0;padding:0;border:0;mi
 
 .sapid-file-status-compact{position:absolute!important;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 
-.sapid-chart-grid path,.sapid-chart-dashes path{stroke-dasharray:5 5}
 .sapid-schedule-year-weekday{text-align:center;font-size:11px;line-height:24px;color:var(--sapid-muted,#78838e)}
 .sapid-schedule-year-day{justify-content:center;min-width:0}
 
@@ -404,13 +399,7 @@ fieldset.sapid-file-input,fieldset.sapid-dropzone{margin:0;padding:0;border:0;mi
 .sapid-input-group:has(>.sapid-input-inset-end)>.sapid-input-group-control :is(.sapid-file-button,.sapid-json-editor,input.sapid-combobox,.sapid-tags-input-shell,.sapid-select,.sapid-number-editor,.sapid-tree-select){padding-inline-end:36px!important}
 .sapid-input-group:has(>.sapid-input-inset-start)>.sapid-input-group-control :is(.sapid-select,.sapid-number-editor,.sapid-tree-select){padding-inline-start:36px!important}
 
-/* Empty status and scale slots must not introduce extra flex gaps below a plot. */
-:is(.sapid-plot-scale-legend,.sapid-plot-empty,.sapid-plot-clipping):empty{display:none!important}
 
-.sapid-chart-x-title,.sapid-chart-y-title{position:absolute;font:inherit;font-size:12px;pointer-events:none}
-.sapid-chart-x-title{bottom:2px;inset-inline:0;text-align:center}.sapid-chart-y-title{top:50%;inset-inline-start:4px;writing-mode:vertical-rl;transform:translateY(-50%) rotate(180deg)}
-.sapid-chart-x-title:empty,.sapid-chart-y-title:empty{display:none}
-.sapid-plot-tooltip{white-space:pre-line}
 
 .sapid-tour-spotlight[data-gly-layer="center"]:popover-open::backdrop {
   background: rgba(0, 0, 0, 0.5);

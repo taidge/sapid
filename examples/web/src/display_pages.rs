@@ -32,13 +32,6 @@ mod browser {
                 Box::new(crate::environment_form::environment_form(theme.clone()))
             } else if family == 75 {
                 Box::new(crate::responsive_form::responsive_form(theme.clone()))
-            } else if (68..=73).contains(&family) {
-                Box::new(crate::plots_form::plots_form(
-                    theme.clone(),
-                    usize::from(family - 68),
-                ))
-            } else if family == 66 || family == 67 {
-                Box::new(crate::charts_form::charts_form(theme.clone(), family == 67))
             } else if family == 51 {
                 Box::new(crate::files_form::files_form(theme.clone()))
             } else if family == 1 {
@@ -368,42 +361,6 @@ mod browser {
     #[wasm_bindgen]
     pub fn mount_cascader(hydrate: bool, hue: String, scheme: String) -> Result<(), JsValue> {
         mount(hydrate, 47, hue, scheme)
-    }
-    #[wasm_bindgen]
-    pub fn mount_charts(hydrate: bool, hue: String, scheme: String) -> Result<(), JsValue> {
-        mount(hydrate, 66, hue, scheme)
-    }
-    #[wasm_bindgen]
-    pub fn mount_cartesian(hydrate: bool, hue: String, scheme: String) -> Result<(), JsValue> {
-        mount(hydrate, 67, hue, scheme)
-    }
-    #[wasm_bindgen]
-    pub fn mount_polar_charts(hydrate: bool, hue: String, scheme: String) -> Result<(), JsValue> {
-        mount(hydrate, 68, hue, scheme)
-    }
-    #[wasm_bindgen]
-    pub fn mount_point_charts(hydrate: bool, hue: String, scheme: String) -> Result<(), JsValue> {
-        mount(hydrate, 69, hue, scheme)
-    }
-    #[wasm_bindgen]
-    pub fn mount_shape_charts(hydrate: bool, hue: String, scheme: String) -> Result<(), JsValue> {
-        mount(hydrate, 70, hue, scheme)
-    }
-    #[wasm_bindgen]
-    pub fn mount_matrix_charts(hydrate: bool, hue: String, scheme: String) -> Result<(), JsValue> {
-        mount(hydrate, 71, hue, scheme)
-    }
-    #[wasm_bindgen]
-    pub fn mount_range_charts(hydrate: bool, hue: String, scheme: String) -> Result<(), JsValue> {
-        mount(hydrate, 72, hue, scheme)
-    }
-    #[wasm_bindgen]
-    pub fn mount_hierarchy_charts(
-        hydrate: bool,
-        hue: String,
-        scheme: String,
-    ) -> Result<(), JsValue> {
-        mount(hydrate, 73, hue, scheme)
     }
     #[wasm_bindgen]
     pub fn mount_rich_editor(hydrate: bool, hue: String, scheme: String) -> Result<(), JsValue> {

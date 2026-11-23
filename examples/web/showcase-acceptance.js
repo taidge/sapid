@@ -37,7 +37,7 @@ async (hostPage) => {
 
     await go(p, 'showcase.html?widget=button');
     const routes = await catalogRoutes(p);
-    const smokeRoutes = ['button', 'text-input', 'select', 'accordion', 'dialog', 'date-picker', 'line-chart', 'schedule'];
+    const smokeRoutes = ['button', 'text-input', 'select', 'accordion', 'dialog', 'date-picker', 'schedule'];
     const visitedRoutes = process.env.SAPID_SHOWCASE_MODE === 'quick'
       ? routes.filter(route => smokeRoutes.includes(route.id)) : routes;
     assert(visitedRoutes.length === (process.env.SAPID_SHOWCASE_MODE === 'quick' ? smokeRoutes.length : expectedSlugs.length), 'expected navigation coverage');
@@ -163,7 +163,7 @@ async (hostPage) => {
     // sources are exercised by the mandatory current remediation suites in
     // showcaseSuites. This suite owns site navigation and SSR adoption.
 
-    for (const hue of ['blue','green']) for (const scheme of ['light','dark']) for (const name of ['home','button','textfield','dates','charts']) {
+    for (const hue of ['blue','green']) for (const scheme of ['light','dark']) for (const name of ['home','button','textfield','dates']) {
       await go(p, `ssr-${name}-${hue}-${scheme}.html`);
       assert(await p.locator(`.sapid-site.site-${scheme}`).count() === 1, `SSR ${name}: adopted theme`);
       if (name !== 'home') await catalogRoutes(p);

@@ -16,8 +16,8 @@ inventory = json.loads((ROOT / "docs/widget-inventory.json").read_text(encoding=
 ledger = json.loads((ROOT / "docs/capability-matrix.json").read_text(encoding="utf-8"))
 tasks = inventory["tasks"]
 records = {entry["id"]: entry for entry in ledger["tasks"]}
-if len(tasks) != 137 or len(records) != 137 or {t["id"] for t in tasks} != set(records):
-    raise SystemExit("catalogue requires all 137 canonical tasks and explicit ledger entries")
+if len(tasks) != 129 or len(records) != 129 or {t["id"] for t in tasks} != set(records):
+    raise SystemExit("catalogue requires all 129 canonical tasks and explicit ledger entries")
 
 EXTRA_PAGES = {"P0-08": "drawer", "P2-09": "actions", "P10-07": "json-viewer"}
 CORE = {f"P0-{i:02}": name for i, name in enumerate([
@@ -41,7 +41,6 @@ FOCUSED_GROUPS = {
     "file_button": ["P10-01"],
     "rich_editor": ["P10-08"],
     "toolbar": ["P2-07", "P6-10"],
-    "charts": ["P11-01", "P11-02", "P11-03", "P11-04", "P11-05", "P11-06", "P11-07", "P11-08"],
     "schedule": ["P12-01"],
 }
 FOCUSED = {identity: family for family, identities in FOCUSED_GROUPS.items() for identity in identities}
@@ -91,14 +90,6 @@ FOCUSED_NAMES = {
     "P10-01": "focused_file_button",
     "P10-03": "focused_copy_button",
     "P10-08": "focused_rich_editor",
-    "P11-01": "focused_chart",
-    "P11-02": "focused_cartesian_charts",
-    "P11-03": "focused_polar_charts",
-    "P11-04": "focused_point_charts",
-    "P11-05": "focused_shape_charts",
-    "P11-06": "focused_matrix_charts",
-    "P11-07": "focused_range_charts",
-    "P11-08": "focused_hierarchy_charts",
     "P12-01": "focused_schedule",
 }
 FOCUSED_DISPLAY = {
@@ -114,14 +105,10 @@ if set(FOCUSED_NAMES) != set(FOCUSED):
 SPECIAL = {
     "index": ("form", "form_themed", "scope, theme.clone()", True),
     "composites": ("composite_form", "form_themed", "scope, theme.clone()", True),
-    "charts": ("charts_form", "charts_form", "theme, false", False),
-    "cartesian": ("charts_form", "charts_form", "theme, true", False),
     "json-viewer": ("json_tree_example", "json_tree_example", "theme", False),
     "tree-select": ("tree_choices_form", "tree_choices_form", "theme, false", False),
     "cascader": ("tree_choices_form", "tree_choices_form", "theme, true", False),
 }
-for index, page in enumerate(["polar-charts", "point-charts", "shape-charts", "matrix-charts", "range-charts", "hierarchy-charts"]):
-    SPECIAL[page] = ("plots_form", "plots_form", f"theme, {index}", False)
 
 # Reader-facing introductions are separate from the canonical engineering evidence.
 LEADS = {
@@ -271,16 +258,6 @@ LEADS = {
         "Inspect JSON values in an expandable structured view.",
         "Edit a structured rich document with formatting controls.",
     ],
-    "P11": [
-        "Compose charts with coordinated colors, legends and accessible data.",
-        "Compare trends and categories with area, line, bar and composite charts.",
-        "Show proportions with pie, donut and radial bar charts.",
-        "Explore relationships and ranges with scatter, bubble and candlestick charts.",
-        "Compare dimensions, stages and compact trends with specialized charts.",
-        "Show patterns and proportions in heatmap, matrix and waffle charts.",
-        "Compare values and targets with ranked bars, bullets and gauges.",
-        "Explore hierarchies and flows with treemap, sunburst and Sankey charts.",
-    ],
     "P12": [
         "Describe scheduled events and their recurrence using civil dates and times.",
         "Arrange events along a daily or weekly timeline.",
@@ -298,7 +275,6 @@ if set(DESCRIPTIONS) != set(records):
     raise SystemExit("reader introductions must describe every canonical work item")
 DISPLAY_DESCRIPTIONS = {
     "MiniCalendar": "Choose a date from a compact strip with controlled ranges, bounds and localized labels.",
-    "Heatmap": "Show dated contributions in week columns, with value domains, localized labels and current-date feedback.",
     "Center": "Center content horizontally and vertically, with an optional inline layout.",
     "Container": "Constrain content width and center it within the available space.",
     "Space": "Add explicit horizontal or vertical space between layout elements.",
@@ -330,7 +306,7 @@ def group(task):
     if phase == "P7": return "Inputs"
     if phase == "P8": return "Combobox" if n in (4, 5) else "Data display"
     if phase == "P10": return "Extensions"
-    return {"P9": "Dates", "P11": "Charts", "P12": "Dates"}[phase]
+    return {"P9": "Dates", "P12": "Dates"}[phase]
 
 
 def target(page):
@@ -361,9 +337,6 @@ def fixture_source(module):
     boundary = re.search(r'\n#\[cfg\((?:target_arch = "wasm32"|test)\)\]\nmod (?:browser|tests) \{', text)
     if boundary:
         text = text[:boundary.start()]
-    # Shared plot data is included explicitly, rather than a file-path override.
-    text = text.replace('#[path = "../../fixtures/plot_samples.rs"]\npub mod samples;',
-                        'pub mod samples {\n' + (WEB.parent / "fixtures/plot_samples.rs").read_text(encoding="utf-8") + '\n}')
     # Media URLs are build inputs, but displayed demos must remain self-contained.
     if 'crate::assets::media(' in text:
         text = text.replace('crate::assets::media(', 'media(')
@@ -466,7 +439,6 @@ NAMED_DEMO_TASKS = {task for task, items in MANTINE_BY_TASK.items() if len(items
 }
 PRESERVE_PRIMARY = {"P0-01", "P2-08", "P3-10", "P4-09", "P5-11", "P6-07", "P12-01"}
 SOURCE_GROUPS = {
-    "mantine-charts": "Charts",
     "mantine-dates": "Dates",
     "mantine-schedule": "Dates",
     "mantine-code": "Extensions",
@@ -522,10 +494,9 @@ def referenced_helpers(prefix, pending, *, calls_only=False):
     return prefix
 
 
-def named_source(body, name, family):
-    chart = family == "charts"
-    indent = 12 if chart else 8
-    marker = "        return match id {" if chart else "    match name {"
+def named_source(body, name):
+    indent = 8
+    marker = "    match name {"
     function_start = body.index("pub fn demo_for")
     start = body.index(marker, function_start)
     prefix = body[:function_start]
@@ -544,22 +515,15 @@ def named_source(body, name, family):
     if not selected:
         raise SystemExit(f"no named demo branch for {name}")
     selected_source = "".join(selected)
-    dependencies = selected_source
-    if chart and "proportions()" in selected_source:
-        dependencies += "values()"
-    prefix = referenced_helpers(prefix, dependencies)
-    variable = "id" if chart else "name"
-    signature = "id: &str, theme: sapid::Theme" if chart else "name: &str, theme: Theme"
-    proportions = "    let proportions = || values(&[(\"a\", \"Product A\", 42.), (\"b\", \"Product B\", 31.), (\"c\", \"Product C\", 18.), (\"other\", \"Other\", 9.)]);\n" if chart and "proportions()" in selected_source else ""
-    return (prefix + f"pub fn demo_for({signature}) -> Box<dyn Widget> {{\n" + proportions
-            + f"    match {variable} {{\n" + selected_source
-            + " " * indent + f"_ => unreachable!(\"unsupported named demo: {{{variable}}}\"),\n    }}\n}}\n")
+    prefix = referenced_helpers(prefix, selected_source)
+    return (prefix + "pub fn demo_for(name: &str, theme: Theme) -> Box<dyn Widget> {\n"
+            + "    match name {\n" + selected_source
+            + " " * indent + f"_ => unreachable!(\"unsupported named demo: {{name}}\"),\n    }}\n}}\n")
 
 
-def named_bundle(name, task):
-    family = "charts" if task.startswith("P11-") else "mantine_pages"
-    body = (WEB / f"src/focused_demos/{family}.rs").read_text(encoding="utf-8")
-    body = named_source(body, name, family)
+def named_bundle(name):
+    body = (WEB / "src/focused_demos/mantine_pages.rs").read_text(encoding="utf-8")
+    body = named_source(body, name)
     controls = ''
     if 'super::controls' in body:
         controls = (WEB / "src/focused_demos/controls.rs").read_text(encoding="utf-8")
@@ -618,12 +582,10 @@ API_TYPES = {
     "Loader": ["Spinner", "LoaderType"], "Dialog": ["FloatingDialog"], "Modals manager": ["ModalsManager"],
     "Dropzone": ["FileInput"], "Rich text editor": ["RichTextEditor"],
     "MiniCalendar": ["MiniCalendar"],
-    "Heatmap": ["Heatmap", "HeatmapData", "HeatmapRange", "HeatmapDomain"],
     "Transition": ["Transition"],
     "MonthPicker": ["PeriodPicker", "PeriodSelection", "DatePickerMode", "YearMonth"], "YearPicker": ["PeriodPicker", "PeriodSelection", "DatePickerMode", "CivilYear"],
     "MonthPickerInput": ["PeriodPickerInput"], "YearPickerInput": ["PeriodPickerInput"],
     "RingProgress": ["Progress"], "SemiCircleProgress": ["Progress"],
-    "Chart / ChartTheme / Legend / Tooltip": ["Chart"],
     "ComboboxPopover": ["Select", "SelectTriggerContext"],
     "UnstyledButton": ["Button"],
     "Notifications system": ["Toaster"],
@@ -635,19 +597,11 @@ API_TYPES = {
     "ResourcesDayView": ["ResourceSchedule"], "ResourcesWeekView": ["ResourceSchedule"],
     "ResourcesMonthView": ["ResourceSchedule"], "ResourcesSchedule": ["ResourceSchedule"],
     "Recurring events": ["ScheduleRecurrence"], "Events data": ["ScheduleEvent"],
-    **{name: ["Chart", "ChartData", "ChartSeries", "ChartFrame", "CartesianOptions", "ChartDomain", "ChartBrush", "ChartReferenceLine", "ChartReferenceArea", "ChartReferenceDot", "ChartSelection"] for name in ["AreaChart", "BarChart", "LineChart", "CompositeChart"]},
-    **{name: ["Plot", "PlotData", "PlotOptions", "PlotAngles", "WaffleGrid", "BubbleRadius", "ChartError", "ChartFrame", "ValueDatum", "PointDatum", "CandleDatum", "TargetDatum", "HierarchyDatum", "FlowData", "MatrixData"] for name in [
-        "DonutChart", "PieChart", "RadialBarChart", "CandlestickChart", "ScatterChart", "BubbleChart",
-        "FunnelChart", "RadarChart", "Sparkline", "WaffleChart", "MatrixChart", "BarsList",
-        "BulletChart", "GaugeChart", "Treemap", "SunburstChart", "SankeyChart",
-    ]},
     **{'Schedule': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'DayView': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'WeekView': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'MonthView': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'YearView': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'MobileMonthView': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'AgendaView': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'ResourcesDayView': ['ResourceSchedule', 'ResourceScheduleView', 'ResourceScheduleRequest', 'ResourceScheduleData', 'ScheduleResources', 'ScheduleResource', 'ScheduleResourceWindow', 'ResourceAxis', 'ScheduleSelection', 'ScheduleEdit', 'SchedulePermissions'], 'ResourcesWeekView': ['ResourceSchedule', 'ResourceScheduleView', 'ResourceScheduleRequest', 'ResourceScheduleData', 'ScheduleResources', 'ScheduleResource', 'ScheduleResourceWindow', 'ResourceAxis', 'ScheduleSelection', 'ScheduleEdit', 'SchedulePermissions'], 'ResourcesMonthView': ['ResourceSchedule', 'ResourceScheduleView', 'ResourceScheduleRequest', 'ResourceScheduleData', 'ScheduleResources', 'ScheduleResource', 'ScheduleResourceWindow', 'ResourceAxis', 'ScheduleSelection', 'ScheduleEdit', 'SchedulePermissions'], 'ResourcesSchedule': ['ResourceSchedule', 'ResourceScheduleView', 'ResourceScheduleRequest', 'ResourceScheduleData', 'ScheduleResources', 'ScheduleResource', 'ScheduleResourceWindow', 'ResourceAxis', 'ScheduleSelection', 'ScheduleEdit', 'SchedulePermissions'], 'Recurring events': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError'], 'Events data': ['Schedule', 'ScheduleView', 'ScheduleData', 'ScheduleWindow', 'ScheduleInterval', 'ScheduleEvent', 'ScheduleSelection', 'ScheduleRequest', 'ScheduleRecurrence', 'RecurrenceFrequency', 'RecurrenceEnd', 'MissingScheduleDay', 'ScheduleContext', 'ScheduleZone', 'ScheduleError']},
 }
 API_PATHS = {
     "PhoneInput": ["src/phone_input.rs"],
     **{name: ['src/schedule/mod.rs', 'src/schedule/resources/mod.rs', 'src/schedule_model.rs', 'src/schedule_recurrence.rs'] for name in ['Schedule', 'DayView', 'WeekView', 'MonthView', 'YearView', 'MobileMonthView', 'AgendaView', 'ResourcesDayView', 'ResourcesWeekView', 'ResourcesMonthView', 'ResourcesSchedule', 'Recurring events', 'Events data']},
-    **{name: ['src/chart_widget.rs', 'src/chart_scene.rs', 'src/chart_model.rs'] for name in ['AreaChart', 'BarChart', 'LineChart', 'CompositeChart']},
-    **{name: ['src/plot_widget.rs', 'src/plot_scene.rs', 'src/plot_model.rs', 'src/chart_scene.rs', 'src/chart_model.rs'] for name in ['DonutChart', 'PieChart', 'RadialBarChart', 'CandlestickChart', 'ScatterChart', 'BubbleChart', 'FunnelChart', 'RadarChart', 'Sparkline', 'WaffleChart', 'MatrixChart', 'BarsList', 'BulletChart', 'GaugeChart', 'Treemap', 'SunburstChart', 'SankeyChart']},
     "InlineDateTimePicker": ["src/date_time_picker.rs", "src/date_time_range_picker.rs", "src/date_time_model.rs"],
     "DateInput": ["src/date_input.rs", "src/date_draft.rs"],
     "DatePicker": ["src/date_picker.rs", "src/date_selection.rs", "src/dates.rs"],
@@ -663,7 +617,6 @@ API_PATHS = {
     "AppShell": ["src/app_shell.rs"],
     "PasswordInput": ["src/password_input.rs", "src/text_input.rs"],
     "Transition": ["src/transition.rs"],
-    "Heatmap": ["src/heatmap.rs", "src/heatmap_model.rs"],
     "MiniCalendar": ["src/mini_calendar.rs"],
     "Menu": ["src/menu/mod.rs", "src/menu/content.rs", "src/menu/search.rs"],
     "Menubar": ["src/menu/bar/mod.rs", "src/menu/mod.rs", "src/menu/content.rs", "src/menu/search.rs"],
@@ -689,12 +642,6 @@ API_PATHS = {
     "ResourcesMonthView": ["src/schedule/resources/mod.rs"],
     "ResourcesSchedule": ["src/schedule/resources/mod.rs"],
     "Recurring events": ["src/schedule_recurrence.rs"], "Events data": ["src/schedule_model.rs"],
-    **{name: ["src/chart_widget.rs"] for name in ["AreaChart", "BarChart", "LineChart", "CompositeChart"]},
-    **{name: ["src/plot_widget.rs"] for name in [
-        "DonutChart", "PieChart", "RadialBarChart", "CandlestickChart", "ScatterChart", "BubbleChart",
-        "FunnelChart", "RadarChart", "Sparkline", "WaffleChart", "MatrixChart", "BarsList",
-        "BulletChart", "GaugeChart", "Treemap", "SunburstChart", "SankeyChart",
-    ]},
 }
 LAYOUT_NAMES = {"Box", "Flex", "Group", "Stack", "Center", "Container", "Space"}
 
@@ -952,7 +899,7 @@ for task in tasks:
             shared_code = (key, bundle(page))
     description = DESCRIPTIONS[identity]
     for display_id, display_name, display_group in display_items(task):
-        input_examples = {"Select": "select", "DatePickerInput": "date_picker_input", "DateTimePicker": "date_time_picker", "MonthPickerInput": "month_picker_input", "YearPickerInput": "year_picker_input", "FloatingWindow": "floating_window", "Carousel": "carousel", "Dropzone": "dropzone", "Menu": "menu", "Menubar": "menubar", "MiniCalendar": "mini_calendar", "Heatmap": "heatmap", "Transition": "transition", "PasswordInput": "password_input"}
+        input_examples = {"Select": "select", "DatePickerInput": "date_picker_input", "DateTimePicker": "date_time_picker", "MonthPickerInput": "month_picker_input", "YearPickerInput": "year_picker_input", "FloatingWindow": "floating_window", "Carousel": "carousel", "Dropzone": "dropzone", "Menu": "menu", "Menubar": "menubar", "MiniCalendar": "mini_calendar", "Transition": "transition", "PasswordInput": "password_input"}
         input_examples.update({name: key for name, key in [
             ("AlphaSlider", "alpha_slider"), ("HueSlider", "hue_slider"), ("AngleSlider", "angle_slider"),
             ("ColorInput", "color_input"), ("ColorPicker", "color_picker"),
@@ -963,7 +910,6 @@ for task in tasks:
             ("PhoneInput", "phone_input"), ("MaskInput", "mask_input"), ("NativeSelect", "native_select"), ("FileInput", "file_input"),
             ("Autocomplete", "autocomplete"), ("Combobox", "combobox"), ("ComboboxPopover", "combobox_popover"), ("MultiSelect", "multi_select"), ("Pill", "pill"), ("PillsInput", "pills_input"), ("TagsInput", "tags_input"), ("TreeSelect", "tree_select"), ("Cascader", "cascader"),
             ("Avatar", "avatar"), ("Badge", "badge"), ("Card", "card"), ("ColorSwatch", "color_swatch"), ("DataList", "data_list"), ("Image", "image"), ("Indicator", "indicator"), ("Kbd", "kbd"), ("NumberFormatter", "number_formatter"), ("OverflowList", "overflow_list"), ("RollingNumber", "rolling_number"), ("Spoiler", "spoiler"), ("Timeline", "timeline"), ("ThemeIcon", "theme_icon"),
-            ("AreaChart", "area_chart"), ("BarChart", "bar_chart"), ("LineChart", "line_chart"), ("CompositeChart", "composite_chart"), ("CandlestickChart", "candlestick_chart"), ("DonutChart", "donut_chart"), ("PieChart", "pie_chart"), ("FunnelChart", "funnel_chart"), ("RadarChart", "radar_chart"), ("ScatterChart", "scatter_chart"), ("BubbleChart", "bubble_chart"), ("RadialBarChart", "radial_bar_chart"), ("Sparkline", "sparkline"), ("BarsList", "bars_list"), ("BulletChart", "bullet_chart"), ("GaugeChart", "gauge_chart"), ("WaffleChart", "waffle_chart"), ("Treemap", "treemap"), ("SunburstChart", "sunburst_chart"), ("SankeyChart", "sankey_chart"), ("MatrixChart", "matrix_chart"),
             ("Schedule", "schedule"), ("DayView", "day_view"), ("WeekView", "week_view"), ("MonthView", "month_view"), ("YearView", "year_view"), ("MobileMonthView", "mobile_month_view"), ("AgendaView", "agenda_view"), ("ResourcesDayView", "resources_day_view"), ("ResourcesWeekView", "resources_week_view"), ("ResourcesMonthView", "resources_month_view"), ("ResourcesSchedule", "resources_schedule"), ("Recurring events", "recurring_events"), ("Events data", "events_data"),
             ("CodeHighlight","code_highlight"), ("JsonViewer","json_viewer"), ("Notifications system","notifications_system"), ("Spotlight","spotlight"), ("Lightbox","lightbox"), ("NavigationProgress","navigation_progress"), ("Modals manager","modals_manager"),
             ("DatePicker", "date_picker"), ("InlineDateTimePicker", "inline_date_time_picker"), ("DateInput", "date_input"), ("MonthPicker", "month_picker"), ("YearPicker", "year_picker"), ("TimeInput", "time_input"), ("TimePicker", "time_picker"), ("TimeValue", "time_value"), ("Calendar", "calendar"),
@@ -994,7 +940,7 @@ for task in tasks:
         elif shared_code is None or (identity in PRESERVE_PRIMARY and display_id != identity):
             slug = re.sub(r"[^a-z0-9]+", "_", display_name.lower()).strip("_")
             key = "focused_" + slug
-            code = named_bundle(display_name, identity)
+            code = named_bundle(display_name)
         else:
             key, code = shared_code
         if len(code.encode()) > 65_536: raise SystemExit(f"source exceeds CodeHighlight budget: {display_id}")
@@ -1006,11 +952,11 @@ for task in tasks:
                   ("description", addition.get("description", DISPLAY_DESCRIPTIONS.get(display_name, description))), ("example", page),
                   ("web", records[identity]["web"]["state"]),
                   ("native", addition.get("native", records[identity]["native"]["state"])),
-                  ("native_note", {"Transition": "Apace supports clock-driven fade/none and custom opacity; animated transforms and Wry presence are explicitly rejected. Engine pixels are separate from OS input/readers.", "MiniCalendar": "Independent 1–31 day strip; native four-theme geometry, keyboard, bounds, RTL and stable day buttons tested.", "Heatmap": "Native dated-grid geometry, pixels, focus and retained identities tested; with_tooltip(true) is explicitly rejected."}.get(display_name, addition.get("native_note", records[identity]["native"]["notes"])))]
+                  ("native_note", {"Transition": "Apace supports clock-driven fade/none and custom opacity; animated transforms and Wry presence are explicitly rejected. Engine pixels are separate from OS input/readers.", "MiniCalendar": "Independent 1–31 day strip; native four-theme geometry, keyboard, bounds, RTL and stable day buttons tested."}.get(display_name, addition.get("native_note", records[identity]["native"]["notes"])))]
         entries.append((display_group, display_name, display_id, "    Entry { " + ", ".join(f"{key}: {literal(value)}" for key, value in values)
                        + f', code: include_str!("showcase_demos/{key}.rs"), build: crate::showcase_demos::{key}_widget' + " },"))
 
-GROUP_ORDER = list(MANTINE_GROUPS) + ["Charts", "Dates", "Extensions"]
+GROUP_ORDER = list(MANTINE_GROUPS) + ["Dates", "Extensions"]
 entries = sorted(entries, key=lambda row: (
     GROUP_ORDER.index(row[0]),
     MANTINE_ORDER.get(row[1], (99, 999))[1],

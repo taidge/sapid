@@ -558,41 +558,6 @@
       "differences": "不是 Tiptap plugin/HTML 编辑器；任意 extension、表格、任务、图片上传、源码模式、语法高亮和协同编辑属于显式架构边界，必须先扩展 Glory 的有限文档/编辑协议，不能用字符串 HTML 或页面脚本伪装。",
       "priority": "边界"
     },
-    "P11-02": {
-      "current": "Area/Line/Bar/Composite：typed 数据/轴/domain/legend/selection、inclusive brush，以及有界 reference area/line/dot 与标签",
-      "differences": "不暴露 Recharts arbitrary props；复杂 tooltip renderer、动画、多轴全部组合和任意 formatter 保留为有限协议边界。reference 几何由 Web/Native 共用，不是页面 SVG 叠加。",
-      "priority": "P2"
-    },
-    "P11-03": {
-      "current": "Pie/Donut/Radial：有限 Plot、legend/selection、可访问数据",
-      "differences": "缺任意分段 label renderer/动画/复杂 ring/tooltip；静态图形、数据表与真实选择各有证据，不能靠图形相似推断 API 等价。",
-      "priority": "P2"
-    },
-    "P11-04": {
-      "current": "Scatter/Bubble/Candlestick：有界数据、采样、选择",
-      "differences": "缺 brush/多轴/自定义 symbol 与完整 tooltip formatting；采样必须报告源数量，不能默默把全量数据当已绘制。",
-      "priority": "P2"
-    },
-    "P11-05": {
-      "current": "Radar/Funnel/Sparkline：有限 Plot/options 与语义数据",
-      "differences": "缺多 radar 叠加和各类插值/label/tooltip 完整配置；Sparkline 的有限模型不同于任意 Recharts 属性。",
-      "priority": "P2"
-    },
-    "P11-06": {
-      "current": "Heatmap/Matrix/Waffle：离散数据、色阶与可访问表",
-      "differences": "缺完整日期热图布局、hover renderer、多色 cell shape 和任意动画；需明确 missing value 和有限颜色映射。",
-      "priority": "P2"
-    },
-    "P11-07": {
-      "current": "BarsList/Bullet/Gauge：有限形状与数据标签",
-      "differences": "缺目标/区间段/动态格式的完整组合；优先 typed thresholds/labels，不能把 progress 换名当 gauge/bullet。",
-      "priority": "P2"
-    },
-    "P11-08": {
-      "current": "Treemap/Sunburst/Sankey：有界层级/流、导航和数据表",
-      "differences": "缺任意布局算法/节点链接 render/动态图过渡；需先校验层级/环/预算，不能导入任意图形引擎配置。",
-      "priority": "P2"
-    },
     "P12-01": {
       "current": "Schedule/事件/recurrence：有限模型、显式 zone/provider、窗口，以及受控 Day/Week/Month/Year 等统一视图头",
       "differences": "不暴露任意外部事件/overlap renderer；通用 DnD/resize 属于各实际视图的有限编辑协议，不由统一容器伪造。应用在切换时原子接受 view 与匹配当前窗口。",

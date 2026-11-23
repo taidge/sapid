@@ -263,7 +263,6 @@ pub fn home(theme: Theme) -> impl Widget {
                 category(&theme, "Navigation", "breadcrumbs", "↗", "site-category-cyan", "Help people find their way, without getting in it."),
                 category(&theme, "Data display", "table", "≡", "site-category-teal", "Turn your information into something easy to understand."),
                 category(&theme, "Dates", "mini-calendar", "28", "site-category-orange", "A thoughtful set of controls for dates and schedules."),
-                category(&theme, "Charts", "area-chart", "▥", "site-category-pink", "Give your numbers a voice with real, interactive charts."),
             )),
         )),
         view().class("site-home-container site-live-section").fill((

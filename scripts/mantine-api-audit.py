@@ -36,7 +36,7 @@ if args.refresh:
     markers = list(re.finditer(r'^### (.+)\nPackage: ([^\n]+)\n', source, re.M))
     blocks = {m[1]: (m[2], source[m.end(): markers[i+1].start() if i+1 < len(markers) else len(source)]) for i, m in enumerate(markers)}
     expected = {c['name'] for c in catalogue}
-    extra = [(m[1], m[2]) for m in markers if m[2] not in {'@mantine/hooks', '@mantine/form', '@mantine/x'} and m[1] not in expected and m[1] not in {'Get started', 'Getting started'}]
+    extra = [(m[1], m[2]) for m in markers if m[2] not in {'@mantine/charts', '@mantine/hooks', '@mantine/form', '@mantine/x'} and m[1] not in expected and m[1] not in {'Get started', 'Getting started'}]
     if extra:
         raise SystemExit(f'Unmapped upstream pages need explicit review: {extra}')
     facts = {'schema_version': 1, 'review_date': '2026-10-25', 'mantine_docs_version': inventory['mantine_docs_version'],
@@ -94,7 +94,7 @@ def snake(value):
 lines = [
     '# Mantine 全组件 API 与功能差异核实', '',
     f"核实日期：{facts['review_date']}；官方文档版本：{facts['mantine_docs_version']}。",
-    f"逐项覆盖 **{len(catalogue)} 个 Mantine 条目**：121 Core、15 Dates、22 Charts、13 Schedule、8 官方扩展、2 Code。",
+    f"逐项覆盖 **{len(catalogue)} 个 Mantine 条目**：121 Core、15 Dates、13 Schedule、8 官方扩展、2 Code。",
     '官方来源：[Core 目录](https://mantine.dev/core/package/)、[官方扩展](https://mantine.dev/x/extensions/)、',
     '[完整文档（包含功能示例和 Props 表）](https://mantine.dev/llms-full.txt)。', '',
     '## 结论与核实边界', '',

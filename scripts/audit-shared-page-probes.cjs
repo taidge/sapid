@@ -10,7 +10,7 @@ const { chromium, base, outputPath, writeReport } = require('./showcase-browser-
   fs.mkdirSync(outputPath('probes'),{recursive:true});
   const tick=()=>page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   try {
-    for (const [slug,width] of [['pin-input',1280],['scroller',1280],['pagination',390],['affix',390],['background-image',390],['time-grid',390],['nav-link',1280],['transition',1280],['mini-calendar',1280],['heatmap',1280],['rich-text-editor',390],['accordion',1280],['tabs',1280],['select',1280],['menu',1280]]) {
+    for (const [slug,width] of [['pin-input',1280],['scroller',1280],['pagination',390],['affix',390],['background-image',390],['time-grid',390],['nav-link',1280],['transition',1280],['mini-calendar',1280],['rich-text-editor',390],['accordion',1280],['tabs',1280],['select',1280],['menu',1280]]) {
       await page.setViewportSize({width,height:1000});
       await page.goto(`${base}/showcase.html?widget=${slug}`);
       await page.waitForFunction(slug=>window.ready===true&&document.documentElement.getAttribute('data-sapid-widget')===slug,slug);

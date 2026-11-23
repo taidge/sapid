@@ -22,14 +22,6 @@ fn ui(scope: &glory::Scope) -> Box<dyn Widget> {
                 .on_press(move || count.revise(|n| *n += 1)),
         );
     }
-    #[cfg(feature = "use-charts")]
-    {
-        use sapid::charts::*;
-        return Box::new(line_chart("size-chart").name("Size chart").data(ChartData {
-            categories: vec![ChartCategory::new("a", "A"), ChartCategory::new("b", "B")],
-            series: vec![ChartSeries::new("sample", "Sample", [Some(1.), Some(2.)])],
-        }));
-    }
     #[cfg(feature = "use-code")]
     return Box::new(sapid::code_block().source("fn main() { println!(\"hello\"); }"));
     #[cfg(feature = "use-files")]

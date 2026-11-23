@@ -72,7 +72,6 @@ fn sidebar(
             "Data display",
             "Typography",
             "Miscellaneous",
-            "Charts",
             "Dates",
             "Extensions",
         ];
@@ -645,9 +644,6 @@ fn api_styles(entry: &'static Entry, theme: Theme) -> impl Widget {
 
 fn documentation_preview_class(widget: &str, section: &str) -> &'static str {
     match (widget, section) {
-        ("heatmap", "reference-heatmap-first-day-of-week") => {
-            "site-demo site-demo-centered site-demo-compact-heatmap"
-        }
         ("accordion", "accordion-composed")
         | ("action-icon", "icon-sizes" | "icon-loading")
         | (
@@ -660,15 +656,6 @@ fn documentation_preview_class(widget: &str, section: &str) -> &'static str {
         | ("autocomplete", "autocomplete-control-dropdown-opened-state-demo")
         | ("avatar", "avatar-link")
         | ("badge", "badge-circle" | "badge-sections" | "badge-variants" | "badge-auto-contrast")
-        | (
-            "bullet-chart",
-            "reference-bullet-chart-label"
-            | "reference-bullet-chart-vertical-orientation"
-            | "reference-bullet-chart-bar-color"
-            | "reference-bullet-chart-chart-size"
-            | "reference-bullet-chart-value-formatter"
-            | "reference-bullet-chart-without-target",
-        )
         | ("close-button", "close-custom")
         | ("color-swatch", "swatch-controlled")
         | ("combobox", "combobox-control-dropdown-opened-state-demo")
@@ -700,24 +687,12 @@ fn documentation_preview_class(widget: &str, section: &str) -> &'static str {
             | "reference-date-picker-localization",
         )
         | (
-            "donut-chart",
-            "reference-donut-chart-legend"
-            | "reference-donut-chart-without-tooltip"
-            | "reference-donut-chart-chart-label"
-            | "reference-donut-chart-start-and-end-angle"
-            | "reference-donut-chart-segments-stroke",
-        )
-        | (
             "drawer",
             "drawer-offset"
             | "drawer-backdrop"
             | "drawer-without-header"
             | "drawer-scroll"
             | "drawer-close-icon",
-        )
-        | (
-            "funnel-chart",
-            "reference-funnel-chart-without-tooltip" | "reference-funnel-chart-segments-stroke",
         )
         | ("indicator", "indicator-max-value" | "indicator-zero" | "indicator-contrast")
         | ("loader", "loader-inline")
@@ -753,13 +728,6 @@ fn documentation_preview_class(widget: &str, section: &str) -> &'static str {
         )
         | ("number-formatter", "number-precision" | "number-affixes" | "number-locales")
         | ("phone-input", "phone-input-controlled-demo" | "phone-input-phone-extensions-demo")
-        | (
-            "pie-chart",
-            "reference-pie-chart-legend"
-            | "reference-pie-chart-enable-tooltip"
-            | "reference-pie-chart-start-and-end-angle"
-            | "reference-pie-chart-segments-stroke",
-        )
         | ("popover", "popover-controlled" | "popover-widths" | "popover-nested")
         | ("progress", "progress-vertical")
         | ("scroll-area", "scroll-into-view" | "scroll-popover")
@@ -773,7 +741,6 @@ fn documentation_preview_class(widget: &str, section: &str) -> &'static str {
             | "reference-time-grid-disabled",
         )
         | ("tooltip", "tooltip-multiline")
-        | ("waffle-chart", "reference-waffle-chart-tooltip")
         | (
             "year-picker",
             "reference-year-picker-allow-deselect"
@@ -1090,7 +1057,6 @@ pub fn site_with_state(
                                     route("theme-studio", &theme),
                                     "site-nav-link",
                                 ),
-                                link("Charts", route("area-chart", &theme), "site-nav-link"),
                                 link("Glory", "https://glory.taidge.org/", "site-nav-link"),
                             ))
                     })) as Box<dyn Widget>

@@ -24,35 +24,20 @@ async function pick(page,demo,slug,variant) {
     }, await cells.nth(7).elementHandle());
   }
 }
-async function tooltip(demo) {
-  const plots=demo.locator('.sapid-plot');
-  assert.equal(await plots.count(),2);
-  for(let i=0;i<2;i++) {
-    const plot=plots.nth(i);
-    await plot.locator('.sapid-plot-point').first().hover();
-    const tip=plot.locator('.sapid-plot-tooltip');
-    await tip.waitFor();
-    const text=await tip.textContent();
-    assert.match(text,/USA.*400/);
-    assert.equal(text.includes('India'),i===1);
-    assert.equal(text.includes('Japan'),i===1);
-    assert.equal(text.includes('Other'),i===1);
-  }
-}
 (async()=>{
   const root=outputPath('example-review/range-and-segment-actions');
   fs.mkdirSync(root,{recursive:true});const browser=await chromium.launch();const page=await browser.newPage({viewport:{width:1336,height:980}});
   const rows=[],errors=[];page.on('pageerror',e=>errors.push(String(e)));page.setDefaultTimeout(4500);
   try {
-    for(const slug of [...Object.keys(selectors),'pie-chart','donut-chart','funnel-chart']) {
+    for(const slug of Object.keys(selectors)) {
       await page.goto(base+'/showcase.html?widget='+slug);await page.waitForFunction(()=>window.ready,undefined,{timeout:45000});
-      for(const variant of (selectors[slug]?['single-date-in-range','controlled-date']:['tooltip-data-source'])) {
+      for(const variant of ['single-date-in-range','controlled-date']) {
         const id='reference-'+slug+'-'+variant;
         const demo=page.locator('.site-component-detail').filter({has:page.locator('#'+id)}).locator('.site-demo');
         let row={slug,id};
         try {
           await demo.screenshot({path:path.join(root,id+'-before.png')});
-          if(selectors[slug])await pick(page,demo,slug,variant);else await tooltip(demo);
+          await pick(page,demo,slug,variant);
           await demo.screenshot({path:path.join(root,id+'-after.png')});row.passed=true;
         } catch(e){row.error=String(e);}
         rows.push(row);console.log(id,row.passed||row.error);
