@@ -83,11 +83,11 @@
         },
         {
           "label": "Heatmap/Matrix 数据默认值",
-          "path": "../src/plot_widget.rs#L45"
+          "path": "https://github.com/taidge/sapid/blob/fe7da53987fdb020cb1576b4d21711500594f226/src/plot_widget.rs#L45"
         },
         {
           "label": "MatrixData",
-          "path": "../src/plot_model.rs#L65"
+          "path": "https://github.com/taidge/sapid/blob/fe7da53987fdb020cb1576b4d21711500594f226/src/plot_model.rs#L65"
         }
       ]
     },
