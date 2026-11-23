@@ -6,7 +6,7 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { cases, select, metrics, comparable } = require('./run.cjs');
 test('matrix includes real and unused cases for every optional family', () => {
-  assert.equal(cases.length, 17);
+  assert.equal(cases.length, 15);
   assert.equal(new Set(cases.map(value => value.name)).size, cases.length);
   for (const family of ['code', 'files', 'editor', 'json', 'dates']) {
     assert.deepEqual(select(`${family}-used`)[0].features, [`use-${family}`]);

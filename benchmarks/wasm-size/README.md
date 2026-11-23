@@ -23,8 +23,8 @@ The runner does not copy or redirect build sources and does not alter environmen
 flags. Reports preserve relevant release overrides; comparisons reject different
 toolchains, profile settings, targets, locks, partial baselines or missing cases.
 
-There are 17 cases: empty, Glory text, unused Sapid, Sapid button, six unused and
-six used optional families, and all-unused. Each used family mounts a concrete
+There are 15 cases: empty, Glory text, unused Sapid, Sapid button, five unused and
+five used optional families, and all-unused. Each used family mounts a concrete
 widget. Browser evidence validates the measured WASM/JS hashes before mounting,
 exercises appropriate interaction and verifies DOM cleanup after unmounting.
 
