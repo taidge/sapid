@@ -1,7 +1,7 @@
 # Mantine 全组件 API 与功能差异核实
 
 核实日期：2026-10-25；官方文档版本：9.7.4。
-逐项覆盖 **181 个 Mantine 条目**：121 Core、15 Dates、22 Charts、13 Schedule、8 官方扩展、2 Code。
+逐项覆盖 **159 个 Mantine 条目**：121 Core、15 Dates、13 Schedule、8 官方扩展、2 Code。
 官方来源：[Core 目录](https://mantine.dev/core/package/)、[官方扩展](https://mantine.dev/x/extensions/)、
 [完整文档（包含功能示例和 Props 表）](https://mantine.dev/llms-full.txt)。
 
@@ -11,7 +11,7 @@
 本地公开 Rust 入口、实现和能力矩阵；没有把文件存在、同名方法、近似拼写或 SSR HTML 当成功能验收。
 Props 表包括同页子部件的公开属性；继承的原生 HTML 属性和所有 React 类型重载不一定在表内。
 功能表是经实现核实的差异与设计决策，附录是完整文档表面的可追溯索引；未映射属性是核实候选，不能直接解释为缺失。
-快照记录 4,659 个按文档条目计数的 Props 字段与其类型；不同条目的同名字段重复计数，不是同等数量的缺失功能。
+快照记录 4,136 个按文档条目计数的 Props 字段与其类型；不同条目的同名字段重复计数，不是同等数量的缺失功能。
 历史宿主证据沿用 capability-matrix，新增功能的当前运行证据单列，未逐个重验所有上游功能组合。
 
 Rust 的 Widget、Cage/Bond/Vary、Owner 和有限宿主协议保持不变；不移植 React hooks、任意 DOM/ARIA 注入、
@@ -171,28 +171,6 @@ polymorphic component、任意 Recharts/Tiptap/Embla 插件或全局 provider。
 | [TimeValue](https://mantine.dev/dates/time-value/) | TimeInput/Value：LocalTime、12/24h、分/秒精度、英中有限 locale、响应式真实 placeholder、草稿/边界 | 已补共享宿主 placeholder，并在 showcase 同时展示 24h、英文/中文 12h、秒精度、初值与状态；仍不支持任意 dayjs format、环境 locale 或自动时区，本地墙上时间和瞬时时刻继续分开。 | P2 |
 | [MiniCalendar](https://mantine.dev/dates/mini-calendar/) | Calendar/MiniCalendar：真实42格Grid、CivilDate、受控月份/选择、排除/周起点、week numbers、typed day renderer、full width 与 passive static | 已补公开 DateSelection 投影和激活提议、有限 inline day renderer、全宽百分比网格、无隐藏按钮的静态模式及5组展示；仍不隐式生成无限年份 native select、Calendar 自身多月或任意 locale formatter。DatePicker 已提供最多四列月份；Calendar 保持真实 Grid/TableMetadata 与 roving day controls。 | P2 |
 | [Calendar](https://mantine.dev/dates/calendar/) | Calendar/MiniCalendar：真实42格Grid、CivilDate、受控月份/选择、排除/周起点、week numbers、typed day renderer、full width 与 passive static | 已补公开 DateSelection 投影和激活提议、有限 inline day renderer、全宽百分比网格、无隐藏按钮的静态模式及5组展示；仍不隐式生成无限年份 native select、Calendar 自身多月或任意 locale formatter。DatePicker 已提供最多四列月份；Calendar 保持真实 Grid/TableMetadata 与 roving day controls。 | P2 |
-| [AreaChart](https://mantine.dev/charts/area-chart/) | Area/Line/Bar/Composite：typed 数据/轴/domain/legend/selection、inclusive brush，以及有界 reference area/line/dot 与标签 | 不暴露 Recharts arbitrary props；复杂 tooltip renderer、动画、多轴全部组合和任意 formatter 保留为有限协议边界。reference 几何由 Web/Native 共用，不是页面 SVG 叠加。 | P2 |
-| [BarChart](https://mantine.dev/charts/bar-chart/) | Area/Line/Bar/Composite：typed 数据/轴/domain/legend/selection、inclusive brush，以及有界 reference area/line/dot 与标签 | 不暴露 Recharts arbitrary props；复杂 tooltip renderer、动画、多轴全部组合和任意 formatter 保留为有限协议边界。reference 几何由 Web/Native 共用，不是页面 SVG 叠加。 | P2 |
-| [LineChart](https://mantine.dev/charts/line-chart/) | Area/Line/Bar/Composite：typed 数据/轴/domain/legend/selection、inclusive brush，以及有界 reference area/line/dot 与标签 | 不暴露 Recharts arbitrary props；复杂 tooltip renderer、动画、多轴全部组合和任意 formatter 保留为有限协议边界。reference 几何由 Web/Native 共用，不是页面 SVG 叠加。 | P2 |
-| [CompositeChart](https://mantine.dev/charts/composite-chart/) | Area/Line/Bar/Composite：typed 数据/轴/domain/legend/selection、inclusive brush，以及有界 reference area/line/dot 与标签 | 不暴露 Recharts arbitrary props；复杂 tooltip renderer、动画、多轴全部组合和任意 formatter 保留为有限协议边界。reference 几何由 Web/Native 共用，不是页面 SVG 叠加。 | P2 |
-| [CandlestickChart](https://mantine.dev/charts/candlestick-chart/) | Scatter/Bubble/Candlestick：有界数据、采样、选择 | 缺 brush/多轴/自定义 symbol 与完整 tooltip formatting；采样必须报告源数量，不能默默把全量数据当已绘制。 | P2 |
-| [DonutChart](https://mantine.dev/charts/donut-chart/) | Pie/Donut/Radial：有限 Plot、legend/selection、可访问数据 | 缺任意分段 label renderer/动画/复杂 ring/tooltip；静态图形、数据表与真实选择各有证据，不能靠图形相似推断 API 等价。 | P2 |
-| [PieChart](https://mantine.dev/charts/pie-chart/) | Pie/Donut/Radial：有限 Plot、legend/selection、可访问数据 | 缺任意分段 label renderer/动画/复杂 ring/tooltip；静态图形、数据表与真实选择各有证据，不能靠图形相似推断 API 等价。 | P2 |
-| [FunnelChart](https://mantine.dev/charts/funnel-chart/) | Radar/Funnel/Sparkline：有限 Plot/options 与语义数据 | 缺多 radar 叠加和各类插值/label/tooltip 完整配置；Sparkline 的有限模型不同于任意 Recharts 属性。 | P2 |
-| [RadarChart](https://mantine.dev/charts/radar-chart/) | Radar/Funnel/Sparkline：有限 Plot/options 与语义数据 | 缺多 radar 叠加和各类插值/label/tooltip 完整配置；Sparkline 的有限模型不同于任意 Recharts 属性。 | P2 |
-| [ScatterChart](https://mantine.dev/charts/scatter-chart/) | Scatter/Bubble/Candlestick：有界数据、采样、选择 | 缺 brush/多轴/自定义 symbol 与完整 tooltip formatting；采样必须报告源数量，不能默默把全量数据当已绘制。 | P2 |
-| [BubbleChart](https://mantine.dev/charts/bubble-chart/) | Scatter/Bubble/Candlestick：有界数据、采样、选择 | 缺 brush/多轴/自定义 symbol 与完整 tooltip formatting；采样必须报告源数量，不能默默把全量数据当已绘制。 | P2 |
-| [RadialBarChart](https://mantine.dev/charts/radial-bar-chart/) | Pie/Donut/Radial：有限 Plot、legend/selection、可访问数据 | 缺任意分段 label renderer/动画/复杂 ring/tooltip；静态图形、数据表与真实选择各有证据，不能靠图形相似推断 API 等价。 | P2 |
-| [Sparkline](https://mantine.dev/charts/sparkline/) | Radar/Funnel/Sparkline：有限 Plot/options 与语义数据 | 缺多 radar 叠加和各类插值/label/tooltip 完整配置；Sparkline 的有限模型不同于任意 Recharts 属性。 | P2 |
-| [Heatmap](https://mantine.dev/charts/heatmap/) | Heatmap/Matrix/Waffle：离散数据、色阶与可访问表 | 缺完整日期热图布局、hover renderer、多色 cell shape 和任意动画；需明确 missing value 和有限颜色映射。 | P2 |
-| [BarsList](https://mantine.dev/charts/bars-list/) | BarsList/Bullet/Gauge：有限形状与数据标签 | 缺目标/区间段/动态格式的完整组合；优先 typed thresholds/labels，不能把 progress 换名当 gauge/bullet。 | P2 |
-| [BulletChart](https://mantine.dev/charts/bullet-chart/) | BarsList/Bullet/Gauge：有限形状与数据标签 | 缺目标/区间段/动态格式的完整组合；优先 typed thresholds/labels，不能把 progress 换名当 gauge/bullet。 | P2 |
-| [GaugeChart](https://mantine.dev/charts/gauge-chart/) | BarsList/Bullet/Gauge：有限形状与数据标签 | 缺目标/区间段/动态格式的完整组合；优先 typed thresholds/labels，不能把 progress 换名当 gauge/bullet。 | P2 |
-| [WaffleChart](https://mantine.dev/charts/waffle-chart/) | Heatmap/Matrix/Waffle：离散数据、色阶与可访问表 | 缺完整日期热图布局、hover renderer、多色 cell shape 和任意动画；需明确 missing value 和有限颜色映射。 | P2 |
-| [Treemap](https://mantine.dev/charts/treemap/) | Treemap/Sunburst/Sankey：有界层级/流、导航和数据表 | 缺任意布局算法/节点链接 render/动态图过渡；需先校验层级/环/预算，不能导入任意图形引擎配置。 | P2 |
-| [SunburstChart](https://mantine.dev/charts/sunburst-chart/) | Treemap/Sunburst/Sankey：有界层级/流、导航和数据表 | 缺任意布局算法/节点链接 render/动态图过渡；需先校验层级/环/预算，不能导入任意图形引擎配置。 | P2 |
-| [SankeyChart](https://mantine.dev/charts/sankey-chart/) | Treemap/Sunburst/Sankey：有界层级/流、导航和数据表 | 缺任意布局算法/节点链接 render/动态图过渡；需先校验层级/环/预算，不能导入任意图形引擎配置。 | P2 |
-| [MatrixChart](https://mantine.dev/charts/matrix-chart/) | Heatmap/Matrix/Waffle：离散数据、色阶与可访问表 | 缺完整日期热图布局、hover renderer、多色 cell shape 和任意动画；需明确 missing value 和有限颜色映射。 | P2 |
 | [Schedule](https://mantine.dev/schedule/schedule/) | Schedule/事件/recurrence：有限模型、显式 zone/provider、窗口，以及受控 Day/Week/Month/Year 等统一视图头 | 不暴露任意外部事件/overlap renderer；通用 DnD/resize 属于各实际视图的有限编辑协议，不由统一容器伪造。应用在切换时原子接受 view 与匹配当前窗口。 | P2 |
 | [DayView](https://mantine.dev/schedule/day-view/) | Day/Week：有界时间窗口、真实 Grid、重叠 lane、全天区、精确选择，以及可配 slot height/header/all-day 展示 | 已补与官方示例相对应的时间范围、interval、slot height、全天区、重叠、受控窗口、静态/readonly 和逐页 showcase。任意 React slot/event renderer、浏览器全局外拖与非资源 event resize 不移植；编辑使用资源视图已有的 typed 权限/目标/冲突协议。 | P2 |
 | [MonthView](https://mantine.dev/schedule/month-view/) | Month/Year/MobileMonth：真实有限 Grid、选择/窗口、事件 disclosure，以及 weekday/outside/today/max-events/header 展示选项 | 已补星期标题、月外日期显隐、显式 today、每日预览上限、无 header、week start/locale/RTL 和三个独立 showcase。任意 React 日期/event renderer 与浏览器全局拖拽不移植；日期跳转仍是应用接受精确窗口提议。 | P2 |

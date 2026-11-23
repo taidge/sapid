@@ -6,7 +6,7 @@ const crypto = require('node:crypto');
 const zlib = require('node:zlib');
 const fixture = __dirname;
 const repository = path.resolve(fixture, '../..');
-const families = ['charts', 'code', 'files', 'editor', 'json', 'dates'];
+const families = ['code', 'files', 'editor', 'json', 'dates'];
 const cases = [
   { name: 'empty', features: [] },
   { name: 'glory-text', features: ['base'] },

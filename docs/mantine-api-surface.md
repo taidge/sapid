@@ -17,9 +17,9 @@
 
 **本地实现：** [src/app_shell.rs](../src/app_shell.rs)
 
-**本地公开入口（同族）：** `app_shell`, `breakpoint`, `class`, `collapsed`, `content`, `default_collapsed`, `default_mobile_open`, `drawer_ref`, `footer`, `header`, `initial_width`, `layout`, `main`, `main_ref`, `mobile`, `mobile_open`, `name`, `nav_ref`, `new`, `node_ref`, `observe_width`, `on`, `on_collapsed_change`, `on_mobile_open_change`, `on_width_change`, `open`, `rail_width`, `set_collapsed`, `set_open`, `sidebar`, `size`, `skip_label`, `style`, `theme`, `toggle`, `unstyled`, `width`
+**本地公开入口（同族）：** `app_shell`, `aside`, `aside_style`, `aside_visible`, `aside_width`, `body_style`, `breakpoint`, `class`, `collapsed`, `content`, `default_collapsed`, `default_mobile_open`, `drawer_ref`, `fill`, `footer`, `footer_style`, `footer_visible`, `grow`, `header`, `header_style`, `header_visible`, `initial_width`, `layout`, `main`, `main_ref`, `main_scrollable`, `main_style`, `mobile`, `mobile_open`, `name`, `nav_ref`, `new`, `node_ref`, `observe_width`, `on`, `on_collapsed_change`, `on_mobile_open_change`, `on_width_change`, `open`, `rail_width`, `scrollable`, `set_collapsed`, `set_open`, `shell_section`, `sidebar`, `size`, `skip_label`, `style`, `theme`, `toggle`, `unstyled`, `viewport`, `width`, `with_border`
 
-**需要语义映射的属性候选：** `aside`, `disabled`, `grow`, `mode`, `navbar`, `offsetScrollbars`, `padding`, `resize`, `transitionDuration`, `transitionTimingFunction`, `withBorder`, `zIndex`
+**需要语义映射的属性候选：** `disabled`, `mode`, `navbar`, `offsetScrollbars`, `padding`, `resize`, `transitionDuration`, `transitionTimingFunction`, `zIndex`
 
 ### AspectRatio — M:AspectRatio
 
@@ -45,7 +45,7 @@
 
 **本地实现：** [../glory/crates/style/src/lib.rs](../../glory/crates/style/src/lib.rs)、[src/layout.rs](../src/layout.rs)、[src/responsive.rs](../src/responsive.rs)
 
-**本地公开入口（同族）：** `align`, `aspect_ratio`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `box_shadow`, `breakpoint`, `breakpoints`, `class`, `container`, `content`, `context_ref`, `direction`, `display`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `fluid`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inline`, `is_finite`, `justify`, `left`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `pending_queries`, `pointer_events`, `position`, `radius`, `resolve`, `responsive_root`, `right`, `scroll_anchor`, `select`, `size`, `style`, `styles`, `text_gradient`, `text_overflow`, `theme`, `thresholds`, `top`, `unstyled`, `validate`, `white_space`, `width`, `wrap`
+**本地公开入口（同族）：** `align`, `aspect_ratio`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `box_shadow`, `breakpoint`, `breakpoints`, `caption_side`, `class`, `container`, `content`, `context_ref`, `direction`, `display`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `fluid`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inline`, `is_finite`, `justify`, `left`, `letter_spacing`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `pending_queries`, `pointer_events`, `position`, `radius`, `resolve`, `responsive_root`, `right`, `scroll_anchor`, `select`, `size`, `style`, `styles`, `text_gradient`, `text_overflow`, `theme`, `thresholds`, `top`, `unstyled`, `validate`, `white_space`, `width`, `wrap`
 
 **需要语义映射的属性候选：** `children`
 
@@ -59,7 +59,7 @@
 
 **本地实现：** [../glory/crates/style/src/lib.rs](../../glory/crates/style/src/lib.rs)、[src/layout.rs](../src/layout.rs)、[src/responsive.rs](../src/responsive.rs)
 
-**本地公开入口（同族）：** `align`, `aspect_ratio`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `box_shadow`, `breakpoint`, `breakpoints`, `class`, `container`, `content`, `context_ref`, `direction`, `display`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `fluid`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inline`, `is_finite`, `justify`, `left`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `pending_queries`, `pointer_events`, `position`, `radius`, `resolve`, `responsive_root`, `right`, `scroll_anchor`, `select`, `size`, `style`, `styles`, `text_gradient`, `text_overflow`, `theme`, `thresholds`, `top`, `unstyled`, `validate`, `white_space`, `width`, `wrap`
+**本地公开入口（同族）：** `align`, `aspect_ratio`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `box_shadow`, `breakpoint`, `breakpoints`, `caption_side`, `class`, `container`, `content`, `context_ref`, `direction`, `display`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `fluid`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inline`, `is_finite`, `justify`, `left`, `letter_spacing`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `pending_queries`, `pointer_events`, `position`, `radius`, `resolve`, `responsive_root`, `right`, `scroll_anchor`, `select`, `size`, `style`, `styles`, `text_gradient`, `text_overflow`, `theme`, `thresholds`, `top`, `unstyled`, `validate`, `white_space`, `width`, `wrap`
 
 **需要语义映射的属性候选：** `strategy`
 
@@ -73,7 +73,7 @@
 
 **本地实现：** [../glory/crates/style/src/lib.rs](../../glory/crates/style/src/lib.rs)、[src/layout.rs](../src/layout.rs)
 
-**本地公开入口（同族）：** `align`, `aspect_ratio`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `box_shadow`, `class`, `container`, `direction`, `display`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `fluid`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inline`, `is_finite`, `justify`, `left`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `pointer_events`, `position`, `radius`, `right`, `scroll_anchor`, `size`, `style`, `text_gradient`, `text_overflow`, `theme`, `top`, `unstyled`, `validate`, `white_space`, `width`, `wrap`
+**本地公开入口（同族）：** `align`, `aspect_ratio`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `box_shadow`, `caption_side`, `class`, `container`, `direction`, `display`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `fluid`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inline`, `is_finite`, `justify`, `left`, `letter_spacing`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `pointer_events`, `position`, `radius`, `right`, `scroll_anchor`, `size`, `style`, `text_gradient`, `text_overflow`, `theme`, `top`, `unstyled`, `validate`, `white_space`, `width`, `wrap`
 
 **需要语义映射的属性候选：** `columnGap`, `rowGap`
 
@@ -101,7 +101,7 @@
 
 **本地实现：** [../glory/crates/style/src/lib.rs](../../glory/crates/style/src/lib.rs)、[src/layout.rs](../src/layout.rs)
 
-**本地公开入口（同族）：** `align`, `aspect_ratio`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `box_shadow`, `class`, `container`, `direction`, `display`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `fluid`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inline`, `is_finite`, `justify`, `left`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `pointer_events`, `position`, `radius`, `right`, `scroll_anchor`, `size`, `style`, `text_gradient`, `text_overflow`, `theme`, `top`, `unstyled`, `validate`, `white_space`, `width`, `wrap`
+**本地公开入口（同族）：** `align`, `aspect_ratio`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `box_shadow`, `caption_side`, `class`, `container`, `direction`, `display`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `fluid`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inline`, `is_finite`, `justify`, `left`, `letter_spacing`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `pointer_events`, `position`, `radius`, `right`, `scroll_anchor`, `size`, `style`, `text_gradient`, `text_overflow`, `theme`, `top`, `unstyled`, `validate`, `white_space`, `width`, `wrap`
 
 **需要语义映射的属性候选：** `grow`, `preventGrowOverflow`
 
@@ -129,7 +129,7 @@
 
 **本地实现：** [../glory/crates/style/src/lib.rs](../../glory/crates/style/src/lib.rs)、[src/layout.rs](../src/layout.rs)、[src/responsive.rs](../src/responsive.rs)
 
-**本地公开入口（同族）：** `align`, `aspect_ratio`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `box_shadow`, `breakpoint`, `breakpoints`, `class`, `container`, `content`, `context_ref`, `direction`, `display`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `fluid`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inline`, `is_finite`, `justify`, `left`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `pending_queries`, `pointer_events`, `position`, `radius`, `resolve`, `responsive_root`, `right`, `scroll_anchor`, `select`, `size`, `style`, `styles`, `text_gradient`, `text_overflow`, `theme`, `thresholds`, `top`, `unstyled`, `validate`, `white_space`, `width`, `wrap`
+**本地公开入口（同族）：** `align`, `aspect_ratio`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `box_shadow`, `breakpoint`, `breakpoints`, `caption_side`, `class`, `container`, `content`, `context_ref`, `direction`, `display`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `fluid`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inline`, `is_finite`, `justify`, `left`, `letter_spacing`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `pending_queries`, `pointer_events`, `position`, `radius`, `resolve`, `responsive_root`, `right`, `scroll_anchor`, `select`, `size`, `style`, `styles`, `text_gradient`, `text_overflow`, `theme`, `thresholds`, `top`, `unstyled`, `validate`, `white_space`, `width`, `wrap`
 
 **需要语义映射的属性候选：** 无直接拼写候选；仍不推断功能等价。
 
@@ -157,7 +157,7 @@
 
 **本地实现：** [../glory/crates/style/src/lib.rs](../../glory/crates/style/src/lib.rs)、[src/layout.rs](../src/layout.rs)
 
-**本地公开入口（同族）：** `align`, `aspect_ratio`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `box_shadow`, `class`, `container`, `direction`, `display`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `fluid`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inline`, `is_finite`, `justify`, `left`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `pointer_events`, `position`, `radius`, `right`, `scroll_anchor`, `size`, `style`, `text_gradient`, `text_overflow`, `theme`, `top`, `unstyled`, `validate`, `white_space`, `width`, `wrap`
+**本地公开入口（同族）：** `align`, `aspect_ratio`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `box_shadow`, `caption_side`, `class`, `container`, `direction`, `display`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `fluid`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inline`, `is_finite`, `justify`, `left`, `letter_spacing`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `pointer_events`, `position`, `radius`, `right`, `scroll_anchor`, `size`, `style`, `text_gradient`, `text_overflow`, `theme`, `top`, `unstyled`, `validate`, `white_space`, `width`, `wrap`
 
 **需要语义映射的属性候选：** 无直接拼写候选；仍不推断功能等价。
 
@@ -171,7 +171,7 @@
 
 **本地实现：** [src/color_model.rs](../src/color_model.rs)、[src/color_slider.rs](../src/color_slider.rs)、[src/slider/mod.rs](../src/slider/mod.rs)
 
-**本地公开入口（同族）：** `alpha_slider`, `class`, `color`, `default_value`, `direction`, `enabled`, `field`, `format_color`, `format_hex_color`, `from_rgba`, `hidden`, `hue_slider`, `invalid`, `marks`, `max`, `min`, `name`, `new`, `node_ref`, `on`, `on_value_change`, `on_value_commit`, `orientation`, `page_step`, `parse_color`, `parse_hex_color`, `readonly`, `required`, `restrict_to_marks`, `size`, `slider`, `step`, `style`, `theme`, `to_rgba`, `unlabeled`, `unstyled`, `validate`, `value`, `value_text`
+**本地公开入口（同族）：** `alpha_slider`, `class`, `color`, `default_value`, `direction`, `enabled`, `field`, `format_color`, `format_hex_color`, `from_rgba`, `hidden`, `hue_slider`, `invalid`, `marks`, `max`, `min`, `name`, `new`, `node_ref`, `on`, `on_value_change`, `on_value_commit`, `orientation`, `page_step`, `parse_color`, `parse_hex_color`, `readonly`, `required`, `restrict_to_marks`, `size`, `slider`, `step`, `style`, `theme`, `thumb_size`, `to_rgba`, `unlabeled`, `unstyled`, `validate`, `value`, `value_text`
 
 **需要语义映射的属性候选：** `focusable`, `onChange`, `onChangeEnd`, `onScrubEnd`, `onScrubStart`
 
@@ -185,9 +185,9 @@
 
 **本地实现：** [src/angle_slider.rs](../src/angle_slider.rs)、[src/slider/mapping.rs](../src/slider/mapping.rs)、[src/slider/mod.rs](../src/slider/mod.rs)
 
-**本地公开入口（同族）：** `angle_slider`, `class`, `default_value`, `direction`, `enabled`, `field`, `hidden`, `invalid`, `key`, `marks`, `max`, `min`, `name`, `new`, `node_ref`, `on`, `on_value_change`, `on_value_commit`, `orientation`, `page_step`, `point`, `readonly`, `required`, `restrict_to_marks`, `retains_increment`, `size`, `slider`, `step`, `style`, `theme`, `unlabeled`, `unstyled`, `validate`, `value`, `value_text`
+**本地公开入口（同族）：** `angle_slider`, `class`, `default_value`, `direction`, `enabled`, `field`, `hidden`, `invalid`, `key`, `marks`, `max`, `min`, `name`, `new`, `node_ref`, `on`, `on_value_change`, `on_value_commit`, `orientation`, `page_step`, `point`, `readonly`, `required`, `restrict_to_marks`, `retains_increment`, `size`, `slider`, `step`, `style`, `theme`, `thumb_size`, `unlabeled`, `unstyled`, `validate`, `value`, `value_text`
 
-**需要语义映射的属性候选：** `disabled`, `formatLabel`, `hiddenInputProps`, `onChange`, `onChangeEnd`, `onScrubEnd`, `onScrubStart`, `thumbSize`, `withLabel`
+**需要语义映射的属性候选：** `disabled`, `formatLabel`, `hiddenInputProps`, `onChange`, `onChangeEnd`, `onScrubEnd`, `onScrubStart`, `withLabel`
 
 ### Checkbox — M:Checkbox
 
@@ -213,7 +213,7 @@
 
 **本地实现：** [src/chip.rs](../src/chip.rs)
 
-**本地公开入口（同族）：** `checked`, `chip`, `chip_group`, `chip_item`, `class`, `default_checked`, `default_value`, `default_values`, `enabled`, `field`, `focus`, `invalid`, `item`, `items`, `label`, `mode`, `name`, `node_ref`, `on`, `on_checked_change`, `on_value_change`, `on_values_change`, `readonly`, `required`, `size`, `style`, `theme`, `unstyled`, `value`, `values`
+**本地公开入口（同族）：** `checked`, `chip`, `chip_group`, `chip_item`, `class`, `default_checked`, `default_value`, `default_values`, `enabled`, `field`, `focus`, `invalid`, `item`, `items`, `label`, `max_values`, `mode`, `name`, `node_ref`, `on`, `on_checked_change`, `on_value_change`, `on_values_change`, `readonly`, `required`, `size`, `style`, `theme`, `unstyled`, `value`, `values`
 
 **需要语义映射的属性候选：** `autoContrast`, `children`, `color`, `icon`, `id`, `multiple`, `onChange`, `radius`, `rootRef`, `type`, `wrapperProps`
 
@@ -227,7 +227,7 @@
 
 **本地实现：** [../glory/crates/render/src/drag.rs](../../glory/crates/render/src/drag.rs)、[src/color_input.rs](../src/color_input.rs)、[src/color_picker/mod.rs](../src/color_picker/mod.rs)、[src/color_picker/pad.rs](../src/color_picker/pad.rs)
 
-**本地公开入口（同族）：** `alpha_label`, `as_str`, `brightness_label`, `class`, `close_on_color_swatch_click`, `color_input`, `color_picker`, `default_open`, `default_value`, `direction`, `disallow_input`, `enabled`, `event`, `eye_dropper`, `eye_dropper_icon`, `eye_dropper_label`, `field`, `fix_on_blur`, `form_format`, `form_name`, `format`, `full_width`, `hue_label`, `invalid`, `left_section`, `loading`, `loading_position`, `name`, `new`, `node_ref`, `on`, `on_commit`, `on_eye_dropper_error`, `on_open_change`, `on_validation`, `on_value_change`, `on_value_commit`, `open`, `plane_size`, `readonly`, `required`, `right_section`, `saturation_label`, `show_alpha`, `show_picker`, `show_precision_sliders`, `size`, `style`, `success`, `swatches`, `swatches_per_row`, `theme`, `unstyled`, `value`, `with_preview`
+**本地公开入口（同族）：** `alpha_label`, `as_str`, `brightness_label`, `class`, `close_on_color_swatch_click`, `color_input`, `color_picker`, `default_open`, `default_value`, `direction`, `disallow_input`, `enabled`, `event`, `eye_dropper`, `eye_dropper_icon`, `eye_dropper_label`, `field`, `fix_on_blur`, `form_format`, `form_name`, `format`, `full_width`, `hue_label`, `invalid`, `is_threshold`, `left_section`, `loading`, `loading_position`, `name`, `new`, `node_ref`, `on`, `on_commit`, `on_eye_dropper_error`, `on_open_change`, `on_validation`, `on_value_change`, `on_value_commit`, `open`, `placeholder`, `plane_height`, `plane_size`, `readonly`, `required`, `right_section`, `saturation_label`, `show_alpha`, `show_picker`, `show_precision_sliders`, `size`, `style`, `success`, `swatches`, `swatches_per_row`, `theme`, `unstyled`, `value`, `with_preview`
 
 **需要语义映射的属性候选：** `description`, `descriptionProps`, `disabled`, `error`, `errorProps`, `eyeDropperButtonProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `onChange`, `onChangeEnd`, `pointer`, `popoverProps`, `radius`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `successProps`, `withAsterisk`, `withErrorStyles`, `withEyeDropper`, `withPicker`, `withSuccessStyles`, `wrapperProps`
 
@@ -241,7 +241,7 @@
 
 **本地实现：** [../glory/crates/render/src/drag.rs](../../glory/crates/render/src/drag.rs)、[src/color_input.rs](../src/color_input.rs)、[src/color_picker/mod.rs](../src/color_picker/mod.rs)、[src/color_picker/pad.rs](../src/color_picker/pad.rs)
 
-**本地公开入口（同族）：** `alpha_label`, `as_str`, `brightness_label`, `class`, `close_on_color_swatch_click`, `color_input`, `color_picker`, `default_open`, `default_value`, `direction`, `disallow_input`, `enabled`, `event`, `eye_dropper`, `eye_dropper_icon`, `eye_dropper_label`, `field`, `fix_on_blur`, `form_format`, `form_name`, `format`, `full_width`, `hue_label`, `invalid`, `left_section`, `loading`, `loading_position`, `name`, `new`, `node_ref`, `on`, `on_commit`, `on_eye_dropper_error`, `on_open_change`, `on_validation`, `on_value_change`, `on_value_commit`, `open`, `plane_size`, `readonly`, `required`, `right_section`, `saturation_label`, `show_alpha`, `show_picker`, `show_precision_sliders`, `size`, `style`, `success`, `swatches`, `swatches_per_row`, `theme`, `unstyled`, `value`, `with_preview`
+**本地公开入口（同族）：** `alpha_label`, `as_str`, `brightness_label`, `class`, `close_on_color_swatch_click`, `color_input`, `color_picker`, `default_open`, `default_value`, `direction`, `disallow_input`, `enabled`, `event`, `eye_dropper`, `eye_dropper_icon`, `eye_dropper_label`, `field`, `fix_on_blur`, `form_format`, `form_name`, `format`, `full_width`, `hue_label`, `invalid`, `is_threshold`, `left_section`, `loading`, `loading_position`, `name`, `new`, `node_ref`, `on`, `on_commit`, `on_eye_dropper_error`, `on_open_change`, `on_validation`, `on_value_change`, `on_value_commit`, `open`, `placeholder`, `plane_height`, `plane_size`, `readonly`, `required`, `right_section`, `saturation_label`, `show_alpha`, `show_picker`, `show_precision_sliders`, `size`, `style`, `success`, `swatches`, `swatches_per_row`, `theme`, `unstyled`, `value`, `with_preview`
 
 **需要语义映射的属性候选：** `focusable`, `hiddenInputProps`, `onChange`, `onChangeEnd`, `onColorSwatchClick`, `withPicker`
 
@@ -255,7 +255,7 @@
 
 **本地实现：** [../glory/crates/apace/src/accessibility.rs](../../glory/crates/apace/src/accessibility.rs)、[../glory/crates/apace/src/shell.rs](../../glory/crates/apace/src/shell.rs)、[../glory/crates/html/src/semantics.rs](../../glory/crates/html/src/semantics.rs)、[../glory/crates/render/src/semantics.rs](../../glory/crates/render/src/semantics.rs)、[../glory/crates/web/src/browser/events.rs](../../glory/crates/web/src/browser/events.rs)、[src/checkbox.rs](../src/checkbox.rs)、[src/field.rs](../src/field.rs)、[src/text_field.rs](../src/text_field.rs)
 
-**本地公开入口（同族）：** `add_window`, `android`, `app`, `as_str`, `attach_router`, `checkbox`, `checked`, `class`, `content`, `control`, `default_checked`, `default_value`, `description`, `disabled`, `enabled`, `error`, `field`, `field_description`, `field_error`, `fieldset`, `fill`, `focus`, `form_name`, `form_value`, `frames`, `from_event_loop`, `handle_native_file_event`, `invalid`, `key`, `key_with_direction`, `label`, `left_section`, `left_section_width`, `legend`, `loading`, `loading_position`, `mount`, `mount_with`, `multiline`, `name`, `new`, `node_ref`, `observe`, `on`, `on_checked_change`, `on_commit`, `on_value_change`, `order`, `placeholder`, `purpose`, `queue_navigation`, `readonly`, `renderer`, `request_size`, `required`, `right_section`, `right_section_width`, `run`, `size`, `style`, `success`, `take_event_loop`, `take_navigation_result`, `text_field`, `theme`, `unstyled`, `value`, `window_stats`, `with_config`, `with_limit`, `with_options`, `with_task_limit`
+**本地公开入口（同族）：** `add_window`, `android`, `app`, `as_str`, `attach_router`, `bottom_section`, `checkbox`, `checked`, `class`, `content`, `control`, `default_checked`, `default_value`, `description`, `disabled`, `enabled`, `error`, `field`, `field_description`, `field_error`, `fieldset`, `fill`, `focus`, `form_name`, `form_value`, `from_event_loop`, `handle_native_file_event`, `invalid`, `key`, `key_with_direction`, `label`, `left_section`, `left_section_width`, `legend`, `loading`, `loading_position`, `mount`, `mount_with`, `multiline`, `name`, `new`, `node_ref`, `observe`, `on`, `on_checked_change`, `on_commit`, `on_value_change`, `order`, `placeholder`, `purpose`, `queue_navigation`, `readonly`, `renderer`, `request_size`, `required`, `right_section`, `right_section_width`, `run`, `size`, `style`, `success`, `take_event_loop`, `take_navigation_result`, `text_field`, `theme`, `unstyled`, `value`, `window_stats`, `with_asterisk`, `with_config`, `with_options`, `with_task_limit`
 
 **需要语义映射的属性候选：** `radius`
 
@@ -269,9 +269,9 @@
 
 **本地实现：** [../glory/crates/render/src/files.rs](../../glory/crates/render/src/files.rs)、[../glory/crates/web/src/browser/files.rs](../../glory/crates/web/src/browser/files.rs)、[src/files.rs](../src/files.rs)
 
-**本地公开入口（同族）：** `attachment`, `class`, `clear`, `configuration`, `controller_ref`, `description`, `dropzone`, `enabled`, `file_attachment`, `file_button`, `file_input`, `files`, `files_ref`, `focus`, `label`, `matches`, `name`, `native_source`, `new`, `node_ref`, `on`, `on_files`, `on_result`, `preview`, `preview_in`, `previews`, `read`, `read_in`, `remove`, `size`, `status`, `status_ref`, `style`, `text`, `theme`, `unstyled`, `validate`, `validate_file`, `validate_files`, `validate_node`, `validate_read`, `validate_update`, `value`
+**本地公开入口（同族）：** `attachment`, `class`, `clear`, `clearable`, `configuration`, `controller_ref`, `description`, `dropzone`, `enabled`, `field`, `file_attachment`, `file_button`, `file_input`, `files`, `files_ref`, `focus`, `label`, `loading`, `matches`, `name`, `native_source`, `new`, `node_ref`, `on`, `on_files`, `on_result`, `open_picker`, `preview`, `preview_in`, `previews`, `read`, `read_in`, `remove`, `show_attachments`, `size`, `status`, `status_ref`, `style`, `text`, `theme`, `unstyled`, `validate`, `validate_file`, `validate_files`, `validate_node`, `validate_read`, `validate_update`, `value`
 
-**需要语义映射的属性候选：** `accept`, `capture`, `clearButtonProps`, `clearSectionMode`, `clearable`, `defaultValue`, `descriptionProps`, `disabled`, `error`, `errorProps`, `fileInputProps`, `form`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `multiple`, `onChange`, `placeholder`, `pointer`, `radius`, `readOnly`, `required`, `resetRef`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `success`, `successProps`, `valueComponent`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
+**需要语义映射的属性候选：** `accept`, `capture`, `clearButtonProps`, `clearSectionMode`, `defaultValue`, `descriptionProps`, `disabled`, `error`, `errorProps`, `fileInputProps`, `form`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loadingPosition`, `multiple`, `onChange`, `placeholder`, `pointer`, `radius`, `readOnly`, `required`, `resetRef`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `success`, `successProps`, `valueComponent`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
 
 ### HueSlider — M:HueSlider
 
@@ -283,7 +283,7 @@
 
 **本地实现：** [src/color_model.rs](../src/color_model.rs)、[src/color_slider.rs](../src/color_slider.rs)、[src/slider/mod.rs](../src/slider/mod.rs)
 
-**本地公开入口（同族）：** `alpha_slider`, `class`, `color`, `default_value`, `direction`, `enabled`, `field`, `format_color`, `format_hex_color`, `from_rgba`, `hidden`, `hue_slider`, `invalid`, `marks`, `max`, `min`, `name`, `new`, `node_ref`, `on`, `on_value_change`, `on_value_commit`, `orientation`, `page_step`, `parse_color`, `parse_hex_color`, `readonly`, `required`, `restrict_to_marks`, `size`, `slider`, `step`, `style`, `theme`, `to_rgba`, `unlabeled`, `unstyled`, `validate`, `value`, `value_text`
+**本地公开入口（同族）：** `alpha_slider`, `class`, `color`, `default_value`, `direction`, `enabled`, `field`, `format_color`, `format_hex_color`, `from_rgba`, `hidden`, `hue_slider`, `invalid`, `marks`, `max`, `min`, `name`, `new`, `node_ref`, `on`, `on_value_change`, `on_value_commit`, `orientation`, `page_step`, `parse_color`, `parse_hex_color`, `readonly`, `required`, `restrict_to_marks`, `size`, `slider`, `step`, `style`, `theme`, `thumb_size`, `to_rgba`, `unlabeled`, `unstyled`, `validate`, `value`, `value_text`
 
 **需要语义映射的属性候选：** `focusable`, `onChange`, `onChangeEnd`, `onScrubEnd`, `onScrubStart`
 
@@ -297,9 +297,9 @@
 
 **本地实现：** [../glory/crates/apace/src/accessibility.rs](../../glory/crates/apace/src/accessibility.rs)、[../glory/crates/apace/src/shell.rs](../../glory/crates/apace/src/shell.rs)、[../glory/crates/html/src/semantics.rs](../../glory/crates/html/src/semantics.rs)、[../glory/crates/render/src/semantics.rs](../../glory/crates/render/src/semantics.rs)、[../glory/crates/web/src/browser/events.rs](../../glory/crates/web/src/browser/events.rs)、[src/checkbox.rs](../src/checkbox.rs)、[src/field.rs](../src/field.rs)、[src/text_field.rs](../src/text_field.rs)
 
-**本地公开入口（同族）：** `add_window`, `android`, `app`, `as_str`, `attach_router`, `checkbox`, `checked`, `class`, `content`, `control`, `default_checked`, `default_value`, `description`, `disabled`, `enabled`, `error`, `field`, `field_description`, `field_error`, `fieldset`, `fill`, `focus`, `form_name`, `form_value`, `frames`, `from_event_loop`, `handle_native_file_event`, `invalid`, `key`, `key_with_direction`, `label`, `left_section`, `left_section_width`, `legend`, `loading`, `loading_position`, `mount`, `mount_with`, `multiline`, `name`, `new`, `node_ref`, `observe`, `on`, `on_checked_change`, `on_commit`, `on_value_change`, `order`, `placeholder`, `purpose`, `queue_navigation`, `readonly`, `renderer`, `request_size`, `required`, `right_section`, `right_section_width`, `run`, `size`, `style`, `success`, `take_event_loop`, `take_navigation_result`, `text_field`, `theme`, `unstyled`, `value`, `window_stats`, `with_config`, `with_limit`, `with_options`, `with_task_limit`
+**本地公开入口（同族）：** `add_window`, `android`, `app`, `as_str`, `attach_router`, `bottom_section`, `checkbox`, `checked`, `class`, `content`, `control`, `default_checked`, `default_value`, `description`, `disabled`, `enabled`, `error`, `field`, `field_description`, `field_error`, `fieldset`, `fill`, `focus`, `form_name`, `form_value`, `from_event_loop`, `handle_native_file_event`, `invalid`, `key`, `key_with_direction`, `label`, `left_section`, `left_section_width`, `legend`, `loading`, `loading_position`, `mount`, `mount_with`, `multiline`, `name`, `new`, `node_ref`, `observe`, `on`, `on_checked_change`, `on_commit`, `on_value_change`, `order`, `placeholder`, `purpose`, `queue_navigation`, `readonly`, `renderer`, `request_size`, `required`, `right_section`, `right_section_width`, `run`, `size`, `style`, `success`, `take_event_loop`, `take_navigation_result`, `text_field`, `theme`, `unstyled`, `value`, `window_stats`, `with_asterisk`, `with_config`, `with_options`, `with_task_limit`
 
-**需要语义映射的属性候选：** `descriptionProps`, `errorProps`, `id`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `labelElement`, `labelProps`, `leftSectionPointerEvents`, `leftSectionProps`, `pointer`, `radius`, `rightSectionPointerEvents`, `rightSectionProps`, `rootRef`, `successProps`, `withAria`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
+**需要语义映射的属性候选：** `descriptionProps`, `errorProps`, `id`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `labelElement`, `labelProps`, `leftSectionPointerEvents`, `leftSectionProps`, `pointer`, `radius`, `rightSectionPointerEvents`, `rightSectionProps`, `rootRef`, `successProps`, `withAria`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
 
 ### JsonInput — M:JsonInput
 
@@ -311,9 +311,9 @@
 
 **本地实现：** [src/json_input.rs](../src/json_input.rs)、[src/json_model.rs](../src/json_model.rs)
 
-**本地公开入口（同族）：** `announce_errors`, `class`, `default_value`, `enabled`, `field`, `format`, `format_json`, `format_label`, `invalid`, `json_input`, `limits`, `name`, `node_ref`, `on`, `on_commit`, `on_format`, `on_format_error`, `on_validation`, `on_value_change`, `placeholder`, `readonly`, `required`, `rows`, `show_formatter`, `size`, `style`, `theme`, `unstyled`, `validate`, `validate_json`, `value`
+**本地公开入口（同族）：** `announce_errors`, `autosize`, `class`, `default_value`, `enabled`, `field`, `format`, `format_json`, `format_label`, `format_on_blur`, `invalid`, `json_input`, `limits`, `loading`, `name`, `node_ref`, `on`, `on_commit`, `on_format`, `on_format_error`, `on_validation`, `on_value_change`, `placeholder`, `readonly`, `required`, `rows`, `show_formatter`, `size`, `style`, `theme`, `unstyled`, `validate`, `validate_json`, `value`
 
-**需要语义映射的属性候选：** `autosize`, `bottomSection`, `bottomSectionProps`, `description`, `descriptionProps`, `deserialize`, `disabled`, `error`, `errorProps`, `formatOnBlur`, `indentSpaces`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `maxRows`, `minRows`, `onChange`, `pointer`, `radius`, `resize`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `serialize`, `success`, `successProps`, `validationError`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
+**需要语义映射的属性候选：** `bottomSection`, `bottomSectionProps`, `description`, `descriptionProps`, `deserialize`, `disabled`, `error`, `errorProps`, `indentSpaces`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loadingPosition`, `maxRows`, `minRows`, `onChange`, `pointer`, `radius`, `resize`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `serialize`, `success`, `successProps`, `validationError`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
 
 ### MaskInput — M:MaskInput
 
@@ -323,15 +323,15 @@
 
 **官方功能章节：** Usage；Dynamic mask；Custom tokens；Regex array format；Transform；Disabled state；Error state；Success state；Reset value；With use-form；Mask pattern syntax
 
-**本地实现：** [../glory/crates/render/src/input_edit.rs](../../glory/crates/render/src/input_edit.rs)、[../glory/crates/render/src/text_selection.rs](../../glory/crates/render/src/text_selection.rs)、[../glory/crates/web/src/browser/input_edit.rs](../../glory/crates/web/src/browser/input_edit.rs)、[src/mask_input.rs](../src/mask_input.rs)、[src/mask_model.rs](../src/mask_model.rs)
+**本地实现：** [../glory/crates/render/src/input_edit.rs](../../glory/crates/render/src/input_edit.rs)、[../glory/crates/render/src/text_selection.rs](../../glory/crates/render/src/text_selection.rs)、[../glory/crates/web/src/browser/input_edit.rs](../../glory/crates/web/src/browser/input_edit.rs)、[src/mask_input.rs](../src/mask_input.rs)、[src/mask_model.rs](../src/mask_model.rs)、[src/phone_input.rs](../src/phone_input.rs)
 
-**本地公开入口（同族）：** `apply`, `as_str`, `byte_range`, `capacity`, `class`, `default_value`, `display`, `display_index`, `enabled`, `field`, `focus`, `form_name`, `format`, `invalid`, `mask_input`, `name`, `new`, `node_ref`, `on`, `on_commit`, `on_reject`, `on_value_change`, `parse`, `parse_display`, `raw`, `raw_index`, `readonly`, `required`, `revision`, `size`, `style`, `theme`, `unstyled`, `validate`, `validate_raw`, `value`
+**本地公开入口（同族）：** `apply`, `as_str`, `byte_range`, `capacity`, `class`, `country_label`, `default_region_open`, `default_value`, `display`, `display_index`, `e164`, `editor_style`, `enabled`, `field`, `focus`, `form_name`, `format`, `invalid`, `label`, `loading`, `mask_input`, `name`, `new`, `node_ref`, `on`, `on_commit`, `on_reject`, `on_value_change`, `parse`, `parse_display`, `phone_input`, `placeholder`, `raw`, `raw_index`, `readonly`, `regions`, `required`, `revision`, `rfc3966`, `searchable_region`, `size`, `style`, `theme`, `unstyled`, `validate`, `validate_raw`, `value`
 
-**需要语义映射的属性候选：** `alwaysShowMask`, `autoClear`, `beforeMaskedStateChange`, `description`, `descriptionProps`, `disabled`, `error`, `errorProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `mask`, `modify`, `onChangeRaw`, `onComplete`, `pointer`, `radius`, `resetRef`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `separate`, `showMaskOnFocus`, `slotChar`, `success`, `successProps`, `tokens`, `transform`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
+**需要语义映射的属性候选：** `alwaysShowMask`, `autoClear`, `beforeMaskedStateChange`, `description`, `descriptionProps`, `disabled`, `error`, `errorProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loadingPosition`, `mask`, `modify`, `onChangeRaw`, `onComplete`, `pointer`, `radius`, `resetRef`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `separate`, `showMaskOnFocus`, `slotChar`, `success`, `successProps`, `tokens`, `transform`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
 
 ### NativeSelect — M:NativeSelect
 
-来源：[@mantine/core](https://mantine.dev/core/native-select/)；对应 `P4-04`；原生有限能力状态 `model-only`。
+来源：[@mantine/core](https://mantine.dev/core/native-select/)；对应 `P4-04`；原生有限能力状态 `tested`。
 
 **官方 Props / 子部件 Props：** `data`, `description`, `descriptionProps`, `disabled`, `error`, `errorProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `radius`, `required`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `size`, `success`, `successProps`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
 
@@ -339,9 +339,9 @@
 
 **本地实现：** [../glory/crates/render/src/select.rs](../../glory/crates/render/src/select.rs)、[src/native_select.rs](../src/native_select.rs)
 
-**本地公开入口（同族）：** `class`, `default_value`, `default_values`, `disabled`, `enabled`, `field`, `focus`, `form_name`, `group`, `invalid`, `label`, `multiple`, `name`, `native_select`, `node_ref`, `on`, `on_value_change`, `on_values_change`, `option`, `options`, `placeholder`, `readonly`, `required`, `rows`, `select_group`, `select_option`, `size`, `style`, `theme`, `unstyled`, `validate`, `validate_selection`, `validate_user_selection`, `value`, `values`
+**本地公开入口（同族）：** `class`, `default_value`, `default_values`, `disabled`, `enabled`, `field`, `focus`, `form_name`, `group`, `invalid`, `label`, `left_section`, `loading`, `multiple`, `name`, `native_entry`, `native_select`, `node_ref`, `on`, `on_value_change`, `on_values_change`, `option`, `options`, `placeholder`, `readonly`, `required`, `right_section`, `rows`, `select_group`, `select_option`, `size`, `style`, `theme`, `unstyled`, `validate`, `validate_selection`, `validate_user_selection`, `value`, `values`, `variant`
 
-**需要语义映射的属性候选：** `data`, `description`, `descriptionProps`, `error`, `errorProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `radius`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `success`, `successProps`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
+**需要语义映射的属性候选：** `data`, `description`, `descriptionProps`, `error`, `errorProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `labelProps`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loadingPosition`, `radius`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `success`, `successProps`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
 
 ### NumberInput — M:NumberInput
 
@@ -353,9 +353,9 @@
 
 **本地实现：** [../glory/crates/render/src/spinbutton.rs](../../glory/crates/render/src/spinbutton.rs)、[src/number_input.rs](../src/number_input.rs)、[src/number_model.rs](../src/number_model.rs)
 
-**本地公开入口（同族）：** `clamp`, `class`, `coefficient`, `controls`, `default_value`, `enabled`, `field`, `focus`, `form_name`, `format`, `grouping`, `increment`, `invalid`, `locale`, `max`, `min`, `name`, `new`, `node_ref`, `number_input`, `on`, `on_commit`, `on_reject`, `on_value_change`, `outside`, `page_step`, `parse`, `parse_number`, `placeholder`, `readonly`, `required`, `scale`, `size`, `spin_key`, `step`, `style`, `text`, `theme`, `to_f64`, `unstyled`, `validate`, `validate_command`, `value`
+**本地公开入口（同族）：** `clamp`, `clamp_behavior`, `class`, `coefficient`, `controls`, `default_value`, `enabled`, `field`, `focus`, `form_name`, `format`, `grouping`, `increment`, `invalid`, `locale`, `max`, `min`, `name`, `new`, `node_ref`, `number_input`, `on`, `on_commit`, `on_reject`, `on_value_change`, `outside`, `page_step`, `parse`, `parse_number`, `placeholder`, `readonly`, `required`, `scale`, `size`, `spin_key`, `step`, `style`, `text`, `theme`, `to_f64`, `unstyled`, `validate`, `validate_command`, `value`
 
-**需要语义映射的属性候选：** `allowDecimal`, `allowLeadingZeros`, `allowNegative`, `allowedDecimalSeparators`, `clampBehavior`, `decimalScale`, `decimalSeparator`, `description`, `descriptionProps`, `disabled`, `error`, `errorProps`, `fixedDecimalScale`, `handlersRef`, `hideControls`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `isAllowed`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `onChange`, `onMaxReached`, `onMinReached`, `prefix`, `radius`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `selectAllOnFocus`, `startValue`, `stepHoldDelay`, `stepHoldInterval`, `success`, `successProps`, `suffix`, `thousandSeparator`, `thousandsGroupStyle`, `trimLeadingZeroesOnBlur`, `type`, `valueIsNumericString`, `withAsterisk`, `withErrorStyles`, `withKeyboardEvents`, `withSuccessStyles`, `wrapperProps`
+**需要语义映射的属性候选：** `allowDecimal`, `allowLeadingZeros`, `allowNegative`, `allowedDecimalSeparators`, `decimalScale`, `decimalSeparator`, `description`, `descriptionProps`, `disabled`, `error`, `errorProps`, `fixedDecimalScale`, `handlersRef`, `hideControls`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `isAllowed`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `onChange`, `onMaxReached`, `onMinReached`, `prefix`, `radius`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `selectAllOnFocus`, `startValue`, `stepHoldDelay`, `stepHoldInterval`, `success`, `successProps`, `suffix`, `thousandSeparator`, `thousandsGroupStyle`, `trimLeadingZeroesOnBlur`, `type`, `valueIsNumericString`, `withAsterisk`, `withErrorStyles`, `withKeyboardEvents`, `withSuccessStyles`, `wrapperProps`
 
 ### PasswordInput — M:PasswordInput
 
@@ -367,7 +367,7 @@
 
 **本地实现：** [src/password_input.rs](../src/password_input.rs)、[src/text_field.rs](../src/text_field.rs)、[src/text_input.rs](../src/text_input.rs)
 
-**本地公开入口（同族）：** `class`, `default_value`, `default_visible`, `enabled`, `field`, `focus`, `invalid`, `left_section`, `left_section_width`, `loading`, `loading_position`, `multiline`, `name`, `node_ref`, `on`, `on_commit`, `on_value_change`, `on_visibility_change`, `password_input`, `placeholder`, `purpose`, `readonly`, `required`, `right_section`, `right_section_width`, `size`, `style`, `success`, `text_field`, `theme`, `unstyled`, `value`, `visibility_labels`, `visible`
+**本地公开入口（同族）：** `bottom_section`, `class`, `default_value`, `default_visible`, `enabled`, `field`, `focus`, `invalid`, `left_section`, `left_section_width`, `loading`, `loading_position`, `multiline`, `name`, `node_ref`, `on`, `on_commit`, `on_value_change`, `on_visibility_change`, `password_input`, `placeholder`, `purpose`, `readonly`, `required`, `right_section`, `right_section_width`, `size`, `style`, `success`, `text_field`, `theme`, `unstyled`, `value`, `visibility_icon`, `visibility_labels`, `visible`
 
 **需要语义映射的属性候选：** `description`, `descriptionProps`, `disabled`, `error`, `errorProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSectionPointerEvents`, `leftSectionProps`, `radius`, `rightSectionPointerEvents`, `rightSectionProps`, `successProps`, `visibilityToggleButtonProps`, `visibilityToggleFocusable`, `visibilityToggleIcon`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
 
@@ -379,11 +379,11 @@
 
 **官方功能章节：** Usage；Controlled；Uncontrolled；Regex type；One time code；Accessibility
 
-**本地实现：** [../glory/crates/render/src/input_assist.rs](../../glory/crates/render/src/input_assist.rs)、[src/pin_input.rs](../src/pin_input.rs)、[src/pin_model.rs](../src/pin_model.rs)
+**本地实现：** [../glory/crates/apace/tests/spacing.rs](../../glory/crates/apace/tests/spacing.rs)、[../glory/crates/html/tests/spacing.rs](../../glory/crates/html/tests/spacing.rs)、[../glory/crates/render/src/input_assist.rs](../../glory/crates/render/src/input_assist.rs)、[../glory/crates/style/tests/spacing.rs](../../glory/crates/style/tests/spacing.rs)、[src/pin_input.rs](../src/pin_input.rs)、[src/pin_model.rs](../src/pin_model.rs)
 
-**本地公开入口（同族）：** `alphabet`, `as_str`, `autofill`, `class`, `complete`, `completed_user_transition`, `default_value`, `enabled`, `field`, `focus`, `form_name`, `input_otp`, `invalid`, `length`, `masked`, `name`, `node_ref`, `on`, `on_commit`, `on_complete`, `on_reject`, `on_value_change`, `pin_input`, `readonly`, `required`, `size`, `style`, `theme`, `unstyled`, `validate`, `validate_input_placeholder`, `validate_value`, `value`
+**本地公开入口（同族）：** `alphabet`, `as_str`, `autofill`, `cell_padding`, `class`, `complete`, `completed_user_transition`, `default_value`, `enabled`, `field`, `focus`, `form_name`, `gap`, `input_otp`, `invalid`, `length`, `masked`, `name`, `node_ref`, `on`, `on_commit`, `on_complete`, `on_reject`, `on_value_change`, `pin_input`, `placeholder`, `readonly`, `required`, `size`, `style`, `theme`, `unstyled`, `validate`, `validate_input_placeholder`, `validate_value`, `value`
 
-**需要语义映射的属性候选：** `ariaLabel`, `autoFocus`, `disabled`, `error`, `form`, `gap`, `getInputProps`, `hiddenInputProps`, `id`, `inputMode`, `inputType`, `manageFocus`, `mask`, `onChange`, `oneTimeCode`, `placeholder`, `radius`, `readOnly`, `rootRef`, `success`, `type`
+**需要语义映射的属性候选：** `ariaLabel`, `autoFocus`, `disabled`, `error`, `form`, `getInputProps`, `hiddenInputProps`, `id`, `inputMode`, `inputType`, `manageFocus`, `mask`, `onChange`, `oneTimeCode`, `radius`, `readOnly`, `rootRef`, `success`, `type`
 
 ### Radio — M:Radio
 
@@ -393,11 +393,11 @@
 
 **官方功能章节：** Usage；Controlled；Uncontrolled；Read only；States；Light variant；Change icon；Change icon color；Disabled state；Pointer cursor；Radio with tooltip；Wrapper props；Radio.Group component；Radio.Group disabled state；Controlled Radio.Group；Radio.Indicator；Accessibility
 
-**本地实现：** [../glory/crates/html/src/patch.rs](../../glory/crates/html/src/patch.rs)、[../glory/crates/render/src/props.rs](../../glory/crates/render/src/props.rs)、[src/checkbox_group.rs](../src/checkbox_group.rs)、[src/mixed_checkbox.rs](../src/mixed_checkbox.rs)、[src/radio.rs](../src/radio.rs)、[src/segmented_control.rs](../src/segmented_control.rs)、[src/switch.rs](../src/switch.rs)
+**本地实现：** [../glory/crates/html/src/patch.rs](../../glory/crates/html/src/patch.rs)、[../glory/crates/render/src/props.rs](../../glory/crates/render/src/props.rs)、[src/checkbox_group.rs](../src/checkbox_group.rs)、[src/mixed_checkbox.rs](../src/mixed_checkbox.rs)、[src/radio.rs](../src/radio.rs)、[src/segmented_control.rs](../src/segmented_control.rs)、[src/switch/mod.rs](../src/switch/mod.rs)
 
-**本地公开入口（同族）：** `accepts_children`, `activation_enabled`, `checkbox_group`, `checkbox_item`, `checked`, `class`, `default_checked`, `default_selected`, `default_state`, `default_value`, `direction`, `document_part`, `effective_role`, `enabled`, `field`, `field_part`, `focus`, `form_name`, `get`, `hidden`, `insert`, `interactive`, `invalid`, `item`, `items`, `label`, `loop_focus`, `mixed_checkbox`, `name`, `new`, `node_ref`, `normalize_input`, `on`, `on_checked_change`, `on_selected_change`, `on_state_change`, `on_value_change`, `orientation`, `patch`, `patched`, `patches`, `radio`, `radio_group`, `readonly`, `required`, `segment`, `segmented_control`, `segments`, `select_all_label`, `selected`, `semantic_id`, `size`, `state`, `style`, `switch`, `theme`, `typeahead`, `unstyled`, `validate`, `value`, `view`
+**本地公开入口（同族）：** `accepts_children`, `activation_enabled`, `checkbox_group`, `checkbox_item`, `checked`, `class`, `default_checked`, `default_selected`, `default_state`, `default_value`, `direction`, `document_part`, `effective_role`, `enabled`, `field`, `field_part`, `focus`, `form_name`, `full_width`, `get`, `hidden`, `insert`, `interactive`, `invalid`, `item`, `items`, `label`, `label_position`, `loop_focus`, `max_values`, `mixed_checkbox`, `name`, `new`, `node_ref`, `normalize_input`, `on`, `on_checked_change`, `on_selected_change`, `on_state_change`, `on_value_change`, `orientation`, `patch`, `patched`, `patches`, `radio`, `radio_group`, `radius`, `readonly`, `required`, `segment`, `segmented_control`, `segments`, `select_all_label`, `selected`, `semantic_id`, `size`, `state`, `style`, `switch`, `theme`, `typeahead`, `unstyled`, `validate`, `value`, `view`, `with_item_borders`, `with_marks`, `with_thumb_indicator`
 
-**需要语义映射的属性候选：** `autoContrast`, `children`, `color`, `description`, `descriptionProps`, `disabled`, `error`, `errorProps`, `icon`, `iconColor`, `id`, `inputContainer`, `inputWrapperOrder`, `labelElement`, `labelPosition`, `labelProps`, `onChange`, `radius`, `readOnly`, `rootRef`, `success`, `successProps`, `withAsterisk`, `withBorder`, `withErrorStyles`, `wrapperProps`
+**需要语义映射的属性候选：** `autoContrast`, `children`, `color`, `description`, `descriptionProps`, `disabled`, `error`, `errorProps`, `icon`, `iconColor`, `id`, `inputContainer`, `inputWrapperOrder`, `labelElement`, `labelProps`, `onChange`, `readOnly`, `rootRef`, `success`, `successProps`, `withAsterisk`, `withBorder`, `withErrorStyles`, `wrapperProps`
 
 ### RangeSlider — M:RangeSlider
 
@@ -423,9 +423,9 @@
 
 **本地实现：** [src/radio.rs](../src/radio.rs)、[src/rating/mod.rs](../src/rating/mod.rs)、[src/rating/model.rs](../src/rating/model.rs)
 
-**本地公开入口（同族）：** `class`, `clearable`, `count`, `default_value`, `direction`, `display_only`, `enabled`, `field`, `focus`, `form_name`, `highlight_selected_only`, `hover_preview`, `invalid`, `items`, `label`, `loop_focus`, `name`, `node_ref`, `on`, `on_value_change`, `option_count`, `orientation`, `precision`, `radio`, `radio_group`, `rating`, `readonly`, `required`, `size`, `style`, `theme`, `typeahead`, `units`, `unstyled`, `validate`, `value`
+**本地公开入口（同族）：** `class`, `clearable`, `count`, `default_value`, `direction`, `display_only`, `empty_symbol`, `enabled`, `field`, `filled_symbol`, `focus`, `form_name`, `highlight_selected_only`, `hover_preview`, `invalid`, `items`, `label`, `loop_focus`, `name`, `node_ref`, `on`, `on_value_change`, `option_count`, `orientation`, `precision`, `radio`, `radio_group`, `rating`, `readonly`, `required`, `size`, `style`, `theme`, `typeahead`, `units`, `unstyled`, `validate`, `value`
 
-**需要语义映射的属性候选：** `allowClear`, `color`, `emptySymbol`, `fractions`, `fullSymbol`, `getSymbolLabel`, `onChange`, `onHover`, `readOnly`
+**需要语义映射的属性候选：** `allowClear`, `color`, `fractions`, `fullSymbol`, `getSymbolLabel`, `onChange`, `onHover`, `readOnly`
 
 ### SegmentedControl — M:SegmentedControl
 
@@ -435,11 +435,11 @@
 
 **官方功能章节：** Usage；Controlled；Uncontrolled；Data prop；Generic value type；Disabled；React node as label；Color；Auto contrast；Transitions；Accessibility and usability
 
-**本地实现：** [../glory/crates/html/src/patch.rs](../../glory/crates/html/src/patch.rs)、[../glory/crates/render/src/props.rs](../../glory/crates/render/src/props.rs)、[src/checkbox_group.rs](../src/checkbox_group.rs)、[src/mixed_checkbox.rs](../src/mixed_checkbox.rs)、[src/radio.rs](../src/radio.rs)、[src/segmented_control.rs](../src/segmented_control.rs)、[src/switch.rs](../src/switch.rs)
+**本地实现：** [../glory/crates/html/src/patch.rs](../../glory/crates/html/src/patch.rs)、[../glory/crates/render/src/props.rs](../../glory/crates/render/src/props.rs)、[src/checkbox_group.rs](../src/checkbox_group.rs)、[src/mixed_checkbox.rs](../src/mixed_checkbox.rs)、[src/radio.rs](../src/radio.rs)、[src/segmented_control.rs](../src/segmented_control.rs)、[src/switch/mod.rs](../src/switch/mod.rs)
 
-**本地公开入口（同族）：** `accepts_children`, `activation_enabled`, `checkbox_group`, `checkbox_item`, `checked`, `class`, `default_checked`, `default_selected`, `default_state`, `default_value`, `direction`, `document_part`, `effective_role`, `enabled`, `field`, `field_part`, `focus`, `form_name`, `get`, `hidden`, `insert`, `interactive`, `invalid`, `item`, `items`, `label`, `loop_focus`, `mixed_checkbox`, `name`, `new`, `node_ref`, `normalize_input`, `on`, `on_checked_change`, `on_selected_change`, `on_state_change`, `on_value_change`, `orientation`, `patch`, `patched`, `patches`, `radio`, `radio_group`, `readonly`, `required`, `segment`, `segmented_control`, `segments`, `select_all_label`, `selected`, `semantic_id`, `size`, `state`, `style`, `switch`, `theme`, `typeahead`, `unstyled`, `validate`, `value`, `view`
+**本地公开入口（同族）：** `accepts_children`, `activation_enabled`, `checkbox_group`, `checkbox_item`, `checked`, `class`, `default_checked`, `default_selected`, `default_state`, `default_value`, `direction`, `document_part`, `effective_role`, `enabled`, `field`, `field_part`, `focus`, `form_name`, `full_width`, `get`, `hidden`, `insert`, `interactive`, `invalid`, `item`, `items`, `label`, `label_position`, `loop_focus`, `max_values`, `mixed_checkbox`, `name`, `new`, `node_ref`, `normalize_input`, `on`, `on_checked_change`, `on_selected_change`, `on_state_change`, `on_value_change`, `orientation`, `patch`, `patched`, `patches`, `radio`, `radio_group`, `radius`, `readonly`, `required`, `segment`, `segmented_control`, `segments`, `select_all_label`, `selected`, `semantic_id`, `size`, `state`, `style`, `switch`, `theme`, `typeahead`, `unstyled`, `validate`, `value`, `view`, `with_item_borders`, `with_marks`, `with_thumb_indicator`
 
-**需要语义映射的属性候选：** `autoContrast`, `color`, `data`, `disabled`, `fullWidth`, `onChange`, `radius`, `readOnly`, `transitionDuration`, `transitionTimingFunction`, `withItemsBorders`
+**需要语义映射的属性候选：** `autoContrast`, `color`, `data`, `disabled`, `onChange`, `readOnly`, `transitionDuration`, `transitionTimingFunction`, `withItemsBorders`
 
 ### Slider — M:Slider
 
@@ -451,9 +451,9 @@
 
 **本地实现：** [src/slider/mod.rs](../src/slider/mod.rs)
 
-**本地公开入口（同族）：** `class`, `default_value`, `direction`, `enabled`, `field`, `hidden`, `invalid`, `marks`, `max`, `min`, `name`, `new`, `node_ref`, `on`, `on_value_change`, `on_value_commit`, `orientation`, `page_step`, `readonly`, `required`, `restrict_to_marks`, `size`, `slider`, `step`, `style`, `theme`, `unlabeled`, `unstyled`, `value`, `value_text`
+**本地公开入口（同族）：** `class`, `default_value`, `direction`, `enabled`, `field`, `hidden`, `invalid`, `marks`, `max`, `min`, `name`, `new`, `node_ref`, `on`, `on_value_change`, `on_value_commit`, `orientation`, `page_step`, `readonly`, `required`, `restrict_to_marks`, `size`, `slider`, `step`, `style`, `theme`, `thumb_size`, `unlabeled`, `unstyled`, `value`, `value_text`
 
-**需要语义映射的属性候选：** `color`, `disabled`, `domain`, `hiddenInputProps`, `inverted`, `label`, `labelAlwaysOn`, `labelTransitionProps`, `onChange`, `onChangeEnd`, `precision`, `radius`, `scale`, `showLabelOnHover`, `startPointValue`, `thumbChildren`, `thumbLabel`, `thumbProps`, `thumbSize`, `thumbValueText`
+**需要语义映射的属性候选：** `color`, `disabled`, `domain`, `hiddenInputProps`, `inverted`, `label`, `labelAlwaysOn`, `labelTransitionProps`, `onChange`, `onChangeEnd`, `precision`, `radius`, `scale`, `showLabelOnHover`, `startPointValue`, `thumbChildren`, `thumbLabel`, `thumbProps`, `thumbValueText`
 
 ### Switch — M:Switch
 
@@ -463,11 +463,11 @@
 
 **官方功能章节：** Usage；Controlled；Uncontrolled；Read only；States；Inner Labels；Icon labels；Thumb icon；With tooltip；Pointer cursor；Wrapper props；Switch.Group；Switch.Group with uncontrolled forms；maxSelectedValues；Switch.Group disabled；Controlled Switch.Group；Get input ref；Accessibility
 
-**本地实现：** [../glory/crates/html/src/patch.rs](../../glory/crates/html/src/patch.rs)、[../glory/crates/render/src/props.rs](../../glory/crates/render/src/props.rs)、[src/checkbox_group.rs](../src/checkbox_group.rs)、[src/mixed_checkbox.rs](../src/mixed_checkbox.rs)、[src/radio.rs](../src/radio.rs)、[src/segmented_control.rs](../src/segmented_control.rs)、[src/switch.rs](../src/switch.rs)
+**本地实现：** [../glory/crates/html/src/patch.rs](../../glory/crates/html/src/patch.rs)、[../glory/crates/render/src/props.rs](../../glory/crates/render/src/props.rs)、[src/checkbox_group.rs](../src/checkbox_group.rs)、[src/mixed_checkbox.rs](../src/mixed_checkbox.rs)、[src/radio.rs](../src/radio.rs)、[src/segmented_control.rs](../src/segmented_control.rs)、[src/switch/mod.rs](../src/switch/mod.rs)、[src/switch/visual.rs](../src/switch/visual.rs)
 
-**本地公开入口（同族）：** `accepts_children`, `activation_enabled`, `checkbox_group`, `checkbox_item`, `checked`, `class`, `default_checked`, `default_selected`, `default_state`, `default_value`, `direction`, `document_part`, `effective_role`, `enabled`, `field`, `field_part`, `focus`, `form_name`, `get`, `hidden`, `insert`, `interactive`, `invalid`, `item`, `items`, `label`, `loop_focus`, `mixed_checkbox`, `name`, `new`, `node_ref`, `normalize_input`, `on`, `on_checked_change`, `on_selected_change`, `on_state_change`, `on_value_change`, `orientation`, `patch`, `patched`, `patches`, `radio`, `radio_group`, `readonly`, `required`, `segment`, `segmented_control`, `segments`, `select_all_label`, `selected`, `semantic_id`, `size`, `state`, `style`, `switch`, `theme`, `typeahead`, `unstyled`, `validate`, `value`, `view`
+**本地公开入口（同族）：** `accepts_children`, `activation_enabled`, `checkbox_group`, `checkbox_item`, `checked`, `class`, `default_checked`, `default_selected`, `default_state`, `default_value`, `direction`, `document_part`, `effective_role`, `enabled`, `field`, `field_part`, `focus`, `form_name`, `full_width`, `get`, `hidden`, `insert`, `interactive`, `invalid`, `item`, `items`, `label`, `label_position`, `loop_focus`, `max_values`, `mixed_checkbox`, `name`, `new`, `node_ref`, `normalize_input`, `on`, `on_checked_change`, `on_selected_change`, `on_state_change`, `on_value_change`, `orientation`, `patch`, `patched`, `patches`, `radio`, `radio_group`, `radius`, `readonly`, `required`, `segment`, `segmented_control`, `segments`, `select_all_label`, `selected`, `semantic_id`, `size`, `state`, `style`, `switch`, `theme`, `typeahead`, `unstyled`, `validate`, `value`, `view`, `with_item_borders`, `with_marks`, `with_thumb_indicator`
 
-**需要语义映射的属性候选：** `color`, `description`, `error`, `id`, `labelPosition`, `offLabel`, `onLabel`, `radius`, `rootRef`, `thumbIcon`, `withThumbIndicator`, `wrapperProps`
+**需要语义映射的属性候选：** `color`, `description`, `error`, `id`, `offLabel`, `onLabel`, `rootRef`, `thumbIcon`, `wrapperProps`
 
 ### Textarea — M:Textarea
 
@@ -479,9 +479,9 @@
 
 **本地实现：** [../glory/crates/apace/src/document.rs](../../glory/crates/apace/src/document.rs)、[../glory/crates/html/src/styles.rs](../../glory/crates/html/src/styles.rs)、[../glory/crates/style/src/lib.rs](../../glory/crates/style/src/lib.rs)、[src/text_field.rs](../src/text_field.rs)、[src/text_input.rs](../src/text_input.rs)、[src/textarea.rs](../src/textarea.rs)
 
-**本地公开入口（同族）：** `advance_time`, `aspect_ratio`, `autosize`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `box_shadow`, `class`, `default_value`, `display`, `enabled`, `engine_id`, `field`, `field_sizing`, `flex_direction`, `flex_wrap`, `focus`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inspect`, `invalid`, `invalidate`, `is_finite`, `left`, `left_section`, `left_section_width`, `line_clamp`, `loading`, `loading_position`, `margin`, `max_height`, `max_rows`, `max_width`, `min_height`, `min_rows`, `min_width`, `multiline`, `name`, `new`, `node_ref`, `object_fit`, `observe_resources`, `on`, `on_commit`, `on_value_change`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `placeholder`, `pointer_events`, `poll_resources`, `position`, `profile`, `purpose`, `radius`, `readonly`, `required`, `resource_stats`, `right`, `right_section`, `right_section_width`, `rows`, `scroll_anchor`, `set_css`, `set_sheet`, `set_viewport`, `size`, `stats`, `style`, `success`, `text_field`, `text_gradient`, `text_overflow`, `textarea`, `theme`, `top`, `unstyled`, `validate`, `value`, `white_space`, `width`, `with_config`
+**本地公开入口（同族）：** `advance_time`, `aspect_ratio`, `autosize`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `bottom_section`, `box_shadow`, `caption_side`, `class`, `default_value`, `display`, `enabled`, `engine_id`, `field`, `field_sizing`, `flex_direction`, `flex_wrap`, `focus`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inspect`, `invalid`, `invalidate`, `is_finite`, `left`, `left_section`, `left_section_width`, `letter_spacing`, `line_clamp`, `loading`, `loading_position`, `margin`, `max_height`, `max_rows`, `max_width`, `min_height`, `min_rows`, `min_width`, `multiline`, `name`, `new`, `node_ref`, `object_fit`, `observe_resources`, `on`, `on_commit`, `on_value_change`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `placeholder`, `pointer_events`, `poll_resources`, `position`, `profile`, `purpose`, `radius`, `readonly`, `required`, `resource_stats`, `right`, `right_section`, `right_section_width`, `rows`, `scroll_anchor`, `set_css`, `set_sheet`, `set_viewport`, `size`, `stats`, `style`, `success`, `text_field`, `text_gradient`, `text_overflow`, `textarea`, `theme`, `top`, `unstyled`, `validate`, `value`, `white_space`, `width`, `with_config`
 
-**需要语义映射的属性候选：** `bottomSection`, `bottomSectionProps`, `description`, `descriptionProps`, `disabled`, `error`, `errorProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSectionPointerEvents`, `leftSectionProps`, `pointer`, `resize`, `rightSectionPointerEvents`, `rightSectionProps`, `successProps`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
+**需要语义映射的属性候选：** `bottomSectionProps`, `description`, `descriptionProps`, `disabled`, `error`, `errorProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSectionPointerEvents`, `leftSectionProps`, `pointer`, `resize`, `rightSectionPointerEvents`, `rightSectionProps`, `successProps`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
 
 ### TextInput — M:TextInput
 
@@ -493,7 +493,7 @@
 
 **本地实现：** [src/text_field.rs](../src/text_field.rs)
 
-**本地公开入口（同族）：** `class`, `default_value`, `enabled`, `field`, `focus`, `invalid`, `left_section`, `left_section_width`, `loading`, `loading_position`, `multiline`, `name`, `node_ref`, `on`, `on_commit`, `on_value_change`, `placeholder`, `purpose`, `readonly`, `required`, `right_section`, `right_section_width`, `size`, `style`, `success`, `text_field`, `theme`, `unstyled`, `value`
+**本地公开入口（同族）：** `bottom_section`, `class`, `default_value`, `enabled`, `field`, `focus`, `invalid`, `left_section`, `left_section_width`, `loading`, `loading_position`, `multiline`, `name`, `node_ref`, `on`, `on_commit`, `on_value_change`, `placeholder`, `purpose`, `readonly`, `required`, `right_section`, `right_section_width`, `size`, `style`, `success`, `text_field`, `theme`, `unstyled`, `value`
 
 **需要语义映射的属性候选：** `description`, `descriptionProps`, `disabled`, `error`, `errorProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSectionPointerEvents`, `leftSectionProps`, `pointer`, `radius`, `rightSectionPointerEvents`, `rightSectionProps`, `successProps`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
 
@@ -507,7 +507,7 @@
 
 **本地实现：** [src/autocomplete.rs](../src/autocomplete.rs)、[src/combobox.rs](../src/combobox.rs)
 
-**本地公开入口（同族）：** `auto_select_on_blur`, `autocomplete`, `autocomplete_option`, `class`, `clear_all`, `clear_label`, `clearable`, `combobox`, `default_open`, `default_search`, `default_value`, `empty_message`, `enabled`, `field`, `filter`, `focus`, `form_name`, `group`, `invalid`, `label`, `limit`, `loading`, `loading_left`, `loading_position`, `name`, `node_ref`, `on`, `on_commit`, `on_open_change`, `on_option_select`, `on_search_change`, `on_search_commit`, `on_value_change`, `open`, `option`, `options`, `placeholder`, `readonly`, `required`, `search`, `select_all`, `select_first_option_on_change`, `selected_key`, `size`, `style`, `theme`, `unstyled`, `value`
+**本地公开入口（同族）：** `auto_select_on_blur`, `autocomplete`, `autocomplete_option`, `check_position`, `class`, `clear_all`, `clear_label`, `clearable`, `combobox`, `default_open`, `default_search`, `default_value`, `empty_group_message`, `empty_message`, `enabled`, `field`, `filter`, `focus`, `footer`, `form_name`, `group`, `header`, `inline_list`, `invalid`, `label`, `limit`, `loading`, `loading_left`, `loading_position`, `name`, `node_ref`, `on`, `on_commit`, `on_open_change`, `on_option_select`, `on_search_change`, `on_search_commit`, `on_value_change`, `open`, `option`, `option_content`, `options`, `placeholder`, `readonly`, `required`, `search`, `select_all`, `select_first_on_change`, `select_first_option_on_change`, `selected_key`, `size`, `style`, `theme`, `unstyled`, `value`, `virtualized`, `with_aligned_labels`
 
 **需要语义映射的属性候选：** `clearButtonProps`, `clearSectionMode`, `comboboxProps`, `data`, `defaultDropdownOpened`, `description`, `descriptionProps`, `disabled`, `dropdownOpened`, `error`, `errorProps`, `floatingHeight`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `maxDropdownHeight`, `onChange`, `onClear`, `onDropdownClose`, `onDropdownOpen`, `onOptionSubmit`, `openOnFocus`, `radius`, `renderOption`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `scrollAreaProps`, `selectFirstOptionOnDropdownOpen`, `success`, `successProps`, `withAsterisk`, `withErrorStyles`, `withScrollArea`, `withSuccessStyles`, `wrapperProps`
 
@@ -521,9 +521,9 @@
 
 **本地实现：** [../glory/crates/render/src/choice.rs](../../glory/crates/render/src/choice.rs)、[../glory/crates/render/src/tree.rs](../../glory/crates/render/src/tree.rs)、[src/cascader.rs](../src/cascader.rs)、[src/tree.rs](../src/tree.rs)、[src/tree_choice_model.rs](../src/tree_choice_model.rs)、[src/tree_select.rs](../src/tree_select.rs)
 
-**本地公开入口（同族）：** `allow_drop`, `as_str`, `cascader`, `checked`, `choice`, `choice_remove_last`, `class`, `clearable`, `columns`, `contains`, `default_expanded`, `default_open`, `default_search`, `default_selected`, `default_value`, `direction`, `empty_message`, `enabled`, `expanded`, `field`, `file_icons`, `file_tree`, `focus`, `form_name`, `height`, `hide_picked`, `invalid`, `is_empty`, `key`, `keys`, `leaf`, `max_dropdown_height`, `max_values`, `multiple`, `name`, `new`, `node_ref`, `nodes`, `nothing_found_message`, `on`, `on_activate`, `on_drag_drop`, `on_expanded_change`, `on_load_children`, `on_open_change`, `on_search_change`, `on_selection_change`, `on_selection_intent`, `on_value_change`, `open`, `path`, `paths`, `placeholder`, `policy`, `popup_placement`, `popup_width`, `readonly`, `render_label`, `render_node`, `render_value`, `required`, `resolve_active_descendant`, `search`, `searchable`, `selected`, `selection_follows_focus`, `selection_mode`, `size`, `style`, `theme`, `toggle`, `tree`, `tree_select`, `typeahead`, `unstyled`, `validate`, `value`, `with_lines`
+**本地公开入口（同族）：** `allow_deselect`, `allow_drop`, `as_str`, `cascader`, `change_on_select`, `checked`, `choice`, `choice_remove_last`, `class`, `clear_label`, `clearable`, `close_on_select`, `columns`, `contains`, `default_expanded`, `default_open`, `default_search`, `default_selected`, `default_value`, `direction`, `drag_handle`, `empty_message`, `enabled`, `expanded`, `field`, `file_icons`, `file_tree`, `focus`, `form_name`, `height`, `hide_picked`, `invalid`, `is_empty`, `key`, `keys`, `leaf`, `max_dropdown_height`, `max_values`, `multiple`, `name`, `new`, `node_ref`, `nodes`, `nothing_found_message`, `on`, `on_activate`, `on_drag_drop`, `on_expanded_change`, `on_load_children`, `on_open_change`, `on_search_change`, `on_selection_change`, `on_selection_intent`, `on_value_change`, `open`, `path`, `path_separator`, `paths`, `placeholder`, `policy`, `popup_placement`, `popup_width`, `readonly`, `render_label`, `render_node`, `render_value`, `required`, `resolve_active_descendant`, `search`, `searchable`, `selected`, `selection_follows_focus`, `selection_mode`, `size`, `style`, `theme`, `toggle`, `tree`, `tree_select`, `typeahead`, `unstyled`, `validate`, `value`, `virtual_rows`, `with_columns`, `with_lines`
 
-**需要语义映射的属性候选：** `allowDeselect`, `changeOnSelect`, `checkIconPosition`, `chevronColor`, `clearButtonProps`, `clearSectionMode`, `closeOnSelect`, `columnWidth`, `comboboxProps`, `data`, `defaultDropdownOpened`, `defaultSearchValue`, `description`, `descriptionProps`, `disabled`, `dropdownOpened`, `error`, `errorProps`, `expandTrigger`, `filter`, `formatValue`, `hiddenInputProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `maxDisplayedLevels`, `nextLevelsControlLabel`, `onChange`, `onClear`, `onDropdownClose`, `onDropdownOpen`, `openOnFocus`, `pointer`, `previousLevelsControlLabel`, `radius`, `renderOption`, `renderSearchOption`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `safeAreaPolygon`, `scrollAreaProps`, `searchValue`, `separator`, `success`, `successProps`, `withAsterisk`, `withCheckIcon`, `withColumns`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
+**需要语义映射的属性候选：** `checkIconPosition`, `chevronColor`, `clearButtonProps`, `clearSectionMode`, `columnWidth`, `comboboxProps`, `data`, `defaultDropdownOpened`, `defaultSearchValue`, `description`, `descriptionProps`, `disabled`, `dropdownOpened`, `error`, `errorProps`, `expandTrigger`, `filter`, `formatValue`, `hiddenInputProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `maxDisplayedLevels`, `nextLevelsControlLabel`, `onChange`, `onClear`, `onDropdownClose`, `onDropdownOpen`, `openOnFocus`, `pointer`, `previousLevelsControlLabel`, `radius`, `renderOption`, `renderSearchOption`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `safeAreaPolygon`, `scrollAreaProps`, `searchValue`, `separator`, `success`, `successProps`, `withAsterisk`, `withCheckIcon`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
 
 ### Combobox — M:Combobox
 
@@ -535,9 +535,9 @@
 
 **本地实现：** [src/combobox.rs](../src/combobox.rs)
 
-**本地公开入口（同族）：** `class`, `clear_all`, `combobox`, `default_open`, `default_search`, `default_value`, `empty_message`, `enabled`, `field`, `filter`, `focus`, `form_name`, `group`, `invalid`, `label`, `limit`, `loading`, `loading_left`, `name`, `node_ref`, `on`, `on_open_change`, `on_search_change`, `on_search_commit`, `on_value_change`, `open`, `option`, `options`, `placeholder`, `readonly`, `required`, `search`, `select_all`, `size`, `style`, `theme`, `unstyled`, `value`
+**本地公开入口（同族）：** `check_position`, `class`, `clear_all`, `combobox`, `default_open`, `default_search`, `default_value`, `empty_group_message`, `empty_message`, `enabled`, `field`, `filter`, `focus`, `footer`, `form_name`, `group`, `header`, `inline_list`, `invalid`, `label`, `limit`, `loading`, `loading_left`, `name`, `node_ref`, `on`, `on_open_change`, `on_search_change`, `on_search_commit`, `on_value_change`, `open`, `option`, `option_content`, `options`, `placeholder`, `readonly`, `required`, `search`, `select_all`, `select_first_on_change`, `size`, `style`, `theme`, `unstyled`, `value`, `virtualized`, `with_aligned_labels`
 
-**需要语义映射的属性候选：** `active`, `allowDeselect`, `arrowOffset`, `arrowPosition`, `arrowRadius`, `arrowSize`, `autoComplete`, `checkIconPosition`, `children`, `clickOutsideCapture`, `color`, `comboboxProps`, `data`, `defaultDropdownOpened`, `defaultSearchValue`, `disabled`, `dropdownOpened`, `dropdownPadding`, `error`, `floatingHeight`, `floatingStrategy`, `form`, `hidden`, `hiddenInputProps`, `hiddenInputValuesDivider`, `hideDetached`, `id`, `inputSize`, `keepMounted`, `keepMountedMode`, `labelledBy`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loadingPosition`, `maxDropdownHeight`, `middlewares`, `multiline`, `multiple`, `nothingFoundMessage`, `offset`, `onChange`, `onClear`, `onClose`, `onDismiss`, `onDropdownClose`, `onDropdownOpen`, `onEnterTransitionEnd`, `onExitTransitionEnd`, `onOpen`, `onOptionSubmit`, `onPositionChange`, `overlayProps`, `pointer`, `portalProps`, `position`, `preventPositionChangeWhenVisible`, `radius`, `readOnly`, `refProp`, `renderOption`, `resetSelectionOnOptionHover`, `returnFocus`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `rootRef`, `scrollAreaProps`, `searchValue`, `searchable`, `selectFirstOptionOnDropdownOpen`, `selected`, `shadow`, `store`, `success`, `targetType`, `transitionProps`, `valuesDivider`, `width`, `withAlignedLabels`, `withAria`, `withAriaAttributes`, `withArrow`, `withCheckIcon`, `withErrorStyles`, `withExpandedAttribute`, `withKeyboardNavigation`, `withOverlay`, `withScrollArea`, `withSuccessStyles`, `withinPortal`, `wrapperProps`, `zIndex`
+**需要语义映射的属性候选：** `active`, `allowDeselect`, `arrowOffset`, `arrowPosition`, `arrowRadius`, `arrowSize`, `autoComplete`, `checkIconPosition`, `children`, `clickOutsideCapture`, `color`, `comboboxProps`, `data`, `defaultDropdownOpened`, `defaultSearchValue`, `disabled`, `dropdownOpened`, `dropdownPadding`, `error`, `floatingHeight`, `floatingStrategy`, `form`, `hidden`, `hiddenInputProps`, `hiddenInputValuesDivider`, `hideDetached`, `id`, `inputSize`, `keepMounted`, `keepMountedMode`, `labelledBy`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loadingPosition`, `maxDropdownHeight`, `middlewares`, `multiline`, `multiple`, `nothingFoundMessage`, `offset`, `onChange`, `onClear`, `onClose`, `onDismiss`, `onDropdownClose`, `onDropdownOpen`, `onEnterTransitionEnd`, `onExitTransitionEnd`, `onOpen`, `onOptionSubmit`, `onPositionChange`, `overlayProps`, `pointer`, `portalProps`, `position`, `preventPositionChangeWhenVisible`, `radius`, `readOnly`, `refProp`, `renderOption`, `resetSelectionOnOptionHover`, `returnFocus`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `rootRef`, `scrollAreaProps`, `searchValue`, `searchable`, `selectFirstOptionOnDropdownOpen`, `selected`, `shadow`, `store`, `success`, `targetType`, `transitionProps`, `valuesDivider`, `width`, `withAria`, `withAriaAttributes`, `withArrow`, `withCheckIcon`, `withErrorStyles`, `withExpandedAttribute`, `withKeyboardNavigation`, `withOverlay`, `withScrollArea`, `withSuccessStyles`, `withinPortal`, `wrapperProps`, `zIndex`
 
 ### ComboboxPopover — M:ComboboxPopover
 
@@ -549,13 +549,13 @@
 
 **本地实现：** [../glory/crates/apace/src/layers.rs](../../glory/crates/apace/src/layers.rs)、[../glory/crates/web/src/browser/layer_document.rs](../../glory/crates/web/src/browser/layer_document.rs)、[src/overlay.rs](../src/overlay.rs)
 
-**本地公开入口（同族）：** `allowed`, `arrow`, `ax_branch`, `boundary`, `cancel_label`, `class`, `close_content`, `close_label`, `confirm_enabled`, `confirm_label`, `confirm_variant`, `content`, `content_policy`, `default_open`, `default_snap`, `description`, `dismiss_on_escape`, `dismiss_on_outside`, `enabled`, `full_screen`, `initial_focus`, `label`, `modal`, `name`, `offset`, `on`, `on_cancel`, `on_confirm`, `on_dismiss`, `on_open_change`, `on_snap_change`, `open`, `panel_ref`, `placement`, `return_focus`, `show_close`, `show_trigger`, `side`, `size`, `snap_config`, `snap_index`, `snap_points`, `style`, `theme`, `title`, `trigger_content`, `trigger_ref`, `unstyled`, `width`, `with_arrow`
+**本地公开入口（同族）：** `allowed`, `arrow`, `ax_branch`, `boundary`, `cancel_label`, `class`, `close_content`, `close_label`, `confirm_enabled`, `confirm_label`, `confirm_variant`, `content`, `content_policy`, `default_open`, `default_snap`, `description`, `dismiss_on_escape`, `dismiss_on_outside`, `enabled`, `full_screen`, `initial_focus`, `label`, `modal`, `name`, `offset`, `on`, `on_cancel`, `on_confirm`, `on_dismiss`, `on_open_change`, `on_snap_change`, `open`, `panel_ref`, `placement`, `position`, `preserve_focus`, `return_focus`, `show_close`, `show_trigger`, `side`, `size`, `snap_config`, `snap_index`, `snap_points`, `style`, `theme`, `title`, `trigger_content`, `trigger_ref`, `trigger_style`, `unstyled`, `width`, `with_arrow`
 
 **需要语义映射的属性候选：** `allowDeselect`, `checkIconPosition`, `children`, `comboboxProps`, `data`, `defaultDropdownOpened`, `defaultSearchValue`, `defaultValue`, `dropdownOpened`, `filter`, `form`, `hiddenInputProps`, `hiddenInputValuesDivider`, `limit`, `maxDropdownHeight`, `multiple`, `nothingFoundMessage`, `onChange`, `onDropdownClose`, `onDropdownOpen`, `onOptionSubmit`, `onSearchChange`, `renderOption`, `scrollAreaProps`, `searchValue`, `searchable`, `selectFirstOptionOnDropdownOpen`, `value`, `withAlignedLabels`, `withCheckIcon`, `withScrollArea`
 
 ### MultiSelect — M:MultiSelect
 
-来源：[@mantine/core](https://mantine.dev/core/multi-select/)；对应 `P4-08`；原生有限能力状态 `model-only`。
+来源：[@mantine/core](https://mantine.dev/core/multi-select/)；对应 `P4-08`；原生有限能力状态 `tested`。
 
 **官方 Props / 子部件 Props：** `checkIconPosition`, `chevronColor`, `clearButtonProps`, `clearSearchOnChange`, `clearSectionMode`, `clearable`, `comboboxProps`, `data`, `defaultDropdownOpened`, `defaultSearchValue`, `defaultValue`, `description`, `descriptionProps`, `disabled`, `dropdownOpened`, `error`, `errorProps`, `filter`, `floatingHeight`, `hiddenInputProps`, `hiddenInputValuesDivider`, `hidePickedOptions`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `limit`, `loading`, `loadingPosition`, `maxDropdownHeight`, `maxValues`, `nothingFoundMessage`, `onChange`, `onClear`, `onDropdownClose`, `onDropdownOpen`, `onMaxValues`, `onOptionSubmit`, `onRemove`, `onSearchChange`, `openOnFocus`, `pointer`, `radius`, `renderOption`, `renderPill`, `required`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `scrollAreaProps`, `searchValue`, `searchable`, `selectFirstOptionOnChange`, `selectFirstOptionOnDropdownOpen`, `size`, `success`, `successProps`, `value`, `withAlignedLabels`, `withAsterisk`, `withCheckIcon`, `withErrorStyles`, `withPillsReorder`, `withScrollArea`, `withSuccessStyles`, `wrapperProps`
 
@@ -563,9 +563,9 @@
 
 **本地实现：** [src/combobox.rs](../src/combobox.rs)、[src/multi_select.rs](../src/multi_select.rs)、[src/tag.rs](../src/tag.rs)
 
-**本地公开入口（同族）：** `class`, `clear_all`, `clear_label`, `clearable`, `combobox`, `default_open`, `default_search`, `default_value`, `empty_message`, `enabled`, `field`, `filter`, `focus`, `form_name`, `group`, `hide_picked_options`, `invalid`, `label`, `limit`, `loading`, `loading_left`, `loading_position`, `max_values`, `multi_select`, `name`, `node_ref`, `on`, `on_open_change`, `on_ready`, `on_search_change`, `on_search_commit`, `on_value_change`, `open`, `option`, `options`, `placeholder`, `readonly`, `required`, `search`, `select_all`, `size`, `style`, `theme`, `unstyled`, `value`
+**本地公开入口（同族）：** `check_position`, `class`, `clear_all`, `clear_label`, `clearable`, `combobox`, `default_open`, `default_search`, `default_value`, `dropdown_label`, `empty_group_message`, `empty_message`, `enabled`, `field`, `filter`, `focus`, `footer`, `form_name`, `group`, `header`, `hide_picked_options`, `inline_list`, `invalid`, `label`, `limit`, `loading`, `loading_left`, `loading_position`, `max_values`, `mount`, `multi_select`, `name`, `node_ref`, `on`, `on_open_change`, `on_ready`, `on_search_change`, `on_search_commit`, `on_value_change`, `open`, `option`, `option_content`, `options`, `placeholder`, `readonly`, `required`, `search`, `select_all`, `select_first_on_change`, `size`, `style`, `theme`, `unstyled`, `value`, `virtualized`, `with_aligned_labels`
 
-**需要语义映射的属性候选：** `checkIconPosition`, `chevronColor`, `clearButtonProps`, `clearSearchOnChange`, `clearSectionMode`, `comboboxProps`, `data`, `defaultDropdownOpened`, `defaultSearchValue`, `description`, `descriptionProps`, `disabled`, `dropdownOpened`, `error`, `errorProps`, `floatingHeight`, `hiddenInputProps`, `hiddenInputValuesDivider`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `maxDropdownHeight`, `nothingFoundMessage`, `onChange`, `onClear`, `onDropdownClose`, `onDropdownOpen`, `onMaxValues`, `onOptionSubmit`, `onRemove`, `openOnFocus`, `pointer`, `radius`, `renderOption`, `renderPill`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `scrollAreaProps`, `searchValue`, `searchable`, `selectFirstOptionOnChange`, `selectFirstOptionOnDropdownOpen`, `success`, `successProps`, `withAlignedLabels`, `withAsterisk`, `withCheckIcon`, `withErrorStyles`, `withPillsReorder`, `withScrollArea`, `withSuccessStyles`, `wrapperProps`
+**需要语义映射的属性候选：** `checkIconPosition`, `chevronColor`, `clearButtonProps`, `clearSearchOnChange`, `clearSectionMode`, `comboboxProps`, `data`, `defaultDropdownOpened`, `defaultSearchValue`, `description`, `descriptionProps`, `disabled`, `dropdownOpened`, `error`, `errorProps`, `floatingHeight`, `hiddenInputProps`, `hiddenInputValuesDivider`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `maxDropdownHeight`, `nothingFoundMessage`, `onChange`, `onClear`, `onDropdownClose`, `onDropdownOpen`, `onMaxValues`, `onOptionSubmit`, `onRemove`, `openOnFocus`, `pointer`, `radius`, `renderOption`, `renderPill`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `scrollAreaProps`, `searchValue`, `searchable`, `selectFirstOptionOnChange`, `selectFirstOptionOnDropdownOpen`, `success`, `successProps`, `withAsterisk`, `withCheckIcon`, `withErrorStyles`, `withPillsReorder`, `withScrollArea`, `withSuccessStyles`, `wrapperProps`
 
 ### Pill — M:Pill
 
@@ -577,13 +577,13 @@
 
 **本地实现：** [src/display.rs](../src/display.rs)、[src/tag.rs](../src/tag.rs)
 
-**本地公开入口（同族）：** `actions`, `badge`, `bordered`, `card`, `class`, `content`, `default_visible`, `description`, `empty_state`, `enabled`, `fill`, `footer`, `header`, `heading_level`, `illustration`, `name`, `node_ref`, `on_remove`, `on_remove_press`, `paper`, `pill`, `removable`, `remove_ref`, `shadow`, `size`, `style`, `theme`, `title`, `unstyled`, `variant`, `visible`
+**本地公开入口（同族）：** `actions`, `badge`, `bordered`, `card`, `class`, `color`, `content`, `default_visible`, `description`, `empty_state`, `enabled`, `fill`, `footer`, `header`, `heading_level`, `illustration`, `left_section`, `mount`, `name`, `node_ref`, `on_remove`, `on_remove_press`, `paper`, `pill`, `removable`, `remove_ref`, `right_section`, `shadow`, `size`, `style`, `theme`, `title`, `unstyled`, `variant`, `visible`
 
-**需要语义映射的属性候选：** `descriptionProps`, `disabled`, `error`, `errorProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `pointer`, `radius`, `removeButtonProps`, `required`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `success`, `successProps`, `type`, `withAsterisk`, `withErrorStyles`, `withRemoveButton`, `withSuccessStyles`, `wrapperProps`
+**需要语义映射的属性候选：** `descriptionProps`, `disabled`, `error`, `errorProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `pointer`, `radius`, `removeButtonProps`, `required`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `success`, `successProps`, `type`, `withAsterisk`, `withErrorStyles`, `withRemoveButton`, `withSuccessStyles`, `wrapperProps`
 
 ### PillsInput — M:PillsInput
 
-来源：[@mantine/core](https://mantine.dev/core/pills-input/)；对应 `P4-09`；原生有限能力状态 `model-only`。
+来源：[@mantine/core](https://mantine.dev/core/pills-input/)；对应 `P4-09`；原生有限能力状态 `tested`。
 
 **官方 Props / 子部件 Props：** `description`, `descriptionProps`, `disabled`, `error`, `errorProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `pointer`, `radius`, `required`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `size`, `success`, `successProps`, `type`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
 
@@ -591,27 +591,27 @@
 
 **本地实现：** [src/pills_input.rs](../src/pills_input.rs)、[src/tag.rs](../src/tag.rs)、[src/tags_input.rs](../src/tags_input.rs)
 
-**本地公开入口（同族）：** `accept_value_on_blur`, `class`, `clear_label`, `clearable`, `default_search`, `default_value`, `duplicate_policy`, `enabled`, `field`, `focus`, `form_name`, `invalid`, `label`, `loading`, `loading_position`, `max_tags`, `name`, `node_ref`, `on`, `on_change`, `on_commit`, `on_reject`, `on_remove`, `pills_input`, `placeholder`, `readonly`, `required`, `separators`, `size`, `state`, `style`, `tags_input`, `theme`, `unstyled`
+**本地公开入口（同族）：** `accept_value_on_blur`, `class`, `clear_label`, `clearable`, `default_search`, `default_value`, `duplicate_policy`, `enabled`, `field`, `focus`, `form_name`, `invalid`, `label`, `loading`, `loading_position`, `max_tags`, `mount`, `name`, `node_ref`, `on`, `on_change`, `on_commit`, `on_reject`, `on_remove`, `pills_input`, `placeholder`, `readonly`, `required`, `separators`, `size`, `state`, `style`, `tags_input`, `theme`, `unstyled`
 
 **需要语义映射的属性候选：** `description`, `descriptionProps`, `disabled`, `error`, `errorProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `pointer`, `radius`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `success`, `successProps`, `type`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
 
 ### Select — M:Select
 
-来源：[@mantine/core](https://mantine.dev/core/select/)；对应 `P4-05`；原生有限能力状态 `model-only`。
+来源：[@mantine/core](https://mantine.dev/core/select/)；对应 `P4-05`；原生有限能力状态 `tested`。
 
 **官方 Props / 子部件 Props：** `allowDeselect`, `autoSelectOnBlur`, `checkIconPosition`, `chevronColor`, `clearButtonProps`, `clearSectionMode`, `clearable`, `comboboxProps`, `data`, `defaultDropdownOpened`, `defaultSearchValue`, `defaultValue`, `description`, `descriptionProps`, `disabled`, `dropdownOpened`, `error`, `errorProps`, `filter`, `floatingHeight`, `hiddenInputProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `limit`, `loading`, `loadingPosition`, `maxDropdownHeight`, `nothingFoundMessage`, `onChange`, `onClear`, `onDropdownClose`, `onDropdownOpen`, `onOptionSubmit`, `onSearchChange`, `openOnFocus`, `pointer`, `radius`, `renderOption`, `required`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `scrollAreaProps`, `searchValue`, `searchable`, `selectFirstOptionOnChange`, `selectFirstOptionOnDropdownOpen`, `size`, `success`, `successProps`, `value`, `withAlignedLabels`, `withAsterisk`, `withCheckIcon`, `withErrorStyles`, `withScrollArea`, `withSuccessStyles`, `wrapperProps`
 
 **官方功能章节：** Usage；Loading state；Controlled；onChange handler；autoSelectOnBlur；Clearable；Allow deselect；Open on focus；Searchable；Controlled search value；Nothing found；Checked option icon；Value type；Data prop；Filtering；Sort options；Fuzzy search with fuse.js；Large datasets；renderOption；Scrollable dropdown；Fit dropdown to viewport height；Group options；Disabled options；Inside Popover；Control dropdown opened state；Dropdown position；Dropdown width；Dropdown offset；Prevent horizontal infinite scrolling；Dropdown animation；Dropdown padding；Dropdown shadow；Input sections；Input props；Read only；Disabled；Error state
 
-**本地实现：** [../glory/crates/render/src/choice.rs](../../glory/crates/render/src/choice.rs)、[src/select.rs](../src/select.rs)
+**本地实现：** [../glory/crates/render/src/choice.rs](../../glory/crates/render/src/choice.rs)、[src/input_actions.rs](../src/input_actions.rs)、[src/select.rs](../src/select.rs)
 
-**本地公开入口（同族）：** `check_position`, `choice`, `choice_remove_last`, `class`, `clearable`, `default_open`, `default_value`, `description`, `enabled`, `field`, `focus`, `form_name`, `group`, `invalid`, `label`, `leading`, `loading`, `max_dropdown_height`, `name`, `node_ref`, `on`, `on_open_change`, `on_value_change`, `open`, `option`, `option_content`, `options`, `placeholder`, `popup_placement`, `readonly`, `required`, `resolve_active_descendant`, `select`, `size`, `style`, `theme`, `trailing`, `unstyled`, `value`, `with_check_icon`
+**本地公开入口（同族）：** `check_position`, `choice`, `choice_remove_last`, `class`, `clearable`, `default_open`, `default_value`, `description`, `empty_message`, `enabled`, `field`, `focus`, `form_name`, `group`, `invalid`, `label`, `leading`, `loading`, `max_dropdown_height`, `name`, `node_ref`, `on`, `on_open_change`, `on_value_change`, `open`, `option`, `option_content`, `options`, `placeholder`, `popup_placement`, `readonly`, `required`, `resolve_active_descendant`, `select`, `size`, `style`, `theme`, `trailing`, `trigger_content`, `unstyled`, `value`, `with_aligned_labels`, `with_check_icon`
 
-**需要语义映射的属性候选：** `allowDeselect`, `autoSelectOnBlur`, `checkIconPosition`, `chevronColor`, `clearButtonProps`, `clearSectionMode`, `comboboxProps`, `data`, `defaultDropdownOpened`, `defaultSearchValue`, `descriptionProps`, `disabled`, `dropdownOpened`, `error`, `errorProps`, `filter`, `floatingHeight`, `hiddenInputProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `limit`, `loadingPosition`, `nothingFoundMessage`, `onChange`, `onClear`, `onDropdownClose`, `onDropdownOpen`, `onOptionSubmit`, `onSearchChange`, `openOnFocus`, `pointer`, `radius`, `renderOption`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `scrollAreaProps`, `searchValue`, `searchable`, `selectFirstOptionOnChange`, `selectFirstOptionOnDropdownOpen`, `success`, `successProps`, `withAlignedLabels`, `withAsterisk`, `withErrorStyles`, `withScrollArea`, `withSuccessStyles`, `wrapperProps`
+**需要语义映射的属性候选：** `allowDeselect`, `autoSelectOnBlur`, `checkIconPosition`, `chevronColor`, `clearButtonProps`, `clearSectionMode`, `comboboxProps`, `data`, `defaultDropdownOpened`, `defaultSearchValue`, `descriptionProps`, `disabled`, `dropdownOpened`, `error`, `errorProps`, `filter`, `floatingHeight`, `hiddenInputProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `limit`, `loadingPosition`, `nothingFoundMessage`, `onChange`, `onClear`, `onDropdownClose`, `onDropdownOpen`, `onOptionSubmit`, `onSearchChange`, `openOnFocus`, `pointer`, `radius`, `renderOption`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `scrollAreaProps`, `searchValue`, `searchable`, `selectFirstOptionOnChange`, `selectFirstOptionOnDropdownOpen`, `success`, `successProps`, `withAsterisk`, `withErrorStyles`, `withScrollArea`, `withSuccessStyles`, `wrapperProps`
 
 ### TagsInput — M:TagsInput
 
-来源：[@mantine/core](https://mantine.dev/core/tags-input/)；对应 `P4-09`；原生有限能力状态 `model-only`。
+来源：[@mantine/core](https://mantine.dev/core/tags-input/)；对应 `P4-09`；原生有限能力状态 `tested`。
 
 **官方 Props / 子部件 Props：** `acceptValueOnBlur`, `allowDuplicates`, `clearButtonProps`, `clearSectionMode`, `clearable`, `comboboxProps`, `data`, `defaultDropdownOpened`, `defaultSearchValue`, `defaultValue`, `description`, `descriptionProps`, `disabled`, `dropdownOpened`, `error`, `errorProps`, `filter`, `floatingHeight`, `hiddenInputProps`, `hiddenInputValuesDivider`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `isDuplicate`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `limit`, `loading`, `loadingPosition`, `maxDropdownHeight`, `maxTags`, `onChange`, `onClear`, `onDropdownClose`, `onDropdownOpen`, `onDuplicate`, `onMaxTags`, `onOptionSubmit`, `onRemove`, `onSearchChange`, `openOnFocus`, `pointer`, `radius`, `renderOption`, `renderPill`, `required`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `scrollAreaProps`, `searchValue`, `selectFirstOptionOnChange`, `selectFirstOptionOnDropdownOpen`, `size`, `splitChars`, `success`, `successProps`, `value`, `withAsterisk`, `withErrorStyles`, `withPillsReorder`, `withScrollArea`, `withSuccessStyles`, `wrapperProps`
 
@@ -619,7 +619,7 @@
 
 **本地实现：** [src/pills_input.rs](../src/pills_input.rs)、[src/tag.rs](../src/tag.rs)、[src/tags_input.rs](../src/tags_input.rs)
 
-**本地公开入口（同族）：** `accept_value_on_blur`, `class`, `clear_label`, `clearable`, `default_search`, `default_value`, `duplicate_policy`, `enabled`, `field`, `focus`, `form_name`, `invalid`, `label`, `loading`, `loading_position`, `max_tags`, `name`, `node_ref`, `on`, `on_change`, `on_commit`, `on_reject`, `on_remove`, `pills_input`, `placeholder`, `readonly`, `required`, `separators`, `size`, `state`, `style`, `tags_input`, `theme`, `unstyled`
+**本地公开入口（同族）：** `accept_value_on_blur`, `class`, `clear_label`, `clearable`, `default_search`, `default_value`, `duplicate_policy`, `enabled`, `field`, `focus`, `form_name`, `invalid`, `label`, `loading`, `loading_position`, `max_tags`, `mount`, `name`, `node_ref`, `on`, `on_change`, `on_commit`, `on_reject`, `on_remove`, `pills_input`, `placeholder`, `readonly`, `required`, `separators`, `size`, `state`, `style`, `tags_input`, `theme`, `unstyled`
 
 **需要语义映射的属性候选：** `allowDuplicates`, `clearButtonProps`, `clearSectionMode`, `comboboxProps`, `data`, `defaultDropdownOpened`, `defaultSearchValue`, `description`, `descriptionProps`, `disabled`, `dropdownOpened`, `error`, `errorProps`, `filter`, `floatingHeight`, `hiddenInputProps`, `hiddenInputValuesDivider`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `isDuplicate`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `limit`, `maxDropdownHeight`, `onClear`, `onDropdownClose`, `onDropdownOpen`, `onDuplicate`, `onMaxTags`, `onOptionSubmit`, `onSearchChange`, `openOnFocus`, `pointer`, `radius`, `renderOption`, `renderPill`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `scrollAreaProps`, `searchValue`, `selectFirstOptionOnChange`, `selectFirstOptionOnDropdownOpen`, `splitChars`, `success`, `successProps`, `value`, `withAsterisk`, `withErrorStyles`, `withPillsReorder`, `withScrollArea`, `withSuccessStyles`, `wrapperProps`
 
@@ -633,9 +633,9 @@
 
 **本地实现：** [../glory/crates/render/src/choice.rs](../../glory/crates/render/src/choice.rs)、[../glory/crates/render/src/tree.rs](../../glory/crates/render/src/tree.rs)、[src/cascader.rs](../src/cascader.rs)、[src/tree.rs](../src/tree.rs)、[src/tree_choice_model.rs](../src/tree_choice_model.rs)、[src/tree_select.rs](../src/tree_select.rs)
 
-**本地公开入口（同族）：** `allow_drop`, `as_str`, `cascader`, `checked`, `choice`, `choice_remove_last`, `class`, `clearable`, `columns`, `contains`, `default_expanded`, `default_open`, `default_search`, `default_selected`, `default_value`, `direction`, `empty_message`, `enabled`, `expanded`, `field`, `file_icons`, `file_tree`, `focus`, `form_name`, `height`, `hide_picked`, `invalid`, `is_empty`, `key`, `keys`, `leaf`, `max_dropdown_height`, `max_values`, `multiple`, `name`, `new`, `node_ref`, `nodes`, `nothing_found_message`, `on`, `on_activate`, `on_drag_drop`, `on_expanded_change`, `on_load_children`, `on_open_change`, `on_search_change`, `on_selection_change`, `on_selection_intent`, `on_value_change`, `open`, `path`, `paths`, `placeholder`, `policy`, `popup_placement`, `popup_width`, `readonly`, `render_label`, `render_node`, `render_value`, `required`, `resolve_active_descendant`, `search`, `searchable`, `selected`, `selection_follows_focus`, `selection_mode`, `size`, `style`, `theme`, `toggle`, `tree`, `tree_select`, `typeahead`, `unstyled`, `validate`, `value`, `with_lines`
+**本地公开入口（同族）：** `allow_deselect`, `allow_drop`, `as_str`, `cascader`, `change_on_select`, `checked`, `choice`, `choice_remove_last`, `class`, `clear_label`, `clearable`, `close_on_select`, `columns`, `contains`, `default_expanded`, `default_open`, `default_search`, `default_selected`, `default_value`, `direction`, `drag_handle`, `empty_message`, `enabled`, `expanded`, `field`, `file_icons`, `file_tree`, `focus`, `form_name`, `height`, `hide_picked`, `invalid`, `is_empty`, `key`, `keys`, `leaf`, `max_dropdown_height`, `max_values`, `multiple`, `name`, `new`, `node_ref`, `nodes`, `nothing_found_message`, `on`, `on_activate`, `on_drag_drop`, `on_expanded_change`, `on_load_children`, `on_open_change`, `on_search_change`, `on_selection_change`, `on_selection_intent`, `on_value_change`, `open`, `path`, `path_separator`, `paths`, `placeholder`, `policy`, `popup_placement`, `popup_width`, `readonly`, `render_label`, `render_node`, `render_value`, `required`, `resolve_active_descendant`, `search`, `searchable`, `selected`, `selection_follows_focus`, `selection_mode`, `size`, `style`, `theme`, `toggle`, `tree`, `tree_select`, `typeahead`, `unstyled`, `validate`, `value`, `virtual_rows`, `with_columns`, `with_lines`
 
-**需要语义映射的属性候选：** `allowDeselect`, `checkStrictly`, `checkedStrategy`, `chevronAriaLabels`, `chevronColor`, `clearButtonProps`, `clearSearchOnChange`, `clearSectionMode`, `comboboxProps`, `data`, `defaultDropdownOpened`, `defaultExpandAll`, `defaultExpandedValues`, `defaultSearchValue`, `description`, `descriptionProps`, `disabled`, `dropdownOpened`, `error`, `errorProps`, `expandOnClick`, `expandedValues`, `filter`, `hiddenInputProps`, `hiddenInputValuesDivider`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `maxDisplayedValues`, `maxDisplayedValuesContent`, `mode`, `onChange`, `onClear`, `onDropdownClose`, `onDropdownOpen`, `onRemove`, `openOnFocus`, `pointer`, `radius`, `renderPill`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `scrollAreaProps`, `searchValue`, `success`, `successProps`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
+**需要语义映射的属性候选：** `checkStrictly`, `checkedStrategy`, `chevronAriaLabels`, `chevronColor`, `clearButtonProps`, `clearSearchOnChange`, `clearSectionMode`, `comboboxProps`, `data`, `defaultDropdownOpened`, `defaultExpandAll`, `defaultExpandedValues`, `defaultSearchValue`, `description`, `descriptionProps`, `disabled`, `dropdownOpened`, `error`, `errorProps`, `expandOnClick`, `expandedValues`, `filter`, `hiddenInputProps`, `hiddenInputValuesDivider`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `maxDisplayedValues`, `maxDisplayedValuesContent`, `mode`, `onChange`, `onClear`, `onDropdownClose`, `onDropdownOpen`, `onRemove`, `openOnFocus`, `pointer`, `radius`, `renderPill`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `scrollAreaProps`, `searchValue`, `success`, `successProps`, `withAsterisk`, `withErrorStyles`, `withSuccessStyles`, `wrapperProps`
 
 ### ActionIcon — M:ActionIcon
 
@@ -647,9 +647,9 @@
 
 **本地实现：** [src/actions.rs](../src/actions.rs)
 
-**本地公开入口（同族）：** `action_icon`, `animated`, `burger`, `button`, `button_group`, `buttons`, `class`, `close_button`, `controls`, `default_open`, `direction`, `duration_millis`, `enabled`, `focus`, `icon`, `joined`, `labels`, `loop_focus`, `name`, `node_ref`, `on`, `on_open_change`, `on_press`, `open`, `orientation`, `size`, `style`, `theme`, `toolbar`, `unstyled`, `variant`
+**本地公开入口（同族）：** `action_icon`, `animated`, `auto_contrast`, `burger`, `button`, `button_group`, `buttons`, `class`, `close_button`, `controls`, `default_open`, `direction`, `duration_millis`, `enabled`, `focus`, `icon`, `joined`, `labels`, `line_size`, `loader_type`, `loading`, `loop_focus`, `name`, `node_ref`, `on`, `on_open_change`, `on_press`, `open`, `orientation`, `size`, `style`, `theme`, `toolbar`, `unstyled`, `variant`
 
-**需要语义映射的属性候选：** `autoContrast`, `borderWidth`, `children`, `color`, `disabled`, `gradient`, `loaderProps`, `loading`, `radius`
+**需要语义映射的属性候选：** `borderWidth`, `children`, `color`, `disabled`, `gradient`, `loaderProps`, `radius`
 
 ### Button — M:Button
 
@@ -659,11 +659,11 @@
 
 **官方功能章节：** Usage；Full width；Left and right sections；Sections position；Compact size；Disabled state；Disabled state when Button is link；Customize disabled styles；Disabled button with Tooltip；Loading state；Custom variants；Customize variant colors；Button.Group；Button.GroupSection
 
-**本地实现：** [src/button.rs](../src/button.rs)、[src/theme/mod.rs](../src/theme/mod.rs)
+**本地实现：** [src/button.rs](../src/button.rs)、[src/theme/contrast.rs](../src/theme/contrast.rs)、[src/theme/mod.rs](../src/theme/mod.rs)
 
-**本地公开入口（同族）：** `blue_dark`, `blue_light`, `button`, `class`, `compact`, `dark`, `enabled`, `fill`, `focus`, `from_default`, `green_dark`, `green_light`, `label`, `left_section`, `light`, `loading`, `name`, `new`, `node_ref`, `on`, `on_press`, `palette`, `right_section`, `size`, `spacing`, `style`, `stylesheet`, `theme`, `typography`, `unstyled`, `validate`, `variant`, `with_tokens`
+**本地公开入口（同族）：** `auto_contrast`, `blue_dark`, `blue_light`, `button`, `class`, `compact`, `contrasting_foreground`, `dark`, `enabled`, `fill`, `focus`, `from_default`, `green_dark`, `green_light`, `label`, `left_section`, `light`, `loader_type`, `loading`, `name`, `new`, `node_ref`, `on`, `on_press`, `palette`, `pressed`, `right_section`, `size`, `spacing`, `style`, `stylesheet`, `theme`, `typography`, `unstyled`, `validate`, `variant`, `with_tokens`
 
-**需要语义映射的属性候选：** `autoContrast`, `borderWidth`, `children`, `color`, `disabled`, `fullWidth`, `gradient`, `justify`, `loaderProps`, `orientation`, `radius`
+**需要语义映射的属性候选：** `borderWidth`, `children`, `color`, `disabled`, `fullWidth`, `gradient`, `justify`, `loaderProps`, `orientation`, `radius`
 
 ### CloseButton — M:CloseButton
 
@@ -675,7 +675,7 @@
 
 **本地实现：** [src/actions.rs](../src/actions.rs)
 
-**本地公开入口（同族）：** `action_icon`, `animated`, `burger`, `button`, `button_group`, `buttons`, `class`, `close_button`, `controls`, `default_open`, `direction`, `duration_millis`, `enabled`, `focus`, `icon`, `joined`, `labels`, `loop_focus`, `name`, `node_ref`, `on`, `on_open_change`, `on_press`, `open`, `orientation`, `size`, `style`, `theme`, `toolbar`, `unstyled`, `variant`
+**本地公开入口（同族）：** `action_icon`, `animated`, `auto_contrast`, `burger`, `button`, `button_group`, `buttons`, `class`, `close_button`, `controls`, `default_open`, `direction`, `duration_millis`, `enabled`, `focus`, `icon`, `joined`, `labels`, `line_size`, `loader_type`, `loading`, `loop_focus`, `name`, `node_ref`, `on`, `on_open_change`, `on_press`, `open`, `orientation`, `size`, `style`, `theme`, `toolbar`, `unstyled`, `variant`
 
 **需要语义映射的属性候选：** `children`, `disabled`, `iconSize`, `radius`
 
@@ -703,7 +703,7 @@
 
 **本地实现：** [../glory/crates/render/src/files.rs](../../glory/crates/render/src/files.rs)、[../glory/crates/web/src/browser/files.rs](../../glory/crates/web/src/browser/files.rs)、[src/files.rs](../src/files.rs)
 
-**本地公开入口（同族）：** `attachment`, `class`, `clear`, `configuration`, `controller_ref`, `description`, `dropzone`, `enabled`, `file_attachment`, `file_button`, `file_input`, `files`, `files_ref`, `focus`, `label`, `matches`, `name`, `native_source`, `new`, `node_ref`, `on`, `on_files`, `on_result`, `preview`, `preview_in`, `previews`, `read`, `read_in`, `remove`, `size`, `status`, `status_ref`, `style`, `text`, `theme`, `unstyled`, `validate`, `validate_file`, `validate_files`, `validate_node`, `validate_read`, `validate_update`, `value`
+**本地公开入口（同族）：** `attachment`, `class`, `clear`, `clearable`, `configuration`, `controller_ref`, `description`, `dropzone`, `enabled`, `field`, `file_attachment`, `file_button`, `file_input`, `files`, `files_ref`, `focus`, `label`, `loading`, `matches`, `name`, `native_source`, `new`, `node_ref`, `on`, `on_files`, `on_result`, `open_picker`, `preview`, `preview_in`, `previews`, `read`, `read_in`, `remove`, `show_attachments`, `size`, `status`, `status_ref`, `style`, `text`, `theme`, `unstyled`, `validate`, `validate_file`, `validate_files`, `validate_node`, `validate_read`, `validate_update`, `value`
 
 **需要语义映射的属性候选：** `accept`, `capture`, `children`, `disabled`, `form`, `inputProps`, `multiple`, `onChange`, `resetRef`
 
@@ -729,9 +729,9 @@
 
 **官方功能章节：** Usage
 
-**本地实现：** [src/button.rs](../src/button.rs)、[src/theme/mod.rs](../src/theme/mod.rs)
+**本地实现：** [src/button.rs](../src/button.rs)、[src/theme/contrast.rs](../src/theme/contrast.rs)、[src/theme/mod.rs](../src/theme/mod.rs)
 
-**本地公开入口（同族）：** `blue_dark`, `blue_light`, `button`, `class`, `compact`, `dark`, `enabled`, `fill`, `focus`, `from_default`, `green_dark`, `green_light`, `label`, `left_section`, `light`, `loading`, `name`, `new`, `node_ref`, `on`, `on_press`, `palette`, `right_section`, `size`, `spacing`, `style`, `stylesheet`, `theme`, `typography`, `unstyled`, `validate`, `variant`, `with_tokens`
+**本地公开入口（同族）：** `auto_contrast`, `blue_dark`, `blue_light`, `button`, `class`, `compact`, `contrasting_foreground`, `dark`, `enabled`, `fill`, `focus`, `from_default`, `green_dark`, `green_light`, `label`, `left_section`, `light`, `loader_type`, `loading`, `name`, `new`, `node_ref`, `on`, `on_press`, `palette`, `pressed`, `right_section`, `size`, `spacing`, `style`, `stylesheet`, `theme`, `typography`, `unstyled`, `validate`, `variant`, `with_tokens`
 
 **需要语义映射的属性候选：** 无直接拼写候选；仍不推断功能等价。
 
@@ -745,7 +745,7 @@
 
 **本地实现：** [../glory/crates/render/tests/links.rs](../../glory/crates/render/tests/links.rs)、[src/anchor.rs](../src/anchor.rs)
 
-**本地公开入口（同族）：** `anchor`, `class`, `current`, `focus`, `href`, `label`, `name`, `node_ref`, `on`, `on_navigate`, `open_in`, `size`, `style`, `theme`, `unstyled`
+**本地公开入口（同族）：** `anchor`, `class`, `current`, `fill`, `focus`, `href`, `label`, `name`, `node_ref`, `on`, `on_navigate`, `open_in`, `size`, `style`, `theme`, `unstyled`
 
 **需要语义映射的属性候选：** `gradient`, `inherit`, `inline`, `lineClamp`, `textWrap`, `truncate`, `underline`
 
@@ -759,9 +759,9 @@
 
 **本地实现：** [../glory/crates/render/tests/current.rs](../../glory/crates/render/tests/current.rs)、[src/navigation.rs](../src/navigation.rs)
 
-**本地公开入口（同族）：** `boundaries`, `breadcrumb_item`, `breadcrumbs`, `children`, `class`, `content_policy`, `current`, `default_expanded`, `default_page`, `enabled`, `expanded`, `has_next`, `highlighted`, `href`, `items`, `label`, `max_items`, `name`, `nav_link`, `node_ref`, `on`, `on_expanded_change`, `on_navigate`, `on_page_change`, `page`, `pagination`, `pagination_window`, `siblings`, `size`, `style`, `theme`, `total`, `unstyled`
+**本地公开入口（同族）：** `boundaries`, `breadcrumb_item`, `breadcrumbs`, `children`, `class`, `content_policy`, `control_icons`, `current`, `default_expanded`, `default_page`, `description`, `enabled`, `expanded`, `gap`, `has_next`, `highlighted`, `href`, `items`, `label`, `left_section`, `max_items`, `name`, `nav_link`, `node_ref`, `on`, `on_expanded_change`, `on_navigate`, `on_page_change`, `page`, `page_href`, `pagination`, `pagination_window`, `right_section`, `separator`, `siblings`, `size`, `start_value`, `style`, `theme`, `total`, `unstyled`, `variant`, `with_controls`, `with_edges`
 
-**需要语义映射的属性候选：** `separator`, `separatorMargin`
+**需要语义映射的属性候选：** `separatorMargin`
 
 ### Burger — M:Burger
 
@@ -773,9 +773,9 @@
 
 **本地实现：** [src/actions.rs](../src/actions.rs)
 
-**本地公开入口（同族）：** `action_icon`, `animated`, `burger`, `button`, `button_group`, `buttons`, `class`, `close_button`, `controls`, `default_open`, `direction`, `duration_millis`, `enabled`, `focus`, `icon`, `joined`, `labels`, `loop_focus`, `name`, `node_ref`, `on`, `on_open_change`, `on_press`, `open`, `orientation`, `size`, `style`, `theme`, `toolbar`, `unstyled`, `variant`
+**本地公开入口（同族）：** `action_icon`, `animated`, `auto_contrast`, `burger`, `button`, `button_group`, `buttons`, `class`, `close_button`, `controls`, `default_open`, `direction`, `duration_millis`, `enabled`, `focus`, `icon`, `joined`, `labels`, `line_size`, `loader_type`, `loading`, `loop_focus`, `name`, `node_ref`, `on`, `on_open_change`, `on_press`, `open`, `orientation`, `size`, `style`, `theme`, `toolbar`, `unstyled`, `variant`
 
-**需要语义映射的属性候选：** `color`, `lineSize`, `opened`, `transitionDuration`, `transitionTimingFunction`
+**需要语义映射的属性候选：** `color`, `opened`, `transitionDuration`, `transitionTimingFunction`
 
 ### NavLink — M:NavLink
 
@@ -787,9 +787,9 @@
 
 **本地实现：** [src/navigation.rs](../src/navigation.rs)、[src/navigation_menu/mod.rs](../src/navigation_menu/mod.rs)
 
-**本地公开入口（同族）：** `boundaries`, `breadcrumb_item`, `breadcrumbs`, `children`, `class`, `content`, `content_policy`, `current`, `default_expanded`, `default_open_path`, `default_page`, `direction`, `enabled`, `expanded`, `has_next`, `highlighted`, `hover`, `hover_delay_with`, `href`, `items`, `label`, `max_items`, `name`, `nav_link`, `navigation_menu`, `node_ref`, `on`, `on_expanded_change`, `on_navigate`, `on_open_path_change`, `on_page_change`, `open`, `open_path`, `page`, `pagination`, `pagination_window`, `siblings`, `size`, `style`, `theme`, `total`, `track_focusable`, `unstyled`
+**本地公开入口（同族）：** `boundaries`, `breadcrumb_item`, `breadcrumbs`, `children`, `class`, `content`, `content_policy`, `control_icons`, `current`, `default_expanded`, `default_open_path`, `default_page`, `description`, `direction`, `enabled`, `expanded`, `gap`, `has_next`, `highlighted`, `hover`, `hover_delay_with`, `href`, `items`, `label`, `left_section`, `max_items`, `name`, `nav_link`, `navigation_menu`, `node_ref`, `on`, `on_expanded_change`, `on_navigate`, `on_open_path_change`, `on_page_change`, `open`, `open_path`, `page`, `page_href`, `pagination`, `pagination_window`, `right_section`, `separator`, `siblings`, `size`, `start_value`, `style`, `theme`, `total`, `track_focusable`, `unstyled`, `variant`, `with_controls`, `with_edges`
 
-**需要语义映射的属性候选：** `active`, `autoContrast`, `childrenOffset`, `color`, `defaultOpened`, `description`, `disableRightSectionRotation`, `disabled`, `keepMounted`, `leftSection`, `noWrap`, `onChange`, `onClick`, `onKeyDown`, `opened`, `rightSection`
+**需要语义映射的属性候选：** `active`, `autoContrast`, `childrenOffset`, `color`, `defaultOpened`, `disableRightSectionRotation`, `disabled`, `keepMounted`, `noWrap`, `onChange`, `onClick`, `onKeyDown`, `opened`
 
 ### Pagination — M:Pagination
 
@@ -801,9 +801,9 @@
 
 **本地实现：** [../glory/crates/render/tests/current.rs](../../glory/crates/render/tests/current.rs)、[src/navigation.rs](../src/navigation.rs)
 
-**本地公开入口（同族）：** `boundaries`, `breadcrumb_item`, `breadcrumbs`, `children`, `class`, `content_policy`, `current`, `default_expanded`, `default_page`, `enabled`, `expanded`, `has_next`, `highlighted`, `href`, `items`, `label`, `max_items`, `name`, `nav_link`, `node_ref`, `on`, `on_expanded_change`, `on_navigate`, `on_page_change`, `page`, `pagination`, `pagination_window`, `siblings`, `size`, `style`, `theme`, `total`, `unstyled`
+**本地公开入口（同族）：** `boundaries`, `breadcrumb_item`, `breadcrumbs`, `children`, `class`, `content_policy`, `control_icons`, `current`, `default_expanded`, `default_page`, `description`, `enabled`, `expanded`, `gap`, `has_next`, `highlighted`, `href`, `items`, `label`, `left_section`, `max_items`, `name`, `nav_link`, `node_ref`, `on`, `on_expanded_change`, `on_navigate`, `on_page_change`, `page`, `page_href`, `pagination`, `pagination_window`, `right_section`, `separator`, `siblings`, `size`, `start_value`, `style`, `theme`, `total`, `unstyled`, `variant`, `with_controls`, `with_edges`
 
-**需要语义映射的属性候选：** `active`, `autoContrast`, `color`, `defaultValue`, `disabled`, `dotsIcon`, `firstIcon`, `formatLabel`, `gap`, `getControlProps`, `getItemProps`, `hideWithOnePage`, `icon`, `lastIcon`, `layout`, `nextIcon`, `onChange`, `onFirstPage`, `onLastPage`, `onNextPage`, `onPreviousPage`, `previousIcon`, `radius`, `startValue`, `value`, `withControls`, `withEdges`, `withPadding`, `withPages`
+**需要语义映射的属性候选：** `active`, `autoContrast`, `color`, `defaultValue`, `disabled`, `dotsIcon`, `firstIcon`, `formatLabel`, `getControlProps`, `getItemProps`, `hideWithOnePage`, `icon`, `lastIcon`, `layout`, `nextIcon`, `onChange`, `onFirstPage`, `onLastPage`, `onNextPage`, `onPreviousPage`, `previousIcon`, `radius`, `value`, `withPadding`, `withPages`
 
 ### Stepper — M:Stepper
 
@@ -815,9 +815,9 @@
 
 **本地实现：** [src/stepper.rs](../src/stepper.rs)
 
-**本地公开入口（同族）：** `active`, `allow_skip`, `class`, `completed`, `completed_label`, `content_policy`, `default_active`, `description`, `enabled`, `focus`, `name`, `node_ref`, `on`, `on_step_change`, `optional`, `orientation`, `selectable`, `size`, `status`, `step`, `stepper`, `steps`, `style`, `theme`, `unstyled`
+**本地公开入口（同族）：** `active`, `allow_skip`, `class`, `completed`, `completed_label`, `content_policy`, `default_active`, `description`, `enabled`, `focus`, `icon`, `icon_radius`, `icon_size`, `loading`, `name`, `node_ref`, `on`, `on_step_change`, `optional`, `orientation`, `selectable`, `size`, `status`, `step`, `stepper`, `steps`, `style`, `theme`, `unstyled`
 
-**需要语义映射的属性候选：** `allowNextStepsSelect`, `allowStepClick`, `allowStepSelect`, `autoContrast`, `children`, `color`, `completedIcon`, `contentPadding`, `icon`, `iconPosition`, `iconSize`, `keepMounted`, `label`, `labelPosition`, `loading`, `onStepClick`, `progressIcon`, `radius`, `state`, `withIcon`, `wrap`
+**需要语义映射的属性候选：** `allowNextStepsSelect`, `allowStepClick`, `allowStepSelect`, `autoContrast`, `children`, `color`, `completedIcon`, `contentPadding`, `iconPosition`, `keepMounted`, `label`, `labelPosition`, `onStepClick`, `progressIcon`, `radius`, `state`, `withIcon`, `wrap`
 
 ### TableOfContents — M:TableOfContents
 
@@ -829,7 +829,7 @@
 
 **本地实现：** [src/table_of_contents/mod.rs](../src/table_of_contents/mod.rs)、[src/table_of_contents/model.rs](../src/table_of_contents/model.rs)
 
-**本地公开入口（同族）：** `class`, `content`, `current`, `entries`, `is_empty`, `len`, `name`, `node_ref`, `offset`, `order`, `refresh`, `reveal`, `size`, `style`, `table_of_contents`, `theme`, `toc_context`, `toc_document`, `toc_heading`, `unstyled`
+**本地公开入口（同族）：** `class`, `content`, `current`, `entries`, `is_empty`, `len`, `name`, `node_ref`, `offset`, `order`, `refresh`, `reveal`, `size`, `style`, `table_of_contents`, `theme`, `toc_context`, `toc_document`, `toc_heading`, `unstyled`, `variant`
 
 **需要语义映射的属性候选：** `autoContrast`, `color`, `depthOffset`, `getControlProps`, `initialData`, `minDepthToOffset`, `radius`, `reinitializeRef`, `scrollSpyOptions`
 
@@ -841,11 +841,11 @@
 
 **官方功能章节：** Usage；Controlled Tabs；Uncontrolled Tabs；Change colors；Tabs position；Inverted tabs；Vertical tabs placement；Custom variants；Disabled tabs；Activation mode；Tab deactivation；Unmount inactive tabs；Get tab control ref；Tab as a link；Tab as a link with Next.js；Tab as a link with React Router；Usage with react-router；Usage with Next.js Pages Router；Example with Scroller component；Accessibility；Keyboard interactions
 
-**本地实现：** [src/tabs/dynamic.rs](../src/tabs/dynamic.rs)、[src/tabs/mod.rs](../src/tabs/mod.rs)
+**本地实现：** [src/composite/skin.rs](../src/composite/skin.rs)、[src/tabs/dynamic.rs](../src/tabs/dynamic.rs)、[src/tabs/mod.rs](../src/tabs/mod.rs)
 
-**本地公开入口（同族）：** `activation`, `class`, `content_policy`, `default_value`, `direction`, `enabled`, `focus`, `loop_focus`, `name`, `node_ref`, `on`, `on_value_change`, `orientation`, `size`, `style`, `tab`, `tabs`, `theme`, `trigger_content`, `unstyled`, `value`
+**本地公开入口（同族）：** `activation`, `allow_deactivation`, `class`, `content_policy`, `default_value`, `direction`, `enabled`, `focus`, `grow`, `loop_focus`, `name`, `node_ref`, `on`, `on_value_change`, `orientation`, `size`, `style`, `tab`, `tabs`, `theme`, `trigger_content`, `unstyled`, `value`, `variant`
 
-**需要语义映射的属性候选：** `activateTabWithKeyboard`, `allowTabDeactivation`, `autoContrast`, `children`, `color`, `grow`, `id`, `inverted`, `justify`, `keepMounted`, `keepMountedMode`, `leftSection`, `loop`, `onChange`, `placement`, `radius`, `rightSection`
+**需要语义映射的属性候选：** `activateTabWithKeyboard`, `allowTabDeactivation`, `autoContrast`, `children`, `color`, `id`, `inverted`, `justify`, `keepMounted`, `keepMountedMode`, `leftSection`, `loop`, `onChange`, `placement`, `radius`, `rightSection`
 
 ### Tree — M:Tree
 
@@ -857,7 +857,7 @@
 
 **本地实现：** [../glory/crates/render/src/tree.rs](../../glory/crates/render/src/tree.rs)、[src/tree.rs](../src/tree.rs)、[src/tree_model.rs](../src/tree_model.rs)
 
-**本地公开入口（同族）：** `allow_drop`, `as_str`, `checked`, `children`, `class`, `default_expanded`, `default_selected`, `direction`, `disabled`, `empty_message`, `enabled`, `expanded`, `expanded_tree_branches`, `file_icons`, `file_tree`, `file_tree_nodes`, `filter_tree_nodes`, `focus`, `height`, `index`, `key`, `kind`, `message`, `move_tree_node`, `name`, `new`, `node_ref`, `nodes`, `on`, `on_activate`, `on_drag_drop`, `on_expanded_change`, `on_load_children`, `on_selection_change`, `on_selection_intent`, `parent`, `render_label`, `selected`, `selection_follows_focus`, `selection_mode`, `size`, `style`, `theme`, `tree`, `typeahead`, `unstyled`, `valid_tree_key`, `validate`, `validate_tree_keys`, `visible`, `with_lines`
+**本地公开入口（同族）：** `allow_drop`, `as_str`, `checked`, `children`, `class`, `default_expanded`, `default_selected`, `direction`, `disabled`, `drag_handle`, `empty_message`, `enabled`, `expanded`, `expanded_tree_branches`, `file_icons`, `file_tree`, `file_tree_nodes`, `filter_tree_nodes`, `focus`, `height`, `index`, `key`, `kind`, `message`, `move_tree_node`, `name`, `new`, `node_ref`, `nodes`, `on`, `on_activate`, `on_drag_drop`, `on_expanded_change`, `on_load_children`, `on_selection_change`, `on_selection_intent`, `parent`, `render_label`, `selected`, `selection_follows_focus`, `selection_mode`, `size`, `style`, `theme`, `tree`, `typeahead`, `unstyled`, `valid_tree_key`, `validate`, `validate_tree_keys`, `virtual_rows`, `visible`, `with_lines`
 
 **需要语义映射的属性候选：** `allowDeselect`, `allowRangeSelection`, `aspectRatio`, `autoContrast`, `checkOnSpace`, `checkStrictly`, `checkedStrategy`, `chevronAriaLabels`, `chevronColor`, `clearButtonProps`, `clearSearchOnChange`, `clearSectionMode`, `clearSelectionOnOutsideClick`, `clearable`, `comboboxProps`, `data`, `dataKey`, `defaultDropdownOpened`, `defaultExpandAll`, `defaultExpandedValues`, `defaultSearchValue`, `defaultValue`, `description`, `descriptionProps`, `dropdownOpened`, `error`, `errorProps`, `expandOnClick`, `expandOnSpace`, `expandedValues`, `filter`, `hiddenInputProps`, `hiddenInputValuesDivider`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `keepMounted`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `levelOffset`, `loading`, `loadingPosition`, `maxDisplayedValues`, `maxDisplayedValuesContent`, `maxDropdownHeight`, `maxValues`, `mode`, `nothingFoundMessage`, `onChange`, `onClear`, `onDropdownClose`, `onDropdownOpen`, `onRemove`, `onSearchChange`, `openOnFocus`, `pointer`, `radius`, `renderNode`, `renderPill`, `required`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `scrollAreaProps`, `searchValue`, `searchable`, `selectOnClick`, `strokeColor`, `strokeWidth`, `success`, `successProps`, `textColor`, `tooltipAnimationDuration`, `tooltipProps`, `treemapProps`, `value`, `valueFormatter`, `withAsterisk`, `withDragHandle`, `withErrorStyles`, `withSuccessStyles`, `withTooltip`, `wrapperProps`
 
@@ -871,7 +871,7 @@
 
 **本地实现：** [src/alert.rs](../src/alert.rs)
 
-**本地公开入口（同族）：** `alert`, `announcement`, `class`, `closable`, `close_label`, `color`, `content`, `fill`, `icon`, `name`, `node_ref`, `on_close`, `severity`, `size`, `style`, `theme`, `title`, `unstyled`, `variant`, `visible`
+**本地公开入口（同族）：** `alert`, `announcement`, `class`, `closable`, `close_label`, `color`, `content`, `fill`, `icon`, `name`, `node_ref`, `on_close`, `optional_content`, `severity`, `size`, `style`, `theme`, `title`, `unstyled`, `variant`, `visible`
 
 **需要语义映射的属性候选：** `autoContrast`, `closeButtonLabel`, `radius`, `withCloseButton`
 
@@ -885,9 +885,9 @@
 
 **本地实现：** [src/display.rs](../src/display.rs)
 
-**本地公开入口（同族）：** `actions`, `badge`, `bordered`, `card`, `class`, `content`, `default_visible`, `description`, `empty_state`, `enabled`, `fill`, `footer`, `header`, `heading_level`, `illustration`, `name`, `node_ref`, `on_remove`, `on_remove_press`, `paper`, `pill`, `removable`, `remove_ref`, `shadow`, `size`, `style`, `theme`, `title`, `unstyled`, `variant`, `visible`
+**本地公开入口（同族）：** `actions`, `badge`, `bordered`, `card`, `class`, `color`, `content`, `default_visible`, `description`, `empty_state`, `enabled`, `fill`, `footer`, `header`, `heading_level`, `illustration`, `left_section`, `name`, `node_ref`, `on_remove`, `on_remove_press`, `paper`, `pill`, `removable`, `remove_ref`, `right_section`, `shadow`, `size`, `style`, `theme`, `title`, `unstyled`, `variant`, `visible`
 
-**需要语义映射的属性候选：** `align`, `children`, `color`, `icon`, `withIndicatorBackground`
+**需要语义映射的属性候选：** `align`, `children`, `icon`, `withIndicatorBackground`
 
 ### Loader — M:Loader
 
@@ -899,9 +899,9 @@
 
 **本地实现：** [../glory/crates/apace/src/graphic_motion.rs](../../glory/crates/apace/src/graphic_motion.rs)、[src/spinner.rs](../src/spinner.rs)
 
-**本地公开入口（同族）：** `animated`, `class`, `decorative`, `diameter`, `finish_transitions`, `install`, `install_transition`, `loader`, `name`, `new`, `node_ref`, `period_millis`, `permissions`, `remove`, `set_motion_preference`, `size`, `spinner`, `style`, `theme`, `thickness`, `unstyled`, `visible`
+**本地公开入口（同族）：** `animated`, `class`, `color`, `decorative`, `diameter`, `finish_transitions`, `install`, `install_transition`, `kind`, `loader`, `name`, `new`, `node_ref`, `period_millis`, `permissions`, `remove`, `set_motion_preference`, `size`, `spinner`, `style`, `theme`, `thickness`, `unstyled`, `visible`
 
-**需要语义映射的属性候选：** `children`, `color`, `loaders`, `type`
+**需要语义映射的属性候选：** `children`, `loaders`, `type`
 
 ### Notification — M:Notification
 
@@ -913,9 +913,9 @@
 
 **本地实现：** [src/notifications.rs](../src/notifications.rs)
 
-**本地公开入口（同族）：** `action`, `announcement`, `capacity`, `class`, `clear`, `clock`, `closable`, `close_label`, `content`, `dismiss`, `name`, `new`, `node_ref`, `notification`, `notification_request`, `notifications`, `on_close`, `on_ready`, `pause`, `pause_on_hover`, `pending`, `severity`, `show`, `style`, `theme`, `timeout`, `title`, `toaster`, `unstyled`, `update`, `visible`, `visible_limit`
+**本地公开入口（同族）：** `action`, `announcement`, `auto_close_progress`, `capacity`, `class`, `clear`, `clock`, `closable`, `close_label`, `color`, `content`, `dismiss`, `icon`, `loading`, `name`, `new`, `node_ref`, `notification`, `notification_request`, `notifications`, `on_close`, `on_ready`, `optional_content`, `pause`, `pause_on_hover`, `pending`, `priority`, `render`, `severity`, `show`, `style`, `theme`, `timeout`, `title`, `toaster`, `unstyled`, `update`, `variant`, `visible`, `visible_and_queued`, `visible_limit`
 
-**需要语义映射的属性候选：** `allowDragDismiss`, `allowScrollDismiss`, `autoClose`, `children`, `closeButtonProps`, `color`, `containerWidth`, `icon`, `layout`, `limit`, `loaderProps`, `loading`, `notificationMaxHeight`, `pauseResetOnHover`, `portalProps`, `position`, `radius`, `renderNotification`, `store`, `transitionDuration`, `withAutoCloseProgress`, `withBorder`, `withCloseButton`, `withinPortal`, `zIndex`
+**需要语义映射的属性候选：** `allowDragDismiss`, `allowScrollDismiss`, `autoClose`, `children`, `closeButtonProps`, `containerWidth`, `layout`, `limit`, `loaderProps`, `notificationMaxHeight`, `pauseResetOnHover`, `portalProps`, `position`, `radius`, `renderNotification`, `store`, `transitionDuration`, `withAutoCloseProgress`, `withBorder`, `withCloseButton`, `withinPortal`, `zIndex`
 
 ### Progress — M:Progress
 
@@ -927,9 +927,9 @@
 
 **本地实现：** [../glory/crates/render/src/progress.rs](../../glory/crates/render/src/progress.rs)、[src/progress.rs](../src/progress.rs)
 
-**本地公开入口（同族）：** `class`, `empty_segment_color`, `fill_direction`, `filled_segment_color`, `fraction`, `height`, `indeterminate`, `label`, `label_position`, `length`, `name`, `node_ref`, `orientation`, `progress`, `range`, `ring_progress`, `root_color`, `round_caps`, `section_gap`, `sections`, `semi_circle_progress`, `semi_orientation`, `size`, `start_angle`, `style`, `theme`, `thickness`, `unstyled`, `validate`, `value_text`, `vertical`, `width`
+**本地公开入口（同族）：** `animated`, `class`, `empty_segment_color`, `fill_direction`, `filled_segment_color`, `fraction`, `height`, `indeterminate`, `label`, `label_position`, `length`, `name`, `node_ref`, `on_section_hover`, `orientation`, `progress`, `range`, `ring_progress`, `root_color`, `round_caps`, `section_gap`, `section_label`, `sections`, `semi_circle_progress`, `semi_orientation`, `size`, `start_angle`, `striped`, `style`, `theme`, `thickness`, `unstyled`, `validate`, `value_text`, `vertical`, `width`
 
-**需要语义映射的属性候选：** `animated`, `autoContrast`, `color`, `radius`, `striped`, `transitionDuration`, `value`, `withAria`
+**需要语义映射的属性候选：** `autoContrast`, `color`, `radius`, `transitionDuration`, `value`, `withAria`
 
 ### RingProgress — M:RingProgress
 
@@ -941,7 +941,7 @@
 
 **本地实现：** [../glory/crates/render/src/progress.rs](../../glory/crates/render/src/progress.rs)、[src/progress.rs](../src/progress.rs)
 
-**本地公开入口（同族）：** `class`, `empty_segment_color`, `fill_direction`, `filled_segment_color`, `fraction`, `height`, `indeterminate`, `label`, `label_position`, `length`, `name`, `node_ref`, `orientation`, `progress`, `range`, `ring_progress`, `root_color`, `round_caps`, `section_gap`, `sections`, `semi_circle_progress`, `semi_orientation`, `size`, `start_angle`, `style`, `theme`, `thickness`, `unstyled`, `validate`, `value_text`, `vertical`, `width`
+**本地公开入口（同族）：** `animated`, `class`, `empty_segment_color`, `fill_direction`, `filled_segment_color`, `fraction`, `height`, `indeterminate`, `label`, `label_position`, `length`, `name`, `node_ref`, `on_section_hover`, `orientation`, `progress`, `range`, `ring_progress`, `root_color`, `round_caps`, `section_gap`, `section_label`, `sections`, `semi_circle_progress`, `semi_orientation`, `size`, `start_angle`, `striped`, `style`, `theme`, `thickness`, `unstyled`, `validate`, `value_text`, `vertical`, `width`
 
 **需要语义映射的属性候选：** `transitionDuration`
 
@@ -955,7 +955,7 @@
 
 **本地实现：** [../glory/crates/render/src/progress.rs](../../glory/crates/render/src/progress.rs)、[src/progress.rs](../src/progress.rs)
 
-**本地公开入口（同族）：** `class`, `empty_segment_color`, `fill_direction`, `filled_segment_color`, `fraction`, `height`, `indeterminate`, `label`, `label_position`, `length`, `name`, `node_ref`, `orientation`, `progress`, `range`, `ring_progress`, `root_color`, `round_caps`, `section_gap`, `sections`, `semi_circle_progress`, `semi_orientation`, `size`, `start_angle`, `style`, `theme`, `thickness`, `unstyled`, `validate`, `value_text`, `vertical`, `width`
+**本地公开入口（同族）：** `animated`, `class`, `empty_segment_color`, `fill_direction`, `filled_segment_color`, `fraction`, `height`, `indeterminate`, `label`, `label_position`, `length`, `name`, `node_ref`, `on_section_hover`, `orientation`, `progress`, `range`, `ring_progress`, `root_color`, `round_caps`, `section_gap`, `section_label`, `sections`, `semi_circle_progress`, `semi_orientation`, `size`, `start_angle`, `striped`, `style`, `theme`, `thickness`, `unstyled`, `validate`, `value_text`, `vertical`, `width`
 
 **需要语义映射的属性候选：** `transitionDuration`, `value`
 
@@ -969,7 +969,7 @@
 
 **本地实现：** [src/skeleton.rs](../src/skeleton.rs)
 
-**本地公开入口（同族）：** `circle`, `class`, `height`, `loading`, `name`, `node_ref`, `radius`, `skeleton`, `style`, `theme`, `unstyled`, `width`
+**本地公开入口（同族）：** `animated`, `circle`, `class`, `fill`, `height`, `loading`, `name`, `node_ref`, `radius`, `skeleton`, `style`, `theme`, `unstyled`, `width`
 
 **需要语义映射的属性候选：** `animate`, `visible`
 
@@ -1011,9 +1011,9 @@
 
 **本地实现：** [src/overlay.rs](../src/overlay.rs)
 
-**本地公开入口（同族）：** `arrow`, `cancel_label`, `class`, `close_content`, `close_label`, `confirm_enabled`, `confirm_label`, `confirm_variant`, `content`, `content_policy`, `default_open`, `default_snap`, `description`, `dismiss_on_escape`, `dismiss_on_outside`, `enabled`, `full_screen`, `initial_focus`, `label`, `modal`, `name`, `offset`, `on`, `on_cancel`, `on_confirm`, `on_dismiss`, `on_open_change`, `on_snap_change`, `open`, `panel_ref`, `placement`, `return_focus`, `show_close`, `show_trigger`, `side`, `size`, `snap_config`, `snap_index`, `snap_points`, `style`, `theme`, `title`, `trigger_content`, `trigger_ref`, `unstyled`, `width`, `with_arrow`
+**本地公开入口（同族）：** `arrow`, `cancel_label`, `class`, `close_content`, `close_label`, `confirm_enabled`, `confirm_label`, `confirm_variant`, `content`, `content_policy`, `default_open`, `default_snap`, `description`, `dismiss_on_escape`, `dismiss_on_outside`, `enabled`, `full_screen`, `initial_focus`, `label`, `modal`, `name`, `offset`, `on`, `on_cancel`, `on_confirm`, `on_dismiss`, `on_open_change`, `on_snap_change`, `open`, `panel_ref`, `placement`, `position`, `preserve_focus`, `return_focus`, `show_close`, `show_trigger`, `side`, `size`, `snap_config`, `snap_index`, `snap_points`, `style`, `theme`, `title`, `trigger_content`, `trigger_ref`, `trigger_style`, `unstyled`, `width`, `with_arrow`
 
-**需要语义映射的属性候选：** `children`, `keepMounted`, `onClose`, `opened`, `portalProps`, `position`, `radius`, `shadow`, `transitionProps`, `withBorder`, `withCloseButton`, `withinPortal`, `zIndex`
+**需要语义映射的属性候选：** `children`, `keepMounted`, `onClose`, `opened`, `portalProps`, `radius`, `shadow`, `transitionProps`, `withBorder`, `withCloseButton`, `withinPortal`, `zIndex`
 
 ### Drawer — M:Drawer
 
@@ -1025,9 +1025,9 @@
 
 **本地实现：** [src/overlay.rs](../src/overlay.rs)、[src/sheet.rs](../src/sheet.rs)
 
-**本地公开入口（同族）：** `arrow`, `cancel_label`, `class`, `close_content`, `close_label`, `confirm_enabled`, `confirm_label`, `confirm_variant`, `content`, `content_policy`, `default_open`, `default_snap`, `description`, `dismiss_on_escape`, `dismiss_on_outside`, `dismissible`, `enabled`, `full_screen`, `initial_focus`, `label`, `max_extent`, `modal`, `name`, `new`, `offset`, `on`, `on_cancel`, `on_confirm`, `on_dismiss`, `on_open_change`, `on_snap_change`, `open`, `panel_ref`, `placement`, `return_focus`, `settle_millis`, `show_close`, `show_trigger`, `side`, `size`, `snap_config`, `snap_index`, `snap_points`, `style`, `theme`, `title`, `trigger_content`, `trigger_ref`, `unstyled`, `validate`, `width`, `with_arrow`
+**本地公开入口（同族）：** `arrow`, `cancel_label`, `class`, `close_content`, `close_label`, `confirm_enabled`, `confirm_label`, `confirm_variant`, `content`, `content_policy`, `default_open`, `default_snap`, `description`, `dismiss_on_escape`, `dismiss_on_outside`, `dismissible`, `enabled`, `full_screen`, `initial_focus`, `label`, `max_extent`, `modal`, `name`, `new`, `offset`, `on`, `on_cancel`, `on_confirm`, `on_dismiss`, `on_open_change`, `on_snap_change`, `open`, `panel_ref`, `placement`, `position`, `preserve_focus`, `return_focus`, `settle_millis`, `show_close`, `show_trigger`, `side`, `size`, `snap_config`, `snap_index`, `snap_points`, `style`, `theme`, `title`, `trigger_content`, `trigger_ref`, `trigger_style`, `unstyled`, `validate`, `width`, `with_arrow`
 
-**需要语义映射的属性候选：** `children`, `closeButtonProps`, `closeOnClickOutside`, `closeOnEscape`, `id`, `keepMounted`, `keepMountedMode`, `lockScroll`, `onClose`, `onEnterTransitionEnd`, `onExitTransitionEnd`, `opened`, `overlayProps`, `padding`, `portalProps`, `position`, `radius`, `removeScrollProps`, `scrollAreaComponent`, `shadow`, `stackId`, `transitionProps`, `trapFocus`, `withCloseButton`, `withOverlay`, `withinPortal`, `zIndex`
+**需要语义映射的属性候选：** `children`, `closeButtonProps`, `closeOnClickOutside`, `closeOnEscape`, `id`, `keepMounted`, `keepMountedMode`, `lockScroll`, `onClose`, `onEnterTransitionEnd`, `onExitTransitionEnd`, `opened`, `overlayProps`, `padding`, `portalProps`, `radius`, `removeScrollProps`, `scrollAreaComponent`, `shadow`, `stackId`, `transitionProps`, `trapFocus`, `withCloseButton`, `withOverlay`, `withinPortal`, `zIndex`
 
 ### FloatingIndicator — M:FloatingIndicator
 
@@ -1053,13 +1053,13 @@
 
 **本地实现：** [../glory/crates/render/src/viewport_layer.rs](../../glory/crates/render/src/viewport_layer.rs)、[src/floating_window/mod.rs](../src/floating_window/mod.rs)
 
-**本地公开入口（同族）：** `bounds`, `class`, `close`, `command`, `constrain_to_viewport`, `content`, `content_policy`, `default_bounds`, `default_open`, `enabled`, `floating_window`, `focus`, `keyboard_step`, `limits`, `name`, `node_ref`, `on`, `on_bounds_change`, `on_dismiss`, `on_open_change`, `on_ready`, `open`, `raise`, `resolve`, `set_bounds`, `size`, `style`, `theme`, `title`, `unstyled`, `validate`, `viewport_padding`
+**本地公开入口（同族）：** `bounds`, `class`, `close`, `command`, `constrain_to_viewport`, `content`, `content_policy`, `default_actions_open`, `default_bounds`, `default_open`, `drag_axis`, `enabled`, `floating_window`, `focus`, `keyboard_step`, `limits`, `name`, `node_ref`, `on`, `on_bounds_change`, `on_dismiss`, `on_open_change`, `on_ready`, `open`, `raise`, `resolve`, `set_bounds`, `size`, `style`, `theme`, `title`, `unstyled`, `validate`, `viewport_padding`
 
 **需要语义映射的属性候选：** `axis`, `constrainOffset`, `dimensions`, `dragHandleSelector`, `excludeDragHandleSelector`, `initialPosition`, `onDragEnd`, `onDragStart`, `onPositionChange`, `onResizeEnd`, `onResizeStart`, `onSizeChange`, `portalProps`, `radius`, `setPositionRef`, `shadow`, `withBorder`, `withinPortal`, `zIndex`
 
 ### HoverCard — M:HoverCard
 
-来源：[@mantine/core](https://mantine.dev/core/hover-card/)；对应 `P5-04`；原生有限能力状态 `rejected`。
+来源：[@mantine/core](https://mantine.dev/core/hover-card/)；对应 `P5-04`；原生有限能力状态 `tested`。
 
 **官方 Props / 子部件 Props：** `arrowOffset`, `arrowPosition`, `arrowRadius`, `arrowSize`, `children`, `clickOutsideCapture`, `clickOutsideEvents`, `closeDelay`, `closeOnClickOutside`, `closeOnEscape`, `defaultOpened`, `disabled`, `eventPropsWrapperName`, `events`, `floatingStrategy`, `hideDetached`, `id`, `initiallyOpened`, `interactive`, `keepMounted`, `keepMountedMode`, `middlewares`, `offset`, `onClose`, `onDismiss`, `onEnterTransitionEnd`, `onExitTransitionEnd`, `onOpen`, `onPositionChange`, `openDelay`, `overlayProps`, `popupType`, `portalProps`, `position`, `preventPositionChangeWhenVisible`, `radius`, `refProp`, `returnFocus`, `role`, `shadow`, `transitionProps`, `trapFocus`, `width`, `withArrow`, `withOverlay`, `withRoles`, `withinPortal`, `zIndex`
 
@@ -1067,7 +1067,7 @@
 
 **本地实现：** [src/hint.rs](../src/hint.rs)、[src/state.rs](../src/state.rs)
 
-**本地公开入口（同族）：** `accept`, `cancel`, `class`, `close_delay_with`, `content`, `content_policy`, `default_open`, `enabled`, `hover_card`, `id`, `label`, `mount`, `name`, `new`, `node_ref`, `on`, `on_dismiss`, `on_open_change`, `open`, `open_delay_with`, `placement`, `run`, `size`, `style`, `take`, `target`, `text`, `theme`, `tooltip`, `touch`, `trigger_ref`, `unstyled`
+**本地公开入口（同族）：** `accept`, `cancel`, `class`, `close_delay_with`, `content`, `content_policy`, `default_open`, `enabled`, `hover_card`, `id`, `label`, `mount`, `name`, `new`, `node_ref`, `on`, `on_dismiss`, `on_open_change`, `open`, `open_delay_with`, `placement`, `run`, `size`, `style`, `take`, `target`, `text`, `theme`, `tooltip`, `tooltip_role`, `touch`, `trigger_ref`, `unstyled`
 
 **需要语义映射的属性候选：** `arrowOffset`, `arrowPosition`, `arrowRadius`, `arrowSize`, `children`, `clickOutsideCapture`, `clickOutsideEvents`, `closeDelay`, `closeOnClickOutside`, `closeOnEscape`, `defaultOpened`, `disabled`, `eventPropsWrapperName`, `events`, `floatingStrategy`, `hideDetached`, `initiallyOpened`, `interactive`, `keepMounted`, `keepMountedMode`, `middlewares`, `offset`, `onClose`, `onEnterTransitionEnd`, `onExitTransitionEnd`, `onOpen`, `onPositionChange`, `openDelay`, `overlayProps`, `popupType`, `portalProps`, `position`, `preventPositionChangeWhenVisible`, `radius`, `refProp`, `returnFocus`, `role`, `shadow`, `transitionProps`, `trapFocus`, `width`, `withArrow`, `withOverlay`, `withRoles`, `withinPortal`, `zIndex`
 
@@ -1081,37 +1081,37 @@
 
 **本地实现：** [src/loading_overlay.rs](../src/loading_overlay.rs)
 
-**本地公开入口（同族）：** `class`, `color`, `content_ref`, `fill`, `label`, `loading`, `loading_overlay`, `mask_ref`, `name`, `node_ref`, `opacity`, `overlay`, `style`, `theme`, `unstyled`, `visible`
+**本地公开入口（同族）：** `animated`, `class`, `color`, `content_ref`, `fill`, `label`, `loader_color`, `loader_content`, `loader_size`, `loader_type`, `loading`, `loading_overlay`, `mask_ref`, `name`, `node_ref`, `opacity`, `overlay`, `style`, `theme`, `unstyled`, `visible`
 
 **需要语义映射的属性候选：** `loaderProps`, `onEnter`, `onEntered`, `onExit`, `onExited`, `overlayProps`, `transitionProps`, `zIndex`
 
 ### Menu — M:Menu
 
-来源：[@mantine/core](https://mantine.dev/core/menu/)；对应 `P4-01`；原生有限能力状态 `model-only`。
+来源：[@mantine/core](https://mantine.dev/core/menu/)；对应 `P4-01`；原生有限能力状态 `tested`。
 
 **官方 Props / 子部件 Props：** `alignItemsLabels`, `arrowOffset`, `arrowPosition`, `arrowRadius`, `arrowSize`, `checkIcon`, `checked`, `children`, `clearSearchOnClose`, `clickOutsideCapture`, `clickOutsideEvents`, `closeDelay`, `closeMenuOnClick`, `closeOnClickOutside`, `closeOnEscape`, `closeOnItemClick`, `color`, `defaultChecked`, `defaultOpenIndex`, `defaultOpened`, `defaultValue`, `disabled`, `error`, `floatingStrategy`, `hideDetached`, `id`, `inputSize`, `keepMounted`, `keepMountedMode`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `longPressDelay`, `loop`, `menuItemTabIndex`, `middlewares`, `multiline`, `offset`, `onChange`, `onClose`, `onDismiss`, `onEnterTransitionEnd`, `onExitTransitionEnd`, `onOpen`, `onOpenChange`, `onPositionChange`, `openDelay`, `openIndex`, `opened`, `overlayProps`, `pointer`, `portalProps`, `position`, `preventPositionChangeWhenVisible`, `radius`, `refProp`, `required`, `returnFocus`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `rootRef`, `safeAreaPolygon`, `shadow`, `size`, `success`, `transitionProps`, `trapFocus`, `trigger`, `value`, `width`, `withAria`, `withArrow`, `withErrorStyles`, `withInitialFocusPlaceholder`, `withOverlay`, `withSuccessStyles`, `withinPortal`, `wrapperProps`, `zIndex`
 
 **官方功能章节：** Usage；Submenus；Search；Checkbox items；Checkbox group；Radio items；Aligning labels of items with and without indicators；Custom check icon；Type-ahead navigation；Context menu；Controlled；Show menu on hover；Disabled items；Dropdown position；Transitions；Custom component as Menu.Item；Accessibility
 
-**本地实现：** [src/menu/mod.rs](../src/menu/mod.rs)
+**本地实现：** [../glory/crates/apace/src/menu.rs](../../glory/crates/apace/src/menu.rs)、[../glory/crates/render/src/menu.rs](../../glory/crates/render/src/menu.rs)、[../glory/crates/web/src/browser/events.rs](../../glory/crates/web/src/browser/events.rs)、[src/menu/content.rs](../src/menu/content.rs)、[src/menu/mod.rs](../src/menu/mod.rs)、[src/menu/search.rs](../src/menu/search.rs)、[tests/menu_search.rs](../tests/menu_search.rs)
 
-**本地公开入口（同族）：** `anchor`, `checked`, `class`, `close_on_select`, `context_menu`, `default_checked`, `default_open`, `default_value`, `direction`, `dropdown_menu`, `editor_policy`, `enabled`, `focus`, `hover_delay_with`, `item`, `items`, `label`, `loop_focus`, `menu`, `menu_checkbox`, `menu_item`, `menu_radio_group`, `menu_radio_item`, `menu_submenu`, `name`, `node_ref`, `on`, `on_activate`, `on_checked_change`, `on_open_change`, `on_value_change`, `open`, `radio_group`, `return_focus`, `separator`, `size`, `style`, `submenu`, `target`, `target_name`, `target_ref`, `theme`, `trigger_ref`, `typeahead`, `unstyled`, `value`
+**本地公开入口（同族）：** `anchor`, `checked`, `children`, `class`, `clear_on_close`, `close`, `close_on_select`, `context_menu`, `decorate`, `default_checked`, `default_open`, `default_value`, `direction`, `dropdown_menu`, `editor_policy`, `enabled`, `focus`, `hover_delay_with`, `href`, `inline_panel`, `is_empty`, `item`, `items`, `label`, `left_section`, `loop_focus`, `menu`, `menu_check_activation`, `menu_checkbox`, `menu_item`, `menu_label`, `menu_radio_group`, `menu_radio_item`, `menu_search`, `menu_search_owner`, `menu_submenu`, `name`, `new`, `node_ref`, `on`, `on_activate`, `on_checked_change`, `on_open_change`, `on_value_change`, `open`, `placeholder`, `position`, `radio_group`, `return_focus`, `right_section`, `search`, `separator`, `size`, `style`, `submenu`, `target`, `target_name`, `target_ref`, `theme`, `trigger_content`, `trigger_ref`, `typeahead`, `unstyled`, `value`, `visible`, `width`
 
-**需要语义映射的属性候选：** `alignItemsLabels`, `arrowOffset`, `arrowPosition`, `arrowRadius`, `arrowSize`, `checkIcon`, `children`, `clearSearchOnClose`, `clickOutsideCapture`, `clickOutsideEvents`, `closeDelay`, `closeMenuOnClick`, `closeOnClickOutside`, `closeOnEscape`, `closeOnItemClick`, `color`, `defaultOpenIndex`, `defaultOpened`, `disabled`, `error`, `floatingStrategy`, `hideDetached`, `id`, `inputSize`, `keepMounted`, `keepMountedMode`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `longPressDelay`, `loop`, `menuItemTabIndex`, `middlewares`, `multiline`, `offset`, `onChange`, `onClose`, `onDismiss`, `onEnterTransitionEnd`, `onExitTransitionEnd`, `onOpen`, `onPositionChange`, `openDelay`, `openIndex`, `opened`, `overlayProps`, `pointer`, `portalProps`, `position`, `preventPositionChangeWhenVisible`, `radius`, `refProp`, `required`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `rootRef`, `safeAreaPolygon`, `shadow`, `success`, `transitionProps`, `trapFocus`, `trigger`, `width`, `withAria`, `withArrow`, `withErrorStyles`, `withInitialFocusPlaceholder`, `withOverlay`, `withSuccessStyles`, `withinPortal`, `wrapperProps`, `zIndex`
+**需要语义映射的属性候选：** `alignItemsLabels`, `arrowOffset`, `arrowPosition`, `arrowRadius`, `arrowSize`, `checkIcon`, `clearSearchOnClose`, `clickOutsideCapture`, `clickOutsideEvents`, `closeDelay`, `closeMenuOnClick`, `closeOnClickOutside`, `closeOnEscape`, `closeOnItemClick`, `color`, `defaultOpenIndex`, `defaultOpened`, `disabled`, `error`, `floatingStrategy`, `hideDetached`, `id`, `inputSize`, `keepMounted`, `keepMountedMode`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `longPressDelay`, `loop`, `menuItemTabIndex`, `middlewares`, `multiline`, `offset`, `onChange`, `onClose`, `onDismiss`, `onEnterTransitionEnd`, `onExitTransitionEnd`, `onOpen`, `onPositionChange`, `openDelay`, `openIndex`, `opened`, `overlayProps`, `pointer`, `portalProps`, `preventPositionChangeWhenVisible`, `radius`, `refProp`, `required`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `rootRef`, `safeAreaPolygon`, `shadow`, `success`, `transitionProps`, `trapFocus`, `trigger`, `withAria`, `withArrow`, `withErrorStyles`, `withInitialFocusPlaceholder`, `withOverlay`, `withSuccessStyles`, `withinPortal`, `wrapperProps`, `zIndex`
 
 ### Menubar — M:Menubar
 
-来源：[@mantine/core](https://mantine.dev/core/menubar/)；对应 `P4-03`；原生有限能力状态 `model-only`。
+来源：[@mantine/core](https://mantine.dev/core/menubar/)；对应 `P4-03`；原生有限能力状态 `tested`。
 
 **官方 Props / 子部件 Props：** `children`, `defaultOpenIndex`, `loop`, `onOpenChange`, `openIndex`, `position`, `trigger`
 
 **官方功能章节：** Usage；How it differs from Menu；Composition；Trigger and loop；Submenus；Checkbox and radio items；Controlled；Position；Accessibility
 
-**本地实现：** [../glory/crates/render/src/semantics.rs](../../glory/crates/render/src/semantics.rs)、[src/menu/bar/mod.rs](../src/menu/bar/mod.rs)、[src/menu/mod.rs](../src/menu/mod.rs)
+**本地实现：** [../glory/crates/apace/src/menu.rs](../../glory/crates/apace/src/menu.rs)、[../glory/crates/render/src/menu.rs](../../glory/crates/render/src/menu.rs)、[../glory/crates/render/src/semantics.rs](../../glory/crates/render/src/semantics.rs)、[../glory/crates/web/src/browser/events.rs](../../glory/crates/web/src/browser/events.rs)、[src/menu/bar/mod.rs](../src/menu/bar/mod.rs)、[src/menu/content.rs](../src/menu/content.rs)、[src/menu/mod.rs](../src/menu/mod.rs)、[src/menu/search.rs](../src/menu/search.rs)、[tests/menu_search.rs](../tests/menu_search.rs)
 
-**本地公开入口（同族）：** `anchor`, `as_str`, `checked`, `class`, `close_on_select`, `context_menu`, `default_checked`, `default_open`, `default_value`, `direction`, `dropdown_menu`, `editor_policy`, `enabled`, `focus`, `hover_delay_with`, `item`, `items`, `key`, `key_with_direction`, `label`, `loop_focus`, `menu`, `menu_checkbox`, `menu_item`, `menu_radio_group`, `menu_radio_item`, `menu_submenu`, `menubar`, `menubar_menu`, `menus`, `name`, `new`, `node_ref`, `on`, `on_activate`, `on_checked_change`, `on_open_change`, `on_value_change`, `open`, `radio_group`, `return_focus`, `separator`, `size`, `style`, `submenu`, `target`, `target_name`, `target_ref`, `theme`, `trigger_ref`, `typeahead`, `unstyled`, `value`
+**本地公开入口（同族）：** `anchor`, `as_str`, `checked`, `children`, `class`, `clear_on_close`, `close`, `close_on_select`, `context_menu`, `decorate`, `default_checked`, `default_open`, `default_value`, `direction`, `dropdown_menu`, `editor_policy`, `enabled`, `focus`, `hover_delay_with`, `href`, `inline_panel`, `is_empty`, `item`, `items`, `key`, `key_with_direction`, `label`, `left_section`, `loop_focus`, `menu`, `menu_check_activation`, `menu_checkbox`, `menu_item`, `menu_label`, `menu_radio_group`, `menu_radio_item`, `menu_search`, `menu_search_owner`, `menu_submenu`, `menubar`, `menubar_menu`, `menus`, `name`, `new`, `node_ref`, `on`, `on_activate`, `on_checked_change`, `on_open_change`, `on_value_change`, `open`, `open_on_hover`, `placeholder`, `position`, `radio_group`, `return_focus`, `right_section`, `search`, `separator`, `size`, `style`, `submenu`, `target`, `target_name`, `target_ref`, `theme`, `trigger_content`, `trigger_ref`, `typeahead`, `unstyled`, `value`, `visible`, `width`
 
-**需要语义映射的属性候选：** `children`, `defaultOpenIndex`, `loop`, `openIndex`, `position`, `trigger`
+**需要语义映射的属性候选：** `defaultOpenIndex`, `loop`, `openIndex`, `trigger`
 
 ### Modal — M:Modal
 
@@ -1123,7 +1123,7 @@
 
 **本地实现：** [../glory/crates/apace/src/layers.rs](../../glory/crates/apace/src/layers.rs)、[../glory/crates/web/src/browser/layer_document.rs](../../glory/crates/web/src/browser/layer_document.rs)、[src/overlay.rs](../src/overlay.rs)
 
-**本地公开入口（同族）：** `allowed`, `arrow`, `ax_branch`, `boundary`, `cancel_label`, `class`, `close_content`, `close_label`, `confirm_enabled`, `confirm_label`, `confirm_variant`, `content`, `content_policy`, `default_open`, `default_snap`, `description`, `dismiss_on_escape`, `dismiss_on_outside`, `enabled`, `full_screen`, `initial_focus`, `label`, `modal`, `name`, `offset`, `on`, `on_cancel`, `on_confirm`, `on_dismiss`, `on_open_change`, `on_snap_change`, `open`, `panel_ref`, `placement`, `return_focus`, `show_close`, `show_trigger`, `side`, `size`, `snap_config`, `snap_index`, `snap_points`, `style`, `theme`, `title`, `trigger_content`, `trigger_ref`, `unstyled`, `width`, `with_arrow`
+**本地公开入口（同族）：** `allowed`, `arrow`, `ax_branch`, `boundary`, `cancel_label`, `class`, `close_content`, `close_label`, `confirm_enabled`, `confirm_label`, `confirm_variant`, `content`, `content_policy`, `default_open`, `default_snap`, `description`, `dismiss_on_escape`, `dismiss_on_outside`, `enabled`, `full_screen`, `initial_focus`, `label`, `modal`, `name`, `offset`, `on`, `on_cancel`, `on_confirm`, `on_dismiss`, `on_open_change`, `on_snap_change`, `open`, `panel_ref`, `placement`, `position`, `preserve_focus`, `return_focus`, `show_close`, `show_trigger`, `side`, `size`, `snap_config`, `snap_index`, `snap_points`, `style`, `theme`, `title`, `trigger_content`, `trigger_ref`, `trigger_style`, `unstyled`, `width`, `with_arrow`
 
 **需要语义映射的属性候选：** `centered`, `children`, `closeButtonProps`, `closeOnClickOutside`, `closeOnEscape`, `id`, `keepMounted`, `keepMountedMode`, `labels`, `lockScroll`, `modalProps`, `modals`, `onClose`, `onEnterTransitionEnd`, `onExitTransitionEnd`, `opened`, `overlayProps`, `padding`, `portalProps`, `radius`, `removeScrollProps`, `scrollAreaComponent`, `shadow`, `stackId`, `transitionProps`, `trapFocus`, `withCloseButton`, `withOverlay`, `withinPortal`, `xOffset`, `yOffset`, `zIndex`
 
@@ -1137,7 +1137,7 @@
 
 **本地实现：** [src/loading_overlay.rs](../src/loading_overlay.rs)
 
-**本地公开入口（同族）：** `class`, `color`, `content_ref`, `fill`, `label`, `loading`, `loading_overlay`, `mask_ref`, `name`, `node_ref`, `opacity`, `overlay`, `style`, `theme`, `unstyled`, `visible`
+**本地公开入口（同族）：** `animated`, `class`, `color`, `content_ref`, `fill`, `label`, `loader_color`, `loader_content`, `loader_size`, `loader_type`, `loading`, `loading_overlay`, `mask_ref`, `name`, `node_ref`, `opacity`, `overlay`, `style`, `theme`, `unstyled`, `visible`
 
 **需要语义映射的属性候选：** `backgroundOpacity`, `blur`, `center`, `children`, `fixed`, `gradient`, `radius`, `zIndex`
 
@@ -1151,9 +1151,9 @@
 
 **本地实现：** [../glory/crates/apace/src/layers.rs](../../glory/crates/apace/src/layers.rs)、[../glory/crates/web/src/browser/layer_document.rs](../../glory/crates/web/src/browser/layer_document.rs)、[src/overlay.rs](../src/overlay.rs)
 
-**本地公开入口（同族）：** `allowed`, `arrow`, `ax_branch`, `boundary`, `cancel_label`, `class`, `close_content`, `close_label`, `confirm_enabled`, `confirm_label`, `confirm_variant`, `content`, `content_policy`, `default_open`, `default_snap`, `description`, `dismiss_on_escape`, `dismiss_on_outside`, `enabled`, `full_screen`, `initial_focus`, `label`, `modal`, `name`, `offset`, `on`, `on_cancel`, `on_confirm`, `on_dismiss`, `on_open_change`, `on_snap_change`, `open`, `panel_ref`, `placement`, `return_focus`, `show_close`, `show_trigger`, `side`, `size`, `snap_config`, `snap_index`, `snap_points`, `style`, `theme`, `title`, `trigger_content`, `trigger_ref`, `unstyled`, `width`, `with_arrow`
+**本地公开入口（同族）：** `allowed`, `arrow`, `ax_branch`, `boundary`, `cancel_label`, `class`, `close_content`, `close_label`, `confirm_enabled`, `confirm_label`, `confirm_variant`, `content`, `content_policy`, `default_open`, `default_snap`, `description`, `dismiss_on_escape`, `dismiss_on_outside`, `enabled`, `full_screen`, `initial_focus`, `label`, `modal`, `name`, `offset`, `on`, `on_cancel`, `on_confirm`, `on_dismiss`, `on_open_change`, `on_snap_change`, `open`, `panel_ref`, `placement`, `position`, `preserve_focus`, `return_focus`, `show_close`, `show_trigger`, `side`, `size`, `snap_config`, `snap_index`, `snap_points`, `style`, `theme`, `title`, `trigger_content`, `trigger_ref`, `trigger_style`, `unstyled`, `width`, `with_arrow`
 
-**需要语义映射的属性候选：** `arrowOffset`, `arrowPosition`, `arrowRadius`, `arrowSize`, `children`, `clickOutsideCapture`, `clickOutsideEvents`, `closeOnClickOutside`, `closeOnEscape`, `defaultOpened`, `disabled`, `floatingStrategy`, `hideDetached`, `id`, `keepMounted`, `keepMountedMode`, `longPressDelay`, `middlewares`, `onChange`, `onClose`, `onEnterTransitionEnd`, `onExitTransitionEnd`, `onOpen`, `onPositionChange`, `opened`, `overlayProps`, `popupType`, `portalProps`, `position`, `preventPositionChangeWhenVisible`, `radius`, `refProp`, `shadow`, `transitionProps`, `trapFocus`, `withOverlay`, `withRoles`, `withinPortal`, `zIndex`
+**需要语义映射的属性候选：** `arrowOffset`, `arrowPosition`, `arrowRadius`, `arrowSize`, `children`, `clickOutsideCapture`, `clickOutsideEvents`, `closeOnClickOutside`, `closeOnEscape`, `defaultOpened`, `disabled`, `floatingStrategy`, `hideDetached`, `id`, `keepMounted`, `keepMountedMode`, `longPressDelay`, `middlewares`, `onChange`, `onClose`, `onEnterTransitionEnd`, `onExitTransitionEnd`, `onOpen`, `onPositionChange`, `opened`, `overlayProps`, `popupType`, `portalProps`, `preventPositionChangeWhenVisible`, `radius`, `refProp`, `shadow`, `transitionProps`, `trapFocus`, `withOverlay`, `withRoles`, `withinPortal`, `zIndex`
 
 ### Tooltip — M:Tooltip
 
@@ -1165,7 +1165,7 @@
 
 **本地实现：** [src/hint.rs](../src/hint.rs)、[src/state.rs](../src/state.rs)
 
-**本地公开入口（同族）：** `accept`, `cancel`, `class`, `close_delay_with`, `content`, `content_policy`, `default_open`, `enabled`, `hover_card`, `id`, `label`, `mount`, `name`, `new`, `node_ref`, `on`, `on_dismiss`, `on_open_change`, `open`, `open_delay_with`, `placement`, `run`, `size`, `style`, `take`, `target`, `text`, `theme`, `tooltip`, `touch`, `trigger_ref`, `unstyled`
+**本地公开入口（同族）：** `accept`, `cancel`, `class`, `close_delay_with`, `content`, `content_policy`, `default_open`, `enabled`, `hover_card`, `id`, `label`, `mount`, `name`, `new`, `node_ref`, `on`, `on_dismiss`, `on_open_change`, `open`, `open_delay_with`, `placement`, `run`, `size`, `style`, `take`, `target`, `text`, `theme`, `tooltip`, `tooltip_role`, `touch`, `trigger_ref`, `unstyled`
 
 **需要语义映射的属性候选：** `arrowOffset`, `arrowPosition`, `arrowRadius`, `arrowSize`, `autoContrast`, `children`, `closeDelay`, `color`, `defaultOpened`, `disabled`, `events`, `floatingStrategy`, `hideDetached`, `inline`, `interactive`, `keepMounted`, `middlewares`, `multiline`, `offset`, `onPositionChange`, `openDelay`, `opened`, `portalProps`, `position`, `radius`, `refProp`, `transitionProps`, `withArrow`, `withinPortal`, `zIndex`
 
@@ -1179,9 +1179,9 @@
 
 **本地实现：** [../glory/crates/apace/src/scroll_into_view.rs](../../glory/crates/apace/src/scroll_into_view.rs)、[src/tour.rs](../src/tour.rs)
 
-**本地公开入口（同族）：** `cancel`, `current`, `default_current`, `default_open`, `fill`, `go_to`, `is_empty`, `len`, `next`, `on_cancel`, `on_complete`, `on_current_change`, `on_open_change`, `on_ready`, `on_target_lost`, `open`, `placement`, `previous`, `refresh`, `step`, `steps`, `theme`, `tour`, `tour_context`, `tour_step`, `tour_target`, `unstyled`
+**本地公开入口（同族）：** `anchored_step`, `cancel`, `centered_step`, `close_on_escape`, `close_on_outside_press`, `compact_navigation`, `current`, `default_current`, `default_open`, `fill`, `go_to`, `is_empty`, `len`, `navigation_labels`, `next`, `on_cancel`, `on_complete`, `on_current_change`, `on_open_change`, `on_ready`, `on_target_lost`, `open`, `over_target_step`, `placement`, `previous`, `refresh`, `step`, `step_counter`, `steps`, `theme`, `tour`, `tour_context`, `tour_step`, `tour_target`, `unstyled`, `with_close_button`, `with_spotlight`
 
-**需要语义映射的属性候选：** `active`, `children`, `closeOnEscape`, `closeOnOverlayClick`, `color`, `defaultStep`, `labels`, `maxWidth`, `mode`, `mounted`, `onClick`, `onClose`, `onStepChange`, `onStepClose`, `onStepOpen`, `overlayColor`, `portalProps`, `position`, `scrollToHandler`, `spotlightPadding`, `spotlightRadius`, `stepTransitionDuration`, `stepsCount`, `target`, `targetElement`, `targetRect`, `title`, `tooltipShadow`, `transitionProps`, `withBeacon`, `withCloseButton`, `withInteraction`, `withKeyboardNavigation`, `withOverlay`, `withOverlayInteraction`, `withScrollIntoView`, `withinPortal`, `zIndex`
+**需要语义映射的属性候选：** `active`, `children`, `closeOnOverlayClick`, `color`, `defaultStep`, `labels`, `maxWidth`, `mode`, `mounted`, `onClick`, `onClose`, `onStepChange`, `onStepClose`, `onStepOpen`, `overlayColor`, `portalProps`, `position`, `scrollToHandler`, `spotlightPadding`, `spotlightRadius`, `stepTransitionDuration`, `stepsCount`, `target`, `targetElement`, `targetRect`, `title`, `tooltipShadow`, `transitionProps`, `withBeacon`, `withInteraction`, `withKeyboardNavigation`, `withOverlay`, `withOverlayInteraction`, `withScrollIntoView`, `withinPortal`, `zIndex`
 
 ### Accordion — M:Accordion
 
@@ -1191,11 +1191,11 @@
 
 **官方功能章节：** Usage；order prop；Change chevron；Custom control label；With icons；Change transition；Default opened items；Control opened state；Disable collapse；Compose controls；Disabled items；TypeScript；Accessibility；Keyboard interactions
 
-**本地实现：** [src/accordion/mod.rs](../src/accordion/mod.rs)、[src/collection.rs](../src/collection.rs)、[src/composite/mod.rs](../src/composite/mod.rs)
+**本地实现：** [src/accordion/mod.rs](../src/accordion/mod.rs)、[src/collection.rs](../src/collection.rs)、[src/composite/mod.rs](../src/composite/mod.rs)、[src/composite/skin.rs](../src/composite/skin.rs)
 
-**本地公开入口（同族）：** `accept`, `accordion`, `accordion_item`, `class`, `clear`, `collapsible`, `content`, `content_policy`, `current`, `default_open`, `destination`, `direction`, `emit`, `enabled`, `flags`, `focus`, `heading_level`, `is_tab_stop`, `item`, `items`, `label`, `locate`, `loop_focus`, `mounted`, `multiple`, `name`, `navigate`, `new`, `node_ref`, `observe`, `on`, `on_open_change`, `open`, `panel_ref`, `query`, `regions`, `register`, `register_ordered`, `registered_len`, `repair`, `search`, `size`, `style`, `theme`, `trigger_content`, `trigger_ref`, `unstyled`
+**本地公开入口（同族）：** `accept`, `accordion`, `accordion_item`, `chevron_at_start`, `chevron_size`, `class`, `clear`, `collapsible`, `content`, `content_policy`, `current`, `default_open`, `destination`, `direction`, `emit`, `enabled`, `flags`, `focus`, `heading_level`, `is_tab_stop`, `item`, `item_radius`, `items`, `label`, `locate`, `loop_focus`, `mounted`, `multiple`, `name`, `navigate`, `new`, `node_ref`, `observe`, `on`, `on_open_change`, `open`, `panel_ref`, `query`, `regions`, `register`, `register_ordered`, `registered_len`, `repair`, `rotate_chevron`, `search`, `size`, `style`, `theme`, `transition_duration`, `trigger_content`, `trigger_ref`, `unstyled`, `variant`, `with_chevron`
 
-**需要语义映射的属性候选：** `chevron`, `chevronIconSize`, `chevronPosition`, `chevronSize`, `children`, `defaultValue`, `disableChevronRotation`, `disableCollapse`, `disabled`, `icon`, `keepMounted`, `keepMountedMode`, `loop`, `onChange`, `order`, `radius`, `transitionDuration`, `value`
+**需要语义映射的属性候选：** `chevron`, `chevronIconSize`, `chevronPosition`, `children`, `defaultValue`, `disableChevronRotation`, `disableCollapse`, `disabled`, `icon`, `keepMounted`, `keepMountedMode`, `loop`, `onChange`, `order`, `radius`, `value`
 
 ### Avatar — M:Avatar
 
@@ -1207,7 +1207,7 @@
 
 **本地实现：** [src/avatar.rs](../src/avatar.rs)、[src/image.rs](../src/image.rs)
 
-**本地公开入口（同族）：** `alt`, `avatar`, `avatar_group`, `avatars`, `background_image`, `class`, `decorative`, `fallback`, `fallback_src`, `fill`, `fit`, `focus`, `height`, `image`, `loading`, `max_visible`, `name`, `node_ref`, `on`, `on_error`, `on_load`, `overflow_label`, `overlap`, `shape`, `size`, `sizes`, `source`, `srcset`, `style`, `theme`, `unstyled`, `width`
+**本地公开入口（同族）：** `alt`, `avatar`, `avatar_group`, `avatars`, `background_image`, `class`, `decorative`, `fallback`, `fallback_icon`, `fallback_src`, `fill`, `fit`, `focus`, `height`, `image`, `loading`, `max_visible`, `name`, `node_ref`, `on`, `on_error`, `on_load`, `overflow_label`, `overlap`, `shape`, `size`, `sizes`, `source`, `srcset`, `style`, `theme`, `unstyled`, `width`
 
 **需要语义映射的属性候选：** `allowedInitialsColors`, `autoContrast`, `children`, `color`, `gradient`, `imageProps`, `radius`, `src`
 
@@ -1235,9 +1235,9 @@
 
 **本地实现：** [src/display.rs](../src/display.rs)、[src/tag.rs](../src/tag.rs)
 
-**本地公开入口（同族）：** `actions`, `badge`, `bordered`, `card`, `class`, `content`, `default_visible`, `description`, `empty_state`, `enabled`, `fill`, `footer`, `header`, `heading_level`, `illustration`, `name`, `node_ref`, `on_remove`, `on_remove_press`, `paper`, `pill`, `removable`, `remove_ref`, `shadow`, `size`, `style`, `theme`, `title`, `unstyled`, `variant`, `visible`
+**本地公开入口（同族）：** `actions`, `badge`, `bordered`, `card`, `class`, `color`, `content`, `default_visible`, `description`, `empty_state`, `enabled`, `fill`, `footer`, `header`, `heading_level`, `illustration`, `left_section`, `mount`, `name`, `node_ref`, `on_remove`, `on_remove_press`, `paper`, `pill`, `removable`, `remove_ref`, `right_section`, `shadow`, `size`, `style`, `theme`, `title`, `unstyled`, `variant`, `visible`
 
-**需要语义映射的属性候选：** `autoContrast`, `children`, `circle`, `color`, `fullWidth`, `gradient`, `leftSection`, `radius`, `rightSection`
+**需要语义映射的属性候选：** `autoContrast`, `children`, `circle`, `fullWidth`, `gradient`, `radius`
 
 ### Card — M:Card
 
@@ -1249,7 +1249,7 @@
 
 **本地实现：** [../glory/crates/style/src/lib.rs](../../glory/crates/style/src/lib.rs)、[src/display.rs](../src/display.rs)
 
-**本地公开入口（同族）：** `actions`, `aspect_ratio`, `background_image`, `badge`, `border_color`, `border_style`, `border_width`, `bordered`, `bottom`, `box_shadow`, `card`, `class`, `content`, `default_visible`, `description`, `display`, `empty_state`, `enabled`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `font_family`, `font_weight`, `footer`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `header`, `heading_level`, `height`, `illustration`, `is_finite`, `left`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `on_remove`, `on_remove_press`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `paper`, `pill`, `pointer_events`, `position`, `radius`, `removable`, `remove_ref`, `right`, `scroll_anchor`, `shadow`, `size`, `style`, `text_gradient`, `text_overflow`, `theme`, `title`, `top`, `unstyled`, `validate`, `variant`, `visible`, `white_space`, `width`
+**本地公开入口（同族）：** `actions`, `aspect_ratio`, `background_image`, `badge`, `border_color`, `border_style`, `border_width`, `bordered`, `bottom`, `box_shadow`, `caption_side`, `card`, `class`, `color`, `content`, `default_visible`, `description`, `display`, `empty_state`, `enabled`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `font_family`, `font_weight`, `footer`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `header`, `heading_level`, `height`, `illustration`, `is_finite`, `left`, `left_section`, `letter_spacing`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `on_remove`, `on_remove_press`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `paper`, `pill`, `pointer_events`, `position`, `radius`, `removable`, `remove_ref`, `right`, `right_section`, `scroll_anchor`, `shadow`, `size`, `style`, `text_gradient`, `text_overflow`, `theme`, `title`, `top`, `unstyled`, `validate`, `variant`, `visible`, `white_space`, `width`
 
 **需要语义映射的属性候选：** `children`, `inheritPadding`, `orientation`, `withBorder`
 
@@ -1263,9 +1263,9 @@
 
 **本地实现：** [src/color_swatch.rs](../src/color_swatch.rs)
 
-**本地公开入口（同族）：** `class`, `color_swatch`, `default_pressed`, `enabled`, `interactive`, `name`, `node_ref`, `on`, `on_press`, `on_pressed_change`, `pressed`, `round`, `side`, `style`, `theme`, `unstyled`
+**本地公开入口（同族）：** `class`, `color_swatch`, `default_pressed`, `enabled`, `interactive`, `name`, `node_ref`, `on`, `on_press`, `on_pressed_change`, `pressed`, `round`, `side`, `style`, `theme`, `unstyled`, `with_shadow`
 
-**需要语义映射的属性候选：** `children`, `color`, `radius`, `size`, `withShadow`
+**需要语义映射的属性候选：** `children`, `color`, `radius`, `size`
 
 ### DataList — M:DataList
 
@@ -1277,9 +1277,9 @@
 
 **本地实现：** [../glory/crates/apace/src/accessibility.rs](../../glory/crates/apace/src/accessibility.rs)、[../glory/crates/html/src/mapping.rs](../../glory/crates/html/src/mapping.rs)、[../glory/crates/render/src/document.rs](../../glory/crates/render/src/document.rs)、[src/document.rs](../src/document.rs)
 
-**本地公开入口（同族）：** `actions`, `blockquote`, `citation`, `class`, `content`, `data_list`, `data_list_item`, `description`, `fill`, `highlight`, `item`, `items`, `kbd`, `key`, `media`, `name`, `node_ref`, `ordered`, `platform`, `preflight`, `queries`, `query`, `shape`, `shape_in`, `size`, `style`, `term`, `text_list`, `text_list_item`, `theme`, `title`, `unstyled`
+**本地公开入口（同族）：** `actions`, `balanced`, `blockquote`, `citation`, `class`, `content`, `data_list`, `data_list_item`, `description`, `fill`, `gap`, `highlight`, `icon`, `icon_size`, `ignore_accents`, `ignore_ascii_case`, `item`, `items`, `kbd`, `key`, `label_width`, `media`, `name`, `node_ref`, `ordered`, `orientation`, `platform`, `preflight`, `queries`, `query`, `reversed`, `shape`, `shape_in`, `size`, `start`, `style`, `term`, `text_list`, `text_list_item`, `theme`, `title`, `unstyled`, `value`, `whole_words`, `with_divider`
 
-**需要语义映射的属性候选：** `children`, `gap`, `labelWidth`, `orientation`, `withDivider`
+**需要语义映射的属性候选：** `children`
 
 ### Image — M:Image
 
@@ -1305,9 +1305,9 @@
 
 **本地实现：** [src/indicator.rs](../src/indicator.rs)、[src/theme_icon.rs](../src/theme_icon.rs)
 
-**本地公开入口（同族）：** `class`, `color`, `diameter`, `fill`, `indicator`, `label`, `marker_ref`, `name`, `node_ref`, `position`, `size`, `style`, `theme`, `theme_icon`, `unstyled`, `variant`, `visible`
+**本地公开入口（同族）：** `auto_contrast`, `class`, `color`, `count`, `diameter`, `drawing`, `fill`, `icon_size`, `indicator`, `label`, `marker_ref`, `max_value`, `name`, `node_ref`, `offset`, `position`, `processing`, `radius`, `show_zero`, `size`, `style`, `theme`, `theme_icon`, `unstyled`, `variant`, `visible`, `with_border`
 
-**需要语义映射的属性候选：** `autoContrast`, `disabled`, `inline`, `maxValue`, `offset`, `processing`, `radius`, `showZero`, `withBorder`, `zIndex`
+**需要语义映射的属性候选：** `disabled`, `inline`, `zIndex`
 
 ### Kbd — M:Kbd
 
@@ -1319,7 +1319,7 @@
 
 **本地实现：** [../glory/crates/apace/src/accessibility.rs](../../glory/crates/apace/src/accessibility.rs)、[../glory/crates/html/src/mapping.rs](../../glory/crates/html/src/mapping.rs)、[../glory/crates/render/src/document.rs](../../glory/crates/render/src/document.rs)、[src/document.rs](../src/document.rs)
 
-**本地公开入口（同族）：** `actions`, `blockquote`, `citation`, `class`, `content`, `data_list`, `data_list_item`, `description`, `fill`, `highlight`, `item`, `items`, `kbd`, `key`, `media`, `name`, `node_ref`, `ordered`, `platform`, `preflight`, `queries`, `query`, `shape`, `shape_in`, `size`, `style`, `term`, `text_list`, `text_list_item`, `theme`, `title`, `unstyled`
+**本地公开入口（同族）：** `actions`, `balanced`, `blockquote`, `citation`, `class`, `content`, `data_list`, `data_list_item`, `description`, `fill`, `gap`, `highlight`, `icon`, `icon_size`, `ignore_accents`, `ignore_ascii_case`, `item`, `items`, `kbd`, `key`, `label_width`, `media`, `name`, `node_ref`, `ordered`, `orientation`, `platform`, `preflight`, `queries`, `query`, `reversed`, `shape`, `shape_in`, `size`, `start`, `style`, `term`, `text_list`, `text_list_item`, `theme`, `title`, `unstyled`, `value`, `whole_words`, `with_divider`
 
 **需要语义映射的属性候选：** 无直接拼写候选；仍不推断功能等价。
 
@@ -1333,9 +1333,9 @@
 
 **本地实现：** [src/number_formatter.rs](../src/number_formatter.rs)
 
-**本地公开入口（同族）：** `class`, `format`, `grouping`, `locale`, `max_fraction_digits`, `min_fraction_digits`, `node_ref`, `number_formatter`, `size`, `style`, `theme`, `unstyled`, `value`
+**本地公开入口（同族）：** `class`, `format`, `grouping`, `locale`, `max_fraction_digits`, `min_fraction_digits`, `node_ref`, `number_formatter`, `prefix`, `size`, `style`, `suffix`, `theme`, `unstyled`, `value`
 
-**需要语义映射的属性候选：** `allowNegative`, `decimalScale`, `decimalSeparator`, `fixedDecimalScale`, `prefix`, `suffix`, `thousandSeparator`, `thousandsGroupStyle`
+**需要语义映射的属性候选：** `allowNegative`, `decimalScale`, `decimalSeparator`, `fixedDecimalScale`, `thousandSeparator`, `thousandsGroupStyle`
 
 ### OverflowList — M:OverflowList
 
@@ -1347,9 +1347,9 @@
 
 **本地实现：** [src/overflow_list/mod.rs](../src/overflow_list/mod.rs)
 
-**本地公开入口（同族）：** `class`, `content`, `dynamic_items`, `enabled`, `focus`, `gap`, `handle_ref`, `initial_visible`, `item`, `items`, `measurement_revision`, `name`, `node_ref`, `on`, `on_open_change`, `on_visible_count_change`, `open`, `overflow`, `overflow_count`, `overflow_item`, `overflow_label`, `overflow_list`, `pending_queries`, `refresh`, `set_open`, `size`, `style`, `theme`, `unstyled`, `visible_count`, `width`
+**本地公开入口（同族）：** `class`, `collapse_from_start`, `content`, `dynamic_items`, `enabled`, `focus`, `gap`, `handle_ref`, `hover_card`, `initial_visible`, `item`, `items`, `max_rows`, `max_visible_items`, `measurement_revision`, `name`, `node_ref`, `on`, `on_open_change`, `on_visible_count_change`, `open`, `overflow`, `overflow_count`, `overflow_count_label`, `overflow_item`, `overflow_label`, `overflow_list`, `pending_queries`, `refresh`, `set_open`, `size`, `style`, `theme`, `unstyled`, `visible_count`, `width`
 
-**需要语义映射的属性候选：** `collapseFrom`, `data`, `getItemKey`, `maxRows`, `maxVisibleItems`, `renderItem`, `renderOverflow`
+**需要语义映射的属性候选：** `collapseFrom`, `data`, `getItemKey`, `renderItem`, `renderOverflow`
 
 ### RollingNumber — M:RollingNumber
 
@@ -1361,7 +1361,7 @@
 
 **本地实现：** [../glory/crates/apace/src/translation.rs](../../glory/crates/apace/src/translation.rs)、[../glory/crates/render/src/translation.rs](../../glory/crates/render/src/translation.rs)、[../glory/crates/web/src/browser/translation.rs](../../glory/crates/web/src/browser/translation.rs)、[src/marquee.rs](../src/marquee.rs)、[src/rolling_number.rs](../src/rolling_number.rs)
 
-**本地公开入口（同族）：** `admitted`, `animated`, `class`, `config`, `configure`, `direction`, `duration_millis`, `format`, `gap`, `grouping`, `is_empty`, `locale`, `marquee`, `max_fraction_digits`, `measurement_revision`, `min_fraction_digits`, `new`, `node_ref`, `offset`, `on`, `origin`, `paused`, `period_millis`, `resting_offset`, `retire`, `rolling_number`, `running`, `size`, `style`, `text`, `theme`, `unstyled`, `validate`, `value`
+**本地公开入口（同族）：** `admitted`, `animated`, `class`, `config`, `configure`, `direction`, `duration_millis`, `format`, `gap`, `grouping`, `is_empty`, `locale`, `marquee`, `max_fraction_digits`, `measurement_revision`, `min_fraction_digits`, `new`, `node_ref`, `offset`, `on`, `origin`, `paused`, `period_millis`, `repeat`, `resting_offset`, `retire`, `rolling_number`, `running`, `size`, `style`, `text`, `theme`, `unstyled`, `validate`, `value`, `visual_content`
 
 **需要语义映射的属性候选：** `animationDuration`, `decimalScale`, `decimalSeparator`, `fixedDecimalScale`, `prefix`, `suffix`, `tabularNumbers`, `thousandSeparator`, `timingFunction`, `withLiveRegion`
 
@@ -1375,7 +1375,7 @@
 
 **本地实现：** [src/spoiler.rs](../src/spoiler.rs)
 
-**本地公开入口（同族）：** `class`, `content`, `default_expanded`, `enabled`, `expanded`, `focus`, `labels`, `max_height`, `name`, `node_ref`, `on`, `on_expanded_change`, `size`, `spoiler`, `style`, `theme`, `trigger_ref`, `unstyled`, `viewport_ref`
+**本地公开入口（同族）：** `animated`, `class`, `content`, `default_expanded`, `enabled`, `expanded`, `focus`, `illustration`, `labels`, `max_height`, `name`, `node_ref`, `on`, `on_expanded_change`, `size`, `spoiler`, `style`, `theme`, `trigger_ref`, `unstyled`, `viewport_ref`
 
 **需要语义映射的属性候选：** `controlRef`, `hideAriaLabel`, `hideLabel`, `showAriaLabel`, `showLabel`, `transitionDuration`
 
@@ -1389,9 +1389,9 @@
 
 **本地实现：** [src/indicator.rs](../src/indicator.rs)、[src/theme_icon.rs](../src/theme_icon.rs)
 
-**本地公开入口（同族）：** `class`, `color`, `diameter`, `fill`, `indicator`, `label`, `marker_ref`, `name`, `node_ref`, `position`, `size`, `style`, `theme`, `theme_icon`, `unstyled`, `variant`, `visible`
+**本地公开入口（同族）：** `auto_contrast`, `class`, `color`, `count`, `diameter`, `drawing`, `fill`, `icon_size`, `indicator`, `label`, `marker_ref`, `max_value`, `name`, `node_ref`, `offset`, `position`, `processing`, `radius`, `show_zero`, `size`, `style`, `theme`, `theme_icon`, `unstyled`, `variant`, `visible`, `with_border`
 
-**需要语义映射的属性候选：** `autoContrast`, `children`, `gradient`, `radius`
+**需要语义映射的属性候选：** `children`, `gradient`
 
 ### Timeline — M:Timeline
 
@@ -1401,11 +1401,11 @@
 
 **官方功能章节：** Usage；Line and bullet props；Opposite content；Alternate items；Bullet as React node；Wrap Timeline.Item
 
-**本地实现：** [src/separator.rs](../src/separator.rs)、[src/timeline.rs](../src/timeline.rs)
+**本地实现：** [src/composite/skin.rs](../src/composite/skin.rs)、[src/separator.rs](../src/separator.rs)、[src/timeline.rs](../src/timeline.rs)
 
-**本地公开入口（同族）：** `active`, `class`, `decorative`, `description`, `fill`, `heading_level`, `item`, `items`, `length`, `marker`, `name`, `node_ref`, `orientation`, `progress`, `separator`, `size`, `state_labels`, `style`, `theme`, `thickness`, `timeline`, `timeline_item`, `timestamp`, `title`, `unstyled`
+**本地公开入口（同族）：** `active`, `align`, `bullet_radius`, `bullet_size`, `class`, `decorative`, `description`, `fill`, `heading_level`, `item`, `items`, `label`, `label_position`, `length`, `line_style`, `line_width`, `marker`, `name`, `node_ref`, `opposite`, `orientation`, `progress`, `reverse_active`, `separator`, `size`, `state_labels`, `style`, `theme`, `thickness`, `timeline`, `timeline_item`, `timestamp`, `title`, `unstyled`, `variant`
 
-**需要语义映射的属性候选：** `align`, `alternate`, `autoContrast`, `bullet`, `bulletSize`, `children`, `color`, `lineVariant`, `lineWidth`, `opposite`, `radius`, `reverseActive`
+**需要语义映射的属性候选：** `alternate`, `autoContrast`, `bullet`, `children`, `color`, `lineVariant`, `radius`
 
 ### Blockquote — M:Blockquote
 
@@ -1417,9 +1417,9 @@
 
 **本地实现：** [../glory/crates/apace/src/accessibility.rs](../../glory/crates/apace/src/accessibility.rs)、[../glory/crates/html/src/mapping.rs](../../glory/crates/html/src/mapping.rs)、[../glory/crates/render/src/document.rs](../../glory/crates/render/src/document.rs)、[src/document.rs](../src/document.rs)
 
-**本地公开入口（同族）：** `actions`, `blockquote`, `citation`, `class`, `content`, `data_list`, `data_list_item`, `description`, `fill`, `highlight`, `item`, `items`, `kbd`, `key`, `media`, `name`, `node_ref`, `ordered`, `platform`, `preflight`, `queries`, `query`, `shape`, `shape_in`, `size`, `style`, `term`, `text_list`, `text_list_item`, `theme`, `title`, `unstyled`
+**本地公开入口（同族）：** `actions`, `balanced`, `blockquote`, `citation`, `class`, `content`, `data_list`, `data_list_item`, `description`, `fill`, `gap`, `highlight`, `icon`, `icon_size`, `ignore_accents`, `ignore_ascii_case`, `item`, `items`, `kbd`, `key`, `label_width`, `media`, `name`, `node_ref`, `ordered`, `orientation`, `platform`, `preflight`, `queries`, `query`, `reversed`, `shape`, `shape_in`, `size`, `start`, `style`, `term`, `text_list`, `text_list_item`, `theme`, `title`, `unstyled`, `value`, `whole_words`, `with_divider`
 
-**需要语义映射的属性候选：** `cite`, `color`, `icon`, `iconSize`, `radius`, `textWrap`
+**需要语义映射的属性候选：** `cite`, `color`, `radius`, `textWrap`
 
 ### Code — M:Code
 
@@ -1431,7 +1431,7 @@
 
 **本地实现：** [../glory/crates/apace/src/accessibility.rs](../../glory/crates/apace/src/accessibility.rs)、[../glory/crates/html/src/mapping.rs](../../glory/crates/html/src/mapping.rs)、[../glory/crates/render/src/document.rs](../../glory/crates/render/src/document.rs)、[src/document.rs](../src/document.rs)
 
-**本地公开入口（同族）：** `actions`, `blockquote`, `citation`, `class`, `content`, `data_list`, `data_list_item`, `description`, `fill`, `highlight`, `item`, `items`, `kbd`, `key`, `media`, `name`, `node_ref`, `ordered`, `platform`, `preflight`, `queries`, `query`, `shape`, `shape_in`, `size`, `style`, `term`, `text_list`, `text_list_item`, `theme`, `title`, `unstyled`
+**本地公开入口（同族）：** `actions`, `balanced`, `blockquote`, `citation`, `class`, `content`, `data_list`, `data_list_item`, `description`, `fill`, `gap`, `highlight`, `icon`, `icon_size`, `ignore_accents`, `ignore_ascii_case`, `item`, `items`, `kbd`, `key`, `label_width`, `media`, `name`, `node_ref`, `ordered`, `orientation`, `platform`, `preflight`, `queries`, `query`, `reversed`, `shape`, `shape_in`, `size`, `start`, `style`, `term`, `text_list`, `text_list_item`, `theme`, `title`, `unstyled`, `value`, `whole_words`, `with_divider`
 
 **需要语义映射的属性候选：** `activeTab`, `background`, `block`, `code`, `codeColorScheme`, `collapseCodeLabel`, `color`, `controls`, `copiedLabel`, `copyLabel`, `defaultActiveTab`, `defaultExpanded`, `expandCodeLabel`, `expanded`, `getFileIcon`, `language`, `maxCollapsedHeight`, `onExpandedChange`, `onTabChange`, `radius`, `withBorder`, `withCopyButton`, `withExpandButton`, `withFirstLineIndentation`, `withLineNumbers`
 
@@ -1445,7 +1445,7 @@
 
 **本地实现：** [../glory/crates/apace/src/accessibility.rs](../../glory/crates/apace/src/accessibility.rs)、[../glory/crates/html/src/mapping.rs](../../glory/crates/html/src/mapping.rs)、[../glory/crates/render/src/document.rs](../../glory/crates/render/src/document.rs)、[src/document.rs](../src/document.rs)
 
-**本地公开入口（同族）：** `actions`, `blockquote`, `citation`, `class`, `content`, `data_list`, `data_list_item`, `description`, `fill`, `highlight`, `item`, `items`, `kbd`, `key`, `media`, `name`, `node_ref`, `ordered`, `platform`, `preflight`, `queries`, `query`, `shape`, `shape_in`, `size`, `style`, `term`, `text_list`, `text_list_item`, `theme`, `title`, `unstyled`
+**本地公开入口（同族）：** `actions`, `balanced`, `blockquote`, `citation`, `class`, `content`, `data_list`, `data_list_item`, `description`, `fill`, `gap`, `highlight`, `icon`, `icon_size`, `ignore_accents`, `ignore_ascii_case`, `item`, `items`, `kbd`, `key`, `label_width`, `media`, `name`, `node_ref`, `ordered`, `orientation`, `platform`, `preflight`, `queries`, `query`, `reversed`, `shape`, `shape_in`, `size`, `start`, `style`, `term`, `text_list`, `text_list_item`, `theme`, `title`, `unstyled`, `value`, `whole_words`, `with_divider`
 
 **需要语义映射的属性候选：** `accentInsensitive`, `caseInsensitive`, `children`, `color`, `gradient`, `highlightStyles`, `inherit`, `inline`, `lineClamp`, `span`, `textWrap`, `truncate`, `wholeWord`
 
@@ -1459,9 +1459,9 @@
 
 **本地实现：** [../glory/crates/apace/src/accessibility.rs](../../glory/crates/apace/src/accessibility.rs)、[../glory/crates/html/src/mapping.rs](../../glory/crates/html/src/mapping.rs)、[../glory/crates/render/src/document.rs](../../glory/crates/render/src/document.rs)、[src/document.rs](../src/document.rs)
 
-**本地公开入口（同族）：** `actions`, `blockquote`, `citation`, `class`, `content`, `data_list`, `data_list_item`, `description`, `fill`, `highlight`, `item`, `items`, `kbd`, `key`, `media`, `name`, `node_ref`, `ordered`, `platform`, `preflight`, `queries`, `query`, `shape`, `shape_in`, `size`, `style`, `term`, `text_list`, `text_list_item`, `theme`, `title`, `unstyled`
+**本地公开入口（同族）：** `actions`, `balanced`, `blockquote`, `citation`, `class`, `content`, `data_list`, `data_list_item`, `description`, `fill`, `gap`, `highlight`, `icon`, `icon_size`, `ignore_accents`, `ignore_ascii_case`, `item`, `items`, `kbd`, `key`, `label_width`, `media`, `name`, `node_ref`, `ordered`, `orientation`, `platform`, `preflight`, `queries`, `query`, `reversed`, `shape`, `shape_in`, `size`, `start`, `style`, `term`, `text_list`, `text_list_item`, `theme`, `title`, `unstyled`, `value`, `whole_words`, `with_divider`
 
-**需要语义映射的属性候选：** `center`, `children`, `icon`, `listStyleType`, `reversed`, `spacing`, `start`, `type`, `withPadding`
+**需要语义映射的属性候选：** `center`, `children`, `listStyleType`, `spacing`, `type`, `withPadding`
 
 ### Mark — M:Mark
 
@@ -1473,7 +1473,7 @@
 
 **本地实现：** [../glory/crates/apace/src/accessibility.rs](../../glory/crates/apace/src/accessibility.rs)、[../glory/crates/html/src/mapping.rs](../../glory/crates/html/src/mapping.rs)、[../glory/crates/render/src/document.rs](../../glory/crates/render/src/document.rs)、[src/document.rs](../src/document.rs)
 
-**本地公开入口（同族）：** `actions`, `blockquote`, `citation`, `class`, `content`, `data_list`, `data_list_item`, `description`, `fill`, `highlight`, `item`, `items`, `kbd`, `key`, `media`, `name`, `node_ref`, `ordered`, `platform`, `preflight`, `queries`, `query`, `shape`, `shape_in`, `size`, `style`, `term`, `text_list`, `text_list_item`, `theme`, `title`, `unstyled`
+**本地公开入口（同族）：** `actions`, `balanced`, `blockquote`, `citation`, `class`, `content`, `data_list`, `data_list_item`, `description`, `fill`, `gap`, `highlight`, `icon`, `icon_size`, `ignore_accents`, `ignore_ascii_case`, `item`, `items`, `kbd`, `key`, `label_width`, `media`, `name`, `node_ref`, `ordered`, `orientation`, `platform`, `preflight`, `queries`, `query`, `reversed`, `shape`, `shape_in`, `size`, `start`, `style`, `term`, `text_list`, `text_list_item`, `theme`, `title`, `unstyled`, `value`, `whole_words`, `with_divider`
 
 **需要语义映射的属性候选：** `color`
 
@@ -1543,7 +1543,7 @@
 
 **本地实现：** [../glory/crates/style/src/lib.rs](../../glory/crates/style/src/lib.rs)、[src/layout.rs](../src/layout.rs)
 
-**本地公开入口（同族）：** `align`, `aspect_ratio`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `box_shadow`, `class`, `container`, `direction`, `display`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `fluid`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inline`, `is_finite`, `justify`, `left`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `pointer_events`, `position`, `radius`, `right`, `scroll_anchor`, `size`, `style`, `text_gradient`, `text_overflow`, `theme`, `top`, `unstyled`, `validate`, `white_space`, `width`, `wrap`
+**本地公开入口（同族）：** `align`, `aspect_ratio`, `background_image`, `border_color`, `border_style`, `border_width`, `bottom`, `box_shadow`, `caption_side`, `class`, `container`, `direction`, `display`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `fluid`, `font_family`, `font_weight`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `height`, `inline`, `is_finite`, `justify`, `left`, `letter_spacing`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `pointer_events`, `position`, `radius`, `right`, `scroll_anchor`, `size`, `style`, `text_gradient`, `text_overflow`, `theme`, `top`, `unstyled`, `validate`, `white_space`, `width`, `wrap`
 
 **需要语义映射的属性候选：** 无直接拼写候选；仍不推断功能等价。
 
@@ -1557,9 +1557,9 @@
 
 **本地实现：** [../glory/crates/apace/src/collapse.rs](../../glory/crates/apace/src/collapse.rs)、[../glory/crates/render/src/collapse.rs](../../glory/crates/render/src/collapse.rs)、[../glory/crates/web/src/browser/collapse.rs](../../glory/crates/web/src/browser/collapse.rs)、[src/collapsible/mod.rs](../src/collapsible/mod.rs)
 
-**本地公开入口（同族）：** `animated`, `class`, `collapsible`, `content`, `content_policy`, `default_open`, `enabled`, `focus`, `height_transition`, `is_empty`, `label`, `name`, `needs_frame`, `node_ref`, `on`, `on_open_change`, `open`, `panel_ref`, `ready`, `retire`, `running`, `size`, `style`, `theme`, `trigger_content`, `trigger_ref`, `unstyled`, `update`, `validate`
+**本地公开入口（同族）：** `animated`, `class`, `collapsible`, `content`, `content_policy`, `default_open`, `enabled`, `focus`, `height_transition`, `horizontal`, `is_empty`, `label`, `name`, `needs_frame`, `node_ref`, `on`, `on_open_change`, `on_transition_end`, `open`, `panel_ref`, `ready`, `retire`, `running`, `size`, `style`, `theme`, `trigger_content`, `trigger_ref`, `unstyled`, `update`, `validate`
 
-**需要语义映射的属性候选：** `animateOpacity`, `expanded`, `keepMounted`, `keepMountedMode`, `onTransitionEnd`, `onTransitionStart`, `orientation`, `transitionDuration`, `transitionTimingFunction`
+**需要语义映射的属性候选：** `animateOpacity`, `expanded`, `keepMounted`, `keepMountedMode`, `onTransitionStart`, `orientation`, `transitionDuration`, `transitionTimingFunction`
 
 ### Divider — M:Divider
 
@@ -1571,9 +1571,9 @@
 
 **本地实现：** [src/separator.rs](../src/separator.rs)、[src/timeline.rs](../src/timeline.rs)
 
-**本地公开入口（同族）：** `active`, `class`, `decorative`, `description`, `fill`, `heading_level`, `item`, `items`, `length`, `marker`, `name`, `node_ref`, `orientation`, `progress`, `separator`, `size`, `state_labels`, `style`, `theme`, `thickness`, `timeline`, `timeline_item`, `timestamp`, `title`, `unstyled`
+**本地公开入口（同族）：** `active`, `align`, `bullet_radius`, `bullet_size`, `class`, `decorative`, `description`, `fill`, `heading_level`, `item`, `items`, `label`, `label_position`, `length`, `line_style`, `line_width`, `marker`, `name`, `node_ref`, `opposite`, `orientation`, `progress`, `reverse_active`, `separator`, `size`, `state_labels`, `style`, `theme`, `thickness`, `timeline`, `timeline_item`, `timestamp`, `title`, `unstyled`, `variant`
 
-**需要语义映射的属性候选：** `color`, `label`, `labelPosition`
+**需要语义映射的属性候选：** `color`
 
 ### FocusTrap — M:FocusTrap
 
@@ -1585,7 +1585,7 @@
 
 **本地实现：** [../glory/crates/apace/src/focus_scope.rs](../../glory/crates/apace/src/focus_scope.rs)、[../glory/crates/render/src/focus_scope.rs](../../glory/crates/render/src/focus_scope.rs)、[../glory/crates/ui/src/app.rs](../../glory/crates/ui/src/app.rs)、[../glory/crates/web/src/browser/focus_scope.rs](../../glory/crates/web/src/browser/focus_scope.rs)、[src/focus_scope.rs](../src/focus_scope.rs)、[src/portal.rs](../src/portal.rs)
 
-**本地公开入口（同族）：** `action`, `active`, `auto_focus`, `batch`, `bounds_now`, `buffer_stats`, `cancel_request`, `capabilities`, `child`, `child_in`, `class`, `clear`, `clear_files`, `configuration`, `construction_parent`, `contain_focus`, `contains_node`, `content`, `copy_text`, `create`, `defer_descendant_disposal`, `dispatch`, `downgrade`, `enabled`, `fill`, `flush`, `focus_scope`, `focus_scope_nodes`, `focus_scope_roots`, `focus_scopes`, `graph_stats`, `has_pending_presentation`, `host_context`, `in_owner`, `in_runtime`, `initial_focus`, `instantiate`, `is_active`, `is_enabled`, `is_inert`, `is_within`, `link_request`, `loop_tab`, `memory`, `mount`, `mount_scoped`, `mount_with`, `new`, `node_ref`, `on`, `on_target_lost`, `patch`, `pick_files`, `place`, `place_before`, `portal`, `portal_context`, `portal_target`, `profile`, `pump`, `remove_file`, `report`, `request`, `restore_focus`, `retain`, `return_focus`, `rich_editor_editable`, `rich_editor_value`, `roots`, `runtime`, `runtime_stats`, `scope`, `semantic_id`, `set_file_configuration`, `set_host_context`, `set_input_selection`, `set_profile`, `set_rich_document`, `set_rich_selection`, `settle`, `shared_runtime`, `sources`, `stats`, `style`, `style_profile`, `suspend`, `targets`, `tree`, `upgrade`, `with_host`
+**本地公开入口（同族）：** `action`, `active`, `auto_focus`, `batch`, `bounds_now`, `buffer_stats`, `cancel_request`, `capabilities`, `child`, `child_in`, `class`, `clear`, `clear_files`, `configuration`, `construction_parent`, `contain_focus`, `contains_node`, `content`, `copy_text`, `create`, `defer_descendant_disposal`, `dispatch`, `downgrade`, `enabled`, `fill`, `flush`, `focus_scope`, `focus_scope_nodes`, `focus_scope_roots`, `focus_scopes`, `graph_stats`, `has_pending_presentation`, `host_context`, `in_owner`, `in_runtime`, `initial_focus`, `instantiate`, `is_active`, `is_enabled`, `is_inert`, `is_within`, `link_request`, `loop_tab`, `memory`, `mount`, `mount_scoped`, `mount_with`, `new`, `node_ref`, `on`, `on_target_lost`, `patch`, `pick_files`, `place`, `place_before`, `portal`, `portal_context`, `portal_target`, `profile`, `pump`, `remove_file`, `report`, `request`, `restore_focus`, `retain`, `return_focus`, `rich_editor_editable`, `rich_editor_value`, `roots`, `runtime`, `runtime_stats`, `scope`, `semantic_id`, `set_file_configuration`, `set_host_context`, `set_input_selection`, `set_profile`, `set_rich_document`, `set_rich_selection`, `settle`, `shared_runtime`, `sources`, `stats`, `style`, `style_profile`, `supports_plot_pointer`, `suspend`, `targets`, `tree`, `upgrade`, `with_host`
 
 **需要语义映射的属性候选：** `children`, `innerRef`, `refProp`
 
@@ -1599,9 +1599,9 @@
 
 **本地实现：** [../glory/crates/apace/src/translation.rs](../../glory/crates/apace/src/translation.rs)、[../glory/crates/render/src/translation.rs](../../glory/crates/render/src/translation.rs)、[../glory/crates/web/src/browser/translation.rs](../../glory/crates/web/src/browser/translation.rs)、[src/marquee.rs](../src/marquee.rs)、[src/rolling_number.rs](../src/rolling_number.rs)
 
-**本地公开入口（同族）：** `admitted`, `animated`, `class`, `config`, `configure`, `direction`, `duration_millis`, `format`, `gap`, `grouping`, `is_empty`, `locale`, `marquee`, `max_fraction_digits`, `measurement_revision`, `min_fraction_digits`, `new`, `node_ref`, `offset`, `on`, `origin`, `paused`, `period_millis`, `resting_offset`, `retire`, `rolling_number`, `running`, `size`, `style`, `text`, `theme`, `unstyled`, `validate`, `value`
+**本地公开入口（同族）：** `admitted`, `animated`, `class`, `config`, `configure`, `direction`, `duration_millis`, `format`, `gap`, `grouping`, `is_empty`, `locale`, `marquee`, `max_fraction_digits`, `measurement_revision`, `min_fraction_digits`, `new`, `node_ref`, `offset`, `on`, `origin`, `paused`, `period_millis`, `repeat`, `resting_offset`, `retire`, `rolling_number`, `running`, `size`, `style`, `text`, `theme`, `unstyled`, `validate`, `value`, `visual_content`
 
-**需要语义映射的属性候选：** `children`, `duration`, `fadeEdgeColor`, `fadeEdgeSize`, `fadeEdges`, `orientation`, `pauseOnHover`, `repeat`, `reverse`
+**需要语义映射的属性候选：** `children`, `duration`, `fadeEdgeColor`, `fadeEdgeSize`, `fadeEdges`, `orientation`, `pauseOnHover`, `reverse`
 
 ### Paper — M:Paper
 
@@ -1613,7 +1613,7 @@
 
 **本地实现：** [../glory/crates/style/src/lib.rs](../../glory/crates/style/src/lib.rs)、[src/display.rs](../src/display.rs)
 
-**本地公开入口（同族）：** `actions`, `aspect_ratio`, `background_image`, `badge`, `border_color`, `border_style`, `border_width`, `bordered`, `bottom`, `box_shadow`, `card`, `class`, `content`, `default_visible`, `description`, `display`, `empty_state`, `enabled`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `font_family`, `font_weight`, `footer`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `header`, `heading_level`, `height`, `illustration`, `is_finite`, `left`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `on_remove`, `on_remove_press`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `paper`, `pill`, `pointer_events`, `position`, `radius`, `removable`, `remove_ref`, `right`, `scroll_anchor`, `shadow`, `size`, `style`, `text_gradient`, `text_overflow`, `theme`, `title`, `top`, `unstyled`, `validate`, `variant`, `visible`, `white_space`, `width`
+**本地公开入口（同族）：** `actions`, `aspect_ratio`, `background_image`, `badge`, `border_color`, `border_style`, `border_width`, `bordered`, `bottom`, `box_shadow`, `caption_side`, `card`, `class`, `color`, `content`, `default_visible`, `description`, `display`, `empty_state`, `enabled`, `field_sizing`, `fill`, `flex_direction`, `flex_wrap`, `font_family`, `font_weight`, `footer`, `gap`, `grid_column`, `grid_columns`, `grid_row`, `grid_rows`, `header`, `heading_level`, `height`, `illustration`, `is_finite`, `left`, `left_section`, `letter_spacing`, `line_clamp`, `margin`, `max_height`, `max_width`, `min_height`, `min_width`, `name`, `new`, `node_ref`, `object_fit`, `on_remove`, `on_remove_press`, `opacity`, `overflow_x`, `overflow_y`, `padding`, `paper`, `pill`, `pointer_events`, `position`, `radius`, `removable`, `remove_ref`, `right`, `right_section`, `scroll_anchor`, `shadow`, `size`, `style`, `text_gradient`, `text_overflow`, `theme`, `title`, `top`, `unstyled`, `validate`, `variant`, `visible`, `white_space`, `width`
 
 **需要语义映射的属性候选：** `withBorder`
 
@@ -1627,7 +1627,7 @@
 
 **本地实现：** [../glory/crates/apace/src/focus_scope.rs](../../glory/crates/apace/src/focus_scope.rs)、[../glory/crates/render/src/focus_scope.rs](../../glory/crates/render/src/focus_scope.rs)、[../glory/crates/ui/src/app.rs](../../glory/crates/ui/src/app.rs)、[../glory/crates/web/src/browser/focus_scope.rs](../../glory/crates/web/src/browser/focus_scope.rs)、[src/focus_scope.rs](../src/focus_scope.rs)、[src/portal.rs](../src/portal.rs)
 
-**本地公开入口（同族）：** `action`, `active`, `auto_focus`, `batch`, `bounds_now`, `buffer_stats`, `cancel_request`, `capabilities`, `child`, `child_in`, `class`, `clear`, `clear_files`, `configuration`, `construction_parent`, `contain_focus`, `contains_node`, `content`, `copy_text`, `create`, `defer_descendant_disposal`, `dispatch`, `downgrade`, `enabled`, `fill`, `flush`, `focus_scope`, `focus_scope_nodes`, `focus_scope_roots`, `focus_scopes`, `graph_stats`, `has_pending_presentation`, `host_context`, `in_owner`, `in_runtime`, `initial_focus`, `instantiate`, `is_active`, `is_enabled`, `is_inert`, `is_within`, `link_request`, `loop_tab`, `memory`, `mount`, `mount_scoped`, `mount_with`, `new`, `node_ref`, `on`, `on_target_lost`, `patch`, `pick_files`, `place`, `place_before`, `portal`, `portal_context`, `portal_target`, `profile`, `pump`, `remove_file`, `report`, `request`, `restore_focus`, `retain`, `return_focus`, `rich_editor_editable`, `rich_editor_value`, `roots`, `runtime`, `runtime_stats`, `scope`, `semantic_id`, `set_file_configuration`, `set_host_context`, `set_input_selection`, `set_profile`, `set_rich_document`, `set_rich_selection`, `settle`, `shared_runtime`, `sources`, `stats`, `style`, `style_profile`, `suspend`, `targets`, `tree`, `upgrade`, `with_host`
+**本地公开入口（同族）：** `action`, `active`, `auto_focus`, `batch`, `bounds_now`, `buffer_stats`, `cancel_request`, `capabilities`, `child`, `child_in`, `class`, `clear`, `clear_files`, `configuration`, `construction_parent`, `contain_focus`, `contains_node`, `content`, `copy_text`, `create`, `defer_descendant_disposal`, `dispatch`, `downgrade`, `enabled`, `fill`, `flush`, `focus_scope`, `focus_scope_nodes`, `focus_scope_roots`, `focus_scopes`, `graph_stats`, `has_pending_presentation`, `host_context`, `in_owner`, `in_runtime`, `initial_focus`, `instantiate`, `is_active`, `is_enabled`, `is_inert`, `is_within`, `link_request`, `loop_tab`, `memory`, `mount`, `mount_scoped`, `mount_with`, `new`, `node_ref`, `on`, `on_target_lost`, `patch`, `pick_files`, `place`, `place_before`, `portal`, `portal_context`, `portal_target`, `profile`, `pump`, `remove_file`, `report`, `request`, `restore_focus`, `retain`, `return_focus`, `rich_editor_editable`, `rich_editor_value`, `roots`, `runtime`, `runtime_stats`, `scope`, `semantic_id`, `set_file_configuration`, `set_host_context`, `set_input_selection`, `set_profile`, `set_rich_document`, `set_rich_selection`, `settle`, `shared_runtime`, `sources`, `stats`, `style`, `style_profile`, `supports_plot_pointer`, `suspend`, `targets`, `tree`, `upgrade`, `with_host`
 
 **需要语义映射的属性候选：** `children`, `reuseTargetNode`, `target`
 
@@ -1641,9 +1641,9 @@
 
 **本地实现：** [../glory/crates/render/src/scroll.rs](../../glory/crates/render/src/scroll.rs)、[src/scroll_area.rs](../src/scroll_area.rs)
 
-**本地公开入口（同族）：** `allows`, `area`, `as_str`, `axes`, `axis`, `class`, `command`, `content`, `content_ref`, `delay`, `key`, `keyboard`, `metrics`, `name`, `node_ref`, `offset_scrollbars`, `on`, `on_metrics_change`, `on_ready`, `on_scroll_change`, `overscroll_behavior`, `refresh`, `scroll_area`, `scroll_by`, `scroll_hide_delay`, `scroll_to`, `scroll_to_fraction`, `scrollbar_size`, `scrollbars`, `scroller`, `size`, `step`, `style`, `theme`, `unstyled`, `validate`
+**本地公开入口（同族）：** `allows`, `area`, `as_str`, `axes`, `axis`, `class`, `command`, `content`, `content_ref`, `control_size`, `controls`, `delay`, `initial_scroll_fraction`, `key`, `keyboard`, `metrics`, `mouse_drag`, `name`, `next_icon`, `node_ref`, `offset_scrollbars`, `on`, `on_metrics_change`, `on_ready`, `on_scroll_change`, `overscroll_behavior`, `previous_icon`, `refresh`, `scroll_area`, `scroll_by`, `scroll_hide_delay`, `scroll_step`, `scroll_to`, `scroll_to_fraction`, `scrollbar_size`, `scrollbars`, `scroller`, `size`, `step`, `style`, `theme`, `unstyled`, `validate`, `vertical_scrollbar_position`
 
-**需要语义映射的属性候选：** `onBottomReached`, `onLeftReached`, `onOverflowChange`, `onRightReached`, `onScrollPositionChange`, `onTopReached`, `startScrollPosition`, `type`, `verticalScrollbarPosition`, `viewportProps`, `viewportRef`
+**需要语义映射的属性候选：** `onBottomReached`, `onLeftReached`, `onOverflowChange`, `onRightReached`, `onScrollPositionChange`, `onTopReached`, `startScrollPosition`, `type`, `viewportProps`, `viewportRef`
 
 ### Scroller — M:Scroller
 
@@ -1655,9 +1655,9 @@
 
 **本地实现：** [../glory/crates/render/src/scroll.rs](../../glory/crates/render/src/scroll.rs)、[src/scroll_area.rs](../src/scroll_area.rs)
 
-**本地公开入口（同族）：** `allows`, `area`, `as_str`, `axes`, `axis`, `class`, `command`, `content`, `content_ref`, `delay`, `key`, `keyboard`, `metrics`, `name`, `node_ref`, `offset_scrollbars`, `on`, `on_metrics_change`, `on_ready`, `on_scroll_change`, `overscroll_behavior`, `refresh`, `scroll_area`, `scroll_by`, `scroll_hide_delay`, `scroll_to`, `scroll_to_fraction`, `scrollbar_size`, `scrollbars`, `scroller`, `size`, `step`, `style`, `theme`, `unstyled`, `validate`
+**本地公开入口（同族）：** `allows`, `area`, `as_str`, `axes`, `axis`, `class`, `command`, `content`, `content_ref`, `control_size`, `controls`, `delay`, `initial_scroll_fraction`, `key`, `keyboard`, `metrics`, `mouse_drag`, `name`, `next_icon`, `node_ref`, `offset_scrollbars`, `on`, `on_metrics_change`, `on_ready`, `on_scroll_change`, `overscroll_behavior`, `previous_icon`, `refresh`, `scroll_area`, `scroll_by`, `scroll_hide_delay`, `scroll_step`, `scroll_to`, `scroll_to_fraction`, `scrollbar_size`, `scrollbars`, `scroller`, `size`, `step`, `style`, `theme`, `unstyled`, `validate`, `vertical_scrollbar_position`
 
-**需要语义映射的属性候选：** `children`, `controlSize`, `draggable`, `edgeGradientColor`, `endControlIcon`, `endControlProps`, `scrollAmount`, `showEndControl`, `showStartControl`, `startControlIcon`, `startControlProps`
+**需要语义映射的属性候选：** `children`, `draggable`, `edgeGradientColor`, `endControlIcon`, `endControlProps`, `scrollAmount`, `showEndControl`, `showStartControl`, `startControlIcon`, `startControlProps`
 
 ### Toolbar — M:Toolbar
 
@@ -1681,11 +1681,11 @@
 
 **官方功能章节：** Usage；Premade transitions；Custom transitions；Enter and exit delay；Reduced motion；Lifecycle callbacks；Keep mounted
 
-**本地实现：** [src/environment.rs](../src/environment.rs)、[src/theme/mod.rs](../src/theme/mod.rs)、[src/theme_tokens.rs](../src/theme_tokens.rs)、[src/typography.rs](../src/typography.rs)
+**本地实现：** [../glory/crates/apace/src/presence.rs](../../glory/crates/apace/src/presence.rs)、[../glory/crates/render/src/presence.rs](../../glory/crates/render/src/presence.rs)、[../glory/crates/web/src/browser/presence.rs](../../glory/crates/web/src/browser/presence.rs)、[src/environment.rs](../src/environment.rs)、[src/theme/mod.rs](../src/theme/mod.rs)、[src/theme_tokens.rs](../src/theme_tokens.rs)、[src/transition.rs](../src/transition.rs)、[src/typography.rs](../src/typography.rs)
 
-**本地公开入口（同族）：** `anchor`, `arabic`, `blue_dark`, `blue_light`, `chinese`, `class`, `color`, `content`, `control`, `dark`, `direction`, `direction_provider`, `english`, `fill`, `font_size`, `from_default`, `gradient`, `green_dark`, `green_light`, `inline`, `language`, `light`, `line_clamp`, `line_height`, `locale`, `locale_provider`, `message`, `motion`, `name`, `new`, `node_ref`, `on`, `palette`, `provider`, `selectable`, `size`, `spacing`, `style`, `stylesheet`, `text`, `theme`, `theme_provider`, `title`, `transition_duration`, `truncate`, `typography`, `unstyled`, `validate`, `variant`, `weight`, `with_control`, `with_spacing`, `with_tokens`, `with_typography`
+**本地公开入口（同族）：** `anchor`, `animated`, `appear`, `arabic`, `as_str`, `blue_dark`, `blue_light`, `chinese`, `class`, `color`, `content`, `content_policy`, `control`, `dark`, `direction`, `direction_provider`, `distance`, `duration`, `effect`, `english`, `enter_delay`, `exit_delay`, `exit_duration`, `fill`, `font_size`, `from_default`, `gradient`, `green_dark`, `green_light`, `has_transform`, `inline`, `is_empty`, `language`, `light`, `line_clamp`, `line_height`, `locale`, `locale_provider`, `message`, `motion`, `mounted`, `name`, `needs_frame`, `new`, `node_ref`, `on`, `on_enter`, `on_entered`, `on_exit`, `on_exited`, `palette`, `provider`, `ready`, `retire`, `running`, `selectable`, `size`, `spacing`, `style`, `stylesheet`, `text`, `theme`, `theme_provider`, `timing`, `title`, `transition`, `transition_duration`, `truncate`, `typography`, `unstyled`, `update`, `validate`, `variant`, `weight`, `with_control`, `with_spacing`, `with_tokens`, `with_typography`
 
-**需要语义映射的属性候选：** `children`, `duration`, `enterDelay`, `exitDelay`, `exitDuration`, `keepMounted`, `keepMountedMode`, `mounted`, `onEnter`, `onEntered`, `onExit`, `onExited`, `timingFunction`, `transition`
+**需要语义映射的属性候选：** `children`, `keepMounted`, `keepMountedMode`, `timingFunction`
 
 ### VisuallyHidden — M:VisuallyHidden
 
@@ -1709,11 +1709,11 @@
 
 **官方功能章节：** Usage；Allow deselect；Multiple dates；Dates range；Single date in range；Presets；Default date；Controlled date；Default level；Hide outside dates；Display week numbers；First day of week；Hide weekdays；Weekend days；Render day function；Min and max date；Change header controls order；Add props to day, year and month control；Exclude dates；Number of columns；Max level；Full width；Size；Change year and months controls format；Change label format；Localization；Native level select；Accessibility
 
-**本地实现：** [src/date_picker.rs](../src/date_picker.rs)、[src/date_picker_input.rs](../src/date_picker_input.rs)、[src/date_selection.rs](../src/date_selection.rs)
+**本地实现：** [src/date_picker.rs](../src/date_picker.rs)、[src/date_picker_input.rs](../src/date_picker_input.rs)、[src/date_selection.rs](../src/date_selection.rs)、[src/input_actions.rs](../src/input_actions.rs)、[tests/input_actions.rs](../tests/input_actions.rs)
 
-**本地公开入口（同族）：** `activate`, `allow_deselect`, `anchor`, `calendar_ref`, `class`, `close_label`, `columns_to_scroll`, `contains`, `date_picker`, `date_picker_input`, `default_level`, `default_month`, `default_open`, `default_value`, `direction`, `disable_weekday`, `display_format`, `enabled`, `exclude_date`, `exclude_dates`, `field`, `focus`, `form_name`, `format_display`, `format_iso`, `hide_outside_dates`, `hide_weekdays`, `insert`, `invalid`, `is_complete`, `iter`, `level`, `max_level`, `mode`, `month`, `name`, `new`, `node_ref`, `number_of_columns`, `on`, `on_level_change`, `on_month_change`, `on_open_change`, `on_reject`, `on_value_change`, `open`, `panel_ref`, `parse_iso`, `presets`, `readonly`, `remove`, `required`, `size`, `style`, `theme`, `title`, `trigger_label`, `trigger_ref`, `try_from_iter`, `unstyled`, `validate`, `value`, `with_week_numbers`
+**本地公开入口（同族）：** `activate`, `allow_deselect`, `anchor`, `calendar_ref`, `class`, `clear_label`, `clearable`, `close_label`, `columns_to_scroll`, `contains`, `date_picker`, `date_picker_input`, `default_level`, `default_month`, `default_open`, `default_value`, `direction`, `disable_weekday`, `display_format`, `enabled`, `exclude_date`, `exclude_dates`, `field`, `focus`, `form_name`, `format_display`, `format_iso`, `hide_outside_dates`, `hide_weekdays`, `insert`, `invalid`, `is_complete`, `iter`, `level`, `max_level`, `mode`, `month`, `name`, `new`, `node_ref`, `number_of_columns`, `on`, `on_level_change`, `on_month_change`, `on_open_change`, `on_reject`, `on_value_change`, `open`, `panel_ref`, `parse_iso`, `placeholder`, `presets`, `readonly`, `remove`, `required`, `size`, `style`, `theme`, `title`, `trigger_label`, `trigger_ref`, `try_from_iter`, `unstyled`, `validate`, `value`, `with_week_numbers`
 
-**需要语义映射的属性候选：** `allowSingleDateInRange`, `ariaLabels`, `clearButtonProps`, `clearSectionMode`, `clearable`, `closeOnChange`, `date`, `decadeLabelFormat`, `defaultDate`, `description`, `descriptionProps`, `disabled`, `dropdownType`, `enableKeyboardNavigation`, `error`, `errorProps`, `firstDayOfWeek`, `fullWidth`, `getDayAriaLabel`, `getDayProps`, `getMonthControlProps`, `getYearControlProps`, `headerControlsOrder`, `highlightToday`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `labelSeparator`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `locale`, `maxDate`, `minDate`, `modalProps`, `monthLabelFormat`, `monthsListFormat`, `nextIcon`, `nextLabel`, `onChange`, `onDateChange`, `onDropdownClose`, `onMonthMouseEnter`, `onMonthSelect`, `onNextDecade`, `onNextMonth`, `onNextYear`, `onPreviousDecade`, `onPreviousMonth`, `onPreviousYear`, `onYearMouseEnter`, `onYearSelect`, `placeholder`, `pointer`, `popoverProps`, `previousIcon`, `previousLabel`, `radius`, `readOnly`, `renderDay`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `sortDates`, `success`, `successProps`, `type`, `valueFormat`, `valueFormatter`, `weekdayFormat`, `weekendDays`, `withAsterisk`, `withCellSpacing`, `withErrorStyles`, `withNativeLevelSelect`, `withSuccessStyles`, `wrapperProps`, `yearLabelFormat`, `yearsListFormat`, `yearsSelectRange`
+**需要语义映射的属性候选：** `allowSingleDateInRange`, `ariaLabels`, `clearButtonProps`, `clearSectionMode`, `closeOnChange`, `date`, `decadeLabelFormat`, `defaultDate`, `description`, `descriptionProps`, `disabled`, `dropdownType`, `enableKeyboardNavigation`, `error`, `errorProps`, `firstDayOfWeek`, `fullWidth`, `getDayAriaLabel`, `getDayProps`, `getMonthControlProps`, `getYearControlProps`, `headerControlsOrder`, `highlightToday`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `labelSeparator`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `locale`, `maxDate`, `minDate`, `modalProps`, `monthLabelFormat`, `monthsListFormat`, `nextIcon`, `nextLabel`, `onChange`, `onDateChange`, `onDropdownClose`, `onMonthMouseEnter`, `onMonthSelect`, `onNextDecade`, `onNextMonth`, `onNextYear`, `onPreviousDecade`, `onPreviousMonth`, `onPreviousYear`, `onYearMouseEnter`, `onYearSelect`, `pointer`, `popoverProps`, `previousIcon`, `previousLabel`, `radius`, `readOnly`, `renderDay`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `sortDates`, `success`, `successProps`, `type`, `valueFormat`, `valueFormatter`, `weekdayFormat`, `weekendDays`, `withAsterisk`, `withCellSpacing`, `withErrorStyles`, `withNativeLevelSelect`, `withSuccessStyles`, `wrapperProps`, `yearLabelFormat`, `yearsListFormat`, `yearsSelectRange`
 
 ### DatePickerInput — D:DatePickerInput
 
@@ -1723,11 +1723,11 @@
 
 **官方功能章节：** DatePicker props；Usage；Multiple dates；Dates range；Presets；Open picker in modal；Value format；Value formatter；Clearable；Disabled state；Min and max dates；Default level；Max level；Control props；Exclude dates；Hide outside dates；Hide weekdays；Weekend days；First day of week；Label format；List format；With week numbers；Render day；Header controls order；Input props；With icon；Native level select；Accessibility
 
-**本地实现：** [src/date_picker.rs](../src/date_picker.rs)、[src/date_picker_input.rs](../src/date_picker_input.rs)、[src/date_selection.rs](../src/date_selection.rs)
+**本地实现：** [src/date_picker.rs](../src/date_picker.rs)、[src/date_picker_input.rs](../src/date_picker_input.rs)、[src/date_selection.rs](../src/date_selection.rs)、[src/input_actions.rs](../src/input_actions.rs)、[tests/input_actions.rs](../tests/input_actions.rs)
 
-**本地公开入口（同族）：** `activate`, `allow_deselect`, `anchor`, `calendar_ref`, `class`, `close_label`, `columns_to_scroll`, `contains`, `date_picker`, `date_picker_input`, `default_level`, `default_month`, `default_open`, `default_value`, `direction`, `disable_weekday`, `display_format`, `enabled`, `exclude_date`, `exclude_dates`, `field`, `focus`, `form_name`, `format_display`, `format_iso`, `hide_outside_dates`, `hide_weekdays`, `insert`, `invalid`, `is_complete`, `iter`, `level`, `max_level`, `mode`, `month`, `name`, `new`, `node_ref`, `number_of_columns`, `on`, `on_level_change`, `on_month_change`, `on_open_change`, `on_reject`, `on_value_change`, `open`, `panel_ref`, `parse_iso`, `presets`, `readonly`, `remove`, `required`, `size`, `style`, `theme`, `title`, `trigger_label`, `trigger_ref`, `try_from_iter`, `unstyled`, `validate`, `value`, `with_week_numbers`
+**本地公开入口（同族）：** `activate`, `allow_deselect`, `anchor`, `calendar_ref`, `class`, `clear_label`, `clearable`, `close_label`, `columns_to_scroll`, `contains`, `date_picker`, `date_picker_input`, `default_level`, `default_month`, `default_open`, `default_value`, `direction`, `disable_weekday`, `display_format`, `enabled`, `exclude_date`, `exclude_dates`, `field`, `focus`, `form_name`, `format_display`, `format_iso`, `hide_outside_dates`, `hide_weekdays`, `insert`, `invalid`, `is_complete`, `iter`, `level`, `max_level`, `mode`, `month`, `name`, `new`, `node_ref`, `number_of_columns`, `on`, `on_level_change`, `on_month_change`, `on_open_change`, `on_reject`, `on_value_change`, `open`, `panel_ref`, `parse_iso`, `placeholder`, `presets`, `readonly`, `remove`, `required`, `size`, `style`, `theme`, `title`, `trigger_label`, `trigger_ref`, `try_from_iter`, `unstyled`, `validate`, `value`, `with_week_numbers`
 
-**需要语义映射的属性候选：** `allowSingleDateInRange`, `ariaLabels`, `clearButtonProps`, `clearSectionMode`, `clearable`, `closeOnChange`, `date`, `decadeLabelFormat`, `defaultDate`, `description`, `descriptionProps`, `disabled`, `dropdownType`, `enableKeyboardNavigation`, `error`, `errorProps`, `firstDayOfWeek`, `fullWidth`, `getDayAriaLabel`, `getDayProps`, `getMonthControlProps`, `getYearControlProps`, `headerControlsOrder`, `highlightToday`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `labelSeparator`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `locale`, `maxDate`, `minDate`, `modalProps`, `monthLabelFormat`, `monthsListFormat`, `nextIcon`, `nextLabel`, `onChange`, `onDateChange`, `onDropdownClose`, `onMonthMouseEnter`, `onMonthSelect`, `onNextDecade`, `onNextMonth`, `onNextYear`, `onPreviousDecade`, `onPreviousMonth`, `onPreviousYear`, `onYearMouseEnter`, `onYearSelect`, `placeholder`, `pointer`, `popoverProps`, `previousIcon`, `previousLabel`, `radius`, `readOnly`, `renderDay`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `sortDates`, `success`, `successProps`, `type`, `valueFormat`, `valueFormatter`, `weekdayFormat`, `weekendDays`, `withAsterisk`, `withCellSpacing`, `withErrorStyles`, `withNativeLevelSelect`, `withSuccessStyles`, `wrapperProps`, `yearLabelFormat`, `yearsListFormat`, `yearsSelectRange`
+**需要语义映射的属性候选：** `allowSingleDateInRange`, `ariaLabels`, `clearButtonProps`, `clearSectionMode`, `closeOnChange`, `date`, `decadeLabelFormat`, `defaultDate`, `description`, `descriptionProps`, `disabled`, `dropdownType`, `enableKeyboardNavigation`, `error`, `errorProps`, `firstDayOfWeek`, `fullWidth`, `getDayAriaLabel`, `getDayProps`, `getMonthControlProps`, `getYearControlProps`, `headerControlsOrder`, `highlightToday`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `labelSeparator`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `locale`, `maxDate`, `minDate`, `modalProps`, `monthLabelFormat`, `monthsListFormat`, `nextIcon`, `nextLabel`, `onChange`, `onDateChange`, `onDropdownClose`, `onMonthMouseEnter`, `onMonthSelect`, `onNextDecade`, `onNextMonth`, `onNextYear`, `onPreviousDecade`, `onPreviousMonth`, `onPreviousYear`, `onYearMouseEnter`, `onYearSelect`, `pointer`, `popoverProps`, `previousIcon`, `previousLabel`, `radius`, `readOnly`, `renderDay`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `sortDates`, `success`, `successProps`, `type`, `valueFormat`, `valueFormatter`, `weekdayFormat`, `weekendDays`, `withAsterisk`, `withCellSpacing`, `withErrorStyles`, `withNativeLevelSelect`, `withSuccessStyles`, `wrapperProps`, `yearLabelFormat`, `yearsListFormat`, `yearsSelectRange`
 
 ### DateTimePicker — D:DateTimePicker
 
@@ -1737,7 +1737,7 @@
 
 **官方功能章节：** DatePicker props；Usage；Range；With seconds；Presets；TimePicker props；Value format；Disabled state；Input props；Clearable；Open picker in modal；Native level select；Accessibility
 
-**本地实现：** [src/date_time_model.rs](../src/date_time_model.rs)、[src/date_time_picker.rs](../src/date_time_picker.rs)
+**本地实现：** [src/date_time_model.rs](../src/date_time_model.rs)、[src/date_time_picker.rs](../src/date_time_picker.rs)、[src/input_actions.rs](../src/input_actions.rs)、[tests/input_actions.rs](../tests/input_actions.rs)
 
 **本地公开入口（同族）：** `application`, `bounds`, `calendar_ref`, `class`, `classify`, `columns_to_scroll`, `contains`, `date_bounds`, `default_level`, `default_month`, `default_time`, `default_value`, `direction`, `enabled`, `field`, `focus`, `format`, `format_local_date_time`, `from_fixed`, `from_local`, `grid`, `hide_outside_dates`, `hide_weekdays`, `hour_ref`, `inline_date_time_picker`, `is_error`, `level`, `max_level`, `max_time_dropdown_height`, `minute_ref`, `month`, `name`, `new`, `node_ref`, `number_of_columns`, `on`, `on_commit`, `on_draft_change`, `on_level_change`, `on_month_change`, `on_reject`, `on_resolved`, `on_value_change`, `parse_local_date_time`, `presets`, `proposal`, `provider`, `readonly`, `reset_revision`, `resolve`, `reverse_time_controls`, `second_ref`, `size`, `style`, `theme`, `time_bounds`, `time_dropdown`, `time_presets`, `time_steps`, `unstyled`, `value`, `with_week_numbers`
 
@@ -1751,7 +1751,7 @@
 
 **官方功能章节：** DatePicker props；Usage；With seconds；Range；Controlled range；Value format
 
-**本地实现：** [src/date_time_model.rs](../src/date_time_model.rs)、[src/date_time_picker.rs](../src/date_time_picker.rs)
+**本地实现：** [src/date_time_model.rs](../src/date_time_model.rs)、[src/date_time_picker.rs](../src/date_time_picker.rs)、[src/input_actions.rs](../src/input_actions.rs)、[tests/input_actions.rs](../tests/input_actions.rs)
 
 **本地公开入口（同族）：** `application`, `bounds`, `calendar_ref`, `class`, `classify`, `columns_to_scroll`, `contains`, `date_bounds`, `default_level`, `default_month`, `default_time`, `default_value`, `direction`, `enabled`, `field`, `focus`, `format`, `format_local_date_time`, `from_fixed`, `from_local`, `grid`, `hide_outside_dates`, `hide_weekdays`, `hour_ref`, `inline_date_time_picker`, `is_error`, `level`, `max_level`, `max_time_dropdown_height`, `minute_ref`, `month`, `name`, `new`, `node_ref`, `number_of_columns`, `on`, `on_commit`, `on_draft_change`, `on_level_change`, `on_month_change`, `on_reject`, `on_resolved`, `on_value_change`, `parse_local_date_time`, `presets`, `proposal`, `provider`, `readonly`, `reset_revision`, `resolve`, `reverse_time_controls`, `second_ref`, `size`, `style`, `theme`, `time_bounds`, `time_dropdown`, `time_presets`, `time_steps`, `unstyled`, `value`, `with_week_numbers`
 
@@ -1779,11 +1779,11 @@
 
 **官方功能章节：** Usage；Allow deselect；Multiple dates；Dates range；Single date in range；Presets；Default date；Controlled date；Min and max date；Add props to year and month control；Number of columns；Max level；Full width；Size；Change year and months controls format；Change label format；Localization；Native level select；Accessibility
 
-**本地实现：** [src/period_model.rs](../src/period_model.rs)、[src/period_picker.rs](../src/period_picker.rs)、[src/period_picker_input.rs](../src/period_picker_input.rs)
+**本地实现：** [src/input_actions.rs](../src/input_actions.rs)、[src/period_model.rs](../src/period_model.rs)、[src/period_picker.rs](../src/period_picker.rs)、[src/period_picker_input.rs](../src/period_picker_input.rs)、[tests/input_actions.rs](../tests/input_actions.rs)
 
-**本地公开入口（同族）：** `activate`, `allow_deselect`, `anchor`, `checked_add`, `clamp`, `class`, `close_label`, `contains`, `default_open`, `default_value`, `default_year`, `direction`, `enabled`, `end`, `exclude_value`, `exclude_values`, `field`, `focus`, `form_name`, `format_iso`, `from_dates`, `grid_ref`, `insert`, `invalid`, `is_complete`, `iter`, `len_periods`, `max`, `min`, `mode`, `month_picker`, `month_picker_input`, `name`, `new`, `node_ref`, `on`, `on_open_change`, `on_reject`, `on_value_change`, `on_year_change`, `open`, `panel_ref`, `parse_iso`, `readonly`, `remove`, `required`, `size`, `start`, `style`, `theme`, `title`, `trigger_label`, `trigger_ref`, `try_from_iter`, `unstyled`, `validate`, `value`, `year`, `year_picker`, `year_picker_input`
+**本地公开入口（同族）：** `activate`, `allow_deselect`, `anchor`, `checked_add`, `clamp`, `class`, `clear_label`, `clearable`, `close_label`, `contains`, `default_open`, `default_value`, `default_year`, `direction`, `display_format`, `enabled`, `end`, `exclude_value`, `exclude_values`, `field`, `focus`, `form_name`, `format_iso`, `from_dates`, `grid_ref`, `insert`, `invalid`, `is_complete`, `iter`, `len_periods`, `max`, `min`, `mode`, `month_picker`, `month_picker_input`, `name`, `new`, `node_ref`, `on`, `on_open_change`, `on_reject`, `on_value_change`, `on_year_change`, `open`, `panel_ref`, `parse_iso`, `placeholder`, `readonly`, `remove`, `required`, `size`, `start`, `style`, `theme`, `title`, `trigger_label`, `trigger_ref`, `try_from_iter`, `unstyled`, `validate`, `value`, `year`, `year_picker`, `year_picker_input`
 
-**需要语义映射的属性候选：** `allowSingleDateInRange`, `ariaLabels`, `clearButtonProps`, `clearSectionMode`, `clearable`, `closeOnChange`, `columnsToScroll`, `date`, `decadeLabelFormat`, `defaultDate`, `defaultLevel`, `description`, `descriptionProps`, `disabled`, `dropdownType`, `error`, `errorProps`, `fullWidth`, `getMonthControlProps`, `getYearControlProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `labelSeparator`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `level`, `loading`, `loadingPosition`, `locale`, `maxDate`, `maxLevel`, `minDate`, `modalProps`, `monthsListFormat`, `nextLabel`, `numberOfColumns`, `onChange`, `onDateChange`, `onDropdownClose`, `onLevelChange`, `onMonthSelect`, `onNextDecade`, `onNextYear`, `onPreviousDecade`, `onPreviousYear`, `placeholder`, `pointer`, `popoverProps`, `presets`, `previousLabel`, `radius`, `readOnly`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `sortDates`, `success`, `successProps`, `type`, `valueFormat`, `valueFormatter`, `withAsterisk`, `withCellSpacing`, `withErrorStyles`, `withNativeLevelSelect`, `withSuccessStyles`, `wrapperProps`, `yearLabelFormat`, `yearsListFormat`
+**需要语义映射的属性候选：** `allowSingleDateInRange`, `ariaLabels`, `clearButtonProps`, `clearSectionMode`, `closeOnChange`, `columnsToScroll`, `date`, `decadeLabelFormat`, `defaultDate`, `defaultLevel`, `description`, `descriptionProps`, `disabled`, `dropdownType`, `error`, `errorProps`, `fullWidth`, `getMonthControlProps`, `getYearControlProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `labelSeparator`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `level`, `loading`, `loadingPosition`, `locale`, `maxDate`, `maxLevel`, `minDate`, `modalProps`, `monthsListFormat`, `nextLabel`, `numberOfColumns`, `onChange`, `onDateChange`, `onDropdownClose`, `onLevelChange`, `onMonthSelect`, `onNextDecade`, `onNextYear`, `onPreviousDecade`, `onPreviousYear`, `pointer`, `popoverProps`, `presets`, `previousLabel`, `radius`, `readOnly`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `sortDates`, `success`, `successProps`, `type`, `valueFormat`, `valueFormatter`, `withAsterisk`, `withCellSpacing`, `withErrorStyles`, `withNativeLevelSelect`, `withSuccessStyles`, `wrapperProps`, `yearLabelFormat`, `yearsListFormat`
 
 ### MonthPickerInput — D:MonthPickerInput
 
@@ -1793,11 +1793,11 @@
 
 **官方功能章节：** MonthPicker props；Usage；Multiple dates；Dates range；Presets；Open picker in modal；Value format；Value formatter；Clearable；Disabled state；Min and max dates；Control props；Label format；List format；Max level；Input props；With icon；Native level select；Accessibility
 
-**本地实现：** [src/period_model.rs](../src/period_model.rs)、[src/period_picker.rs](../src/period_picker.rs)、[src/period_picker_input.rs](../src/period_picker_input.rs)
+**本地实现：** [src/input_actions.rs](../src/input_actions.rs)、[src/period_model.rs](../src/period_model.rs)、[src/period_picker.rs](../src/period_picker.rs)、[src/period_picker_input.rs](../src/period_picker_input.rs)、[tests/input_actions.rs](../tests/input_actions.rs)
 
-**本地公开入口（同族）：** `activate`, `allow_deselect`, `anchor`, `checked_add`, `clamp`, `class`, `close_label`, `contains`, `default_open`, `default_value`, `default_year`, `direction`, `enabled`, `end`, `exclude_value`, `exclude_values`, `field`, `focus`, `form_name`, `format_iso`, `from_dates`, `grid_ref`, `insert`, `invalid`, `is_complete`, `iter`, `len_periods`, `max`, `min`, `mode`, `month_picker`, `month_picker_input`, `name`, `new`, `node_ref`, `on`, `on_open_change`, `on_reject`, `on_value_change`, `on_year_change`, `open`, `panel_ref`, `parse_iso`, `readonly`, `remove`, `required`, `size`, `start`, `style`, `theme`, `title`, `trigger_label`, `trigger_ref`, `try_from_iter`, `unstyled`, `validate`, `value`, `year`, `year_picker`, `year_picker_input`
+**本地公开入口（同族）：** `activate`, `allow_deselect`, `anchor`, `checked_add`, `clamp`, `class`, `clear_label`, `clearable`, `close_label`, `contains`, `default_open`, `default_value`, `default_year`, `direction`, `display_format`, `enabled`, `end`, `exclude_value`, `exclude_values`, `field`, `focus`, `form_name`, `format_iso`, `from_dates`, `grid_ref`, `insert`, `invalid`, `is_complete`, `iter`, `len_periods`, `max`, `min`, `mode`, `month_picker`, `month_picker_input`, `name`, `new`, `node_ref`, `on`, `on_open_change`, `on_reject`, `on_value_change`, `on_year_change`, `open`, `panel_ref`, `parse_iso`, `placeholder`, `readonly`, `remove`, `required`, `size`, `start`, `style`, `theme`, `title`, `trigger_label`, `trigger_ref`, `try_from_iter`, `unstyled`, `validate`, `value`, `year`, `year_picker`, `year_picker_input`
 
-**需要语义映射的属性候选：** `allowSingleDateInRange`, `ariaLabels`, `clearButtonProps`, `clearSectionMode`, `clearable`, `closeOnChange`, `columnsToScroll`, `date`, `decadeLabelFormat`, `defaultDate`, `defaultLevel`, `description`, `descriptionProps`, `disabled`, `dropdownType`, `error`, `errorProps`, `fullWidth`, `getMonthControlProps`, `getYearControlProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `labelSeparator`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `level`, `loading`, `loadingPosition`, `locale`, `maxDate`, `maxLevel`, `minDate`, `modalProps`, `monthsListFormat`, `nextLabel`, `numberOfColumns`, `onChange`, `onDateChange`, `onDropdownClose`, `onLevelChange`, `onNextDecade`, `onNextYear`, `onPreviousDecade`, `onPreviousYear`, `placeholder`, `pointer`, `popoverProps`, `presets`, `previousLabel`, `radius`, `readOnly`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `sortDates`, `success`, `successProps`, `type`, `valueFormat`, `valueFormatter`, `withAsterisk`, `withCellSpacing`, `withErrorStyles`, `withNativeLevelSelect`, `withSuccessStyles`, `wrapperProps`, `yearLabelFormat`, `yearsListFormat`
+**需要语义映射的属性候选：** `allowSingleDateInRange`, `ariaLabels`, `clearButtonProps`, `clearSectionMode`, `closeOnChange`, `columnsToScroll`, `date`, `decadeLabelFormat`, `defaultDate`, `defaultLevel`, `description`, `descriptionProps`, `disabled`, `dropdownType`, `error`, `errorProps`, `fullWidth`, `getMonthControlProps`, `getYearControlProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `labelSeparator`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `level`, `loading`, `loadingPosition`, `locale`, `maxDate`, `maxLevel`, `minDate`, `modalProps`, `monthsListFormat`, `nextLabel`, `numberOfColumns`, `onChange`, `onDateChange`, `onDropdownClose`, `onLevelChange`, `onNextDecade`, `onNextYear`, `onPreviousDecade`, `onPreviousYear`, `pointer`, `popoverProps`, `presets`, `previousLabel`, `radius`, `readOnly`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `sortDates`, `success`, `successProps`, `type`, `valueFormat`, `valueFormatter`, `withAsterisk`, `withCellSpacing`, `withErrorStyles`, `withNativeLevelSelect`, `withSuccessStyles`, `wrapperProps`, `yearLabelFormat`, `yearsListFormat`
 
 ### YearPicker — D:YearPicker
 
@@ -1807,11 +1807,11 @@
 
 **官方功能章节：** Usage；Allow deselect；Multiple dates；Dates range；Single date in range；Presets；Default date；Controlled date；Min and max date；Add props to year control；Number of columns；Full width；Size；Change year controls format；Change decade label format；Accessibility；CHARTS COMPONENTS AND FEATURES
 
-**本地实现：** [src/period_model.rs](../src/period_model.rs)、[src/period_picker.rs](../src/period_picker.rs)、[src/period_picker_input.rs](../src/period_picker_input.rs)
+**本地实现：** [src/input_actions.rs](../src/input_actions.rs)、[src/period_model.rs](../src/period_model.rs)、[src/period_picker.rs](../src/period_picker.rs)、[src/period_picker_input.rs](../src/period_picker_input.rs)、[tests/input_actions.rs](../tests/input_actions.rs)
 
-**本地公开入口（同族）：** `activate`, `allow_deselect`, `anchor`, `checked_add`, `clamp`, `class`, `close_label`, `contains`, `default_open`, `default_value`, `default_year`, `direction`, `enabled`, `end`, `exclude_value`, `exclude_values`, `field`, `focus`, `form_name`, `format_iso`, `from_dates`, `grid_ref`, `insert`, `invalid`, `is_complete`, `iter`, `len_periods`, `max`, `min`, `mode`, `month_picker`, `month_picker_input`, `name`, `new`, `node_ref`, `on`, `on_open_change`, `on_reject`, `on_value_change`, `on_year_change`, `open`, `panel_ref`, `parse_iso`, `readonly`, `remove`, `required`, `size`, `start`, `style`, `theme`, `title`, `trigger_label`, `trigger_ref`, `try_from_iter`, `unstyled`, `validate`, `value`, `year`, `year_picker`, `year_picker_input`
+**本地公开入口（同族）：** `activate`, `allow_deselect`, `anchor`, `checked_add`, `clamp`, `class`, `clear_label`, `clearable`, `close_label`, `contains`, `default_open`, `default_value`, `default_year`, `direction`, `display_format`, `enabled`, `end`, `exclude_value`, `exclude_values`, `field`, `focus`, `form_name`, `format_iso`, `from_dates`, `grid_ref`, `insert`, `invalid`, `is_complete`, `iter`, `len_periods`, `max`, `min`, `mode`, `month_picker`, `month_picker_input`, `name`, `new`, `node_ref`, `on`, `on_open_change`, `on_reject`, `on_value_change`, `on_year_change`, `open`, `panel_ref`, `parse_iso`, `placeholder`, `readonly`, `remove`, `required`, `size`, `start`, `style`, `theme`, `title`, `trigger_label`, `trigger_ref`, `try_from_iter`, `unstyled`, `validate`, `value`, `year`, `year_picker`, `year_picker_input`
 
-**需要语义映射的属性候选：** `allowSingleDateInRange`, `ariaLabels`, `clearButtonProps`, `clearSectionMode`, `clearable`, `closeOnChange`, `columnsToScroll`, `date`, `decadeLabelFormat`, `defaultDate`, `description`, `descriptionProps`, `disabled`, `dropdownType`, `error`, `errorProps`, `fullWidth`, `getYearControlProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `labelSeparator`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `locale`, `maxDate`, `minDate`, `modalProps`, `nextLabel`, `numberOfColumns`, `onChange`, `onDateChange`, `onDropdownClose`, `onNextDecade`, `onPreviousDecade`, `onYearSelect`, `placeholder`, `pointer`, `popoverProps`, `presets`, `previousLabel`, `radius`, `readOnly`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `sortDates`, `success`, `successProps`, `type`, `valueFormat`, `valueFormatter`, `withAsterisk`, `withCellSpacing`, `withErrorStyles`, `withNativeLevelSelect`, `withSuccessStyles`, `wrapperProps`, `yearsListFormat`
+**需要语义映射的属性候选：** `allowSingleDateInRange`, `ariaLabels`, `clearButtonProps`, `clearSectionMode`, `closeOnChange`, `columnsToScroll`, `date`, `decadeLabelFormat`, `defaultDate`, `description`, `descriptionProps`, `disabled`, `dropdownType`, `error`, `errorProps`, `fullWidth`, `getYearControlProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `labelSeparator`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `locale`, `maxDate`, `minDate`, `modalProps`, `nextLabel`, `numberOfColumns`, `onChange`, `onDateChange`, `onDropdownClose`, `onNextDecade`, `onPreviousDecade`, `onYearSelect`, `pointer`, `popoverProps`, `presets`, `previousLabel`, `radius`, `readOnly`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `sortDates`, `success`, `successProps`, `type`, `valueFormat`, `valueFormatter`, `withAsterisk`, `withCellSpacing`, `withErrorStyles`, `withNativeLevelSelect`, `withSuccessStyles`, `wrapperProps`, `yearsListFormat`
 
 ### YearPickerInput — D:YearPickerInput
 
@@ -1821,11 +1821,11 @@
 
 **官方功能章节：** YearPicker props；Usage；Multiple dates；Dates range；Presets；Open picker in modal；Value format；Value formatter；Clearable；Disabled state；Min and max dates；Control props；Year label format；Decade label format；Input props；With icon；Accessibility
 
-**本地实现：** [src/period_model.rs](../src/period_model.rs)、[src/period_picker.rs](../src/period_picker.rs)、[src/period_picker_input.rs](../src/period_picker_input.rs)
+**本地实现：** [src/input_actions.rs](../src/input_actions.rs)、[src/period_model.rs](../src/period_model.rs)、[src/period_picker.rs](../src/period_picker.rs)、[src/period_picker_input.rs](../src/period_picker_input.rs)、[tests/input_actions.rs](../tests/input_actions.rs)
 
-**本地公开入口（同族）：** `activate`, `allow_deselect`, `anchor`, `checked_add`, `clamp`, `class`, `close_label`, `contains`, `default_open`, `default_value`, `default_year`, `direction`, `enabled`, `end`, `exclude_value`, `exclude_values`, `field`, `focus`, `form_name`, `format_iso`, `from_dates`, `grid_ref`, `insert`, `invalid`, `is_complete`, `iter`, `len_periods`, `max`, `min`, `mode`, `month_picker`, `month_picker_input`, `name`, `new`, `node_ref`, `on`, `on_open_change`, `on_reject`, `on_value_change`, `on_year_change`, `open`, `panel_ref`, `parse_iso`, `readonly`, `remove`, `required`, `size`, `start`, `style`, `theme`, `title`, `trigger_label`, `trigger_ref`, `try_from_iter`, `unstyled`, `validate`, `value`, `year`, `year_picker`, `year_picker_input`
+**本地公开入口（同族）：** `activate`, `allow_deselect`, `anchor`, `checked_add`, `clamp`, `class`, `clear_label`, `clearable`, `close_label`, `contains`, `default_open`, `default_value`, `default_year`, `direction`, `display_format`, `enabled`, `end`, `exclude_value`, `exclude_values`, `field`, `focus`, `form_name`, `format_iso`, `from_dates`, `grid_ref`, `insert`, `invalid`, `is_complete`, `iter`, `len_periods`, `max`, `min`, `mode`, `month_picker`, `month_picker_input`, `name`, `new`, `node_ref`, `on`, `on_open_change`, `on_reject`, `on_value_change`, `on_year_change`, `open`, `panel_ref`, `parse_iso`, `placeholder`, `readonly`, `remove`, `required`, `size`, `start`, `style`, `theme`, `title`, `trigger_label`, `trigger_ref`, `try_from_iter`, `unstyled`, `validate`, `value`, `year`, `year_picker`, `year_picker_input`
 
-**需要语义映射的属性候选：** `allowSingleDateInRange`, `ariaLabels`, `clearButtonProps`, `clearSectionMode`, `clearable`, `closeOnChange`, `columnsToScroll`, `date`, `decadeLabelFormat`, `defaultDate`, `description`, `descriptionProps`, `disabled`, `dropdownType`, `error`, `errorProps`, `fullWidth`, `getYearControlProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `labelSeparator`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `locale`, `maxDate`, `minDate`, `modalProps`, `nextLabel`, `numberOfColumns`, `onChange`, `onDateChange`, `onDropdownClose`, `onNextDecade`, `onPreviousDecade`, `placeholder`, `pointer`, `popoverProps`, `presets`, `previousLabel`, `radius`, `readOnly`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `sortDates`, `success`, `successProps`, `type`, `valueFormat`, `valueFormatter`, `withAsterisk`, `withCellSpacing`, `withErrorStyles`, `withNativeLevelSelect`, `withSuccessStyles`, `wrapperProps`, `yearsListFormat`
+**需要语义映射的属性候选：** `allowSingleDateInRange`, `ariaLabels`, `clearButtonProps`, `clearSectionMode`, `closeOnChange`, `columnsToScroll`, `date`, `decadeLabelFormat`, `defaultDate`, `description`, `descriptionProps`, `disabled`, `dropdownType`, `error`, `errorProps`, `fullWidth`, `getYearControlProps`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `labelSeparator`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `locale`, `maxDate`, `minDate`, `modalProps`, `nextLabel`, `numberOfColumns`, `onChange`, `onDateChange`, `onDropdownClose`, `onNextDecade`, `onPreviousDecade`, `pointer`, `popoverProps`, `presets`, `previousLabel`, `radius`, `readOnly`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `sortDates`, `success`, `successProps`, `type`, `valueFormat`, `valueFormatter`, `withAsterisk`, `withCellSpacing`, `withErrorStyles`, `withNativeLevelSelect`, `withSuccessStyles`, `wrapperProps`, `yearsListFormat`
 
 ### TimeInput — D:TimeInput
 
@@ -1851,7 +1851,7 @@
 
 **本地实现：** [src/duration_picker.rs](../src/duration_picker.rs)、[src/time_grid.rs](../src/time_grid.rs)、[src/time_grid_model.rs](../src/time_grid_model.rs)、[src/time_parts.rs](../src/time_parts.rs)、[src/time_picker.rs](../src/time_picker.rs)
 
-**本地公开入口（同族）：** `at`, `bounds`, `class`, `classify`, `clear_label`, `clearable`, `close_on_preset_select`, `default_open`, `default_value`, `direction`, `disable_time`, `disable_times`, `duration`, `duration_picker`, `enabled`, `field`, `focus`, `form_name`, `format`, `from_time`, `grid`, `handle_paste`, `hour_label`, `hour_placeholder`, `hour_ref`, `hour_step`, `index_of`, `invalid`, `is_error`, `max_dropdown_content_height`, `min_hours_digits`, `minute_label`, `minute_placeholder`, `minute_ref`, `minute_step`, `name`, `nearest_index`, `new`, `node_ref`, `on`, `on_blur`, `on_commit`, `on_draft_change`, `on_focus`, `on_open_change`, `on_reject`, `on_value_change`, `open`, `paste_split`, `period_label`, `period_labels`, `popup_placement`, `popup_width`, `precision`, `presets`, `proposal`, `readonly`, `required`, `reverse_time_controls_list`, `rows`, `second_label`, `second_placeholder`, `second_ref`, `second_step`, `size`, `spec`, `style`, `theme`, `time_grid`, `time_picker`, `unstyled`, `value`, `with_dropdown`
+**本地公开入口（同族）：** `at`, `bounds`, `class`, `classify`, `clear_label`, `clearable`, `close_on_preset_select`, `default_open`, `default_value`, `direction`, `disable_time`, `disable_times`, `dropdown_icon`, `duration`, `duration_picker`, `enabled`, `field`, `focus`, `form_name`, `format`, `from_time`, `grid`, `handle_paste`, `hour_label`, `hour_placeholder`, `hour_ref`, `hour_step`, `index_of`, `invalid`, `is_error`, `max_dropdown_content_height`, `min_hours_digits`, `minute_label`, `minute_placeholder`, `minute_ref`, `minute_step`, `name`, `nearest_index`, `new`, `node_ref`, `on`, `on_blur`, `on_commit`, `on_draft_change`, `on_focus`, `on_open_change`, `on_reject`, `on_value_change`, `open`, `paste_split`, `period_label`, `period_labels`, `popup_placement`, `popup_width`, `precision`, `presets`, `proposal`, `readonly`, `required`, `reverse_time_controls_list`, `rows`, `second_label`, `second_placeholder`, `second_ref`, `second_step`, `size`, `spec`, `style`, `theme`, `time_grid`, `time_picker`, `unstyled`, `value`, `with_dropdown`
 
 **需要语义映射的属性候选：** `amPmInputLabel`, `amPmLabels`, `amPmRef`, `amPmSelectProps`, `clearButtonProps`, `clearSectionMode`, `closeDropdownOnPresetSelect`, `description`, `descriptionProps`, `disabled`, `error`, `errorProps`, `form`, `hiddenInputProps`, `hoursInputLabel`, `hoursInputProps`, `hoursPlaceholder`, `hoursRef`, `hoursStep`, `inputContainer`, `inputSize`, `inputWrapperOrder`, `label`, `labelProps`, `leftSection`, `leftSectionPointerEvents`, `leftSectionProps`, `leftSectionWidth`, `loading`, `loadingPosition`, `max`, `min`, `minutesInputLabel`, `minutesInputProps`, `minutesPlaceholder`, `minutesRef`, `minutesStep`, `onChange`, `pointer`, `popoverProps`, `radius`, `readOnly`, `rightSection`, `rightSectionPointerEvents`, `rightSectionProps`, `rightSectionWidth`, `scrollAreaProps`, `secondsInputLabel`, `secondsInputProps`, `secondsPlaceholder`, `secondsRef`, `secondsStep`, `success`, `successProps`, `type`, `withAsterisk`, `withErrorStyles`, `withSeconds`, `withSuccessStyles`, `wrapperProps`
 
@@ -1865,7 +1865,7 @@
 
 **本地实现：** [src/duration_picker.rs](../src/duration_picker.rs)、[src/time_grid.rs](../src/time_grid.rs)、[src/time_grid_model.rs](../src/time_grid_model.rs)、[src/time_parts.rs](../src/time_parts.rs)、[src/time_picker.rs](../src/time_picker.rs)
 
-**本地公开入口（同族）：** `at`, `bounds`, `class`, `classify`, `clear_label`, `clearable`, `close_on_preset_select`, `default_open`, `default_value`, `direction`, `disable_time`, `disable_times`, `duration`, `duration_picker`, `enabled`, `field`, `focus`, `form_name`, `format`, `from_time`, `grid`, `handle_paste`, `hour_label`, `hour_placeholder`, `hour_ref`, `hour_step`, `index_of`, `invalid`, `is_error`, `max_dropdown_content_height`, `min_hours_digits`, `minute_label`, `minute_placeholder`, `minute_ref`, `minute_step`, `name`, `nearest_index`, `new`, `node_ref`, `on`, `on_blur`, `on_commit`, `on_draft_change`, `on_focus`, `on_open_change`, `on_reject`, `on_value_change`, `open`, `paste_split`, `period_label`, `period_labels`, `popup_placement`, `popup_width`, `precision`, `presets`, `proposal`, `readonly`, `required`, `reverse_time_controls_list`, `rows`, `second_label`, `second_placeholder`, `second_ref`, `second_step`, `size`, `spec`, `style`, `theme`, `time_grid`, `time_picker`, `unstyled`, `value`, `with_dropdown`
+**本地公开入口（同族）：** `at`, `bounds`, `class`, `classify`, `clear_label`, `clearable`, `close_on_preset_select`, `default_open`, `default_value`, `direction`, `disable_time`, `disable_times`, `dropdown_icon`, `duration`, `duration_picker`, `enabled`, `field`, `focus`, `form_name`, `format`, `from_time`, `grid`, `handle_paste`, `hour_label`, `hour_placeholder`, `hour_ref`, `hour_step`, `index_of`, `invalid`, `is_error`, `max_dropdown_content_height`, `min_hours_digits`, `minute_label`, `minute_placeholder`, `minute_ref`, `minute_step`, `name`, `nearest_index`, `new`, `node_ref`, `on`, `on_blur`, `on_commit`, `on_draft_change`, `on_focus`, `on_open_change`, `on_reject`, `on_value_change`, `open`, `paste_split`, `period_label`, `period_labels`, `popup_placement`, `popup_width`, `precision`, `presets`, `proposal`, `readonly`, `required`, `reverse_time_controls_list`, `rows`, `second_label`, `second_placeholder`, `second_ref`, `second_step`, `size`, `spec`, `style`, `theme`, `time_grid`, `time_picker`, `unstyled`, `value`, `with_dropdown`
 
 **需要语义映射的属性候选：** `allowDeselect`, `amPmLabels`, `data`, `disabled`, `getControlProps`, `maxTime`, `minTime`, `onChange`, `radius`, `simpleGridProps`, `withSeconds`
 
@@ -1891,11 +1891,11 @@
 
 **官方功能章节：** Usage；Number of days；getDayProps；Min and max dates；Localization；Accessibility
 
-**本地实现：** [../glory/crates/render/src/grid.rs](../../glory/crates/render/src/grid.rs)、[src/calendar.rs](../src/calendar.rs)、[src/dates.rs](../src/dates.rs)
+**本地实现：** [../glory/crates/render/src/grid.rs](../../glory/crates/render/src/grid.rs)、[src/calendar.rs](../src/calendar.rs)、[src/dates.rs](../src/dates.rs)、[src/mini_calendar.rs](../src/mini_calendar.rs)
 
-**本地公开入口（同族）：** `add_months`, `allow_deselect`, `calendar`, `cells`, `checked_add`, `checked_add_days`, `clamp`, `class`, `contains`, `date_label`, `days`, `days_until`, `default_month`, `default_value`, `direction`, `disable_weekday`, `enabled`, `exclude_date`, `exclude_dates`, `first`, `focus`, `from_ordinal`, `full_width`, `hide_outside_dates`, `hide_weekdays`, `index_of`, `iso_week_number`, `key`, `last`, `len_days`, `mini_calendar`, `month`, `month_allowed`, `month_label`, `month_name`, `name`, `new`, `node_ref`, `on`, `on_month_change`, `on_value_change`, `ordinal`, `parse_iso`, `readonly`, `render_day`, `resolve_fixed`, `seconds_from_midnight`, `selection`, `size`, `static_mode`, `style`, `theme`, `to_local`, `unstyled`, `value`, `weekday`, `weekday_long`, `weekday_short`, `with_nanosecond`, `with_week_numbers`
+**本地公开入口（同族）：** `add_months`, `allow_deselect`, `calendar`, `cells`, `checked_add`, `checked_add_days`, `clamp`, `class`, `contains`, `date`, `date_label`, `day_style`, `days`, `days_until`, `default_date`, `default_month`, `default_value`, `direction`, `disable_weekday`, `enabled`, `exclude_date`, `exclude_dates`, `first`, `focus`, `from_ordinal`, `full_width`, `hide_outside_dates`, `hide_weekdays`, `index_of`, `iso_week_number`, `key`, `last`, `len_days`, `mini_calendar`, `month`, `month_allowed`, `month_label`, `month_name`, `name`, `new`, `node_ref`, `number_of_days`, `on`, `on_date_change`, `on_month_change`, `on_value_change`, `ordinal`, `parse_iso`, `readonly`, `render_day`, `resolve_fixed`, `seconds_from_midnight`, `selection`, `size`, `static_mode`, `style`, `theme`, `to_local`, `unstyled`, `value`, `weekday`, `weekday_long`, `weekday_short`, `with_nanosecond`, `with_week_numbers`
 
-**需要语义映射的属性候选：** `date`, `defaultDate`, `getDayProps`, `locale`, `maxDate`, `minDate`, `monthLabelFormat`, `nextControlProps`, `numberOfDays`, `onChange`, `onDateChange`, `onNext`, `onPrevious`, `previousControlProps`
+**需要语义映射的属性候选：** `getDayProps`, `locale`, `maxDate`, `minDate`, `monthLabelFormat`, `nextControlProps`, `onChange`, `onNext`, `onPrevious`, `previousControlProps`
 
 ### Calendar — D:Calendar
 
@@ -1905,319 +1905,11 @@
 
 **官方功能章节：** Usage；Custom date pickers；Full width；Static prop；Native level select
 
-**本地实现：** [../glory/crates/render/src/grid.rs](../../glory/crates/render/src/grid.rs)、[src/calendar.rs](../src/calendar.rs)、[src/dates.rs](../src/dates.rs)
+**本地实现：** [../glory/crates/render/src/grid.rs](../../glory/crates/render/src/grid.rs)、[src/calendar.rs](../src/calendar.rs)、[src/dates.rs](../src/dates.rs)、[src/mini_calendar.rs](../src/mini_calendar.rs)
 
-**本地公开入口（同族）：** `add_months`, `allow_deselect`, `calendar`, `cells`, `checked_add`, `checked_add_days`, `clamp`, `class`, `contains`, `date_label`, `days`, `days_until`, `default_month`, `default_value`, `direction`, `disable_weekday`, `enabled`, `exclude_date`, `exclude_dates`, `first`, `focus`, `from_ordinal`, `full_width`, `hide_outside_dates`, `hide_weekdays`, `index_of`, `iso_week_number`, `key`, `last`, `len_days`, `mini_calendar`, `month`, `month_allowed`, `month_label`, `month_name`, `name`, `new`, `node_ref`, `on`, `on_month_change`, `on_value_change`, `ordinal`, `parse_iso`, `readonly`, `render_day`, `resolve_fixed`, `seconds_from_midnight`, `selection`, `size`, `static_mode`, `style`, `theme`, `to_local`, `unstyled`, `value`, `weekday`, `weekday_long`, `weekday_short`, `with_nanosecond`, `with_week_numbers`
+**本地公开入口（同族）：** `add_months`, `allow_deselect`, `calendar`, `cells`, `checked_add`, `checked_add_days`, `clamp`, `class`, `contains`, `date`, `date_label`, `day_style`, `days`, `days_until`, `default_date`, `default_month`, `default_value`, `direction`, `disable_weekday`, `enabled`, `exclude_date`, `exclude_dates`, `first`, `focus`, `from_ordinal`, `full_width`, `hide_outside_dates`, `hide_weekdays`, `index_of`, `iso_week_number`, `key`, `last`, `len_days`, `mini_calendar`, `month`, `month_allowed`, `month_label`, `month_name`, `name`, `new`, `node_ref`, `number_of_days`, `on`, `on_date_change`, `on_month_change`, `on_value_change`, `ordinal`, `parse_iso`, `readonly`, `render_day`, `resolve_fixed`, `seconds_from_midnight`, `selection`, `size`, `static_mode`, `style`, `theme`, `to_local`, `unstyled`, `value`, `weekday`, `weekday_long`, `weekday_short`, `with_nanosecond`, `with_week_numbers`
 
-**需要语义映射的属性候选：** `ariaLabels`, `columnsToScroll`, `date`, `decadeLabelFormat`, `defaultDate`, `defaultLevel`, `enableKeyboardNavigation`, `firstDayOfWeek`, `getDayAriaLabel`, `getDayProps`, `getMonthControlProps`, `getYearControlProps`, `hasNextLevel`, `headerControlsOrder`, `highlightToday`, `label`, `level`, `levelControlAriaLabel`, `locale`, `maxDate`, `maxLevel`, `minDate`, `minLevel`, `monthLabelFormat`, `monthsListFormat`, `nextDisabled`, `nextIcon`, `nextLabel`, `numberOfColumns`, `onDateChange`, `onLevelChange`, `onLevelClick`, `onMonthMouseEnter`, `onMonthSelect`, `onNext`, `onNextDecade`, `onNextMonth`, `onNextYear`, `onPrevious`, `onPreviousDecade`, `onPreviousMonth`, `onPreviousYear`, `onYearMouseEnter`, `onYearSelect`, `previousDisabled`, `previousIcon`, `previousLabel`, `static`, `weekdayFormat`, `weekendDays`, `withCellSpacing`, `withNativeLevelSelect`, `withNext`, `withPrevious`, `yearLabelFormat`, `yearsListFormat`, `yearsSelectRange`
-
-### AreaChart — C:AreaChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/area-chart/)；对应 `P11-02`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `accessibilityLayer`, `activeDotProps`, `areaChartProps`, `areaProps`, `brushProps`, `children`, `connectNulls`, `curveType`, `data`, `dataKey`, `dotProps`, `fillOpacity`, `gridAxis`, `gridColor`, `gridProps`, `legendProps`, `orientation`, `referenceAreas`, `referenceDots`, `referenceLines`, `rightYAxisLabel`, `rightYAxisProps`, `series`, `splitColors`, `splitOffset`, `strokeDasharray`, `strokeWidth`, `textColor`, `tickLine`, `tooltipAnimationDuration`, `tooltipProps`, `type`, `unit`, `valueFormatter`, `withBrush`, `withDots`, `withGradient`, `withLegend`, `withPointLabels`, `withRightYAxis`, `withTooltip`, `withXAxis`, `withYAxis`, `xAxisLabel`, `xAxisProps`, `yAxisLabel`, `yAxisProps`
-
-**官方功能章节：** Usage；Stacked area chart；Percent area chart；Streamgraph；Split area chart；Split colors；Legend；Legend position；Series labels；Set curve type per line；Connect nulls；Points labels；X and Y axis props；Axis labels；X axis offset；Y axis scale；Right Y axis；Rotate x-axis labels；Value formatter；Area color；Change area color depending on color scheme；Stroke dash array；Grid and text colors；Tooltip animation；Units；Custom tooltip；Remove tooltip；Customize dots；Stroke width；Fill opacity；Sync multiple AreaCharts；Vertical orientation；Dashed area line；Reference lines；Reference areas；Reference dots；Brush；Brush props；ChartBrush component
-
-**本地实现：** [src/chart_model.rs](../src/chart_model.rs)、[src/chart_scene.rs](../src/chart_scene.rs)、[src/chart_widget.rs](../src/chart_widget.rs)
-
-**本地公开入口（同族）：** `area_chart`, `bar_chart`, `build`, `categories`, `category`, `chart`, `chart_theme`, `class`, `color`, `composite_chart`, `data`, `data_table`, `default_options`, `domain`, `enabled`, `focus`, `fraction`, `frame`, `from_theme`, `kind`, `label`, `legend`, `line_chart`, `max`, `message`, `min`, `name`, `nearest`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `pointer_selection`, `reference_areas`, `reference_dots`, `reference_lines`, `selection`, `size`, `style`, `text`, `theme`, `ticks`, `to_svg`, `unstyled`, `validate`, `value`, `values`
-
-**需要语义映射的属性候选：** `accessibilityLayer`, `activeDotProps`, `areaChartProps`, `areaProps`, `brushProps`, `children`, `connectNulls`, `curveType`, `dataKey`, `dotProps`, `fillOpacity`, `gridAxis`, `gridColor`, `gridProps`, `legendProps`, `orientation`, `rightYAxisLabel`, `rightYAxisProps`, `series`, `splitColors`, `splitOffset`, `strokeDasharray`, `strokeWidth`, `textColor`, `tickLine`, `tooltipAnimationDuration`, `tooltipProps`, `type`, `unit`, `valueFormatter`, `withBrush`, `withDots`, `withGradient`, `withLegend`, `withPointLabels`, `withRightYAxis`, `withTooltip`, `withXAxis`, `withYAxis`, `xAxisLabel`, `xAxisProps`, `yAxisLabel`, `yAxisProps`
-
-### BarChart — C:BarChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/bar-chart/)；对应 `P11-02`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `accessibilityLayer`, `barChartProps`, `barLabelColor`, `barProps`, `brushProps`, `children`, `cursorFill`, `data`, `dataKey`, `fillOpacity`, `getBarColor`, `gridAxis`, `gridColor`, `gridProps`, `legendProps`, `maxBarWidth`, `minBarSize`, `orientation`, `referenceAreas`, `referenceDots`, `referenceLines`, `rightYAxisLabel`, `rightYAxisProps`, `series`, `strokeDasharray`, `textColor`, `tickLine`, `tooltipAnimationDuration`, `tooltipProps`, `type`, `unit`, `valueFormatter`, `valueLabelProps`, `withBarValueLabel`, `withBrush`, `withLegend`, `withRightYAxis`, `withTooltip`, `withXAxis`, `withYAxis`, `xAxisLabel`, `xAxisProps`, `yAxisLabel`, `yAxisProps`
-
-**官方功能章节：** Usage；Stacked bar chart；Mixed stacked bar chart；Percent bar chart；Waterfall bar chart；SVG pattern as bar fill；Bar color based on value；Legend；Legend position；Series labels；X and Y axis props；Axis labels；X axis offset；Y axis scale；Value formatter；Area color；Bar props；Minimum bar size；Change bar color depending on color scheme；Stroke dash array；Grid and text colors；Tooltip animation；Units；Custom tooltip；Remove tooltip；Sync multiple BarCharts；Vertical orientation；Reference lines；Reference areas；Reference dots；Bar value label；Bar value label props；Bar overlays；Brush
-
-**本地实现：** [src/chart_model.rs](../src/chart_model.rs)、[src/chart_scene.rs](../src/chart_scene.rs)、[src/chart_widget.rs](../src/chart_widget.rs)
-
-**本地公开入口（同族）：** `area_chart`, `bar_chart`, `build`, `categories`, `category`, `chart`, `chart_theme`, `class`, `color`, `composite_chart`, `data`, `data_table`, `default_options`, `domain`, `enabled`, `focus`, `fraction`, `frame`, `from_theme`, `kind`, `label`, `legend`, `line_chart`, `max`, `message`, `min`, `name`, `nearest`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `pointer_selection`, `reference_areas`, `reference_dots`, `reference_lines`, `selection`, `size`, `style`, `text`, `theme`, `ticks`, `to_svg`, `unstyled`, `validate`, `value`, `values`
-
-**需要语义映射的属性候选：** `accessibilityLayer`, `barChartProps`, `barLabelColor`, `barProps`, `brushProps`, `children`, `cursorFill`, `dataKey`, `fillOpacity`, `getBarColor`, `gridAxis`, `gridColor`, `gridProps`, `legendProps`, `maxBarWidth`, `minBarSize`, `orientation`, `rightYAxisLabel`, `rightYAxisProps`, `series`, `strokeDasharray`, `textColor`, `tickLine`, `tooltipAnimationDuration`, `tooltipProps`, `type`, `unit`, `valueFormatter`, `valueLabelProps`, `withBarValueLabel`, `withBrush`, `withLegend`, `withRightYAxis`, `withTooltip`, `withXAxis`, `withYAxis`, `xAxisLabel`, `xAxisProps`, `yAxisLabel`, `yAxisProps`
-
-### LineChart — C:LineChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/line-chart/)；对应 `P11-02`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `accessibilityLayer`, `activeDotProps`, `brushProps`, `children`, `connectNulls`, `curveType`, `data`, `dataKey`, `dotProps`, `fillOpacity`, `gradientStops`, `gridAxis`, `gridColor`, `gridProps`, `legendProps`, `lineChartProps`, `lineProps`, `orientation`, `referenceAreas`, `referenceDots`, `referenceLines`, `rightYAxisLabel`, `rightYAxisProps`, `series`, `strokeDasharray`, `strokeWidth`, `textColor`, `tickLine`, `tooltipAnimationDuration`, `tooltipProps`, `type`, `unit`, `valueFormatter`, `withBrush`, `withDots`, `withLegend`, `withPointLabels`, `withRightYAxis`, `withTooltip`, `withXAxis`, `withYAxis`, `xAxisLabel`, `xAxisProps`, `yAxisLabel`, `yAxisProps`
-
-**官方功能章节：** Usage；Gradient type；Legend；Legend position；Series labels；Connect nulls；Points labels；X and Y axis props；Axis labels；X axis offset；Y axis scale；Right Y axis；Value formatter；Set curve type per line；Line color；Change line color depending on color scheme；Stroke dash array；Grid and text colors；Tooltip animation；Units；Custom tooltip；Remove tooltip；Customize dots；Stroke width；Sync multiple LineCharts；Vertical orientation；Dashed line；Reference lines；Reference areas；Reference dots；Brush
-
-**本地实现：** [src/chart_model.rs](../src/chart_model.rs)、[src/chart_scene.rs](../src/chart_scene.rs)、[src/chart_widget.rs](../src/chart_widget.rs)
-
-**本地公开入口（同族）：** `area_chart`, `bar_chart`, `build`, `categories`, `category`, `chart`, `chart_theme`, `class`, `color`, `composite_chart`, `data`, `data_table`, `default_options`, `domain`, `enabled`, `focus`, `fraction`, `frame`, `from_theme`, `kind`, `label`, `legend`, `line_chart`, `max`, `message`, `min`, `name`, `nearest`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `pointer_selection`, `reference_areas`, `reference_dots`, `reference_lines`, `selection`, `size`, `style`, `text`, `theme`, `ticks`, `to_svg`, `unstyled`, `validate`, `value`, `values`
-
-**需要语义映射的属性候选：** `accessibilityLayer`, `activeDotProps`, `brushProps`, `children`, `connectNulls`, `curveType`, `dataKey`, `dotProps`, `fillOpacity`, `gradientStops`, `gridAxis`, `gridColor`, `gridProps`, `legendProps`, `lineChartProps`, `lineProps`, `orientation`, `rightYAxisLabel`, `rightYAxisProps`, `series`, `strokeDasharray`, `strokeWidth`, `textColor`, `tickLine`, `tooltipAnimationDuration`, `tooltipProps`, `type`, `unit`, `valueFormatter`, `withBrush`, `withDots`, `withLegend`, `withPointLabels`, `withRightYAxis`, `withTooltip`, `withXAxis`, `withYAxis`, `xAxisLabel`, `xAxisProps`, `yAxisLabel`, `yAxisProps`
-
-### CompositeChart — C:CompositeChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/composite-chart/)；对应 `P11-02`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `accessibilityLayer`, `activeDotProps`, `areaProps`, `barProps`, `brushProps`, `children`, `composedChartProps`, `connectNulls`, `curveType`, `data`, `dataKey`, `dotProps`, `gridAxis`, `gridColor`, `gridProps`, `legendProps`, `lineProps`, `maxBarWidth`, `minBarSize`, `referenceAreas`, `referenceDots`, `referenceLines`, `rightYAxisLabel`, `rightYAxisProps`, `series`, `strokeDasharray`, `strokeWidth`, `textColor`, `tickLine`, `tooltipAnimationDuration`, `tooltipProps`, `unit`, `valueFormatter`, `withBarValueLabel`, `withBrush`, `withDots`, `withLegend`, `withPointLabels`, `withRightYAxis`, `withTooltip`, `withXAxis`, `withYAxis`, `xAxisLabel`, `xAxisProps`, `yAxisLabel`, `yAxisProps`
-
-**官方功能章节：** Usage；Legend；Legend position；Series labels；Points labels；X and Y axis props；Axis labels；X axis offset；Y axis scale；Right Y axis；Rotate x-axis labels；Value formatter；Chart color；Change chart color depending on color scheme；Stroke dash array；Grid and text colors；Tooltip animation；Units；Custom tooltip；Remove tooltip；Customize dots；Stroke width；Sync multiple charts；Dashed lines；Reference lines；Reference areas；Reference dots；Brush
-
-**本地实现：** [src/chart_model.rs](../src/chart_model.rs)、[src/chart_scene.rs](../src/chart_scene.rs)、[src/chart_widget.rs](../src/chart_widget.rs)
-
-**本地公开入口（同族）：** `area_chart`, `bar_chart`, `build`, `categories`, `category`, `chart`, `chart_theme`, `class`, `color`, `composite_chart`, `data`, `data_table`, `default_options`, `domain`, `enabled`, `focus`, `fraction`, `frame`, `from_theme`, `kind`, `label`, `legend`, `line_chart`, `max`, `message`, `min`, `name`, `nearest`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `pointer_selection`, `reference_areas`, `reference_dots`, `reference_lines`, `selection`, `size`, `style`, `text`, `theme`, `ticks`, `to_svg`, `unstyled`, `validate`, `value`, `values`
-
-**需要语义映射的属性候选：** `accessibilityLayer`, `activeDotProps`, `areaProps`, `barProps`, `brushProps`, `children`, `composedChartProps`, `connectNulls`, `curveType`, `dataKey`, `dotProps`, `gridAxis`, `gridColor`, `gridProps`, `legendProps`, `lineProps`, `maxBarWidth`, `minBarSize`, `rightYAxisLabel`, `rightYAxisProps`, `series`, `strokeDasharray`, `strokeWidth`, `textColor`, `tickLine`, `tooltipAnimationDuration`, `tooltipProps`, `unit`, `valueFormatter`, `withBarValueLabel`, `withBrush`, `withDots`, `withLegend`, `withPointLabels`, `withRightYAxis`, `withTooltip`, `withXAxis`, `withYAxis`, `xAxisLabel`, `xAxisProps`, `yAxisLabel`, `yAxisProps`
-
-### CandlestickChart — C:CandlestickChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/candlestick-chart/)；对应 `P11-04`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `accessibilityLayer`, `candleStrokeWidth`, `children`, `composedChartProps`, `data`, `dataKey`, `dataKeys`, `downColor`, `gridAxis`, `gridColor`, `gridProps`, `labels`, `maxCandleWidth`, `referenceAreas`, `referenceDots`, `referenceLines`, `strokeDasharray`, `textColor`, `tickLine`, `tooltipAnimationDuration`, `tooltipProps`, `unit`, `upColor`, `valueFormatter`, `withTooltip`, `withXAxis`, `withYAxis`, `xAxisLabel`, `xAxisProps`, `yAxisLabel`, `yAxisProps`
-
-**官方功能章节：** Usage；Data；Custom data keys；Colors；Candle width；Value formatter；Tooltip labels；Axis labels；Reference lines
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `accessibilityLayer`, `candleStrokeWidth`, `children`, `composedChartProps`, `dataKey`, `dataKeys`, `downColor`, `gridAxis`, `gridColor`, `gridProps`, `labels`, `maxCandleWidth`, `referenceAreas`, `referenceDots`, `referenceLines`, `strokeDasharray`, `textColor`, `tickLine`, `tooltipAnimationDuration`, `tooltipProps`, `unit`, `upColor`, `valueFormatter`, `withTooltip`, `withXAxis`, `withYAxis`, `xAxisLabel`, `xAxisProps`, `yAxisLabel`, `yAxisProps`
-
-### DonutChart — C:DonutChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/donut-chart/)；对应 `P11-03`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `accessibilityLayer`, `cellProps`, `chartLabel`, `children`, `data`, `endAngle`, `labelColor`, `labelsType`, `legendProps`, `paddingAngle`, `pieChartProps`, `pieProps`, `size`, `startAngle`, `strokeColor`, `strokeWidth`, `thickness`, `tooltipAnimationDuration`, `tooltipDataSource`, `tooltipProps`, `valueFormatter`, `withLabels`, `withLabelsLine`, `withLegend`, `withTooltip`
-
-**官方功能章节：** Usage；Legend；Segments labels；Size and thickness；Padding angle；Segment color；Tooltip data source；Without tooltip；Chart label；Start and end angle；Segments stroke
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `accessibilityLayer`, `cellProps`, `chartLabel`, `children`, `endAngle`, `labelColor`, `labelsType`, `legendProps`, `paddingAngle`, `pieChartProps`, `pieProps`, `startAngle`, `strokeColor`, `strokeWidth`, `thickness`, `tooltipAnimationDuration`, `tooltipDataSource`, `tooltipProps`, `valueFormatter`, `withLabels`, `withLabelsLine`, `withLegend`, `withTooltip`
-
-### PieChart — C:PieChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/pie-chart/)；对应 `P11-03`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `accessibilityLayer`, `cellProps`, `children`, `data`, `endAngle`, `labelColor`, `labelsPosition`, `labelsType`, `legendProps`, `paddingAngle`, `pieChartProps`, `pieProps`, `size`, `startAngle`, `strokeColor`, `strokeWidth`, `tooltipAnimationDuration`, `tooltipDataSource`, `tooltipProps`, `valueFormatter`, `withLabels`, `withLabelsLine`, `withLegend`, `withTooltip`
-
-**官方功能章节：** Usage；Legend；Segments labels；Size；Segment color；Enable tooltip；Tooltip data source；Start and end angle；Segments stroke
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `accessibilityLayer`, `cellProps`, `children`, `endAngle`, `labelColor`, `labelsPosition`, `labelsType`, `legendProps`, `paddingAngle`, `pieChartProps`, `pieProps`, `startAngle`, `strokeColor`, `strokeWidth`, `tooltipAnimationDuration`, `tooltipDataSource`, `tooltipProps`, `valueFormatter`, `withLabels`, `withLabelsLine`, `withLegend`, `withTooltip`
-
-### FunnelChart — C:FunnelChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/funnel-chart/)；对应 `P11-05`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `accessibilityLayer`, `children`, `data`, `funnelChartProps`, `funnelProps`, `labelColor`, `labelsPosition`, `legendProps`, `size`, `strokeColor`, `strokeWidth`, `tooltipAnimationDuration`, `tooltipDataSource`, `tooltipProps`, `valueFormatter`, `withLabels`, `withLegend`, `withTooltip`
-
-**官方功能章节：** Usage；Legend；Segments labels；Size and thickness；Segment color；Tooltip data source；Without tooltip；Segments stroke
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `accessibilityLayer`, `children`, `funnelChartProps`, `funnelProps`, `labelColor`, `labelsPosition`, `legendProps`, `strokeColor`, `strokeWidth`, `tooltipAnimationDuration`, `tooltipDataSource`, `tooltipProps`, `valueFormatter`, `withLabels`, `withLegend`, `withTooltip`
-
-### RadarChart — C:RadarChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/radar-chart/)；对应 `P11-05`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `accessibilityLayer`, `activeDotProps`, `children`, `data`, `dataKey`, `dotProps`, `gridColor`, `legendProps`, `polarAngleAxisProps`, `polarGridProps`, `polarRadiusAxisProps`, `radarChartProps`, `radarProps`, `series`, `textColor`, `tooltipAnimationDuration`, `tooltipProps`, `withDots`, `withLegend`, `withPolarAngleAxis`, `withPolarGrid`, `withPolarRadiusAxis`, `withTooltip`
-
-**官方功能章节：** Usage；Multiple series；Change color；Hide/show chart parts；With tooltip and dots；Recharts props；Legend
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `accessibilityLayer`, `activeDotProps`, `children`, `dataKey`, `dotProps`, `gridColor`, `legendProps`, `polarAngleAxisProps`, `polarGridProps`, `polarRadiusAxisProps`, `radarChartProps`, `radarProps`, `series`, `textColor`, `tooltipAnimationDuration`, `tooltipProps`, `withDots`, `withLegend`, `withPolarAngleAxis`, `withPolarGrid`, `withPolarRadiusAxis`, `withTooltip`
-
-### ScatterChart — C:ScatterChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/scatter-chart/)；对应 `P11-04`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `accessibilityLayer`, `data`, `dataKey`, `gridAxis`, `gridColor`, `gridProps`, `labels`, `legendProps`, `orientation`, `pointLabels`, `referenceAreas`, `referenceDots`, `referenceLines`, `rightYAxisLabel`, `rightYAxisProps`, `scatterChartProps`, `scatterProps`, `strokeDasharray`, `textColor`, `tickLine`, `tooltipAnimationDuration`, `tooltipProps`, `unit`, `valueFormatter`, `withLegend`, `withRightYAxis`, `withTooltip`, `withXAxis`, `withYAxis`, `xAxisLabel`, `xAxisProps`, `yAxisLabel`, `yAxisProps`
-
-**官方功能章节：** Usage；Multiple series；Legend；Legend position；X and Y axis props；Right Y axis；Value formatter；Point labels；Grid and text colors；Stroke dash array；Units；Tooltip labels；Custom tooltip；Remove tooltip；Tooltip animation；Customize dots；Reference lines；Reference areas；Reference dots
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `accessibilityLayer`, `dataKey`, `gridAxis`, `gridColor`, `gridProps`, `labels`, `legendProps`, `orientation`, `pointLabels`, `referenceAreas`, `referenceDots`, `referenceLines`, `rightYAxisLabel`, `rightYAxisProps`, `scatterChartProps`, `scatterProps`, `strokeDasharray`, `textColor`, `tickLine`, `tooltipAnimationDuration`, `tooltipProps`, `unit`, `valueFormatter`, `withLegend`, `withRightYAxis`, `withTooltip`, `withXAxis`, `withYAxis`, `xAxisLabel`, `xAxisProps`, `yAxisLabel`, `yAxisProps`
-
-### BubbleChart — C:BubbleChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/bubble-chart/)；对应 `P11-04`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `accessibilityLayer`, `color`, `data`, `dataKey`, `gridColor`, `label`, `range`, `scatterProps`, `textColor`, `tooltipProps`, `valueFormatter`, `withTooltip`, `xAxisProps`, `yAxisProps`, `zAxisProps`
-
-**官方功能章节：** Usage；Change color；Change area color depending on color scheme；Remove tooltip；Value formatter；Grid and text colors
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `accessibilityLayer`, `color`, `dataKey`, `gridColor`, `label`, `range`, `scatterProps`, `textColor`, `tooltipProps`, `valueFormatter`, `withTooltip`, `xAxisProps`, `yAxisProps`, `zAxisProps`
-
-### RadialBarChart — C:RadialBarChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/radial-bar-chart/)；对应 `P11-03`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `accessibilityLayer`, `barSize`, `data`, `dataKey`, `emptyBackgroundColor`, `endAngle`, `legendProps`, `radialBarChartProps`, `radialBarProps`, `startAngle`, `tooltipProps`, `withBackground`, `withLabels`, `withLegend`, `withTooltip`
-
-**官方功能章节：** Usage；Change color；Legend；Labels；Hide tooltip
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `accessibilityLayer`, `barSize`, `dataKey`, `emptyBackgroundColor`, `endAngle`, `legendProps`, `radialBarChartProps`, `radialBarProps`, `startAngle`, `tooltipProps`, `withBackground`, `withLabels`, `withLegend`, `withTooltip`
-
-### Sparkline — C:Sparkline
-
-来源：[@mantine/charts](https://mantine.dev/charts/sparkline/)；对应 `P11-05`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `areaProps`, `color`, `connectNulls`, `curveType`, `data`, `fillOpacity`, `strokeWidth`, `trendColors`, `withGradient`
-
-**官方功能章节：** Usage；Change area color depending on color scheme；Trend colors
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `areaProps`, `color`, `connectNulls`, `curveType`, `fillOpacity`, `strokeWidth`, `trendColors`, `withGradient`
-
-### Heatmap — C:Heatmap
-
-来源：[@mantine/charts](https://mantine.dev/charts/heatmap/)；对应 `P11-06`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `colors`, `data`, `domain`, `endDate`, `firstDayOfWeek`, `fontSize`, `gap`, `getRectProps`, `getTooltipLabel`, `legendLabels`, `monthLabels`, `monthLabelsPosition`, `monthsLabelsHeight`, `rectRadius`, `rectSize`, `splitMonths`, `startDate`, `tooltipProps`, `weekdayLabels`, `weekdaysLabelsWidth`, `withLegend`, `withMonthLabels`, `withOutsideDates`, `withTooltip`, `withWeekdayLabels`
-
-**官方功能章节：** Usage；Data format；With tooltip；Change colors；Colors depending on color scheme；Values domain；Weekdays and months labels；Month labels position；Change labels text；Rect size, gap and radius；Pass props to rect；Hide outside dates；First day of week；Legend；Split months
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `colors`, `domain`, `endDate`, `firstDayOfWeek`, `fontSize`, `gap`, `getRectProps`, `getTooltipLabel`, `legendLabels`, `monthLabels`, `monthLabelsPosition`, `monthsLabelsHeight`, `rectRadius`, `rectSize`, `splitMonths`, `startDate`, `tooltipProps`, `weekdayLabels`, `weekdaysLabelsWidth`, `withLegend`, `withMonthLabels`, `withOutsideDates`, `withTooltip`, `withWeekdayLabels`
-
-### BarsList — C:BarsList
-
-来源：[@mantine/charts](https://mantine.dev/charts/bars-list/)；对应 `P11-07`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `autoContrast`, `barColor`, `barGap`, `barHeight`, `barTextColor`, `barsLabel`, `data`, `getBarProps`, `minBarSize`, `renderBar`, `valueFormatter`, `valueLabel`
-
-**官方功能章节：** Usage；Data format；Value formatter；Labels；Bar gap；Minimum bar size；Bar height；Bar color；Auto contrast；Custom colors；Get bar props；Custom bar rendering
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `autoContrast`, `barColor`, `barGap`, `barHeight`, `barTextColor`, `barsLabel`, `getBarProps`, `minBarSize`, `renderBar`, `valueFormatter`, `valueLabel`
-
-### BulletChart — C:BulletChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/bullet-chart/)；对应 `P11-07`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `barColor`, `barSize`, `getTooltipLabel`, `label`, `orientation`, `ranges`, `size`, `target`, `targetColor`, `targetRatio`, `targetSize`, `value`, `valueFormatter`, `withTooltip`
-
-**官方功能章节：** Usage；Data format；Label；Vertical orientation；Bar color；Chart size；Value formatter；Without target
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `barColor`, `barSize`, `getTooltipLabel`, `label`, `orientation`, `ranges`, `target`, `targetColor`, `targetRatio`, `targetSize`, `value`, `valueFormatter`, `withTooltip`
-
-### GaugeChart — C:GaugeChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/gauge-chart/)；对应 `P11-07`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `endAngle`, `filledColor`, `label`, `max`, `min`, `roundCaps`, `sections`, `size`, `startAngle`, `target`, `targetColor`, `targetSize`, `thickness`, `trackColor`, `value`, `valueFormatter`
-
-**官方功能章节：** Usage；Sections；Target marker；Start and end angle；Thickness；Custom label；Round caps；Accessibility
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `endAngle`, `filledColor`, `label`, `max`, `min`, `roundCaps`, `sections`, `startAngle`, `target`, `targetColor`, `targetSize`, `thickness`, `trackColor`, `value`, `valueFormatter`
-
-### WaffleChart — C:WaffleChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/waffle-chart/)；对应 `P11-06`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `cellRadius`, `columns`, `data`, `emptyColor`, `fillDirection`, `gap`, `getTooltipLabel`, `legendPosition`, `rows`, `size`, `total`, `withLegend`, `withTooltip`
-
-**官方功能章节：** Usage；Total；Tooltip；Legend；Gap and grid size；Fill direction；Empty cells color；Accessibility；CODE-HIGHLIGHT COMPONENTS AND FEATURES
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `cellRadius`, `columns`, `emptyColor`, `fillDirection`, `gap`, `getTooltipLabel`, `legendPosition`, `rows`, `total`, `withLegend`, `withTooltip`
-
-### Treemap — C:Treemap
-
-来源：[@mantine/charts](https://mantine.dev/charts/treemap/)；对应 `P11-08`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `aspectRatio`, `autoContrast`, `children`, `data`, `dataKey`, `height`, `strokeColor`, `strokeWidth`, `textColor`, `tooltipAnimationDuration`, `tooltipProps`, `treemapProps`, `valueFormatter`, `withTooltip`
-
-**官方功能章节：** Usage；Nested data；Node color；autoContrast；Node stroke；Disable tooltip
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `aspectRatio`, `autoContrast`, `children`, `dataKey`, `height`, `strokeColor`, `strokeWidth`, `textColor`, `tooltipAnimationDuration`, `tooltipProps`, `treemapProps`, `valueFormatter`, `withTooltip`
-
-### SunburstChart — C:SunburstChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/sunburst-chart/)；对应 `P11-08`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `children`, `data`, `dataKey`, `endAngle`, `gap`, `innerRadius`, `size`, `startAngle`, `strokeColor`, `sunburstChartProps`, `tooltipAnimationDuration`, `tooltipProps`, `valueFormatter`, `withLabels`, `withTooltip`
-
-**官方功能章节：** Usage；Data format；Node color；Stroke color；Chart size；Gap；Labels；Disable tooltip
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `children`, `dataKey`, `endAngle`, `gap`, `innerRadius`, `startAngle`, `strokeColor`, `sunburstChartProps`, `tooltipAnimationDuration`, `tooltipProps`, `valueFormatter`, `withLabels`, `withTooltip`
-
-### SankeyChart — C:SankeyChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/sankey-chart/)；对应 `P11-08`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `children`, `colors`, `data`, `height`, `iterations`, `linkColor`, `linkCurvature`, `linkOpacity`, `nodeColor`, `nodePadding`, `nodeWidth`, `sankeyProps`, `textColor`, `tooltipAnimationDuration`, `tooltipProps`, `valueFormatter`, `withTooltip`
-
-**官方功能章节：** Usage；Node color；Custom colors；Node width and padding；Link opacity；Disable tooltip
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `children`, `colors`, `height`, `iterations`, `linkColor`, `linkCurvature`, `linkOpacity`, `nodeColor`, `nodePadding`, `nodeWidth`, `sankeyProps`, `textColor`, `tooltipAnimationDuration`, `tooltipProps`, `valueFormatter`, `withTooltip`
-
-### MatrixChart — C:MatrixChart
-
-来源：[@mantine/charts](https://mantine.dev/charts/matrix-chart/)；对应 `P11-06`；原生有限能力状态 `tested`。
-
-**官方 Props / 子部件 Props：** `cellRadius`, `cellSize`, `colors`, `data`, `domain`, `emptyColor`, `fontSize`, `gap`, `getCellProps`, `getTooltipLabel`, `legendLabels`, `tooltipProps`, `withLegend`, `withTooltip`, `withXLabels`, `withYLabels`, `xLabels`, `xLabelsHeight`, `xLabelsPosition`, `xLabelsRotation`, `yLabels`, `yLabelsWidth`
-
-**官方功能章节：** Usage；Data format；Labels；X-axis labels rotation；Tooltip；Colors；Values domain；Cell size and gap；Pass props to cells；Legend；Accessibility
-
-**本地实现：** [src/plot_hierarchy.rs](../src/plot_hierarchy.rs)、[src/plot_model.rs](../src/plot_model.rs)、[src/plot_scene.rs](../src/plot_scene.rs)、[src/plot_table.rs](../src/plot_table.rs)、[src/plot_widget.rs](../src/plot_widget.rs)
-
-**本地公开入口（同族）：** `build`, `chart_theme`, `class`, `data`, `data_table`, `default_options`, `enabled`, `focus`, `frame`, `keys`, `legend`, `name`, `new`, `node_ref`, `on`, `on_options_change`, `on_selection_change`, `options`, `plot`, `pointer_selection`, `sample_points`, `selection`, `size`, `style`, `theme`, `unstyled`, `validate`, `values`
-
-**需要语义映射的属性候选：** `cellRadius`, `cellSize`, `colors`, `domain`, `emptyColor`, `fontSize`, `gap`, `getCellProps`, `getTooltipLabel`, `legendLabels`, `tooltipProps`, `withLegend`, `withTooltip`, `withXLabels`, `withYLabels`, `xLabels`, `xLabelsHeight`, `xLabelsPosition`, `xLabelsRotation`, `yLabels`, `yLabelsWidth`
+**需要语义映射的属性候选：** `ariaLabels`, `columnsToScroll`, `decadeLabelFormat`, `defaultLevel`, `enableKeyboardNavigation`, `firstDayOfWeek`, `getDayAriaLabel`, `getDayProps`, `getMonthControlProps`, `getYearControlProps`, `hasNextLevel`, `headerControlsOrder`, `highlightToday`, `label`, `level`, `levelControlAriaLabel`, `locale`, `maxDate`, `maxLevel`, `minDate`, `minLevel`, `monthLabelFormat`, `monthsListFormat`, `nextDisabled`, `nextIcon`, `nextLabel`, `numberOfColumns`, `onLevelChange`, `onLevelClick`, `onMonthMouseEnter`, `onMonthSelect`, `onNext`, `onNextDecade`, `onNextMonth`, `onNextYear`, `onPrevious`, `onPreviousDecade`, `onPreviousMonth`, `onPreviousYear`, `onYearMouseEnter`, `onYearSelect`, `previousDisabled`, `previousIcon`, `previousLabel`, `static`, `weekdayFormat`, `weekendDays`, `withCellSpacing`, `withNativeLevelSelect`, `withNext`, `withPrevious`, `yearLabelFormat`, `yearsListFormat`, `yearsSelectRange`
 
 ### Schedule — T:Schedule
 
@@ -2229,7 +1921,7 @@
 
 **本地实现：** [src/schedule/mod.rs](../src/schedule/mod.rs)、[src/schedule_layout/mod.rs](../src/schedule_layout/mod.rs)、[src/schedule_model.rs](../src/schedule_model.rs)、[src/schedule_recurrence.rs](../src/schedule_recurrence.rs)
 
-**本地公开入口（同族）：** `agenda_view`, `all_day`, `application`, `as_str`, `at`, `available_views`, `civil`, `class`, `column_width`, `columns`, `conflicts`, `contains`, `data`, `day_view`, `days`, `default_selection`, `direction`, `duration_nanoseconds`, `enabled`, `event`, `events`, `except_dates`, `exceptions`, `expand`, `fixed`, `focus`, `get`, `grid_ref`, `index_on`, `items`, `key`, `layout_day`, `layout_timeline`, `locale`, `max_events_per_day`, `mobile_month_view`, `month`, `month_view`, `name`, `new`, `node_ref`, `on`, `on_selection_change`, `on_view_change`, `on_window_request`, `overlaps`, `permissions`, `placements`, `readonly`, `recurring`, `resize_end_by_minutes`, `resize_start_by_minutes`, `resolve`, `resource`, `resource_key`, `resources`, `schedule`, `selection`, `shifted`, `shifted_minutes`, `show_outside_days`, `size`, `slot_height`, `style`, `theme`, `time_window`, `title`, `today`, `unstyled`, `validate_edit`, `validate_resources`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `visible_resources`, `week_start`, `week_view`, `window`, `with_all_day`, `with_header`, `with_weekdays`, `year`, `year_view`, `zone`
+**本地公开入口（同族）：** `agenda_date_label`, `agenda_event_content`, `agenda_view`, `all_day`, `application`, `as_str`, `at`, `available_views`, `civil`, `class`, `color`, `column_width`, `columns`, `conflicts`, `contains`, `data`, `day_view`, `days`, `default_selection`, `direction`, `duration_nanoseconds`, `enabled`, `event`, `event_color`, `events`, `except_dates`, `exceptions`, `expand`, `fit_timeline_columns`, `fixed`, `focus`, `get`, `grid_ref`, `index_on`, `items`, `key`, `layout_day`, `layout_timeline`, `locale`, `max_events_per_day`, `mobile_month_view`, `month`, `month_view`, `name`, `new`, `node_ref`, `on`, `on_selection_change`, `on_view_change`, `on_window_request`, `overlaps`, `permissions`, `placements`, `readonly`, `recurring`, `resize_end_by_minutes`, `resize_start_by_minutes`, `resolve`, `resource`, `resource_key`, `resources`, `schedule`, `selection`, `shifted`, `shifted_minutes`, `show_outside_days`, `size`, `slot_height`, `slot_label_format`, `slot_label_interval`, `style`, `theme`, `time_window`, `timeline_day_label`, `timeline_gutter_width`, `title`, `today`, `unstyled`, `validate_edit`, `validate_resources`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `visible_resources`, `week_start`, `week_view`, `window`, `window_date_label`, `with_all_day`, `with_header`, `with_slot_text`, `with_weekdays`, `year`, `year_view`, `zone`
 
 **需要语义映射的属性候选：** `canDragEvent`, `canDropEvent`, `canDropExternalEvent`, `canResizeEvent`, `canResizeEventTo`, `date`, `dayViewProps`, `defaultDate`, `defaultView`, `labels`, `layout`, `mobileMonthViewProps`, `mode`, `monthViewProps`, `onAllDaySlotClick`, `onDateChange`, `onDayClick`, `onEventClick`, `onEventDragEnd`, `onEventDragStart`, `onEventDrop`, `onEventPlacementRejected`, `onEventResize`, `onExternalEventDrop`, `onSlotDragEnd`, `onTimeSlotClick`, `preventEventOverlap`, `radius`, `recurrenceExpansionLimit`, `renderEventBody`, `weekViewProps`, `withAgenda`, `withDragSlotSelect`, `withEventResize`, `withEventsDragAndDrop`, `withInteractiveBackgroundEvents`, `yearViewProps`
 
@@ -2313,7 +2005,7 @@
 
 **本地实现：** [src/schedule/mod.rs](../src/schedule/mod.rs)
 
-**本地公开入口（同族）：** `agenda_view`, `available_views`, `class`, `column_width`, `day_view`, `default_selection`, `direction`, `enabled`, `focus`, `grid_ref`, `locale`, `max_events_per_day`, `mobile_month_view`, `month_view`, `name`, `node_ref`, `on`, `on_selection_change`, `on_view_change`, `on_window_request`, `readonly`, `schedule`, `selection`, `show_outside_days`, `size`, `slot_height`, `style`, `theme`, `time_window`, `today`, `unstyled`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `week_start`, `week_view`, `with_all_day`, `with_header`, `with_weekdays`, `year_view`
+**本地公开入口（同族）：** `agenda_date_label`, `agenda_event_content`, `agenda_view`, `available_views`, `class`, `column_width`, `day_view`, `default_selection`, `direction`, `enabled`, `fit_timeline_columns`, `focus`, `grid_ref`, `locale`, `max_events_per_day`, `mobile_month_view`, `month_view`, `name`, `node_ref`, `on`, `on_selection_change`, `on_view_change`, `on_window_request`, `readonly`, `schedule`, `selection`, `show_outside_days`, `size`, `slot_height`, `slot_label_format`, `slot_label_interval`, `style`, `theme`, `time_window`, `timeline_day_label`, `timeline_gutter_width`, `today`, `unstyled`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `week_start`, `week_view`, `window_date_label`, `with_all_day`, `with_header`, `with_slot_text`, `with_weekdays`, `year_view`
 
 **需要语义映射的属性候选：** 无直接拼写候选；仍不推断功能等价。
 
@@ -2327,7 +2019,7 @@
 
 **本地实现：** [src/schedule/resources/drag.rs](../src/schedule/resources/drag.rs)、[src/schedule/resources/mod.rs](../src/schedule/resources/mod.rs)、[src/schedule/resources/timeline.rs](../src/schedule/resources/timeline.rs)、[src/schedule_layout/resource_month.rs](../src/schedule_layout/resource_month.rs)、[src/schedule_model.rs](../src/schedule_model.rs)
 
-**本地公开入口（同族）：** `all_day`, `application`, `as_str`, `available_views`, `axis`, `civil`, `class`, `column_width`, `conflicts`, `contains`, `data`, `days`, `default_selection`, `direction`, `duration_nanoseconds`, `enabled`, `event`, `events`, `except_dates`, `exceptions`, `expand`, `fixed`, `focus`, `get`, `grid_ref`, `items`, `key`, `layout_month`, `locale`, `month`, `name`, `new`, `node_ref`, `on`, `on_edit`, `on_selection_change`, `on_view_change`, `on_window_request`, `overlaps`, `permissions`, `readonly`, `recurring`, `resize_end_by_minutes`, `resize_start_by_minutes`, `resolve`, `resource`, `resource_key`, `resource_page_size`, `resources`, `resources_day_view`, `resources_month_view`, `resources_schedule`, `resources_week_view`, `selection`, `shifted`, `shifted_minutes`, `size`, `style`, `theme`, `time_window`, `title`, `unstyled`, `validate_edit`, `validate_resources`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `visible_resources`, `window`, `year`, `zone`
+**本地公开入口（同族）：** `all_day`, `application`, `as_str`, `available_views`, `axis`, `civil`, `class`, `color`, `column_width`, `conflicts`, `contains`, `data`, `days`, `default_selection`, `direction`, `duration_nanoseconds`, `enabled`, `event`, `event_color`, `events`, `except_dates`, `exceptions`, `expand`, `fixed`, `focus`, `get`, `grid_ref`, `items`, `key`, `layout_month`, `locale`, `month`, `name`, `new`, `node_ref`, `on`, `on_edit`, `on_selection_change`, `on_view_change`, `on_window_request`, `overlaps`, `permissions`, `readonly`, `recurring`, `resize_end_by_minutes`, `resize_start_by_minutes`, `resolve`, `resource`, `resource_key`, `resource_page_size`, `resources`, `resources_day_view`, `resources_month_view`, `resources_schedule`, `resources_week_view`, `selection`, `shifted`, `shifted_minutes`, `size`, `style`, `theme`, `time_window`, `title`, `unstyled`, `validate_edit`, `validate_resources`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `visible_resources`, `window`, `year`, `zone`
 
 **需要语义映射的属性候选：** `businessHours`, `canDragEvent`, `canDropEvent`, `canDropExternalEvent`, `canResizeEvent`, `canResizeEventTo`, `date`, `endTime`, `eventDragInterval`, `eventResizeInterval`, `getCurrentTime`, `groupLabelWidth`, `groups`, `headerFormat`, `highlightBusinessHours`, `intervalMinutes`, `labels`, `maxEventsPerTimeSlot`, `minEventSize`, `mode`, `moreEventsProps`, `nextControlProps`, `onDateChange`, `onEventClick`, `onEventDragEnd`, `onEventDragStart`, `onEventDrop`, `onEventPlacementRejected`, `onEventResize`, `onExternalEventDrop`, `onSlotDragEnd`, `onTimeSlotClick`, `preventEventOverlap`, `previousControlProps`, `radius`, `recurrenceExpansionLimit`, `renderEvent`, `renderEventBody`, `renderGroupLabel`, `renderResourceLabel`, `rowHeight`, `scrollAreaProps`, `slotLabelFormat`, `slotWidth`, `startScrollTime`, `startTime`, `todayControlProps`, `viewSelectProps`, `withCurrentTimeBubble`, `withCurrentTimeIndicator`, `withDragSlotSelect`, `withEventResize`, `withEventsDragAndDrop`, `withHeader`, `withInteractiveBackgroundEvents`
 
@@ -2341,7 +2033,7 @@
 
 **本地实现：** [src/schedule/resources/drag.rs](../src/schedule/resources/drag.rs)、[src/schedule/resources/mod.rs](../src/schedule/resources/mod.rs)、[src/schedule/resources/timeline.rs](../src/schedule/resources/timeline.rs)、[src/schedule_layout/resource_month.rs](../src/schedule_layout/resource_month.rs)、[src/schedule_model.rs](../src/schedule_model.rs)
 
-**本地公开入口（同族）：** `all_day`, `application`, `as_str`, `available_views`, `axis`, `civil`, `class`, `column_width`, `conflicts`, `contains`, `data`, `days`, `default_selection`, `direction`, `duration_nanoseconds`, `enabled`, `event`, `events`, `except_dates`, `exceptions`, `expand`, `fixed`, `focus`, `get`, `grid_ref`, `items`, `key`, `layout_month`, `locale`, `month`, `name`, `new`, `node_ref`, `on`, `on_edit`, `on_selection_change`, `on_view_change`, `on_window_request`, `overlaps`, `permissions`, `readonly`, `recurring`, `resize_end_by_minutes`, `resize_start_by_minutes`, `resolve`, `resource`, `resource_key`, `resource_page_size`, `resources`, `resources_day_view`, `resources_month_view`, `resources_schedule`, `resources_week_view`, `selection`, `shifted`, `shifted_minutes`, `size`, `style`, `theme`, `time_window`, `title`, `unstyled`, `validate_edit`, `validate_resources`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `visible_resources`, `window`, `year`, `zone`
+**本地公开入口（同族）：** `all_day`, `application`, `as_str`, `available_views`, `axis`, `civil`, `class`, `color`, `column_width`, `conflicts`, `contains`, `data`, `days`, `default_selection`, `direction`, `duration_nanoseconds`, `enabled`, `event`, `event_color`, `events`, `except_dates`, `exceptions`, `expand`, `fixed`, `focus`, `get`, `grid_ref`, `items`, `key`, `layout_month`, `locale`, `month`, `name`, `new`, `node_ref`, `on`, `on_edit`, `on_selection_change`, `on_view_change`, `on_window_request`, `overlaps`, `permissions`, `readonly`, `recurring`, `resize_end_by_minutes`, `resize_start_by_minutes`, `resolve`, `resource`, `resource_key`, `resource_page_size`, `resources`, `resources_day_view`, `resources_month_view`, `resources_schedule`, `resources_week_view`, `selection`, `shifted`, `shifted_minutes`, `size`, `style`, `theme`, `time_window`, `title`, `unstyled`, `validate_edit`, `validate_resources`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `visible_resources`, `window`, `year`, `zone`
 
 **需要语义映射的属性候选：** `businessHours`, `canDragEvent`, `canDropEvent`, `canDropExternalEvent`, `canResizeEvent`, `canResizeEventTo`, `date`, `endTime`, `eventDragInterval`, `eventResizeInterval`, `firstDayOfWeek`, `getCurrentTime`, `groupLabelWidth`, `groups`, `highlightBusinessHours`, `highlightToday`, `intervalMinutes`, `labels`, `maxEventsPerTimeSlot`, `minEventSize`, `mode`, `moreEventsProps`, `nextControlProps`, `onDateChange`, `onEventClick`, `onEventDragEnd`, `onEventDragStart`, `onEventDrop`, `onEventPlacementRejected`, `onEventResize`, `onExternalEventDrop`, `onSlotDragEnd`, `onTimeSlotClick`, `preventEventOverlap`, `previousControlProps`, `radius`, `recurrenceExpansionLimit`, `renderEvent`, `renderEventBody`, `renderGroupLabel`, `renderResourceLabel`, `renderWeekLabel`, `rowHeight`, `scrollAreaProps`, `slotLabelFormat`, `slotWidth`, `startScrollDateTime`, `startTime`, `todayControlProps`, `viewSelectProps`, `weekLabelFormat`, `weekdayFormat`, `weekendDays`, `withCurrentTimeBubble`, `withCurrentTimeIndicator`, `withDragSlotSelect`, `withEventResize`, `withEventsDragAndDrop`, `withHeader`, `withInteractiveBackgroundEvents`, `withWeekendDays`
 
@@ -2355,7 +2047,7 @@
 
 **本地实现：** [src/schedule/resources/drag.rs](../src/schedule/resources/drag.rs)、[src/schedule/resources/mod.rs](../src/schedule/resources/mod.rs)、[src/schedule/resources/timeline.rs](../src/schedule/resources/timeline.rs)、[src/schedule_layout/resource_month.rs](../src/schedule_layout/resource_month.rs)、[src/schedule_model.rs](../src/schedule_model.rs)
 
-**本地公开入口（同族）：** `all_day`, `application`, `as_str`, `available_views`, `axis`, `civil`, `class`, `column_width`, `conflicts`, `contains`, `data`, `days`, `default_selection`, `direction`, `duration_nanoseconds`, `enabled`, `event`, `events`, `except_dates`, `exceptions`, `expand`, `fixed`, `focus`, `get`, `grid_ref`, `items`, `key`, `layout_month`, `locale`, `month`, `name`, `new`, `node_ref`, `on`, `on_edit`, `on_selection_change`, `on_view_change`, `on_window_request`, `overlaps`, `permissions`, `readonly`, `recurring`, `resize_end_by_minutes`, `resize_start_by_minutes`, `resolve`, `resource`, `resource_key`, `resource_page_size`, `resources`, `resources_day_view`, `resources_month_view`, `resources_schedule`, `resources_week_view`, `selection`, `shifted`, `shifted_minutes`, `size`, `style`, `theme`, `time_window`, `title`, `unstyled`, `validate_edit`, `validate_resources`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `visible_resources`, `window`, `year`, `zone`
+**本地公开入口（同族）：** `all_day`, `application`, `as_str`, `available_views`, `axis`, `civil`, `class`, `color`, `column_width`, `conflicts`, `contains`, `data`, `days`, `default_selection`, `direction`, `duration_nanoseconds`, `enabled`, `event`, `event_color`, `events`, `except_dates`, `exceptions`, `expand`, `fixed`, `focus`, `get`, `grid_ref`, `items`, `key`, `layout_month`, `locale`, `month`, `name`, `new`, `node_ref`, `on`, `on_edit`, `on_selection_change`, `on_view_change`, `on_window_request`, `overlaps`, `permissions`, `readonly`, `recurring`, `resize_end_by_minutes`, `resize_start_by_minutes`, `resolve`, `resource`, `resource_key`, `resource_page_size`, `resources`, `resources_day_view`, `resources_month_view`, `resources_schedule`, `resources_week_view`, `selection`, `shifted`, `shifted_minutes`, `size`, `style`, `theme`, `time_window`, `title`, `unstyled`, `validate_edit`, `validate_resources`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `visible_resources`, `window`, `year`, `zone`
 
 **需要语义映射的属性候选：** `canDragEvent`, `canDropEvent`, `canDropExternalEvent`, `canResizeEvent`, `canResizeEventTo`, `date`, `dayWidth`, `groupLabelWidth`, `groups`, `highlightToday`, `labels`, `maxEventsPerTimeSlot`, `mode`, `monthYearSelectProps`, `moreEventsProps`, `nextControlProps`, `onDateChange`, `onDayClick`, `onEventClick`, `onEventDragEnd`, `onEventDragStart`, `onEventDrop`, `onEventPlacementRejected`, `onEventResize`, `onExternalEventDrop`, `onSlotDragEnd`, `preventEventOverlap`, `previousControlProps`, `radius`, `recurrenceExpansionLimit`, `renderEvent`, `renderEventBody`, `renderGroupLabel`, `renderResourceLabel`, `rowHeight`, `scrollAreaProps`, `startScrollDate`, `todayControlProps`, `viewSelectProps`, `weekdayFormat`, `weekendDays`, `withDragSlotSelect`, `withEventResize`, `withEventsDragAndDrop`, `withHeader`, `withWeekendDays`
 
@@ -2369,7 +2061,7 @@
 
 **本地实现：** [src/schedule/resources/drag.rs](../src/schedule/resources/drag.rs)、[src/schedule/resources/mod.rs](../src/schedule/resources/mod.rs)、[src/schedule/resources/timeline.rs](../src/schedule/resources/timeline.rs)、[src/schedule_layout/resource_month.rs](../src/schedule_layout/resource_month.rs)、[src/schedule_model.rs](../src/schedule_model.rs)
 
-**本地公开入口（同族）：** `all_day`, `application`, `as_str`, `available_views`, `axis`, `civil`, `class`, `column_width`, `conflicts`, `contains`, `data`, `days`, `default_selection`, `direction`, `duration_nanoseconds`, `enabled`, `event`, `events`, `except_dates`, `exceptions`, `expand`, `fixed`, `focus`, `get`, `grid_ref`, `items`, `key`, `layout_month`, `locale`, `month`, `name`, `new`, `node_ref`, `on`, `on_edit`, `on_selection_change`, `on_view_change`, `on_window_request`, `overlaps`, `permissions`, `readonly`, `recurring`, `resize_end_by_minutes`, `resize_start_by_minutes`, `resolve`, `resource`, `resource_key`, `resource_page_size`, `resources`, `resources_day_view`, `resources_month_view`, `resources_schedule`, `resources_week_view`, `selection`, `shifted`, `shifted_minutes`, `size`, `style`, `theme`, `time_window`, `title`, `unstyled`, `validate_edit`, `validate_resources`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `visible_resources`, `window`, `year`, `zone`
+**本地公开入口（同族）：** `all_day`, `application`, `as_str`, `available_views`, `axis`, `civil`, `class`, `color`, `column_width`, `conflicts`, `contains`, `data`, `days`, `default_selection`, `direction`, `duration_nanoseconds`, `enabled`, `event`, `event_color`, `events`, `except_dates`, `exceptions`, `expand`, `fixed`, `focus`, `get`, `grid_ref`, `items`, `key`, `layout_month`, `locale`, `month`, `name`, `new`, `node_ref`, `on`, `on_edit`, `on_selection_change`, `on_view_change`, `on_window_request`, `overlaps`, `permissions`, `readonly`, `recurring`, `resize_end_by_minutes`, `resize_start_by_minutes`, `resolve`, `resource`, `resource_key`, `resource_page_size`, `resources`, `resources_day_view`, `resources_month_view`, `resources_schedule`, `resources_week_view`, `selection`, `shifted`, `shifted_minutes`, `size`, `style`, `theme`, `time_window`, `title`, `unstyled`, `validate_edit`, `validate_resources`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `visible_resources`, `window`, `year`, `zone`
 
 **需要语义映射的属性候选：** `canDragEvent`, `canDropEvent`, `canDropExternalEvent`, `canResizeEvent`, `canResizeEventTo`, `date`, `dayViewProps`, `defaultDate`, `defaultView`, `labels`, `mode`, `monthViewProps`, `onDateChange`, `onDayClick`, `onEventClick`, `onEventDragEnd`, `onEventDragStart`, `onEventDrop`, `onEventPlacementRejected`, `onEventResize`, `onExternalEventDrop`, `onSlotDragEnd`, `onTimeSlotClick`, `preventEventOverlap`, `radius`, `recurrenceExpansionLimit`, `renderEventBody`, `renderResourceLabel`, `weekViewProps`, `withDragSlotSelect`, `withEventResize`, `withEventsDragAndDrop`, `withInteractiveBackgroundEvents`
 
@@ -2383,7 +2075,7 @@
 
 **本地实现：** [src/schedule/mod.rs](../src/schedule/mod.rs)、[src/schedule_layout/mod.rs](../src/schedule_layout/mod.rs)、[src/schedule_model.rs](../src/schedule_model.rs)、[src/schedule_recurrence.rs](../src/schedule_recurrence.rs)
 
-**本地公开入口（同族）：** `agenda_view`, `all_day`, `application`, `as_str`, `at`, `available_views`, `civil`, `class`, `column_width`, `columns`, `conflicts`, `contains`, `data`, `day_view`, `days`, `default_selection`, `direction`, `duration_nanoseconds`, `enabled`, `event`, `events`, `except_dates`, `exceptions`, `expand`, `fixed`, `focus`, `get`, `grid_ref`, `index_on`, `items`, `key`, `layout_day`, `layout_timeline`, `locale`, `max_events_per_day`, `mobile_month_view`, `month`, `month_view`, `name`, `new`, `node_ref`, `on`, `on_selection_change`, `on_view_change`, `on_window_request`, `overlaps`, `permissions`, `placements`, `readonly`, `recurring`, `resize_end_by_minutes`, `resize_start_by_minutes`, `resolve`, `resource`, `resource_key`, `resources`, `schedule`, `selection`, `shifted`, `shifted_minutes`, `show_outside_days`, `size`, `slot_height`, `style`, `theme`, `time_window`, `title`, `today`, `unstyled`, `validate_edit`, `validate_resources`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `visible_resources`, `week_start`, `week_view`, `window`, `with_all_day`, `with_header`, `with_weekdays`, `year`, `year_view`, `zone`
+**本地公开入口（同族）：** `agenda_date_label`, `agenda_event_content`, `agenda_view`, `all_day`, `application`, `as_str`, `at`, `available_views`, `civil`, `class`, `color`, `column_width`, `columns`, `conflicts`, `contains`, `data`, `day_view`, `days`, `default_selection`, `direction`, `duration_nanoseconds`, `enabled`, `event`, `event_color`, `events`, `except_dates`, `exceptions`, `expand`, `fit_timeline_columns`, `fixed`, `focus`, `get`, `grid_ref`, `index_on`, `items`, `key`, `layout_day`, `layout_timeline`, `locale`, `max_events_per_day`, `mobile_month_view`, `month`, `month_view`, `name`, `new`, `node_ref`, `on`, `on_selection_change`, `on_view_change`, `on_window_request`, `overlaps`, `permissions`, `placements`, `readonly`, `recurring`, `resize_end_by_minutes`, `resize_start_by_minutes`, `resolve`, `resource`, `resource_key`, `resources`, `schedule`, `selection`, `shifted`, `shifted_minutes`, `show_outside_days`, `size`, `slot_height`, `slot_label_format`, `slot_label_interval`, `style`, `theme`, `time_window`, `timeline_day_label`, `timeline_gutter_width`, `title`, `today`, `unstyled`, `validate_edit`, `validate_resources`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `visible_resources`, `week_start`, `week_view`, `window`, `window_date_label`, `with_all_day`, `with_header`, `with_slot_text`, `with_weekdays`, `year`, `year_view`, `zone`
 
 **需要语义映射的属性候选：** 无直接拼写候选；仍不推断功能等价。
 
@@ -2397,7 +2089,7 @@
 
 **本地实现：** [src/schedule/mod.rs](../src/schedule/mod.rs)、[src/schedule_layout/mod.rs](../src/schedule_layout/mod.rs)、[src/schedule_model.rs](../src/schedule_model.rs)、[src/schedule_recurrence.rs](../src/schedule_recurrence.rs)
 
-**本地公开入口（同族）：** `agenda_view`, `all_day`, `application`, `as_str`, `at`, `available_views`, `civil`, `class`, `column_width`, `columns`, `conflicts`, `contains`, `data`, `day_view`, `days`, `default_selection`, `direction`, `duration_nanoseconds`, `enabled`, `event`, `events`, `except_dates`, `exceptions`, `expand`, `fixed`, `focus`, `get`, `grid_ref`, `index_on`, `items`, `key`, `layout_day`, `layout_timeline`, `locale`, `max_events_per_day`, `mobile_month_view`, `month`, `month_view`, `name`, `new`, `node_ref`, `on`, `on_selection_change`, `on_view_change`, `on_window_request`, `overlaps`, `permissions`, `placements`, `readonly`, `recurring`, `resize_end_by_minutes`, `resize_start_by_minutes`, `resolve`, `resource`, `resource_key`, `resources`, `schedule`, `selection`, `shifted`, `shifted_minutes`, `show_outside_days`, `size`, `slot_height`, `style`, `theme`, `time_window`, `title`, `today`, `unstyled`, `validate_edit`, `validate_resources`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `visible_resources`, `week_start`, `week_view`, `window`, `with_all_day`, `with_header`, `with_weekdays`, `year`, `year_view`, `zone`
+**本地公开入口（同族）：** `agenda_date_label`, `agenda_event_content`, `agenda_view`, `all_day`, `application`, `as_str`, `at`, `available_views`, `civil`, `class`, `color`, `column_width`, `columns`, `conflicts`, `contains`, `data`, `day_view`, `days`, `default_selection`, `direction`, `duration_nanoseconds`, `enabled`, `event`, `event_color`, `events`, `except_dates`, `exceptions`, `expand`, `fit_timeline_columns`, `fixed`, `focus`, `get`, `grid_ref`, `index_on`, `items`, `key`, `layout_day`, `layout_timeline`, `locale`, `max_events_per_day`, `mobile_month_view`, `month`, `month_view`, `name`, `new`, `node_ref`, `on`, `on_selection_change`, `on_view_change`, `on_window_request`, `overlaps`, `permissions`, `placements`, `readonly`, `recurring`, `resize_end_by_minutes`, `resize_start_by_minutes`, `resolve`, `resource`, `resource_key`, `resources`, `schedule`, `selection`, `shifted`, `shifted_minutes`, `show_outside_days`, `size`, `slot_height`, `slot_label_format`, `slot_label_interval`, `style`, `theme`, `time_window`, `timeline_day_label`, `timeline_gutter_width`, `title`, `today`, `unstyled`, `validate_edit`, `validate_resources`, `view`, `view_value`, `viewport_height`, `viewport_ref`, `visible_resources`, `week_start`, `week_view`, `window`, `window_date_label`, `with_all_day`, `with_header`, `with_slot_text`, `with_weekdays`, `year`, `year_view`, `zone`
 
 **需要语义映射的属性候选：** 无直接拼写候选；仍不推断功能等价。
 
@@ -2411,7 +2103,7 @@
 
 **本地实现：** [src/code_block.rs](../src/code_block.rs)、[src/code_model.rs](../src/code_model.rs)
 
-**本地公开入口（同族）：** `class`, `code_block`, `code_highlight`, `copy_button`, `highlighted_lines`, `language`, `line_numbers`, `line_starts`, `name`, `node_ref`, `on`, `size`, `source`, `start_line`, `style`, `theme`, `tokenize_code`, `tokens`, `unstyled`
+**本地公开入口（同族）：** `class`, `code_block`, `code_highlight`, `controls`, `copy_button`, `dedent_first_line`, `highlighted_lines`, `language`, `line_numbers`, `line_starts`, `name`, `node_ref`, `on`, `size`, `source`, `start_line`, `style`, `theme`, `tokenize_code`, `tokens`, `unstyled`
 
 **需要语义映射的属性候选：** 无直接拼写候选；仍不推断功能等价。
 
@@ -2425,9 +2117,9 @@
 
 **本地实现：** [src/json_tree_model.rs](../src/json_tree_model.rs)、[src/json_viewer/mod.rs](../src/json_viewer/mod.rs)、[src/json_viewer/tree_mode.rs](../src/json_viewer/tree_mode.rs)
 
-**本地公开入口（同族）：** `class`, `copy_button`, `default_expanded`, `enabled`, `expanded`, `focus`, `json_viewer`, `limits`, `name`, `node_ref`, `nodes`, `on`, `on_expanded_change`, `parse_json_tree`, `search`, `size`, `source`, `style`, `theme`, `tree_navigation`, `unstyled`, `validate`, `value`
+**本地公开入口（同族）：** `class`, `collapse_strings_after`, `copy_button`, `default_expand_depth`, `default_expanded`, `enabled`, `expanded`, `expanded_at_depth`, `focus`, `highlight_path`, `json_viewer`, `limits`, `name`, `node_ref`, `nodes`, `on`, `on_expanded_change`, `parse_json_tree`, `root_name`, `search`, `size`, `sort_keys`, `source`, `style`, `theme`, `tree_navigation`, `unstyled`, `validate`, `value`, `with_line_numbers`, `with_types`
 
-**需要语义映射的属性候选：** `allExpanded`, `collapseAllLabel`, `collapseStringsAfterLength`, `copiedLabel`, `copyLabel`, `defaultExpandDepth`, `expandAllLabel`, `expandedPaths`, `fontSize`, `groupArraysAfterLength`, `highlightItems`, `indentWidth`, `maxDisplayLength`, `onExpandedPathsChange`, `onValueSelect`, `radius`, `rootName`, `sortKeys`, `withBorder`, `withChevrons`, `withControls`, `withCopy`, `withCopyButton`, `withKeyQuotes`, `withLineNumbers`, `withQuotes`, `withSize`, `withTypes`
+**需要语义映射的属性候选：** `allExpanded`, `collapseAllLabel`, `collapseStringsAfterLength`, `copiedLabel`, `copyLabel`, `expandAllLabel`, `expandedPaths`, `fontSize`, `groupArraysAfterLength`, `highlightItems`, `indentWidth`, `maxDisplayLength`, `onExpandedPathsChange`, `onValueSelect`, `radius`, `withBorder`, `withChevrons`, `withControls`, `withCopy`, `withCopyButton`, `withKeyQuotes`, `withQuotes`, `withSize`
 
 ### Notifications system — X:Notifications system
 
@@ -2439,7 +2131,7 @@
 
 **本地实现：** [src/notifications.rs](../src/notifications.rs)
 
-**本地公开入口（同族）：** `action`, `announcement`, `capacity`, `class`, `clear`, `clock`, `closable`, `close_label`, `content`, `dismiss`, `name`, `new`, `node_ref`, `notification`, `notification_request`, `notifications`, `on_close`, `on_ready`, `pause`, `pause_on_hover`, `pending`, `severity`, `show`, `style`, `theme`, `timeout`, `title`, `toaster`, `unstyled`, `update`, `visible`, `visible_limit`
+**本地公开入口（同族）：** `action`, `announcement`, `auto_close_progress`, `capacity`, `class`, `clear`, `clock`, `closable`, `close_label`, `color`, `content`, `dismiss`, `icon`, `loading`, `name`, `new`, `node_ref`, `notification`, `notification_request`, `notifications`, `on_close`, `on_ready`, `optional_content`, `pause`, `pause_on_hover`, `pending`, `priority`, `render`, `severity`, `show`, `style`, `theme`, `timeout`, `title`, `toaster`, `unstyled`, `update`, `variant`, `visible`, `visible_and_queued`, `visible_limit`
 
 **需要语义映射的属性候选：** `allowDragDismiss`, `allowScrollDismiss`, `autoClose`, `containerWidth`, `layout`, `limit`, `notificationMaxHeight`, `pauseResetOnHover`, `portalProps`, `position`, `renderNotification`, `store`, `transitionDuration`, `withAutoCloseProgress`, `withinPortal`, `zIndex`
 
@@ -2467,9 +2159,9 @@
 
 **本地实现：** [src/carousel/mod.rs](../src/carousel/mod.rs)、[src/carousel/model.rs](../src/carousel/model.rs)
 
-**本地公开入口（同族）：** `autoplay`, `carousel`, `class`, `count`, `current`, `default_current`, `direction`, `enabled`, `focus`, `looping`, `name`, `node_ref`, `on`, `on_current_change`, `orientation`, `overscan`, `pause_on_hover`, `paused`, `propose`, `render_slide`, `size`, `style`, `swipe`, `theme`, `unstyled`, `validate`, `window`
+**本地公开入口（同族）：** `autoplay`, `carousel`, `class`, `control_icons`, `control_size`, `controls_offset`, `count`, `current`, `default_current`, `direction`, `drag_free`, `enabled`, `focus`, `indicators`, `looping`, `name`, `node_ref`, `on`, `on_current_change`, `orientation`, `overscan`, `pause_on_hover`, `paused`, `propose`, `render_slide`, `size`, `slide_align`, `slide_fraction`, `slide_gap`, `style`, `swipe`, `theme`, `unstyled`, `validate`, `viewport_height`, `window`, `with_controls`, `with_indicators`
 
-**需要语义映射的属性候选：** `children`, `controlSize`, `controlsOffset`, `emblaOptions`, `getEmblaApi`, `getIndicatorProps`, `height`, `includeGapInSize`, `initialSlide`, `nextControlIcon`, `nextControlProps`, `onNextSlide`, `onPreviousSlide`, `onSlideChange`, `plugins`, `previousControlIcon`, `previousControlProps`, `slideGap`, `slideSize`, `type`, `withControls`, `withIndicators`, `withKeyboardEvents`
+**需要语义映射的属性候选：** `children`, `emblaOptions`, `getEmblaApi`, `getIndicatorProps`, `height`, `includeGapInSize`, `initialSlide`, `nextControlIcon`, `nextControlProps`, `onNextSlide`, `onPreviousSlide`, `onSlideChange`, `plugins`, `previousControlIcon`, `previousControlProps`, `slideSize`, `type`, `withKeyboardEvents`
 
 ### Lightbox — X:Lightbox
 
@@ -2481,9 +2173,9 @@
 
 **本地实现：** [src/lightbox.rs](../src/lightbox.rs)
 
-**本地公开入口（同族）：** `caption`, `class`, `default_open`, `default_view`, `enabled`, `factor`, `images`, `label`, `lightbox`, `lightbox_image`, `on_open_change`, `on_view_change`, `open`, `panel_ref`, `style`, `theme`, `title`, `trigger_ref`, `unstyled`, `view`
+**本地公开入口（同族）：** `caption`, `class`, `close_on_click_outside`, `close_on_swipe`, `default_open`, `default_view`, `enabled`, `factor`, `images`, `label`, `lightbox`, `lightbox_image`, `loop_navigation`, `on_open_change`, `on_view_change`, `open`, `panel_ref`, `render_slide`, `show_trigger`, `style`, `theme`, `thumbnails`, `title`, `toolbar`, `transition`, `trigger_ref`, `unstyled`, `view`
 
-**需要语义映射的属性候选：** `children`, `closeOnClickOutside`, `closeOnSwipeDown`, `currentIndex`, `emblaOptions`, `emblaRef`, `index`, `labels`, `loop`, `onClose`, `onIndexChange`, `opened`, `returnFocus`, `slide`, `slides`, `store`, `toolbarItems`, `transitionDuration`, `transitionProps`, `withDownload`, `withFullscreen`, `withInitialFocusPlaceholder`, `withKeyboardEvents`, `withNavigation`, `withSlideTransition`, `withThumbnails`, `withZoom`, `withinPortal`, `zIndex`, `zoomMaxScale`
+**需要语义映射的属性候选：** `children`, `closeOnSwipeDown`, `currentIndex`, `emblaOptions`, `emblaRef`, `index`, `labels`, `loop`, `onClose`, `onIndexChange`, `opened`, `returnFocus`, `slide`, `slides`, `store`, `toolbarItems`, `transitionDuration`, `transitionProps`, `withDownload`, `withFullscreen`, `withInitialFocusPlaceholder`, `withKeyboardEvents`, `withNavigation`, `withSlideTransition`, `withThumbnails`, `withZoom`, `withinPortal`, `zIndex`, `zoomMaxScale`
 
 ### Dropzone — X:Dropzone
 
@@ -2495,9 +2187,9 @@
 
 **本地实现：** [../glory/crates/render/src/files.rs](../../glory/crates/render/src/files.rs)、[../glory/crates/web/src/browser/files.rs](../../glory/crates/web/src/browser/files.rs)、[src/files.rs](../src/files.rs)
 
-**本地公开入口（同族）：** `attachment`, `class`, `clear`, `configuration`, `controller_ref`, `description`, `dropzone`, `enabled`, `file_attachment`, `file_button`, `file_input`, `files`, `files_ref`, `focus`, `label`, `matches`, `name`, `native_source`, `new`, `node_ref`, `on`, `on_files`, `on_result`, `preview`, `preview_in`, `previews`, `read`, `read_in`, `remove`, `size`, `status`, `status_ref`, `style`, `text`, `theme`, `unstyled`, `validate`, `validate_file`, `validate_files`, `validate_node`, `validate_read`, `validate_update`, `value`
+**本地公开入口（同族）：** `attachment`, `class`, `clear`, `clearable`, `configuration`, `controller_ref`, `description`, `dropzone`, `enabled`, `field`, `file_attachment`, `file_button`, `file_input`, `files`, `files_ref`, `focus`, `label`, `loading`, `matches`, `name`, `native_source`, `new`, `node_ref`, `on`, `on_files`, `on_result`, `open_picker`, `preview`, `preview_in`, `previews`, `read`, `read_in`, `remove`, `show_attachments`, `size`, `status`, `status_ref`, `style`, `text`, `theme`, `unstyled`, `validate`, `validate_file`, `validate_files`, `validate_node`, `validate_read`, `validate_update`, `value`
 
-**需要语义映射的属性候选：** `accept`, `acceptColor`, `activateOnClick`, `activateOnDrag`, `activateOnKeyboard`, `active`, `autoFocus`, `disabled`, `dragEventsBubbling`, `enablePointerEvents`, `getFilesFromEvent`, `inputProps`, `loaderProps`, `loading`, `maxFiles`, `maxSize`, `multiple`, `onDragEnter`, `onDragLeave`, `onDragOver`, `onDrop`, `onDropAny`, `onFileDialogCancel`, `onFileDialogOpen`, `onReject`, `openRef`, `portalProps`, `preventDropOnDocument`, `radius`, `rejectColor`, `useFsAccessApi`, `validator`, `withinPortal`, `zIndex`
+**需要语义映射的属性候选：** `accept`, `acceptColor`, `activateOnClick`, `activateOnDrag`, `activateOnKeyboard`, `active`, `autoFocus`, `disabled`, `dragEventsBubbling`, `enablePointerEvents`, `getFilesFromEvent`, `inputProps`, `loaderProps`, `maxFiles`, `maxSize`, `multiple`, `onDragEnter`, `onDragLeave`, `onDragOver`, `onDrop`, `onDropAny`, `onFileDialogCancel`, `onFileDialogOpen`, `onReject`, `openRef`, `portalProps`, `preventDropOnDocument`, `radius`, `rejectColor`, `useFsAccessApi`, `validator`, `withinPortal`, `zIndex`
 
 ### NavigationProgress — X:NavigationProgress
 
@@ -2523,7 +2215,7 @@
 
 **本地实现：** [../glory/crates/apace/src/layers.rs](../../glory/crates/apace/src/layers.rs)、[src/modals.rs](../src/modals.rs)、[src/overlay.rs](../src/overlay.rs)
 
-**本地公开入口（同族）：** `allowed`, `arrow`, `ax_branch`, `boundary`, `cancel_label`, `capacity`, `class`, `close`, `close_all`, `close_content`, `close_label`, `confirm_enabled`, `confirm_label`, `confirm_variant`, `confirmation_request`, `content`, `content_policy`, `default_open`, `default_snap`, `description`, `dismiss_on_escape`, `dismiss_on_outside`, `enabled`, `full_screen`, `initial_focus`, `label`, `modal`, `modal_request`, `modals_manager`, `name`, `offset`, `on`, `on_cancel`, `on_confirm`, `on_dismiss`, `on_open_change`, `on_ready`, `on_result`, `on_snap_change`, `open`, `panel_ref`, `pending`, `placement`, `return_focus`, `show_close`, `show_trigger`, `side`, `size`, `snap_config`, `snap_index`, `snap_points`, `style`, `theme`, `title`, `trigger_content`, `trigger_ref`, `unstyled`, `update`, `width`, `with_arrow`
+**本地公开入口（同族）：** `allowed`, `arrow`, `ax_branch`, `boundary`, `cancel_label`, `capacity`, `class`, `close`, `close_all`, `close_content`, `close_label`, `confirm_enabled`, `confirm_label`, `confirm_variant`, `confirmation_request`, `content`, `content_policy`, `default_open`, `default_snap`, `description`, `dismiss_on_escape`, `dismiss_on_outside`, `enabled`, `full_screen`, `initial_focus`, `label`, `modal`, `modal_request`, `modals_manager`, `name`, `offset`, `on`, `on_cancel`, `on_confirm`, `on_dismiss`, `on_open_change`, `on_ready`, `on_result`, `on_snap_change`, `open`, `panel_ref`, `pending`, `placement`, `position`, `preserve_focus`, `return_focus`, `show_close`, `show_trigger`, `side`, `size`, `snap_config`, `snap_index`, `snap_points`, `stacked`, `style`, `theme`, `title`, `trigger_content`, `trigger_ref`, `trigger_style`, `unstyled`, `update`, `width`, `with_arrow`
 
 **需要语义映射的属性候选：** `children`, `labels`, `modalProps`, `modals`
 
@@ -2537,6 +2229,6 @@
 
 **本地实现：** [../glory/crates/render/src/rich.rs](../../glory/crates/render/src/rich.rs)、[../glory/crates/render/src/rich_document.rs](../../glory/crates/render/src/rich_document.rs)、[src/rich_editor.rs](../src/rich_editor.rs)
 
-**本地公开入口（同族）：** `charged_bytes`, `class`, `collapsed`, `composing`, `controller_ref`, `default_document`, `document`, `enabled`, `focus`, `format`, `format_at`, `history`, `insert`, `insert_at`, `is_collapsed`, `name`, `new`, `node_ref`, `on`, `on_document_change`, `ordered`, `placeholder`, `plain_text`, `readonly`, `redo`, `replace`, `reset`, `rich_text_editor`, `selection`, `size`, `style`, `subtle`, `theme`, `toolbar`, `undo`, `unstyled`, `utf16_len`, `validate`, `validate_selection`
+**本地公开入口（同族）：** `charged_bytes`, `class`, `collapsed`, `composing`, `controller_ref`, `default_document`, `document`, `enabled`, `focus`, `format`, `format_at`, `history`, `insert`, `insert_at`, `is_collapsed`, `name`, `new`, `node_ref`, `on`, `on_document_change`, `ordered`, `placeholder`, `plain_text`, `readonly`, `redo`, `replace`, `reset`, `rich_text_editor`, `selection`, `size`, `style`, `subtle`, `theme`, `toolbar`, `toolbar_actions`, `toolbar_glyph`, `undo`, `unstyled`, `utf16_len`, `validate`, `validate_selection`
 
 **需要语义映射的属性候选：** 无直接拼写候选；仍不推断功能等价。

@@ -1,4 +1,3 @@
-mod bubble_chart_change_color;
 mod carousel_embla_options;
 mod carousel_options;
 mod carousel_styles;
@@ -6,47 +5,16 @@ mod checkbox_group_config;
 mod color_picker_format;
 mod color_picker_size;
 mod combobox_popover_check_icon;
-mod donut_chart_padding_angle;
-mod donut_chart_segment_color;
-mod donut_chart_segments_labels;
-mod donut_chart_segments_stroke;
-mod donut_chart_size_and_thickness;
-mod funnel_chart_segment_color;
-mod funnel_chart_segments_labels;
-mod funnel_chart_segments_stroke;
-mod funnel_chart_size_and_thickness;
-mod heatmap_rect_size_gap_and_radius;
 mod input_clear_button;
 mod input_wrapper;
 mod multi_select_check_icon;
-mod pie_chart_segment_color;
-mod pie_chart_segments_labels;
-mod pie_chart_segments_stroke;
-mod pie_chart_size;
-mod radar_chart_change_color;
-mod radar_chart_parts;
-mod radial_bar_chart_change_color;
 mod radio_group_config;
 mod segmented_control_color;
 mod select_check_icon;
 mod slider_thumb_size;
-mod sunburst_chart_gap;
 mod switch_group_config;
-mod waffle_chart_fill_direction;
-mod waffle_chart_gap_and_grid_size;
-mod waffle_chart_legend;
 use super::showcase_examples::DetailSection;
-mod area_chart_area_color;
-mod area_chart_connect_nulls;
-mod area_chart_fill_opacity;
-mod area_chart_stroke_width;
-mod bar_chart_area_color;
-mod composite_chart_chart_color;
-mod composite_chart_stroke_width;
 mod date_picker_size;
-mod line_chart_connect_nulls;
-mod line_chart_line_color;
-mod line_chart_stroke_width;
 mod month_picker_size;
 mod year_picker_size;
 
@@ -94,37 +62,9 @@ mod anchor_underline;
 mod app_shell_alternative_layout;
 mod app_shell_resizable_alternative;
 mod app_shell_without_transitions;
-mod area_chart_brush;
-mod area_chart_customize_dots;
-mod area_chart_dashed_area_line;
-mod area_chart_legend;
-mod area_chart_legend_position;
-mod area_chart_percent_area_chart;
-mod area_chart_points_labels;
-mod area_chart_reference_areas;
-mod area_chart_reference_dots;
-mod area_chart_reference_lines;
-mod area_chart_remove_tooltip;
-mod area_chart_series_labels;
-mod area_chart_stacked_area_chart;
-mod area_chart_sync_multiple_areacharts;
-mod area_chart_x_and_y_axis_props;
 mod aspect_ratio_flex_avatar;
 mod aspect_ratio_map_embed;
 mod aspect_ratio_video_embed;
-mod bar_chart_bar_value_label;
-mod bar_chart_brush;
-mod bar_chart_legend;
-mod bar_chart_legend_position;
-mod bar_chart_percent_bar_chart;
-mod bar_chart_reference_areas;
-mod bar_chart_reference_dots;
-mod bar_chart_reference_lines;
-mod bar_chart_remove_tooltip;
-mod bar_chart_series_labels;
-mod bar_chart_stacked_bar_chart;
-mod bar_chart_sync_multiple_barcharts;
-mod bar_chart_x_and_y_axis_props;
 mod burger_line_size;
 mod button_autocontrast;
 mod button_compact;
@@ -143,19 +83,6 @@ mod button_sections_position;
 mod button_styles;
 mod button_styles_api;
 mod center_inline_link;
-mod composite_chart_brush;
-mod composite_chart_customize_dots;
-mod composite_chart_dashed_lines;
-mod composite_chart_legend;
-mod composite_chart_legend_position;
-mod composite_chart_points_labels;
-mod composite_chart_reference_areas;
-mod composite_chart_reference_dots;
-mod composite_chart_reference_lines;
-mod composite_chart_remove_tooltip;
-mod composite_chart_series_labels;
-mod composite_chart_sync_multiple_charts;
-mod composite_chart_x_and_y_axis_props;
 mod container_custom_container;
 mod container_grid_strategy;
 mod container_responsive_container;
@@ -171,19 +98,6 @@ mod grid_grow;
 mod grid_justify_align;
 mod hover_card_delay_group;
 mod hover_card_dropdown_role;
-mod line_chart_brush;
-mod line_chart_customize_dots;
-mod line_chart_dashed_line;
-mod line_chart_legend;
-mod line_chart_legend_position;
-mod line_chart_points_labels;
-mod line_chart_reference_areas;
-mod line_chart_reference_dots;
-mod line_chart_reference_lines;
-mod line_chart_remove_tooltip;
-mod line_chart_series_labels;
-mod line_chart_sync_multiple_linecharts;
-mod line_chart_x_and_y_axis_props;
 mod loading_overlay_custom_inline_loaders;
 mod menu_aligned_labels;
 mod menu_click_hover;
@@ -234,34 +148,6 @@ mod reference_agenda_view_date_formats;
 mod reference_agenda_view_event_click;
 mod reference_agenda_view_localization;
 mod reference_agenda_view_static_mode;
-mod reference_area_chart_axis_labels;
-mod reference_area_chart_change_area_color_depending_on_color_scheme;
-mod reference_area_chart_grid_and_text_colors;
-mod reference_area_chart_rotate_x_axis_labels;
-mod reference_area_chart_value_formatter;
-mod reference_area_chart_x_axis_offset;
-mod reference_area_chart_y_axis_scale;
-mod reference_bar_chart_axis_labels;
-mod reference_bar_chart_change_bar_color_depending_on_color_scheme;
-mod reference_bar_chart_grid_and_text_colors;
-mod reference_bar_chart_value_formatter;
-mod reference_bar_chart_x_axis_offset;
-mod reference_bar_chart_y_axis_scale;
-mod reference_bars_list_bar_color;
-mod reference_bubble_chart_remove_tooltip;
-mod reference_bullet_chart_bar_color;
-mod reference_bullet_chart_chart_size;
-mod reference_bullet_chart_label;
-mod reference_bullet_chart_value_formatter;
-mod reference_bullet_chart_vertical_orientation;
-mod reference_bullet_chart_without_target;
-mod reference_composite_chart_axis_labels;
-mod reference_composite_chart_change_chart_color_depending_on_color_scheme;
-mod reference_composite_chart_grid_and_text_colors;
-mod reference_composite_chart_rotate_x_axis_labels;
-mod reference_composite_chart_value_formatter;
-mod reference_composite_chart_x_axis_offset;
-mod reference_composite_chart_y_axis_scale;
 mod reference_date_input_date_parser;
 mod reference_date_input_disabled_state;
 mod reference_date_input_min_and_max_date;
@@ -309,40 +195,6 @@ mod reference_day_view_slot_label_interval;
 mod reference_day_view_static_mode;
 mod reference_day_view_time_range;
 mod reference_day_view_without_header;
-mod reference_donut_chart_chart_label;
-mod reference_donut_chart_legend;
-mod reference_donut_chart_segments_stroke;
-mod reference_donut_chart_start_and_end_angle;
-mod reference_donut_chart_tooltip_data_source;
-mod reference_donut_chart_without_tooltip;
-mod reference_funnel_chart_legend;
-mod reference_funnel_chart_segments_stroke;
-mod reference_funnel_chart_tooltip_data_source;
-mod reference_funnel_chart_without_tooltip;
-mod reference_gauge_chart_custom_label;
-mod reference_gauge_chart_round_caps;
-mod reference_gauge_chart_sections;
-mod reference_gauge_chart_start_and_end_angle;
-mod reference_gauge_chart_target_marker;
-mod reference_gauge_chart_thickness;
-mod reference_heatmap_change_colors;
-mod reference_heatmap_change_labels_text;
-mod reference_heatmap_first_day_of_week;
-mod reference_heatmap_legend;
-mod reference_heatmap_weekdays_and_months_labels;
-mod reference_heatmap_with_tooltip;
-mod reference_line_chart_axis_labels;
-mod reference_line_chart_change_line_color_depending_on_color_scheme;
-mod reference_line_chart_grid_and_text_colors;
-mod reference_line_chart_value_formatter;
-mod reference_line_chart_x_axis_offset;
-mod reference_line_chart_y_axis_scale;
-mod reference_matrix_chart_cell_size_and_gap;
-mod reference_matrix_chart_colors;
-mod reference_matrix_chart_labels;
-mod reference_matrix_chart_legend;
-mod reference_matrix_chart_tooltip;
-mod reference_matrix_chart_values_domain;
 mod reference_mini_calendar_getdayprops;
 mod reference_mini_calendar_min_and_max_dates;
 mod reference_mini_calendar_number_of_days;
@@ -376,13 +228,6 @@ mod reference_month_view_static_mode;
 mod reference_month_view_without_header;
 mod reference_month_view_without_outside_days;
 mod reference_month_view_without_week_days;
-mod reference_pie_chart_enable_tooltip;
-mod reference_pie_chart_legend;
-mod reference_pie_chart_segments_stroke;
-mod reference_pie_chart_start_and_end_angle;
-mod reference_pie_chart_tooltip_data_source;
-mod reference_radial_bar_chart_hide_tooltip;
-mod reference_radial_bar_chart_legend;
 mod reference_recurring_events_dayview_demo;
 mod reference_recurring_events_monthview_demo;
 mod reference_recurring_events_weekview_demo;
@@ -407,17 +252,6 @@ mod reference_resources_week_view_radius;
 mod reference_resources_week_view_recurring_events;
 mod reference_resources_week_view_static_mode;
 mod reference_resources_week_view_time_range_and_intervals;
-mod reference_sankey_chart_custom_colors;
-mod reference_sankey_chart_disable_tooltip;
-mod reference_sankey_chart_link_opacity;
-mod reference_sankey_chart_node_color;
-mod reference_sankey_chart_node_width_and_padding;
-mod reference_scatter_chart_remove_tooltip;
-mod reference_sunburst_chart_chart_size;
-mod reference_sunburst_chart_disable_tooltip;
-mod reference_sunburst_chart_labels;
-mod reference_sunburst_chart_node_color;
-mod reference_sunburst_chart_stroke_color;
 mod reference_time_grid_disable_specific_controls;
 mod reference_time_grid_disabled;
 mod reference_time_grid_min_and_max_time;
@@ -441,11 +275,6 @@ mod reference_time_picker_time_presets_range;
 mod reference_time_picker_with_dropdown;
 mod reference_time_picker_with_seconds;
 mod reference_time_value_with_seconds;
-mod reference_treemap_disable_tooltip;
-mod reference_treemap_nested_data;
-mod reference_treemap_node_color;
-mod reference_treemap_node_stroke;
-mod reference_waffle_chart_tooltip;
 mod reference_week_view_all_day_events;
 mod reference_week_view_highlight_today;
 mod reference_week_view_interval_minutes;
@@ -764,188 +593,6 @@ const EXAMPLES: &[Example] = &[
         ""
     ),
     example!(
-        "area-chart",
-        reference_area_chart_axis_labels,
-        "reference-area-chart-axis-labels",
-        "Axis labels",
-        ""
-    ),
-    example!(
-        "area-chart",
-        reference_area_chart_x_axis_offset,
-        "reference-area-chart-x-axis-offset",
-        "X axis offset",
-        ""
-    ),
-    example!(
-        "area-chart",
-        reference_area_chart_y_axis_scale,
-        "reference-area-chart-y-axis-scale",
-        "Y axis scale",
-        ""
-    ),
-    example!(
-        "area-chart",
-        reference_area_chart_rotate_x_axis_labels,
-        "reference-area-chart-rotate-x-axis-labels",
-        "Rotate x-axis labels",
-        ""
-    ),
-    example!(
-        "area-chart",
-        reference_area_chart_value_formatter,
-        "reference-area-chart-value-formatter",
-        "Value formatter",
-        ""
-    ),
-    example!(
-        "area-chart",
-        reference_area_chart_change_area_color_depending_on_color_scheme,
-        "reference-area-chart-change-area-color-depending-on-color-scheme",
-        "Change area color depending on color scheme",
-        ""
-    ),
-    example!(
-        "area-chart",
-        reference_area_chart_grid_and_text_colors,
-        "reference-area-chart-grid-and-text-colors",
-        "Grid and text colors",
-        ""
-    ),
-    example!(
-        "bar-chart",
-        reference_bar_chart_axis_labels,
-        "reference-bar-chart-axis-labels",
-        "Axis labels",
-        ""
-    ),
-    example!(
-        "bar-chart",
-        reference_bar_chart_x_axis_offset,
-        "reference-bar-chart-x-axis-offset",
-        "X axis offset",
-        ""
-    ),
-    example!(
-        "bar-chart",
-        reference_bar_chart_y_axis_scale,
-        "reference-bar-chart-y-axis-scale",
-        "Y axis scale",
-        ""
-    ),
-    example!(
-        "bar-chart",
-        reference_bar_chart_value_formatter,
-        "reference-bar-chart-value-formatter",
-        "Value formatter",
-        ""
-    ),
-    example!(
-        "bar-chart",
-        reference_bar_chart_change_bar_color_depending_on_color_scheme,
-        "reference-bar-chart-change-bar-color-depending-on-color-scheme",
-        "Change bar color depending on color scheme",
-        ""
-    ),
-    example!(
-        "bar-chart",
-        reference_bar_chart_grid_and_text_colors,
-        "reference-bar-chart-grid-and-text-colors",
-        "Grid and text colors",
-        ""
-    ),
-    example!(
-        "composite-chart",
-        reference_composite_chart_axis_labels,
-        "reference-composite-chart-axis-labels",
-        "Axis labels",
-        ""
-    ),
-    example!(
-        "composite-chart",
-        reference_composite_chart_x_axis_offset,
-        "reference-composite-chart-x-axis-offset",
-        "X axis offset",
-        ""
-    ),
-    example!(
-        "composite-chart",
-        reference_composite_chart_y_axis_scale,
-        "reference-composite-chart-y-axis-scale",
-        "Y axis scale",
-        ""
-    ),
-    example!(
-        "composite-chart",
-        reference_composite_chart_rotate_x_axis_labels,
-        "reference-composite-chart-rotate-x-axis-labels",
-        "Rotate x-axis labels",
-        ""
-    ),
-    example!(
-        "composite-chart",
-        reference_composite_chart_value_formatter,
-        "reference-composite-chart-value-formatter",
-        "Value formatter",
-        ""
-    ),
-    example!(
-        "composite-chart",
-        reference_composite_chart_change_chart_color_depending_on_color_scheme,
-        "reference-composite-chart-change-chart-color-depending-on-color-scheme",
-        "Change chart color depending on color scheme",
-        ""
-    ),
-    example!(
-        "composite-chart",
-        reference_composite_chart_grid_and_text_colors,
-        "reference-composite-chart-grid-and-text-colors",
-        "Grid and text colors",
-        ""
-    ),
-    example!(
-        "line-chart",
-        reference_line_chart_axis_labels,
-        "reference-line-chart-axis-labels",
-        "Axis labels",
-        ""
-    ),
-    example!(
-        "line-chart",
-        reference_line_chart_x_axis_offset,
-        "reference-line-chart-x-axis-offset",
-        "X axis offset",
-        ""
-    ),
-    example!(
-        "line-chart",
-        reference_line_chart_y_axis_scale,
-        "reference-line-chart-y-axis-scale",
-        "Y axis scale",
-        ""
-    ),
-    example!(
-        "line-chart",
-        reference_line_chart_value_formatter,
-        "reference-line-chart-value-formatter",
-        "Value formatter",
-        ""
-    ),
-    example!(
-        "line-chart",
-        reference_line_chart_change_line_color_depending_on_color_scheme,
-        "reference-line-chart-change-line-color-depending-on-color-scheme",
-        "Change line color depending on color scheme",
-        ""
-    ),
-    example!(
-        "line-chart",
-        reference_line_chart_grid_and_text_colors,
-        "reference-line-chart-grid-and-text-colors",
-        "Grid and text colors",
-        ""
-    ),
-    example!(
         "tabs",
         tabs_deactivation,
         "tabs-deactivation",
@@ -1090,97 +737,6 @@ const EXAMPLES: &[Example] = &[
         reference_time_picker_control_dropdown_opened_state,
         "reference-time-picker-control-dropdown-opened-state",
         "Control dropdown opened state",
-        ""
-    ),
-    example!(
-        "gauge-chart",
-        reference_gauge_chart_sections,
-        "reference-gauge-chart-sections",
-        "Sections",
-        ""
-    ),
-    example!(
-        "gauge-chart",
-        reference_gauge_chart_target_marker,
-        "reference-gauge-chart-target-marker",
-        "Target marker",
-        ""
-    ),
-    example!(
-        "gauge-chart",
-        reference_gauge_chart_start_and_end_angle,
-        "reference-gauge-chart-start-and-end-angle",
-        "Start and end angle",
-        ""
-    ),
-    example!(
-        "gauge-chart",
-        reference_gauge_chart_thickness,
-        "reference-gauge-chart-thickness",
-        "Thickness",
-        ""
-    ),
-    example!(
-        "gauge-chart",
-        reference_gauge_chart_custom_label,
-        "reference-gauge-chart-custom-label",
-        "Custom label",
-        ""
-    ),
-    example!(
-        "gauge-chart",
-        reference_gauge_chart_round_caps,
-        "reference-gauge-chart-round-caps",
-        "Round caps",
-        ""
-    ),
-    example!(
-        "sankey-chart",
-        reference_sankey_chart_node_color,
-        "reference-sankey-chart-node-color",
-        "Node color",
-        ""
-    ),
-    example!(
-        "sankey-chart",
-        reference_sankey_chart_link_opacity,
-        "reference-sankey-chart-link-opacity",
-        "Link opacity",
-        ""
-    ),
-    example!(
-        "sankey-chart",
-        reference_sankey_chart_node_width_and_padding,
-        "reference-sankey-chart-node-width-and-padding",
-        "Node width and padding",
-        ""
-    ),
-    example!(
-        "sunburst-chart",
-        reference_sunburst_chart_stroke_color,
-        "reference-sunburst-chart-stroke-color",
-        "Stroke color",
-        ""
-    ),
-    example!(
-        "sunburst-chart",
-        reference_sunburst_chart_labels,
-        "reference-sunburst-chart-labels",
-        "Labels",
-        ""
-    ),
-    example!(
-        "sunburst-chart",
-        reference_sunburst_chart_node_color,
-        "reference-sunburst-chart-node-color",
-        "Node color",
-        ""
-    ),
-    example!(
-        "treemap",
-        reference_treemap_node_stroke,
-        "reference-treemap-node-stroke",
-        "Node stroke",
         ""
     ),
     example!(
@@ -1837,34 +1393,6 @@ const EXAMPLES: &[Example] = &[
         "Style the button sections to display a count and a trailing arrow."
     ),
     example!(
-        "bullet-chart",
-        reference_bullet_chart_vertical_orientation,
-        "reference-bullet-chart-vertical-orientation",
-        "Vertical orientation",
-        ""
-    ),
-    example!(
-        "bullet-chart",
-        reference_bullet_chart_bar_color,
-        "reference-bullet-chart-bar-color",
-        "Bar color",
-        ""
-    ),
-    example!(
-        "bullet-chart",
-        reference_bullet_chart_value_formatter,
-        "reference-bullet-chart-value-formatter",
-        "Value formatter",
-        ""
-    ),
-    example!(
-        "bullet-chart",
-        reference_bullet_chart_label,
-        "reference-bullet-chart-label",
-        "Label",
-        ""
-    ),
-    example!(
         "modal",
         modal_initial_focus,
         "modal-initial-focus",
@@ -2052,279 +1580,6 @@ const EXAMPLES: &[Example] = &[
         "loading-overlay-custom-inline-loaders",
         "Custom inline loaders",
         "Toggle the loading layer over the form to see a custom inline indicator."
-    ),
-    example!(
-        "matrix-chart",
-        reference_matrix_chart_legend,
-        "reference-matrix-chart-legend",
-        "Legend",
-        ""
-    ),
-    example!(
-        "matrix-chart",
-        reference_matrix_chart_labels,
-        "reference-matrix-chart-labels",
-        "Labels",
-        ""
-    ),
-    example!(
-        "matrix-chart",
-        reference_matrix_chart_colors,
-        "reference-matrix-chart-colors",
-        "Colors",
-        ""
-    ),
-    example!(
-        "matrix-chart",
-        reference_matrix_chart_cell_size_and_gap,
-        "reference-matrix-chart-cell-size-and-gap",
-        "Cell size and gap",
-        ""
-    ),
-    example!(
-        "donut-chart",
-        reference_donut_chart_legend,
-        "reference-donut-chart-legend",
-        "Legend",
-        ""
-    ),
-    example!(
-        "donut-chart",
-        reference_donut_chart_segments_stroke,
-        "reference-donut-chart-segments-stroke",
-        "Segments stroke",
-        ""
-    ),
-    example!(
-        "donut-chart",
-        reference_donut_chart_start_and_end_angle,
-        "reference-donut-chart-start-and-end-angle",
-        "Start and end angle",
-        ""
-    ),
-    example!(
-        "donut-chart",
-        reference_donut_chart_without_tooltip,
-        "reference-donut-chart-without-tooltip",
-        "Without tooltip",
-        ""
-    ),
-    example!(
-        "pie-chart",
-        reference_pie_chart_legend,
-        "reference-pie-chart-legend",
-        "Legend",
-        ""
-    ),
-    example!(
-        "pie-chart",
-        reference_pie_chart_segments_stroke,
-        "reference-pie-chart-segments-stroke",
-        "Segments stroke",
-        ""
-    ),
-    example!(
-        "pie-chart",
-        reference_pie_chart_start_and_end_angle,
-        "reference-pie-chart-start-and-end-angle",
-        "Start and end angle",
-        ""
-    ),
-    example!(
-        "funnel-chart",
-        reference_funnel_chart_legend,
-        "reference-funnel-chart-legend",
-        "Legend",
-        ""
-    ),
-    example!(
-        "funnel-chart",
-        reference_funnel_chart_segments_stroke,
-        "reference-funnel-chart-segments-stroke",
-        "Segments stroke",
-        ""
-    ),
-    example!(
-        "funnel-chart",
-        reference_funnel_chart_without_tooltip,
-        "reference-funnel-chart-without-tooltip",
-        "Without tooltip",
-        ""
-    ),
-    example!(
-        "donut-chart",
-        reference_donut_chart_chart_label,
-        "reference-donut-chart-chart-label",
-        "Chart label",
-        ""
-    ),
-    example!(
-        "pie-chart",
-        reference_pie_chart_enable_tooltip,
-        "reference-pie-chart-enable-tooltip",
-        "Enable tooltip",
-        ""
-    ),
-    example!(
-        "radial-bar-chart",
-        reference_radial_bar_chart_legend,
-        "reference-radial-bar-chart-legend",
-        "Legend",
-        ""
-    ),
-    example!(
-        "radial-bar-chart",
-        reference_radial_bar_chart_hide_tooltip,
-        "reference-radial-bar-chart-hide-tooltip",
-        "Hide tooltip",
-        ""
-    ),
-    example!(
-        "sunburst-chart",
-        reference_sunburst_chart_disable_tooltip,
-        "reference-sunburst-chart-disable-tooltip",
-        "Disable tooltip",
-        ""
-    ),
-    example!(
-        "sankey-chart",
-        reference_sankey_chart_disable_tooltip,
-        "reference-sankey-chart-disable-tooltip",
-        "Disable tooltip",
-        ""
-    ),
-    example!(
-        "treemap",
-        reference_treemap_disable_tooltip,
-        "reference-treemap-disable-tooltip",
-        "Disable tooltip",
-        ""
-    ),
-    example!(
-        "bubble-chart",
-        reference_bubble_chart_remove_tooltip,
-        "reference-bubble-chart-remove-tooltip",
-        "Remove tooltip",
-        ""
-    ),
-    example!(
-        "scatter-chart",
-        reference_scatter_chart_remove_tooltip,
-        "reference-scatter-chart-remove-tooltip",
-        "Remove tooltip",
-        ""
-    ),
-    example!(
-        "waffle-chart",
-        reference_waffle_chart_tooltip,
-        "reference-waffle-chart-tooltip",
-        "Tooltip",
-        ""
-    ),
-    example!(
-        "matrix-chart",
-        reference_matrix_chart_tooltip,
-        "reference-matrix-chart-tooltip",
-        "Tooltip",
-        ""
-    ),
-    example!(
-        "matrix-chart",
-        reference_matrix_chart_values_domain,
-        "reference-matrix-chart-values-domain",
-        "Values domain",
-        ""
-    ),
-    example!(
-        "sunburst-chart",
-        reference_sunburst_chart_chart_size,
-        "reference-sunburst-chart-chart-size",
-        "Chart size",
-        ""
-    ),
-    example!(
-        "sankey-chart",
-        reference_sankey_chart_custom_colors,
-        "reference-sankey-chart-custom-colors",
-        "Custom colors",
-        ""
-    ),
-    example!(
-        "treemap",
-        reference_treemap_node_color,
-        "reference-treemap-node-color",
-        "Node color",
-        ""
-    ),
-    example!(
-        "treemap",
-        reference_treemap_nested_data,
-        "reference-treemap-nested-data",
-        "Nested data",
-        ""
-    ),
-    example!(
-        "bars-list",
-        reference_bars_list_bar_color,
-        "reference-bars-list-bar-color",
-        "Bar color",
-        ""
-    ),
-    example!(
-        "bullet-chart",
-        reference_bullet_chart_without_target,
-        "reference-bullet-chart-without-target",
-        "Without target",
-        ""
-    ),
-    example!(
-        "bullet-chart",
-        reference_bullet_chart_chart_size,
-        "reference-bullet-chart-chart-size",
-        "Chart size",
-        ""
-    ),
-    example!(
-        "heatmap",
-        reference_heatmap_with_tooltip,
-        "reference-heatmap-with-tooltip",
-        "With tooltip",
-        ""
-    ),
-    example!(
-        "heatmap",
-        reference_heatmap_change_colors,
-        "reference-heatmap-change-colors",
-        "Change colors",
-        ""
-    ),
-    example!(
-        "heatmap",
-        reference_heatmap_weekdays_and_months_labels,
-        "reference-heatmap-weekdays-and-months-labels",
-        "Weekdays and months labels",
-        ""
-    ),
-    example!(
-        "heatmap",
-        reference_heatmap_legend,
-        "reference-heatmap-legend",
-        "Legend",
-        ""
-    ),
-    example!(
-        "heatmap",
-        reference_heatmap_first_day_of_week,
-        "reference-heatmap-first-day-of-week",
-        "First day of week",
-        ""
-    ),
-    example!(
-        "heatmap",
-        reference_heatmap_change_labels_text,
-        "reference-heatmap-change-labels-text",
-        "Change labels text",
-        ""
     ),
     example!(
         "day-view",
@@ -2579,20 +1834,6 @@ const EXAMPLES: &[Example] = &[
         "Select the same date twice to finish a one-day range."
     ),
     example!(
-        "donut-chart",
-        reference_donut_chart_tooltip_data_source,
-        "reference-donut-chart-tooltip-data-source",
-        "Tooltip data source",
-        "Compare the hovered segment with the values for every visible segment."
-    ),
-    example!(
-        "funnel-chart",
-        reference_funnel_chart_tooltip_data_source,
-        "reference-funnel-chart-tooltip-data-source",
-        "Tooltip data source",
-        "Compare the hovered segment with the values for every visible segment."
-    ),
-    example!(
         "month-picker",
         reference_month_picker_controlled_date,
         "reference-month-picker-controlled-date",
@@ -2605,13 +1846,6 @@ const EXAMPLES: &[Example] = &[
         "reference-month-picker-single-date-in-range",
         "Single date in range",
         "Select the same date twice to finish a one-day range."
-    ),
-    example!(
-        "pie-chart",
-        reference_pie_chart_tooltip_data_source,
-        "reference-pie-chart-tooltip-data-source",
-        "Tooltip data source",
-        "Compare the hovered segment with the values for every visible segment."
     ),
     example!(
         "year-picker",
@@ -3090,384 +2324,6 @@ const EXAMPLES: &[Example] = &[
         "Display the selected period using localized text."
     ),
     example!(
-        "area-chart",
-        area_chart_legend,
-        "area-chart-legend",
-        "Legend",
-        "Toggle individual fruit series in the legend."
-    ),
-    example!(
-        "area-chart",
-        area_chart_legend_position,
-        "area-chart-legend-position",
-        "Legend position",
-        "The legend is below the plot."
-    ),
-    example!(
-        "area-chart",
-        area_chart_series_labels,
-        "area-chart-series-labels",
-        "Series labels",
-        "The legend and point details use the display labels supplied for the data series."
-    ),
-    example!(
-        "area-chart",
-        area_chart_x_and_y_axis_props,
-        "area-chart-x-and-y-axis-props",
-        "X and Y axis props",
-        "The Y axis spans 0 to 5,000 and both axes show their tick marks."
-    ),
-    example!(
-        "area-chart",
-        area_chart_points_labels,
-        "area-chart-points-labels",
-        "Points labels",
-        "Values appear beside the corresponding data points."
-    ),
-    example!(
-        "area-chart",
-        area_chart_remove_tooltip,
-        "area-chart-remove-tooltip",
-        "Remove tooltip",
-        "Hover over a data point with tooltip display disabled."
-    ),
-    example!(
-        "area-chart",
-        area_chart_customize_dots,
-        "area-chart-customize-dots",
-        "Customize dots",
-        "The chart draws 14-pixel markers at each observation."
-    ),
-    example!(
-        "area-chart",
-        area_chart_dashed_area_line,
-        "area-chart-dashed-area-line",
-        "Dashed area line",
-        "Series outlines use a dashed stroke."
-    ),
-    example!(
-        "area-chart",
-        area_chart_reference_lines,
-        "area-chart-reference-lines",
-        "Reference lines",
-        "Reference lines mark a day and a sales target."
-    ),
-    example!(
-        "area-chart",
-        area_chart_reference_areas,
-        "area-chart-reference-areas",
-        "Reference areas",
-        "The highlighted interval covers March 23 through March 25."
-    ),
-    example!(
-        "area-chart",
-        area_chart_reference_dots,
-        "area-chart-reference-dots",
-        "Reference dots",
-        "The marker identifies the March 25 peak."
-    ),
-    example!(
-        "area-chart",
-        area_chart_stacked_area_chart,
-        "area-chart-stacked-area-chart",
-        "Stacked area chart",
-        "Positive values accumulate for each day."
-    ),
-    example!(
-        "area-chart",
-        area_chart_percent_area_chart,
-        "area-chart-percent-area-chart",
-        "Percent area chart",
-        "Each day is normalized to 100 percent before its series are stacked."
-    ),
-    example!(
-        "area-chart",
-        area_chart_brush,
-        "area-chart-brush",
-        "Brush",
-        "Move the ends of the range to change the visible dates."
-    ),
-    example!(
-        "area-chart",
-        area_chart_sync_multiple_areacharts,
-        "area-chart-sync-multiple-areacharts",
-        "Sync multiple AreaCharts",
-        "Hover or select a point to highlight the same category and series in both charts."
-    ),
-    example!(
-        "line-chart",
-        line_chart_legend,
-        "line-chart-legend",
-        "Legend",
-        "Toggle individual fruit series in the legend."
-    ),
-    example!(
-        "line-chart",
-        line_chart_legend_position,
-        "line-chart-legend-position",
-        "Legend position",
-        "The legend is below the plot."
-    ),
-    example!(
-        "line-chart",
-        line_chart_series_labels,
-        "line-chart-series-labels",
-        "Series labels",
-        "The legend and point details use the display labels supplied for the data series."
-    ),
-    example!(
-        "line-chart",
-        line_chart_x_and_y_axis_props,
-        "line-chart-x-and-y-axis-props",
-        "X and Y axis props",
-        "The Y axis spans 0 to 5,000 and both axes show their tick marks."
-    ),
-    example!(
-        "line-chart",
-        line_chart_points_labels,
-        "line-chart-points-labels",
-        "Points labels",
-        "Values appear beside the corresponding data points."
-    ),
-    example!(
-        "line-chart",
-        line_chart_remove_tooltip,
-        "line-chart-remove-tooltip",
-        "Remove tooltip",
-        "Hover over a data point with tooltip display disabled."
-    ),
-    example!(
-        "line-chart",
-        line_chart_customize_dots,
-        "line-chart-customize-dots",
-        "Customize dots",
-        "The chart draws 14-pixel markers at each observation."
-    ),
-    example!(
-        "line-chart",
-        line_chart_dashed_line,
-        "line-chart-dashed-line",
-        "Dashed line",
-        "Series outlines use a dashed stroke."
-    ),
-    example!(
-        "line-chart",
-        line_chart_reference_lines,
-        "line-chart-reference-lines",
-        "Reference lines",
-        "Reference lines mark a day and a sales target."
-    ),
-    example!(
-        "line-chart",
-        line_chart_reference_areas,
-        "line-chart-reference-areas",
-        "Reference areas",
-        "The highlighted interval covers March 23 through March 25."
-    ),
-    example!(
-        "line-chart",
-        line_chart_reference_dots,
-        "line-chart-reference-dots",
-        "Reference dots",
-        "The marker identifies the March 25 peak."
-    ),
-    example!(
-        "line-chart",
-        line_chart_brush,
-        "line-chart-brush",
-        "Brush",
-        "Move the ends of the range to change the visible dates."
-    ),
-    example!(
-        "line-chart",
-        line_chart_sync_multiple_linecharts,
-        "line-chart-sync-multiple-linecharts",
-        "Sync multiple LineCharts",
-        "Hover or select a point to highlight the same category and series in both charts."
-    ),
-    example!(
-        "bar-chart",
-        bar_chart_legend,
-        "bar-chart-legend",
-        "Legend",
-        "Toggle individual fruit series in the legend."
-    ),
-    example!(
-        "bar-chart",
-        bar_chart_legend_position,
-        "bar-chart-legend-position",
-        "Legend position",
-        "The legend is below the plot."
-    ),
-    example!(
-        "bar-chart",
-        bar_chart_series_labels,
-        "bar-chart-series-labels",
-        "Series labels",
-        "The legend and point details use the display labels supplied for the data series."
-    ),
-    example!(
-        "bar-chart",
-        bar_chart_x_and_y_axis_props,
-        "bar-chart-x-and-y-axis-props",
-        "X and Y axis props",
-        "The Y axis spans 0 to 5,000 and both axes show their tick marks."
-    ),
-    example!(
-        "bar-chart",
-        bar_chart_bar_value_label,
-        "bar-chart-bar-value-label",
-        "Bar value label",
-        "Each bar displays its numeric value."
-    ),
-    example!(
-        "bar-chart",
-        bar_chart_remove_tooltip,
-        "bar-chart-remove-tooltip",
-        "Remove tooltip",
-        "Hover over a data point with tooltip display disabled."
-    ),
-    example!(
-        "bar-chart",
-        bar_chart_reference_lines,
-        "bar-chart-reference-lines",
-        "Reference lines",
-        "Reference lines mark a day and a sales target."
-    ),
-    example!(
-        "bar-chart",
-        bar_chart_reference_areas,
-        "bar-chart-reference-areas",
-        "Reference areas",
-        "The highlighted interval covers March 23 through March 25."
-    ),
-    example!(
-        "bar-chart",
-        bar_chart_reference_dots,
-        "bar-chart-reference-dots",
-        "Reference dots",
-        "The marker identifies the March 25 peak."
-    ),
-    example!(
-        "bar-chart",
-        bar_chart_stacked_bar_chart,
-        "bar-chart-stacked-bar-chart",
-        "Stacked bar chart",
-        "Positive values accumulate for each day."
-    ),
-    example!(
-        "bar-chart",
-        bar_chart_percent_bar_chart,
-        "bar-chart-percent-bar-chart",
-        "Percent bar chart",
-        "Each day is normalized to 100 percent before its series are stacked."
-    ),
-    example!(
-        "bar-chart",
-        bar_chart_brush,
-        "bar-chart-brush",
-        "Brush",
-        "Move the ends of the range to change the visible dates."
-    ),
-    example!(
-        "bar-chart",
-        bar_chart_sync_multiple_barcharts,
-        "bar-chart-sync-multiple-barcharts",
-        "Sync multiple BarCharts",
-        "Hover or select a point to highlight the same category and series in both charts."
-    ),
-    example!(
-        "composite-chart",
-        composite_chart_legend,
-        "composite-chart-legend",
-        "Legend",
-        "Toggle individual fruit series in the legend."
-    ),
-    example!(
-        "composite-chart",
-        composite_chart_legend_position,
-        "composite-chart-legend-position",
-        "Legend position",
-        "The legend is below the plot."
-    ),
-    example!(
-        "composite-chart",
-        composite_chart_series_labels,
-        "composite-chart-series-labels",
-        "Series labels",
-        "The legend and point details use the display labels supplied for the data series."
-    ),
-    example!(
-        "composite-chart",
-        composite_chart_x_and_y_axis_props,
-        "composite-chart-x-and-y-axis-props",
-        "X and Y axis props",
-        "The Y axis spans 0 to 5,000 and both axes show their tick marks."
-    ),
-    example!(
-        "composite-chart",
-        composite_chart_points_labels,
-        "composite-chart-points-labels",
-        "Points labels",
-        "Values appear beside the corresponding data points."
-    ),
-    example!(
-        "composite-chart",
-        composite_chart_remove_tooltip,
-        "composite-chart-remove-tooltip",
-        "Remove tooltip",
-        "Hover over a data point with tooltip display disabled."
-    ),
-    example!(
-        "composite-chart",
-        composite_chart_customize_dots,
-        "composite-chart-customize-dots",
-        "Customize dots",
-        "The chart draws 14-pixel markers at each observation."
-    ),
-    example!(
-        "composite-chart",
-        composite_chart_dashed_lines,
-        "composite-chart-dashed-lines",
-        "Dashed lines",
-        "Series outlines use a dashed stroke."
-    ),
-    example!(
-        "composite-chart",
-        composite_chart_reference_lines,
-        "composite-chart-reference-lines",
-        "Reference lines",
-        "Reference lines mark a day and a sales target."
-    ),
-    example!(
-        "composite-chart",
-        composite_chart_reference_areas,
-        "composite-chart-reference-areas",
-        "Reference areas",
-        "The highlighted interval covers March 23 through March 25."
-    ),
-    example!(
-        "composite-chart",
-        composite_chart_reference_dots,
-        "composite-chart-reference-dots",
-        "Reference dots",
-        "The marker identifies the March 25 peak."
-    ),
-    example!(
-        "composite-chart",
-        composite_chart_brush,
-        "composite-chart-brush",
-        "Brush",
-        "Move the ends of the range to change the visible dates."
-    ),
-    example!(
-        "composite-chart",
-        composite_chart_sync_multiple_charts,
-        "composite-chart-sync-multiple-charts",
-        "Sync multiple charts",
-        "Hover or select a point to highlight the same category and series in both charts."
-    ),
-    example!(
         "button",
         button_group_orientation,
         "button-group-orientation",
@@ -3664,13 +2520,6 @@ const EXAMPLES: &[Example] = &[
         "Align ordinary menu actions with items that have check indicators."
     ),
     example!(
-        "radar-chart",
-        radar_chart_parts,
-        "radar-chart-parts",
-        "Hide/show chart parts",
-        "Show or hide the axes, grid, tooltip and data points."
-    ),
-    example!(
         "carousel",
         carousel_embla_options,
         "carousel-embla-options",
@@ -3693,153 +2542,6 @@ const EXAMPLES: &[Example] = &[
         source: || include_str!("../showcase_demos/notification_usage.rs"),
         build: super::showcase_demos::notification_usage_widget,
     },
-    example!(
-        "donut-chart",
-        donut_chart_segments_labels,
-        "donut-chart-segments-labels",
-        "Segments labels",
-        "Change how values are labeled in the drawing."
-    ),
-    example!(
-        "donut-chart",
-        donut_chart_size_and_thickness,
-        "donut-chart-size-and-thickness",
-        "Size and thickness",
-        "Adjust the size of the drawing."
-    ),
-    example!(
-        "donut-chart",
-        donut_chart_padding_angle,
-        "donut-chart-padding-angle",
-        "Padding angle",
-        "Set the angle between neighboring segments."
-    ),
-    example!(
-        "donut-chart",
-        donut_chart_segment_color,
-        "donut-chart-segment-color",
-        "Segment color",
-        "Choose the color used to draw the data."
-    ),
-    example!(
-        "donut-chart",
-        donut_chart_segments_stroke,
-        "donut-chart-segments-stroke",
-        "Segments stroke",
-        "Set the width of the segment outline."
-    ),
-    example!(
-        "pie-chart",
-        pie_chart_segments_labels,
-        "pie-chart-segments-labels",
-        "Segments labels",
-        "Change how values are labeled in the drawing."
-    ),
-    example!(
-        "pie-chart",
-        pie_chart_size,
-        "pie-chart-size",
-        "Size",
-        "Change the chart diameter."
-    ),
-    example!(
-        "pie-chart",
-        pie_chart_segment_color,
-        "pie-chart-segment-color",
-        "Segment color",
-        "Choose the color used to draw the data."
-    ),
-    example!(
-        "pie-chart",
-        pie_chart_segments_stroke,
-        "pie-chart-segments-stroke",
-        "Segments stroke",
-        "Set the width of the segment outline."
-    ),
-    example!(
-        "funnel-chart",
-        funnel_chart_segments_labels,
-        "funnel-chart-segments-labels",
-        "Segments labels",
-        "Change how values are labeled in the drawing."
-    ),
-    example!(
-        "funnel-chart",
-        funnel_chart_size_and_thickness,
-        "funnel-chart-size-and-thickness",
-        "Size and thickness",
-        "Adjust the size of the drawing."
-    ),
-    example!(
-        "funnel-chart",
-        funnel_chart_segment_color,
-        "funnel-chart-segment-color",
-        "Segment color",
-        "Choose the color used to draw the data."
-    ),
-    example!(
-        "funnel-chart",
-        funnel_chart_segments_stroke,
-        "funnel-chart-segments-stroke",
-        "Segments stroke",
-        "Set the width of the segment outline."
-    ),
-    example!(
-        "radial-bar-chart",
-        radial_bar_chart_change_color,
-        "radial-bar-chart-change-color",
-        "Change color",
-        "Choose the color used to draw the data."
-    ),
-    example!(
-        "bubble-chart",
-        bubble_chart_change_color,
-        "bubble-chart-change-color",
-        "Change color",
-        "Choose the color used to draw the data."
-    ),
-    example!(
-        "sunburst-chart",
-        sunburst_chart_gap,
-        "sunburst-chart-gap",
-        "Gap",
-        "Adjust the separation between concentric segments."
-    ),
-    example!(
-        "waffle-chart",
-        waffle_chart_gap_and_grid_size,
-        "waffle-chart-gap-and-grid-size",
-        "Gap and grid size",
-        "Adjust the number of rows and columns and the space between cells."
-    ),
-    example!(
-        "waffle-chart",
-        waffle_chart_fill_direction,
-        "waffle-chart-fill-direction",
-        "Fill direction",
-        "Change the order in which categories fill the grid."
-    ),
-    example!(
-        "waffle-chart",
-        waffle_chart_legend,
-        "waffle-chart-legend",
-        "Legend",
-        "Place the legend around the chart."
-    ),
-    example!(
-        "radar-chart",
-        radar_chart_change_color,
-        "radar-chart-change-color",
-        "Change color",
-        "Choose the color used to draw the data."
-    ),
-    example!(
-        "heatmap",
-        heatmap_rect_size_gap_and_radius,
-        "heatmap-rect-size-gap-and-radius",
-        "Rect size, gap and radius",
-        "Change the geometry of each dated cell."
-    ),
     example!(
         "checkbox",
         checkbox_group_config,
@@ -3946,69 +2648,6 @@ const EXAMPLES: &[Example] = &[
         "Change the calendar size. Your selection is retained across sizes."
     ),
     example!(
-        "area-chart",
-        area_chart_connect_nulls,
-        "area-chart-connect-nulls",
-        "Connect nulls",
-        "A missing observation in the first series can interrupt the line or connect its neighbors."
-    ),
-    example!(
-        "area-chart",
-        area_chart_area_color,
-        "area-chart-area-color",
-        "Area color",
-        "Choose the color used for the first series."
-    ),
-    example!(
-        "area-chart",
-        area_chart_stroke_width,
-        "area-chart-stroke-width",
-        "Stroke width",
-        "Adjust the width of the series stroke."
-    ),
-    example!(
-        "area-chart",
-        area_chart_fill_opacity,
-        "area-chart-fill-opacity",
-        "Fill opacity",
-        "Adjust the transparency of the filled areas."
-    ),
-    example!(
-        "line-chart",
-        line_chart_connect_nulls,
-        "line-chart-connect-nulls",
-        "Connect nulls",
-        "A missing observation in the first series can interrupt the line or connect its neighbors."
-    ),
-    example!(
-        "line-chart",
-        line_chart_line_color,
-        "line-chart-line-color",
-        "Line color",
-        "Choose the color used for the first series."
-    ),
-    example!(
-        "line-chart",
-        line_chart_stroke_width,
-        "line-chart-stroke-width",
-        "Stroke width",
-        "Adjust the width of the series stroke."
-    ),
-    example!(
-        "bar-chart",
-        bar_chart_area_color,
-        "bar-chart-area-color",
-        "Area color",
-        "Choose the color used for the first series."
-    ),
-    example!(
-        "composite-chart",
-        composite_chart_chart_color,
-        "composite-chart-chart-color",
-        "Chart color",
-        "Choose the color used for the first series."
-    ),
-    example!(
         "button",
         button_styles,
         "button-styles",
@@ -4049,13 +2688,6 @@ const EXAMPLES: &[Example] = &[
         "tabs-styles",
         "Styles API",
         "Inspect the tab list, icons, labels and active panel."
-    ),
-    example!(
-        "composite-chart",
-        composite_chart_stroke_width,
-        "composite-chart-stroke-width",
-        "Stroke width",
-        "Adjust the width of the series stroke."
     ),
 ];
 pub fn sections(slug: &str, theme: sapid::Theme) -> Vec<DetailSection> {

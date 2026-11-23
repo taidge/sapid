@@ -1,10 +1,10 @@
 # WASM size probes
 
 The active consumer matrix belongs to Sapid:
-[`benchmarks/wasm-size`](../benchmarks/wasm-size/README.md). It has 17 cases:
+[`benchmarks/wasm-size`](../benchmarks/wasm-size/README.md). It has 15 cases:
 an empty WASM module, Glory text, unused Sapid, a reactive Sapid button,
-each of the six optional families both enabled-but-unused and actually mounted,
-and all six unused families together.
+each of the five optional families both enabled-but-unused and actually mounted,
+and all five unused families together.
 
 Builds inherit the caller environment and Cargo configuration. The runner reads
 `cargo metadata --no-deps --format-version 1` in the benchmark workspace and puts

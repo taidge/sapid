@@ -3,8 +3,8 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('n
 const {assertDocHeadingWeights,chromium,base,writeReport,showcaseSlugs}=require('./showcase-browser-env.cjs');
 (async()=>{
  const slugs=showcaseSlugs();
- const original=JSON.parse(fs.readFileSync(path.join(__dirname,'../docs/shared-page-remediation.json'),'utf8'));
- for(const {slug} of original.pages)assert(slugs.includes(slug),slug);
+ const examples=JSON.parse(fs.readFileSync(path.join(__dirname,'../docs/showcase-mantine-examples.json'),'utf8'));
+ for(const slug of Object.keys(examples.components))assert(slugs.includes(slug),slug);
  const browser=await chromium.launch(),page=await browser.newPage(),report={browser:browser.version(),cases:[],errors:[]};let current;
  page.on('pageerror',e=>report.errors.push({page:current,error:e.message}));page.on('console',m=>{if(m.type()==='error')report.errors.push({page:current,error:m.text()});});
  const visit=async url=>{for(let attempt=0;;attempt++){try{await page.goto(url);return;}catch(error){if(attempt>=2||!String(error).includes('ERR_NO_BUFFER_SPACE'))throw error;(report.navigationRetries??=[]).push({page:current,attempt,error:String(error)});await page.waitForTimeout(250*(attempt+1));}}};

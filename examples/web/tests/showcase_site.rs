@@ -403,7 +403,7 @@ fn representative_ssr_documents_render_in_all_themes_without_frames() {
         Theme::green_light(),
         Theme::green_dark(),
     ] {
-        for id in ["", "button", "text-input", "mini-calendar", "area-chart"] {
+        for id in ["", "button", "text-input", "mini-calendar"] {
             let html = glory::ssr::snapshot(showcase::site(theme.clone(), id.into()))
                 .unwrap()
                 .html;
@@ -509,23 +509,6 @@ fn focused_guides_render_their_own_widget_content() {
         ("P6-02", "Example pages"),
         ("P6-10", "Archive selected"),
         ("P6-10-toolbar", "Document formatting"),
-        ("P11-02", "Apples"),
-        ("P11-02-barchart", "Smartphones"),
-        ("P11-02-linechart", "Apples"),
-        ("P11-02-compositechart", "Apples"),
-        ("P11-03", "USA"),
-        ("P11-03-piechart", "USA"),
-        ("P11-04", "Monday"),
-        ("P11-04-scatterchart", "Scatter chart"),
-        ("P11-05", "USA"),
-        ("P11-05-radarchart", "Tomatoes"),
-        ("P11-06", "Project contributions"),
-        ("P11-06-matrixchart", "James"),
-        ("P11-06-wafflechart", "Chrome"),
-        ("P11-07", "React"),
-        ("P11-07-bulletchart", "Revenue"),
-        ("P11-08", "USA"),
-        ("P11-08-sankeychart", "Visit"),
     ];
     for (id, expected) in cases {
         let entry = sapid_web_example::showcase_catalog::find_by_id(id).unwrap();
@@ -541,47 +524,6 @@ fn focused_guides_render_their_own_widget_content() {
             assert_eq!(html.matches("sapid-password-toggle").count(), 1);
             assert!(html.contains("Show password") && html.contains("<svg"));
             assert!(html.contains("site-field-configurator"));
-        }
-    }
-}
-
-#[test]
-fn chart_guides_do_not_mount_the_shared_acceptance_workbench() {
-    let charts = ENTRIES.iter().filter(|entry| entry.group == "Charts");
-    assert_eq!(charts.clone().count(), 22);
-    for entry in charts {
-        let id = entry.id;
-        let html = glory::ssr::snapshot((entry.build)(Theme::blue_light()))
-            .unwrap()
-            .html;
-        assert!(!html.contains("Accept chart proposals"), "{id}");
-        assert!(!html.contains("Accept plot proposals"), "{id}");
-        assert!(!html.contains("Toggle chart owner"), "{id}");
-        assert!(!html.contains("Toggle plot owner"), "{id}");
-        assert!(!html.contains("chart-mode-Line"), "{id}");
-        assert!(!html.contains("plot-secondary"), "{id}");
-        if entry.name == "Heatmap" {
-            assert_eq!(html.matches("sapid-heatmap-grid").count(), 1);
-            assert_eq!(html.matches("role=\"gridcell\"").count(), 366);
-            assert_eq!(html.matches("site-chart-card").count(), 0);
-        } else {
-            assert_eq!(html.matches("site-chart-card").count(), 0, "{id}");
-            assert_eq!(
-                html.matches("sapid-chart-plot").count()
-                    + html.matches("sapid-plot-drawing").count(),
-                1,
-                "{id}"
-            );
-            if entry.name == "Sparkline" {
-                assert!(html.contains("Weekly values: 4, 7, 5, 9, 8, 12, 15"));
-                assert!(!html.contains("sapid-plot-controls"));
-            }
-            assert!(!html.contains("<table"), "{id}");
-            assert!(!html.contains("Next data point"), "{id}");
-            assert!(
-                html.contains("sapid-chart-point") || html.contains("sapid-plot-point"),
-                "{id}"
-            );
         }
     }
 }

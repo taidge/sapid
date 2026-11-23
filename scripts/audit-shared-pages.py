@@ -108,14 +108,14 @@ def main():
             raise ValueError(f"ambiguous shared-page mapping: {fact['name']}")
         entries.append({**matches[0], "upstream_url": fact["url"], "package": fact["package"],
                         "previous_sections": fact["sections"]})
-    assert len(entries) == len(catalogue) == 181
-    report = {"review_date": datetime.date(2026, 11, 4).isoformat(), "scope": "181 shared documentation pages",
+    assert len({entry["slug"] for entry in entries}) == len(facts["entries"])
+    report = {"review_date": datetime.date(2026, 11, 4).isoformat(), "scope": f"{len(entries)} shared documentation pages",
               "entries": []}
     with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
         for index, entry in enumerate(pool.map(fetch, entries), 1):
             report["entries"].append(entry)
             if index % 30 == 0 or entry["upstream_status"] == "error":
-                print(f"upstream {index}/181: {entry['slug']} {entry['upstream_status']}", flush=True)
+                print(f"upstream {index}/{len(entries)}: {entry['slug']} {entry['upstream_status']}", flush=True)
     destination = OUTPUT / "upstream.json"
     destination.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (OUTPUT / "pages.json").write_text(json.dumps(entries, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

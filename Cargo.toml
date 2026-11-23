@@ -12,7 +12,6 @@ repository = "https://github.com/taidge/sapid"
 [features]
 default = []
 accent-matching = ["dep:unicode-normalization"]
-charts = ["dep:libm"]
 code = []
 files = []
 phone = ["dep:phonenumber"]
@@ -23,7 +22,6 @@ dates = []
 [dependencies]
 unicode-normalization = { version = "=0.1.26", optional = true, default-features = false }
 phonenumber = { version = "=0.3.10", optional = true }
-libm = { version = "=0.2.16", default-features = false, optional = true }
 glory = { version = "0.9.1", default-features = false }
 serde_json = { version = "=1.0.154", features = ["raw_value"], optional = true }
 

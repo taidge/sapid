@@ -47,11 +47,6 @@ pub fn detail_sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         | "resources-schedule"
         | "recurring-events"
         | "events-data" => super::showcase_schedule_docs::sections(id, theme),
-        "area-chart" | "bar-chart" | "line-chart" | "composite-chart" | "candlestick-chart"
-        | "donut-chart" | "pie-chart" | "funnel-chart" | "radar-chart" | "scatter-chart"
-        | "bubble-chart" | "radial-bar-chart" | "sparkline" | "bars-list" | "bullet-chart"
-        | "gauge-chart" | "waffle-chart" | "treemap" | "sunburst-chart" | "sankey-chart"
-        | "matrix-chart" => super::showcase_chart_docs::sections(id, theme),
         "date-input"
         | "month-picker"
         | "year-picker"
@@ -83,7 +78,6 @@ pub fn detail_sections(id: &str, theme: sapid::Theme) -> Vec<DetailSection> {
         }
         "menu" => super::showcase_menu_docs::sections(theme),
         "mini-calendar" => super::showcase_mini_calendar_docs::sections(theme),
-        "heatmap" => super::showcase_heatmap_docs::sections(theme),
         "transition" => super::showcase_transition_docs::sections(theme),
         "password-input" => super::showcase_password_docs::sections(theme),
         "menubar" => super::showcase_menubar::sections(theme),
@@ -179,11 +173,6 @@ pub fn detail_navigation(id: &str) -> Vec<(&'static str, &'static str)> {
         | "resources-schedule"
         | "recurring-events"
         | "events-data" => super::showcase_schedule_docs::navigation(id),
-        "area-chart" | "bar-chart" | "line-chart" | "composite-chart" | "candlestick-chart"
-        | "donut-chart" | "pie-chart" | "funnel-chart" | "radar-chart" | "scatter-chart"
-        | "bubble-chart" | "radial-bar-chart" | "sparkline" | "bars-list" | "bullet-chart"
-        | "gauge-chart" | "waffle-chart" | "treemap" | "sunburst-chart" | "sankey-chart"
-        | "matrix-chart" => super::showcase_chart_docs::contents(id),
         "date-picker" => {
             let mut navigation = date_picker_links();
             navigation.extend(super::showcase_dates_docs::navigation(id));
@@ -235,7 +224,6 @@ pub fn detail_navigation(id: &str) -> Vec<(&'static str, &'static str)> {
         }
         "menu" => super::showcase_menu_docs::navigation(),
         "mini-calendar" => super::showcase_mini_calendar_docs::navigation(),
-        "heatmap" => super::showcase_heatmap_docs::navigation(),
         "transition" => super::showcase_transition_docs::navigation(),
         "password-input" => super::showcase_password_docs::navigation(),
         "menubar" => super::showcase_menubar::navigation(),
@@ -415,45 +403,6 @@ mod tests {
         }
     }
     #[test]
-    fn chart_documentation_mounts_each_full_source_example_and_retires_its_owned_graph() {
-        for (slug, count) in [
-            ("area-chart", 32),
-            ("bar-chart", 26),
-            ("line-chart", 27),
-            ("composite-chart", 27),
-            ("candlestick-chart", 4),
-            ("donut-chart", 15),
-            ("pie-chart", 13),
-            ("funnel-chart", 12),
-            ("radar-chart", 6),
-            ("scatter-chart", 5),
-            ("bubble-chart", 6),
-            ("radial-bar-chart", 7),
-            ("sparkline", 4),
-            ("bars-list", 5),
-            ("bullet-chart", 10),
-            ("gauge-chart", 10),
-            ("waffle-chart", 8),
-            ("treemap", 8),
-            ("sunburst-chart", 10),
-            ("sankey-chart", 9),
-            ("matrix-chart", 10),
-        ] {
-            let sections = detail_sections(slug, sapid::Theme::blue_light());
-            assert_eq!(sections.len(), count);
-            assert_eq!(detail_navigation(slug).len(), count);
-            for section in sections {
-                assert!(section.source.contains("pub fn demo("));
-                let app = App::memory();
-                app.mount(section.example)
-                    .unwrap_or_else(|e| panic!("{}: {e}", section.id));
-                app.clear().unwrap();
-                assert_eq!(app.stats().nodes, 0);
-                assert_eq!(app.stats().handlers, 0);
-            }
-        }
-    }
-    #[test]
     fn shell_and_menubar_documentation_sections_mount_real_widgets_and_retire() {
         for (slug, count) in [
             ("app-shell", 13),
@@ -470,7 +419,6 @@ mod tests {
             ("menubar", 10),
             ("menu", 17),
             ("mini-calendar", 7),
-            ("heatmap", 11),
             ("transition", 5),
             ("password-input", 12),
             ("alpha-slider", 2),

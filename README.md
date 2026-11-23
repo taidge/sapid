@@ -112,7 +112,7 @@ shared browser/SSR/native examples.
 
 ## Find your widgets
 
-The inventory covers **242 upstream entries across 137 work items**. Completion
+The inventory covers **219 upstream entries across 129 work items**. Completion
 records a finite implementation; it does not imply full Mantine/shadcn API parity
 or support on every host.
 
@@ -122,7 +122,7 @@ or support on every host.
 | Layout and content | Stack, Grid, Card, typography, tables and trees | [Layout](docs/layout-widgets.md) · [DataTable](docs/data-table.md) · [Tree](docs/tree.md) |
 | Navigation and layers | Tabs, menus, dialogs, drawers, sidebars and app shells | [Tabs](docs/tabs.md) · [Layers](docs/widget-guide.md#dialog-drawer-and-popover) · [AppShell](docs/sidebar-app-shell.md) |
 | Dates and schedules | Date/time inputs, calendars and resource scheduling | [Dates](docs/date-picker.md) · [Schedules](docs/schedule.md) |
-| Data and media | Charts, JSON/code views, files and a finite rich document editor | [Charts](docs/charts.md) · [Files](docs/files.md) · [Editor](docs/rich-editor.md) |
+| Data and media | JSON/code views, files and a finite rich document editor | [Files](docs/files.md) · [Editor](docs/rich-editor.md) |
 
 Browse the [showcase](https://sapid.taidge.org/) for widget guides, live Rust
 examples, Props and Styles API references, source panels, search, theme controls
@@ -140,7 +140,6 @@ Default features are empty. Specialized families are opt-in:
 | `json` | Bounded JSON input/viewing and explicit parsing |
 | `code` | Code blocks and highlighting |
 | `dates` | Civil date/time controls, calendars and resource schedules |
-| `charts` | Charts, bounded sampling and portable `libm` geometry |
 | `files` | File controls with explicit permissions and budgets |
 | `editor` | Finite rich documents and Web editing; native editing is rejected |
 

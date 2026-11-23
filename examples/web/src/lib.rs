@@ -359,9 +359,7 @@ pub mod data_table_server_form;
 
 pub mod date_picker_form;
 
-pub mod charts_form;
 pub mod lightbox_form;
-pub mod plots_form;
 pub mod tree_choices_form;
 pub mod tree_form;
 
@@ -398,7 +396,6 @@ mod showcase_feedback_docs;
 mod showcase_field_docs;
 mod showcase_field_states;
 mod showcase_geometry_docs;
-mod showcase_heatmap_docs;
 pub mod showcase_home;
 pub mod showcase_host;
 mod showcase_layout_docs;
@@ -442,7 +439,6 @@ pub mod showcase_navigation;
 
 mod showcase_misc_docs;
 
-mod showcase_chart_docs;
 mod showcase_dates_docs;
 mod showcase_extension_docs;
 mod showcase_schedule_docs;

@@ -14,7 +14,7 @@ if (!Number.isInteger(viewportWidth) || viewportWidth < 280 || viewportWidth > 3
 const reviewFolder = viewportWidth === 1336 ? 'example-review' : 'example-review/viewport-' + viewportWidth;
 const requested = new Set(process.argv.slice(3));
 const work = pages.filter(p => !requested.size || requested.has(p.slug));
-const packagePaths = {Charts:'charts', Dates:'dates', Extensions:'x'};
+const packagePaths = {Dates:'dates', Extensions:'x'};
 const aliases = {'notifications-system':'x/notifications', 'navigation-progress':'x/nprogress',
   'rich-text-editor':'x/tiptap', 'modals-manager':'x/modals', 'code-highlight':'code-highlight/code-highlight',
   'json-viewer':'code-highlight/json-viewer'};

@@ -23,7 +23,7 @@ Switch、RadioGroup/SegmentedControl、动作按钮、展示表面、NumberForma
 已增加实际宿主证据；Menu、Stepper、辅助文本、图像、提示层、原生选择和应用框架亦已验收，
 新批次的完成状态及宿主边界以清单和逐组件证据为准。
 DataTable、Tree/FileTree、TreeSelect 和 Cascader 已按有限契约完成实现和宿主验收；
-图表、文件、编辑器和日程模块的当前完成状态以清单及对应证据为准。
+文件、编辑器和日程模块的当前完成状态以清单及对应证据为准。
 
 名称需要按语义对照：当前 Dialog 对应 Mantine Modal / shadcn Dialog；Mantine Dialog
 是另外的非模态提示需求，单列 FloatingDialog。Sheet 已在 Drawer 上增加有限手势与 snap
@@ -37,18 +37,18 @@ Dialog/Popover 已验收 Web/SSR/hydration、Document 跨 App 栈、完整有限
 
 ## 目标边界
 
-1. 覆盖两套官方目录中可见的通用核心 widgets，并纳入 Mantine 日期/图表/日程/编辑器等扩展；
+1. 覆盖两套官方目录中可见的通用核心 widgets，并纳入 Mantine 日期/日程/编辑器等扩展；
    对话、AI 工作流和消息展示不属于通用 widget 范围。
-2. 同义名称和紧密变体共享实现，但清单保留每个来源 URL。137 项工作不是 137 个独立 widgets；
+2. 同义名称和紧密变体共享实现，但清单保留每个来源 URL。129 项工作不是 129 个独立 widgets；
    其中包含已有组件补强、公共基础设施和多个变体的共同实现。每个变体都要有自己的验收证据。
 3. 不照搬 React/JSX API、hooks、JS 库依赖和代码分发 CLI。继续使用手写 Rust builder、
    Cage/Bond/Vary、Glory Widget 与现有所有权/宿主边界；第三方实现不复制进仓库。
 4. 社区 Registry、页面 Blocks、完整业务应用和任意第三方插件不是有限可穷尽的 widgets 清单。
    React 表单库绑定不移植，但对应表单能力列入 P1；主题/provider/方向/locale 是基础设施。
-5. 默认 Sapid 保持轻依赖。日期、图表、文件、富文本和日程组件使用可选模块或独立 crate。
-   当前是 Sapid 的 `dates/charts/files/editor/code/json` 可选 features，日程随 `dates`；
+5. 默认 Sapid 保持轻依赖。日期、文件、富文本和日程组件使用可选模块或独立 crate。
+   当前是 Sapid 的 `dates/files/editor/code/json` 可选 features，日程随 `dates`；
    尚未拆为同名独立 crate，也不把可选宿主依赖带入默认组件图。
-   图表需要可访问数据表示和跨宿主绘图能力；富文本需要独立文档/编辑协议，不能空壳交付。
+   富文本需要独立文档/编辑协议，不能空壳交付。
 6. 实现默认样式、主题 token、尺寸/状态和 unstyled 组合能力；不把黑白原生控件包装当完整设计系统。
    组合部件可表达 Root/Trigger/Content/Label/Description 等角色，但不引入 UI DSL 或任意 HTML API。
 
@@ -330,23 +330,6 @@ S= shadcn 主目录；D=日期；C=图表；T=日程；H=代码；X=其他 Manti
 | P10-07 | JsonViewer | 已完成并记录证据 | 有界无损JSON模型/重复key拒绝、文档disclosure与显式真实Tree模式、路径身份/搜索/深度节点预算及accepted完整源复制已完成；10 Rust、原生四主题两模式实际布局/像素/焦点/重排、原Json9及Web30 Tree9/组合复制8实际通过。Tree模式支持含root64级并在发布前拒更深数据。 扩展7页改为真实使用主例与30段独立完整源码，覆盖代码/JSON复制反馈、局部通知队列/时钟、命令面板、照片画廊、取消式导航和确认表单。四主题双宽度56组通过，见extension-pages.md、extensions-final.json。 | [H:JsonViewer](https://mantine.dev/code-highlight/json-viewer/) |
 | P10-08 | RichTextEditor | 已完成并记录证据 | 真实有限富文档/UTF16选区/marks/段落与heading、应用受控拒绝、独立32项2MiB历史、Web composition/source仲裁/真实plain clipboard；补齐 controlled、placeholder、subtle、无工具栏/只读/禁用的公开示例。FORMAT13共享mapper/SSRstream/oracle，Web43原9+classic11+extra3全过；Native编辑与相关AX明确typed拒绝，不用Textarea冒充；任意Tiptap插件/HTML、表格、任务、媒体与源码模式保留为协议边界。 补有限可配置toolbar_actions、H1–H6与接受选区pressed状态，紧凑可换行按钮与真实undo/redo可用性；文章主例和4段独立编译文档/源码。保留有限文档、纯文本粘贴及原生拒绝边界。 | [X:Rich text editor](https://mantine.dev/x/tiptap/) |
 
-### P11 · 图表
-
-可选图表模块，先可访问的数据替代表示和绘图协议，再逐图形扩展。
-
-依赖：P3、P5、P7。
-
-| 编号 | 工作项 | 当前状态 | 实现与验收重点 | 来源 |
-|---|---|---|---|---|
-| P11-01 | Chart / ChartTheme / Legend / Tooltip | 已完成并记录证据 | 可选 charts 无新增依赖；有限 data/domain/frame/Graphic 协议、八色主题、真实 legend/tooltip、逐点操作/受控提案、可访问完整数值表与安全 SVG 几何导出。原生默认 Click/键盘/绘制支持，pointer hover/Tooltip 保持明确拒绝。 | [S:Chart](https://ui.shadcn.com/docs/components/base/chart) |
-| P11-02 | AreaChart / LineChart / BarChart / CompositeChart | 已完成并记录证据 | Line/Area/Bar/Composite 实际几何、真实空值断线、正负 bar 堆叠与非负 area 堆叠、有限刻度/显式裁剪、inclusive brush、稳定完整 key、全数据表、受控拒绝及 CSR/adoption/原生四主题验收。新增最多16项的 typed reference area/line/dot 与标签，按当前 brush 裁剪并进入共享 Web/Native Graphic 场景；四个公开指南各展示 usage、stack/legend、references、brush。 图表剩余21页拆成独立主例及90段完整源码，新增有限角度、圆环厚度/中心字、Waffle行列间距、气泡半径、XY刻度/网格与Matrix行列标识；压缩图例/辅助导航，保留真实读数和受控拒绝/原子恢复，新增Owner绑定错误回调。四主题×双宽度168组通过；见chart-pages.md及charts-final.json。 | [C:AreaChart](https://mantine.dev/charts/area-chart/)、[C:LineChart](https://mantine.dev/charts/line-chart/)、[C:BarChart](https://mantine.dev/charts/bar-chart/)、[C:CompositeChart](https://mantine.dev/charts/composite-chart/) |
-| P11-03 | PieChart / DonutChart / RadialBarChart | 已完成并记录证据 | 真实 Pie/Donut 角度占比和零值处理、RadialBar 同心弧线；有限键盘逐点与完整数值表，四主题 Web CSR/adoption 和 Native 真实绘制/命中验收。 图表剩余21页拆成独立主例及90段完整源码，新增有限角度、圆环厚度/中心字、Waffle行列间距、气泡半径、XY刻度/网格与Matrix行列标识；压缩图例/辅助导航，保留真实读数和受控拒绝/原子恢复，新增Owner绑定错误回调。四主题×双宽度168组通过；见chart-pages.md及charts-final.json。 | [C:PieChart](https://mantine.dev/charts/pie-chart/)、[C:DonutChart](https://mantine.dev/charts/donut-chart/)、[C:RadialBarChart](https://mantine.dev/charts/radial-bar-chart/) |
-| P11-04 | ScatterChart / BubbleChart / CandlestickChart | 已完成并记录证据 | 真实 XY/面积尺寸尺度与零尺寸、OHLC 交叉约束/方向、至多128次索引回调的显式采样及来源数量说明；有限逐点/完整表，四主题 Web/Native 实测。 图表剩余21页拆成独立主例及90段完整源码，新增有限角度、圆环厚度/中心字、Waffle行列间距、气泡半径、XY刻度/网格与Matrix行列标识；压缩图例/辅助导航，保留真实读数和受控拒绝/原子恢复，新增Owner绑定错误回调。四主题×双宽度168组通过；见chart-pages.md及charts-final.json。 | [C:ScatterChart](https://mantine.dev/charts/scatter-chart/)、[C:BubbleChart](https://mantine.dev/charts/bubble-chart/)、[C:CandlestickChart](https://mantine.dev/charts/candlestick-chart/) |
-| P11-05 | RadarChart / FunnelChart / Sparkline | 已完成并记录证据 | Radar 径向轴/缺值断线、Funnel 独立梯形、Sparkline 真正分段路径，保留文字与数值替代、受控交互及四主题 Web/Native 实测。 图表剩余21页拆成独立主例及90段完整源码，新增有限角度、圆环厚度/中心字、Waffle行列间距、气泡半径、XY刻度/网格与Matrix行列标识；压缩图例/辅助导航，保留真实读数和受控拒绝/原子恢复，新增Owner绑定错误回调。四主题×双宽度168组通过；见chart-pages.md及charts-final.json。 | [C:RadarChart](https://mantine.dev/charts/radar-chart/)、[C:FunnelChart](https://mantine.dev/charts/funnel-chart/)、[C:Sparkline](https://mantine.dev/charts/sparkline/) |
-| P11-06 | Heatmap / MatrixChart / WaffleChart | 已完成并记录证据 | Heatmap 在2026-11-05替换为独立日期贡献网格：1–366天、最多54周列、缺失/零值区分、反应式数据/范围/数值域、中英文和自定义标签/色阶、点击与当前键盘光标、稳定日期身份、一个当前提示。MatrixChart保留32×32/1024格面积矩阵，Waffle保留确定性100格余数分配。Heatmap的库/原生像素与8组公开站验收通过；原生明确拒绝提示层。 图表剩余21页拆成独立主例及90段完整源码，新增有限角度、圆环厚度/中心字、Waffle行列间距、气泡半径、XY刻度/网格与Matrix行列标识；压缩图例/辅助导航，保留真实读数和受控拒绝/原子恢复，新增Owner绑定错误回调。四主题×双宽度168组通过；见chart-pages.md及charts-final.json。 | [C:Heatmap](https://mantine.dev/charts/heatmap/)、[C:MatrixChart](https://mantine.dev/charts/matrix-chart/)、[C:WaffleChart](https://mantine.dev/charts/waffle-chart/) |
-| P11-07 | BarsList / BulletChart / GaugeChart | 已完成并记录证据 | 有符号水平 BarsList、目标/分段 Bullet、半环 Gauge；真实只读 Progress 范围、刻度/目标/精确表值、键盘受控交互，Web/Native 实测。 图表剩余21页拆成独立主例及90段完整源码，新增有限角度、圆环厚度/中心字、Waffle行列间距、气泡半径、XY刻度/网格与Matrix行列标识；压缩图例/辅助导航，保留真实读数和受控拒绝/原子恢复，新增Owner绑定错误回调。四主题×双宽度168组通过；见chart-pages.md及charts-final.json。 | [C:BarsList](https://mantine.dev/charts/bars-list/)、[C:BulletChart](https://mantine.dev/charts/bullet-chart/)、[C:GaugeChart](https://mantine.dev/charts/gauge-chart/) |
-| P11-08 | Treemap / SunburstChart / SankeyChart | 已完成并记录证据 | 128节点/depth32 当前层级权重/隐藏派生、交替 Treemap 与角度深度 Sunburst、256边有限 DAG Sankey 保持流量端口厚度；稳定key、父子导航和完整表，Web/Native 实测。 图表剩余21页拆成独立主例及90段完整源码，新增有限角度、圆环厚度/中心字、Waffle行列间距、气泡半径、XY刻度/网格与Matrix行列标识；压缩图例/辅助导航，保留真实读数和受控拒绝/原子恢复，新增Owner绑定错误回调。四主题×双宽度168组通过；见chart-pages.md及charts-final.json。 | [C:Treemap](https://mantine.dev/charts/treemap/)、[C:SunburstChart](https://mantine.dev/charts/sunburst-chart/)、[C:SankeyChart](https://mantine.dev/charts/sankey-chart/) |
-
 ### P12 · 日程
 
 先事件/时区/重复模型和只读视图，再资源视图与拖动编辑。
@@ -366,15 +349,14 @@ S= shadcn 主目录；D=日期；C=图表；T=日程；H=代码；X=其他 Manti
 | 目录 | 原始条目数 |
 |---|---:|
 | mantine-core | 121 |
-| shadcn-components | 60 |
+| shadcn-components | 59 |
 | mantine-dates | 15 |
-| mantine-charts | 22 |
 | mantine-schedule | 13 |
 | mantine-code | 2 |
 | mantine-extensions | 8 |
 | shadcn-ai | 1 |
 
-共 242 个来源条目，归并为 137 项工作：0 项已有基线、0 项部分基础、0 项未实现、137 项按后续完成标准关闭。日程目录包含事件数据与重复规则两项模型文档，基础设施也单独计入，不能把总数解释为缺失组件数量。
+共 219 个来源条目，归并为 129 项工作：0 项已有基线、0 项部分基础、0 项未实现、129 项按后续完成标准关闭。日程目录包含事件数据与重复规则两项模型文档，基础设施也单独计入，不能把总数解释为缺失组件数量。
 
 ## 对照来源
 
@@ -382,7 +364,6 @@ S= shadcn 主目录；D=日期；C=图表；T=日程；H=代码；X=其他 Manti
 - [shadcn-components](https://ui.shadcn.com/docs/components)
 - [mantine-extensions](https://mantine.dev/x/extensions/)
 - [mantine-dates](https://mantine.dev/dates/getting-started/)
-- [mantine-charts](https://mantine.dev/charts/getting-started/)
 - [mantine-schedule](https://mantine.dev/schedule/getting-started/)
 - [mantine-code](https://mantine.dev/code-highlight/getting-started/)
 - [shadcn-ai](https://ui.shadcn.com/docs/ai-elements)

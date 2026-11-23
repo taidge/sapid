@@ -22,15 +22,3 @@ fn tree_construction_propagates_with_question_mark_and_keeps_its_type() {
     assert_eq!(error.to_string(), TreeError::Key.message());
     assert_eq!(error.downcast_ref(), Some(&TreeError::Key));
 }
-
-#[cfg(feature = "charts")]
-#[test]
-fn chart_domain_propagates_with_question_mark_and_keeps_its_type() {
-    use sapid::charts::{ChartDomain, ChartError};
-    fn load() -> Result<ChartDomain, Box<dyn Error>> {
-        Ok(ChartDomain::new(1.0, 1.0)?)
-    }
-    let error = load().unwrap_err();
-    assert_eq!(error.to_string(), ChartError::Domain.message());
-    assert_eq!(error.downcast_ref(), Some(&ChartError::Domain));
-}

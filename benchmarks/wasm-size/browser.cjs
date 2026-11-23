@@ -57,8 +57,6 @@ const server = http.createServer((request, response) => {
         const calendar = page.getByRole('grid', { name: 'Probe date', exact: true });
         await calendar.waitFor();
         await calendar.locator('button.sapid-calendar-day:enabled').first().click();
-      } else if (item.name === 'charts-used') {
-        if (!(await page.locator('#app svg').count())) throw Error('Chart geometry missing');
       } else if (item.name === 'code-used') {
         await page.getByText('fn main() { println!("hello"); }', { exact: true }).waitFor();
       } else if (item.name !== 'empty' && await page.locator('#app').textContent() !== 'hello') {

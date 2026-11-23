@@ -55,7 +55,7 @@ MiniCalendar 的构造函数返回 Calendar，仅设置 ExtraSmall/mini，实测
 
 验收：MiniCalendar 按配置天数呈现连续日期并可导航；Heatmap 用日期键数据正确定位周/日及范围，MatrixChart 仍正确处理一般二维矩阵。
 
-位置：[mini_calendar 构造](../src/calendar.rs#L366)；[Heatmap/Matrix 数据默认值](../src/plot_widget.rs#L45)；[MatrixData](../src/plot_model.rs#L65)。
+位置：[mini_calendar 构造](../src/calendar.rs#L366)；[Heatmap/Matrix 数据默认值](https://github.com/taidge/sapid/blob/fe7da53987fdb020cb1576b4d21711500594f226/src/plot_widget.rs#L45)；[MatrixData](https://github.com/taidge/sapid/blob/fe7da53987fdb020cb1576b4d21711500594f226/src/plot_model.rs#L65)。
 
 ### F05 · Transition 不能作为已经交付的通用组件展示
 
@@ -400,16 +400,16 @@ RichEditor 基于 Sapid 的有限 Rust 文档模型，与上游基于 Tiptap 的
 
 ## 复现
 
-原始 HTML、完整截图、联系表和量测 JSON 均保存在 `D:/BuildCache/sapid/shared-page-audit`，不进入运行时依赖或发布资源。
+原始 HTML、完整截图、联系表和量测 JSON 均保存在 `project build directory/sapid/shared-page-audit`，不进入运行时依赖或发布资源。
 
 ```powershell
-$env:SAPID_BUILD_ROOT = 'D:/BuildCache/sapid'
-$env:SAPID_BROWSER_OUTPUT = 'D:/BuildCache/sapid/shared-page-audit'
-$env:SAPID_PLAYWRIGHT = 'D:/BuildCache/sapid/node-tools/node_modules/playwright'
-$env:PLAYWRIGHT_BROWSERS_PATH = 'D:/BuildCache/sapid/browsers'
-$env:TEMP = 'D:/BuildCache/sapid/tmp'
+$env:SAPID_BUILD_ROOT = 'project build directory/sapid'
+$env:SAPID_BROWSER_OUTPUT = 'project build directory/sapid/shared-page-audit'
+$env:SAPID_PLAYWRIGHT = 'project build directory/sapid/node-tools/node_modules/playwright'
+$env:PLAYWRIGHT_BROWSERS_PATH = 'project build directory/sapid/browsers'
+$env:TEMP = 'project build directory/sapid/tmp'
 $env:TMP = $env:TEMP
-$env:PYTHONPYCACHEPREFIX = 'D:/BuildCache/sapid/pycache'
+$env:PYTHONPYCACHEPREFIX = 'project build directory/sapid/pycache'
 # 先启动本轮发布资源的 8795 预览服务器，再执行：
 python scripts/audit-shared-pages.py
 node scripts/audit-shared-pages.cjs

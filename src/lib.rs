@@ -69,33 +69,7 @@ mod tree_select;
 pub use tree_select::{TreeSelect, tree_select};
 mod cascader;
 pub use cascader::{Cascader, cascader};
-#[cfg(feature = "charts")]
-mod chart_aux;
-#[cfg(feature = "charts")]
-mod chart_curve;
-#[cfg(feature = "charts")]
-mod chart_model;
-#[cfg(feature = "charts")]
-mod chart_scene;
-#[cfg(feature = "charts")]
-mod chart_widget;
-#[cfg(feature = "charts")]
-pub mod charts;
 pub mod data_table;
-#[cfg(feature = "charts")]
-mod heatmap;
-#[cfg(feature = "charts")]
-mod heatmap_model;
-#[cfg(feature = "charts")]
-mod plot_hierarchy;
-#[cfg(feature = "charts")]
-mod plot_model;
-#[cfg(feature = "charts")]
-mod plot_scene;
-#[cfg(feature = "charts")]
-mod plot_table;
-#[cfg(feature = "charts")]
-mod plot_widget;
 pub use data_table::{
     DataColumn, DataPage, DataPlan, DataRecord, DataRequest, DataSort, DataTable, DataTableError,
     DataTableQuery, data_table,
@@ -170,7 +144,7 @@ pub use time_input::{TimeInput, TimeInputDraft, time_input};
 mod time_value;
 #[cfg(feature = "dates")]
 pub use time_value::{TimeValue, time_value};
-#[cfg(any(feature = "dates", feature = "charts"))]
+#[cfg(feature = "dates")]
 pub mod dates;
 mod display;
 #[cfg(feature = "dates")]
