@@ -7,6 +7,33 @@ async(hostPage)=>{
     const path=()=>page.locator('.sapid-floating-indicator-shape path');const marker=()=>page.locator('.sapid-floating-indicator-marker');
     const target=key=>page.locator(`.floating-target-${key}`);const editor=()=>page.locator('.floating-draft');
     const command=async name=>{await page.getByRole('button',{name,exact:true}).evaluate(element=>element.click());await turn();await turn()};
+    // Capture the replacement transition as soon as the widget updates the SVG path.
+    // Holding it halfway lets the next command interrupt the same rendered geometry.
+    const selectMidway = name => page.getByRole('button', {name, exact: true}).evaluate(async button => {
+      const shape = document.querySelector('.sapid-floating-indicator-shape path');
+      const pathTransition = () => shape.getAnimations().find(animation => animation.transitionProperty === 'd');
+      const previous = pathTransition();
+      const animation = await new Promise((resolve, reject) => {
+        const observer = new MutationObserver(() => {
+          const current = pathTransition();
+          if (!current || current === previous) return;
+          observer.disconnect();
+          clearTimeout(timeout);
+          resolve(current);
+        });
+        const timeout = setTimeout(() => {
+          observer.disconnect();
+          reject(new Error('No new SVG path transition for ' + button.textContent));
+        }, 5000);
+        observer.observe(shape, {attributes: true, attributeFilter: ['d']});
+        button.click();
+      });
+      animation.pause();
+      animation.currentTime = 0;
+      const start = getComputedStyle(shape).d;
+      animation.currentTime = animation.effect.getTiming().duration / 2;
+      return {start, middle: getComputedStyle(shape).d};
+    });
     const settled=async()=>{await page.waitForFunction(()=>{const element=document.querySelector('.sapid-floating-indicator-shape path');return element&&element.getAnimations().length===0});await turn()};
     const aligned=async key=>page.evaluate(key=>{
       const shape=document.querySelector('.sapid-floating-indicator-shape path').getBoundingClientRect();const item=document.querySelector(`.floating-target-${key}`).getBoundingClientRect();
@@ -22,16 +49,19 @@ async(hostPage)=>{
       await editor().fill('Keep 😀 indicator focus');await editor().evaluate(element=>{window.savedFloatingEditor=element;element.focus();element.setSelectionRange(2,8)});
       await target('one').evaluate(element=>window.savedFloatingOne=element);await path().evaluate(element=>window.savedFloatingPath=element);
       const first=await path().evaluate(element=>getComputedStyle(element).d);
-      await command('Select teams');await page.waitForTimeout(35);const middle=await path().evaluate(element=>getComputedStyle(element).d);
-      assert(middle!==first,`${mode}: no measured path interpolation`);await settled();const second=await path().evaluate(element=>getComputedStyle(element).d);
+      const {start,middle}=await selectMidway('Select teams');
+      assert(start===first&&middle!==first,`${mode}: no measured path interpolation`);
+      await path().evaluate(element=>element.getAnimations().find(animation=>animation.transitionProperty==='d').play());
+      await settled();const second=await path().evaluate(element=>getComputedStyle(element).d);
       assert(second!==middle&&second!==first&&await aligned('two'),`${mode}: path jumped or ended at stale geometry`);
       assert(await editor().evaluate(element=>element===window.savedFloatingEditor&&element===document.activeElement&&element.selectionStart===2&&element.selectionEnd===8),`${mode}: decoration changed actual focus/selection`);
-      await command('Select projects');await page.waitForTimeout(35);const reversing=await path().evaluate(element=>getComputedStyle(element).d);
-      assert(reversing!==first&&reversing!==second,`${mode}: reverse transition missing`);
-      await command('Select teams');const interrupted=await path().evaluate(element=>getComputedStyle(element).d);
-      assert(interrupted!==first&&interrupted!==second,`${mode}: interrupted path restarted at an endpoint`);
+      const reversing=await selectMidway('Select projects');
+      assert(reversing.start===second&&reversing.middle!==first&&reversing.middle!==second,`${mode}: reverse transition missing`);
+      const interrupted=await selectMidway('Select teams');
+      assert(interrupted.start===reversing.middle,`${mode}: interrupted path did not continue from its rendered position`);
+      assert(interrupted.middle!==interrupted.start&&interrupted.middle!==first&&interrupted.middle!==second,`${mode}: interrupted path did not interpolate to the new target`);
       await page.emulateMedia({reducedMotion:'reduce'});await turn();await settled();assert(await aligned('two'),`${mode}: dynamic Reduce did not settle current measured target`);
-      await page.emulateMedia({reducedMotion:'no-preference'});await command('Select projects');await page.waitForTimeout(35);await command('Toggle indicator motion');await settled();
+      await page.emulateMedia({reducedMotion:'no-preference'});await selectMidway('Select projects');await command('Toggle indicator motion');await settled();
       assert(await aligned('one')&&await path().evaluate(element=>getComputedStyle(element).transitionProperty==='none'),`${mode}: Clear retained old interpolation`);
       await command('Toggle indicator motion');await command('Set indicator duration zero');await command('Select draft');await settled();assert(await aligned('draft'),`${mode}: explicit zero duration did not immediately follow target`);
       await command('Toggle indicator direction');await settled();assert(await aligned('draft'),`${mode}: vertical direction used stale local origin`);
