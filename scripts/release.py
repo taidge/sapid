@@ -423,7 +423,6 @@ def main():
         succeeded = {job["name"] for job in jobs["jobs"] if job["conclusion"] == "success"}
         if not set(plan.get("required_release_jobs", [])).issubset(succeeded):
             raise SystemExit("Required platform validation jobs have not all succeeded")
-    artifacts = []
     release_packages = []
     output = target / "release" / tag
     output.mkdir(parents=True, exist_ok=True)
@@ -455,10 +454,8 @@ def main():
                 ROOT, audit_directory, package_targets[name] / 'package' / f'{name}-{package_version}.crate',
                 target, head)
             transform = output / f'{name}-normalized-publication.json'
-            command = ['cargo', 'publish', '--locked', '--allow-dirty', '--registry', 'crates-io',
+            command = ['cargo', 'publish', '--locked', '--no-verify', '--allow-dirty', '--registry', 'crates-io',
                        '--manifest-path', str(checkout / 'Cargo.toml'), '-p', name]
-            if name in cross:
-                command.append('--no-verify')
             def before_upload():
                 # The dry run produces the actual publish temporary archive.
                 # The original path workspace never supplies its lock graph.
@@ -496,13 +493,10 @@ def main():
         if transformed:
             transform = output / f'{name}-normalized-publication.json'
             normalized_publication.record_transform(audit_directory, archive, expected_commit, transform, published=True)
-            artifacts.append(transform)
-        artifacts.append(archive)
         release_packages.append({"name": name, "version": package_version,
                                  "checksum": checksum, "source_commit": expected_commit})
     if plan.get("registry_verifier"):
         run("python", str(ROOT / plan["registry_verifier"]), "--tag", tag)
-        artifacts.extend([output / "registry-consumer.json", output / "registry-consumer.lock"])
     evidence = output / "release.json"
     evidence.write_text(json.dumps({"repository": plan["repository"], "tag": tag, "commit": head,
         "packages": release_packages}, indent=2) + "\n", encoding="utf-8")
@@ -513,7 +507,7 @@ def main():
                    "--title", plan["title"] + " " + version, "--notes-file", str(notes)]
         if "-" in version:
             command.append("--prerelease")
-        run(*command, str(evidence), *map(str, artifacts))
+        run(*command, str(evidence))
 
 
 if __name__ == "__main__":
